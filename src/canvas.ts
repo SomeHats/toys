@@ -1,0 +1,15 @@
+import { DebugDraw } from "./DebugCanvas";
+
+export const canvasEl = document.createElement("canvas");
+export const ctx = canvasEl.getContext("2d")!;
+export const width = window.innerWidth;
+export const height = window.innerHeight;
+export const scale = window.devicePixelRatio;
+
+canvasEl.width = width * scale;
+canvasEl.height = height * scale;
+canvasEl.style.width = `${width}px`;
+canvasEl.style.height = `${height}px`;
+ctx.scale(scale, scale);
+export const canvas = new DebugDraw(ctx);
+document.body.appendChild(canvasEl);

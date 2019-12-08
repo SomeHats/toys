@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "strict": true,
+    "lib": ["es2015", "dom"],
+    "target": "es5",
+    "downlevelIteration": true
+  },
+  "include": ["src/**/*", "types/**/*"]
+}

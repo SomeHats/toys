@@ -1,0 +1,26 @@
+import { assert } from "./assert";
+import { rand } from "./utils";
+
+export default class RandomQueue<T> {
+  private items: Array<T> = [];
+
+  constructor(items: Array<T> = []) {
+    this.items = items.slice();
+  }
+
+  add(item: T): void {
+    this.items.push(item);
+  }
+
+  get size(): number {
+    return this.items.length;
+  }
+
+  pop(): T {
+    assert(this.size, "RandomQueue must not be empty");
+    const index = Math.floor(rand(this.items.length));
+    const item = this.items[index];
+    this.items.splice(index, 1);
+    return item;
+  }
+}

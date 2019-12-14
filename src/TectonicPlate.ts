@@ -1,7 +1,11 @@
-import { rand, mapRange, wait } from "./utils";
+import { rand, mapRange, wait, lerp } from "./utils";
 import Terrain from "./Terrain";
-import { interpolateSpectral } from "d3-scale-chromatic";
+import { interpolateRgbBasis } from "d3-interpolate";
 import { ReadonlyVector2 } from "./Vector2";
+import { TerrainCell } from "./TerrainCell";
+import { makeFractalNoise2d } from "./fractalNoise";
+import * as config from "./config";
+import { canvas } from "./canvas";
 
 function findPlateEdges(
   currentPlateId: number,
@@ -37,7 +41,7 @@ function findPlateEdges(
   let currentEdgeIndexInCell = startingEdgeCellStartingEdgeIndex;
   let lastPolygonPoint: ReadonlyVector2 | null = null;
   let i = 0;
-  while (i < 1000) {
+  while (i < 50000) {
     i++;
 
     edgeCellIds.add(currentCell.id);
@@ -86,16 +90,23 @@ function findPlateEdges(
 
 export class TectonicPlate {
   // public readonly color = randomColor();
-  public readonly baseHeight = rand(-0.5, 0.5);
+  // public readonly baseHeight = rand(-0.7, 0.5);
   public readonly edgeCellIds: ReadonlySet<number>;
   public readonly polygon: ReadonlyArray<ReadonlyVector2>;
+  public readonly cellIds: ReadonlySet<number>;
+  public readonly drift: ReadonlyVector2 = ReadonlyVector2.fromPolar(
+    rand(-Math.PI, Math.PI),
+    rand(config.MIN_TECTONIC_DRIFT, config.MAX_TECTONIC_DRIFT)
+  );
 
   constructor(
     public readonly id: number,
     private readonly terrain: Terrain,
-    public readonly cellIds: ReadonlyArray<number>,
+    public readonly baseHeight: number,
+    cellIds: ReadonlyArray<number>,
     plateIdByCellId: ReadonlyArray<number>
   ) {
+    this.cellIds = new Set(cellIds);
     console.time("plate.findPlateEdges");
     const plateEdges = findPlateEdges(id, terrain, cellIds, plateIdByCellId);
     this.edgeCellIds = plateEdges.edgeCellIds;
@@ -103,7 +114,33 @@ export class TectonicPlate {
     console.timeEnd("plate.findPlateEdges");
   }
 
-  get color(): string {
-    return interpolateSpectral(mapRange(-1, 1, 0, 1, this.baseHeight));
+  private getCell(cellId: number): TerrainCell {
+    if (!this.cellIds.has(cellId)) {
+      throw new Error(`Cell not in plate: ${cellId}`);
+    }
+    return this.terrain.cellsById[cellId];
+  }
+
+  calculateDriftHeightOffsets() {
+    for (const edgeCellId of this.edgeCellIds) {
+      const cell = this.getCell(edgeCellId);
+      const neighbourDrifts = cell.neighbourCellIds
+        .filter(
+          neighbourId => this.terrain.plateIdByCellId[neighbourId] !== this.id
+        )
+        .map(
+          neighbourId =>
+            this.terrain.platesById[this.terrain.plateIdByCellId[neighbourId]]
+              .drift
+        );
+
+      if (!neighbourDrifts.length) continue;
+
+      const averageNeighbourDrift = ReadonlyVector2.average(neighbourDrifts);
+      const driftDotProduct = averageNeighbourDrift.dot(this.drift);
+      canvas.debugPointX(cell.position, {
+        label: String(driftDotProduct.toFixed(1))
+      });
+    }
   }
 }

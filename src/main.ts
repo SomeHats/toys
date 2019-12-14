@@ -5,12 +5,11 @@ import Vector2, { ReadonlyVector2 } from "./Vector2";
 import { Delaunay } from "./Delaunay";
 import { rand } from "./utils";
 import Terrain from "./Terrain";
-import { width, height, canvas } from "./canvas";
+import { width, height, canvas, ctx } from "./canvas";
+import * as config from "./config";
+import { interpolateMagma } from "d3-scale-chromatic";
 
-const POINT_SPACING = 20;
-const TARGET_CELLS_PER_PLATE = 300;
-
-const spaceVec = new Vector2(POINT_SPACING, POINT_SPACING);
+const spaceVec = new Vector2(config.POINT_SPACING, config.POINT_SPACING);
 const sizeVec = new Vector2(width, height);
 const baseBounds = new AABB(Vector2.ZERO, sizeVec);
 const expandedBounds = new AABB(
@@ -30,12 +29,12 @@ const contractedBounds = new AABB(
 const activeBounds = baseBounds;
 
 console.time("generatePoisson");
-const points = generatePoisson(expandedBounds, POINT_SPACING, 15);
+const points = generatePoisson(expandedBounds, config.POINT_SPACING, 15);
 console.timeEnd("generatePoisson");
 
 const delaunay = new Delaunay(points);
 console.log(delaunay);
-const terrain = new Terrain(delaunay, activeBounds, TARGET_CELLS_PER_PLATE);
+const terrain = new Terrain(delaunay, activeBounds);
 Object.assign(window, { delaunay, terrain });
 
 function drawDebugTriangles(color = "yellow") {
@@ -80,18 +79,49 @@ function drawPolygons() {
   console.timeEnd("draw polygons");
 }
 
-function drawPlates() {
-  for (const plate of terrain.plates) {
-    canvas.polygon(plate.polygon, {
-      fill: plate.color,
-      stroke: "red",
+function drawPlates(shouldIncludeDrift = true) {
+  for (const cellId of terrain.activeCellIds) {
+    const cell = terrain.cellsById[cellId];
+    // cell.propagateTectonicDrift();
+    // canvas.polygon(cell.polygon, {
+    //   fill: interpolateMagma(cell.totalDriftPressure ** (1 / 2) * 0.5)
+    // });
+    canvas.polygon(cell.polygon, {
+      fill: cell.getColor(shouldIncludeDrift),
+      stroke: cell.getColor(shouldIncludeDrift),
       strokeWidth: 1
     });
   }
+  for (const plate of terrain.platesById) {
+    // canvas.polygon(plate.polygon, {
+    //   stroke: "red",
+    //   strokeWidth: 1
+    // });
+    for (const cellId of plate.edgeCellIds) {
+      const cell = terrain.cellsById[cellId];
+
+      // cell.propagateTectonicDrift();
+      // canvas.debugVectorAtPoint(
+      //   plate.drift.cloneMutable().scale(15),
+      //   cell.position,
+      //   { color: "cyan" }
+      // );
+    }
+  }
 }
 
+console.time("terrain.smoothCellsBasedOnPlateHeight");
+terrain.smoothCellsBasedOnPlateHeight();
+console.timeEnd("terrain.smoothCellsBasedOnPlateHeight");
+
+console.time("propagateTectonicDrift");
+terrain.propagateTectonicDrift();
+console.timeEnd("propagateTectonicDrift");
+
+// terrain.calculateDriftHeightOffsets();
+
 // drawDebug();
-drawPolygons();
+// drawPolygons();
 drawPlates();
 
 // window.addEventListener("mousemove", e => {
@@ -100,26 +130,79 @@ drawPlates();
 //   const mousePosition = new Vector2(e.clientX, e.clientY);
 //   const cell = terrain.getCellAtPosition(mousePosition);
 
-//   drawPolygons();
+//   // drawPolygons();
 //   // drawDebug();
 //   drawPlates();
 
 //   if (cell) {
-//     canvas.debugPointO(cell.position, {
-//       color: "magenta",
-//       label: `Cell ${cell.id}`
-//     });
-
-//     // const neighbours = cell.neighbourCellIds.map(id => terrain.cellsById[id]);
-//     // for (const neighbour of neighbours) {
-//     //   canvas.debugArrow(cell.position, neighbour.position, {
-//     //     color: "magenta",
-//     //     label: `Neighbour: ${neighbour.id}`
-//     //   });
-//     // }
-
-//     for (const edgeIndex of cell.iterateEdgesStartingFromIndex(0)) {
-//       canvas.debugPointX(cell.polygon[edgeIndex], { label: `E ${edgeIndex}` });
-//     }
+//     canvas.debugVectorAtPoint(
+//       cell
+//         .getPlate()
+//         .drift.cloneMutable()
+//         .scale(15),
+//       cell.position,
+//       {
+//         color: "cyan"
+//       }
+//     );
 //   }
 // });
+
+let renderStage = 0;
+window.addEventListener("click", e => {
+  ctx.clearRect(0, 0, width, height);
+
+  // const mousePosition = new Vector2(e.clientX, e.clientY);
+  // const cell = terrain.getCellAtPosition(mousePosition);
+
+  renderStage = (renderStage + 1) % 4;
+  if (renderStage === 0) {
+    drawPlates();
+  } else if (renderStage === 1) {
+    drawPlates(false);
+  } else if (renderStage === 2) {
+    for (const cellId of terrain.activeCellIds) {
+      const cell = terrain.cellsById[cellId];
+      canvas.polygon(cell.polygon, {
+        fill: interpolateMagma(cell.getHeightFromDriftPressure())
+      });
+    }
+  } else {
+    for (const cellId of terrain.activeCellIds) {
+      const cell = terrain.cellsById[cellId];
+      canvas.polygon(cell.polygon, { stroke: "cyan", strokeWidth: 0.1 });
+    }
+
+    let i = 0;
+    for (const plate of terrain.platesById) {
+      canvas.polygon(plate.polygon, {
+        stroke: "red",
+        strokeWidth: 1
+      });
+      for (const cellId of plate.edgeCellIds) {
+        const cell = terrain.cellsById[cellId];
+
+        i++;
+        if (i % 3 === 0) {
+          canvas.debugVectorAtPoint(
+            plate.drift.cloneMutable().scale(15),
+            cell.position,
+            { color: "white" }
+          );
+        }
+      }
+    }
+  }
+
+  // drawPolygons();
+  // drawDebug();
+
+  // if (cell) {
+  // canvas.debugPointO(cell.position, {
+  //   color: "magenta",
+  //   label: `Cell ${cell.id}`
+  // });
+  // debugger;
+  // }
+  // drawPlates();
+});

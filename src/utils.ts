@@ -80,3 +80,24 @@ export function compact<T>(arr: ReadonlyArray<T>): Array<NonNullable<T>> {
     (item): item is NonNullable<T> => item !== null && item !== undefined
   );
 }
+
+export function normalizeAngle(angle: number): number {
+  while (angle < 0) {
+    angle += 2 * Math.PI;
+  }
+  angle = angle % (2 * Math.PI);
+  return angle > Math.PI ? angle - 2 * Math.PI : angle;
+}
+
+export function clamp(min: number, max: number, n: number): number {
+  return Math.max(min, Math.min(max, n));
+}
+
+export function shuffle<T>(arr: ReadonlyArray<T>): Array<T> {
+  const newArr = arr.slice();
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  }
+  return newArr;
+}

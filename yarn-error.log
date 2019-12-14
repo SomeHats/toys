@@ -1,8 +1,8 @@
 Arguments: 
-  /Users/somehats/.nodenv/versions/10.15.0/bin/node /Users/somehats/.nodenv/versions/10.15.0/bin/yarn add RandomQueue
+  /Users/somehats/.nodenv/versions/10.15.0/bin/node /Users/somehats/.nodenv/versions/10.15.0/bin/yarn add simplex-noise @types/simplex-noise
 
 PATH: 
-  /var/folders/s4/wm0nxj4s3z79qzlhcvf7pzth0000gn/T/yarn--1573322408516-0.019761680973531703:/Users/somehats/Projects/terrain/node_modules/.bin:/Users/somehats/.config/yarn/link/node_modules/.bin:/Users/somehats/.nodenv/versions/10.15.0/libexec/lib/node_modules/npm/bin/node-gyp-bin:/Users/somehats/.nodenv/versions/10.15.0/lib/node_modules/npm/bin/node-gyp-bin:/Users/somehats/.nodenv/versions/10.15.0/bin/node_modules/npm/bin/node-gyp-bin:/Users/somehats/.nodenv/versions/10.15.0/bin:/usr/local/Cellar/nodenv/1.2.0/libexec:/Users/somehats/.nodenv/plugins/nodenv-package-rehash/bin:/usr/local/bin/arcanist/bin/:/Users/somehats/.nodenv/shims:/Users/somehats/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Postgres.app/Contents/Versions/latest/bin:/usr/local/bin/arcanist/bin/:/Users/somehats/.nodenv/shims:/Users/somehats/.cargo/bin
+  /Users/somehats/.nodenv/versions/10.15.0/bin:/usr/local/Cellar/nodenv/1.2.0/libexec:/Users/somehats/.nodenv/plugins/nodenv-package-rehash/bin:/usr/local/bin/arcanist/bin/:/Users/somehats/.nodenv/shims:/Users/somehats/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Postgres.app/Contents/Versions/latest/bin:/usr/local/bin/arcanist/bin/:/Users/somehats/.nodenv/shims:/Users/somehats/.cargo/bin
 
 Yarn version: 
   1.19.1
@@ -14,7 +14,7 @@ Platform:
   darwin x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/RandomQueue: Not found
+  Error: https://registry.yarnpkg.com/@types%2fsimplex-noise: Not found
       at Request.params.callback [as _callback] (/Users/somehats/.nodenv/versions/10.15.0/lib/node_modules/yarn/lib/cli.js:66926:18)
       at Request.self.callback (/Users/somehats/.nodenv/versions/10.15.0/lib/node_modules/yarn/lib/cli.js:140564:22)
       at Request.emit (events.js:182:13)
@@ -37,11 +37,19 @@ npm manifest:
       "typescript": "^3.7.2"
     },
     "scripts": {
-      "serve": "parcel serve src/index.html",
-      "build": "parcel build src/index.html",
+      "clean": "rm -rf dist",
+      "serve": "yarn run clean && parcel serve src/index.html",
+      "build": "yarn run clean && parcel build src/index.html",
       "types": "tsc --noEmit"
     },
     "dependencies": {
+      "@types/d3-color": "^1.2.2",
+      "@types/d3-scale-chromatic": "^1.3.1",
+      "@types/delaunator": "^3.0.0",
+      "d3-color": "^1.4.0",
+      "d3-scale": "^3.2.1",
+      "d3-scale-chromatic": "^1.5.0",
+      "delaunator": "^4.0.1",
       "utility-types": "^3.10.0"
     }
   }
@@ -806,6 +814,21 @@ Lockfile:
     dependencies:
       "@parcel/utils" "^1.11.0"
       physical-cpu-count "^2.0.0"
+  
+  "@types/d3-color@^1.2.2":
+    version "1.2.2"
+    resolved "https://registry.yarnpkg.com/@types/d3-color/-/d3-color-1.2.2.tgz#80cf7cfff7401587b8f89307ba36fe4a576bc7cf"
+    integrity sha512-6pBxzJ8ZP3dYEQ4YjQ+NVbQaOflfgXq/JbDiS99oLobM2o72uAST4q6yPxHv6FOTCRC/n35ktuo8pvw/S4M7sw==
+  
+  "@types/d3-scale-chromatic@^1.3.1":
+    version "1.3.1"
+    resolved "https://registry.yarnpkg.com/@types/d3-scale-chromatic/-/d3-scale-chromatic-1.3.1.tgz#a294ae688634027870f0307bf8802f863aa2ddb3"
+    integrity sha512-Ny3rLbV5tnmqgW7w/poCcef4kXP8mHPo/p8EjTS5d9OUk8MlqAeRaM8eF7Vyv7QMLiIXNE94Pa1cMLSPkXQBoQ==
+  
+  "@types/delaunator@^3.0.0":
+    version "3.0.0"
+    resolved "https://registry.yarnpkg.com/@types/delaunator/-/delaunator-3.0.0.tgz#217475640c604def83709f18f652bb372e3897ca"
+    integrity sha512-x8XXE/QqXUPafkqFXeJCQCq/S81IW/t49Nnhgx3yKmGwL89qFRxnXn5qtcil9GO3gVkjGy4SwgacOjCN1B6b7w==
   
   "@types/q@^1.5.1":
     version "1.5.2"
@@ -1768,6 +1791,59 @@ Lockfile:
     dependencies:
       cssom "0.3.x"
   
+  "d3-array@1.2.0 - 2":
+    version "2.4.0"
+    resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-2.4.0.tgz#87f8b9ad11088769c82b5ea846bcb1cc9393f242"
+    integrity sha512-KQ41bAF2BMakf/HdKT865ALd4cgND6VcIztVQZUTt0+BH3RWy6ZYnHghVXf6NFjt2ritLr8H1T8LreAAlfiNcw==
+  
+  d3-color@1, d3-color@^1.4.0:
+    version "1.4.0"
+    resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-1.4.0.tgz#89c45a995ed773b13314f06460df26d60ba0ecaf"
+    integrity sha512-TzNPeJy2+iEepfiL92LAAB7fvnp/dV2YwANPVHdDWmYMm23qIJBYww3qT8I8C1wXrmrg4UWs7BKc2tKIgyjzHg==
+  
+  d3-format@1:
+    version "1.4.2"
+    resolved "https://registry.yarnpkg.com/d3-format/-/d3-format-1.4.2.tgz#2a8c0ebf500f315981c2110eaaf70b82f472cb2b"
+    integrity sha512-gco1Ih54PgMsyIXgttLxEhNy/mXxq8+rLnCb5shQk+P5TsiySrwWU5gpB4zen626J4LIwBxHvDChyA8qDm57ww==
+  
+  d3-interpolate@1, d3-interpolate@^1.2.0:
+    version "1.4.0"
+    resolved "https://registry.yarnpkg.com/d3-interpolate/-/d3-interpolate-1.4.0.tgz#526e79e2d80daa383f9e0c1c1c7dcc0f0583e987"
+    integrity sha512-V9znK0zc3jOPV4VD2zZn0sDhZU3WAE2bmlxdIwwQPPzPjvyLkd8B3JUVdS1IDUFDkWZ72c9qnv1GK2ZagTZ8EA==
+    dependencies:
+      d3-color "1"
+  
+  d3-scale-chromatic@^1.5.0:
+    version "1.5.0"
+    resolved "https://registry.yarnpkg.com/d3-scale-chromatic/-/d3-scale-chromatic-1.5.0.tgz#54e333fc78212f439b14641fb55801dd81135a98"
+    integrity sha512-ACcL46DYImpRFMBcpk9HhtIyC7bTBR4fNOPxwVSl0LfulDAwyiHyPOTqcDG1+t5d4P9W7t/2NAuWu59aKko/cg==
+    dependencies:
+      d3-color "1"
+      d3-interpolate "1"
+  
+  d3-scale@^3.2.1:
+    version "3.2.1"
+    resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-3.2.1.tgz#da1684adce7261b4bc7a76fe193d887f0e909e69"
+    integrity sha512-huz5byJO/6MPpz6Q8d4lg7GgSpTjIZW/l+1MQkzKfu2u8P6hjaXaStOpmyrD6ymKoW87d2QVFCKvSjLwjzx/rA==
+    dependencies:
+      d3-array "1.2.0 - 2"
+      d3-format "1"
+      d3-interpolate "^1.2.0"
+      d3-time "1"
+      d3-time-format "2"
+  
+  d3-time-format@2:
+    version "2.2.2"
+    resolved "https://registry.yarnpkg.com/d3-time-format/-/d3-time-format-2.2.2.tgz#187597ffc6a0f37cb36bb7a1d7167cdc887ecda0"
+    integrity sha512-pweL2Ri2wqMY+wlW/wpkl8T3CUzKAha8S9nmiQlMABab8r5MJN0PD1V4YyRNVaKQfeh4Z0+VO70TLw6ESVOYzw==
+    dependencies:
+      d3-time "1"
+  
+  d3-time@1:
+    version "1.1.0"
+    resolved "https://registry.yarnpkg.com/d3-time/-/d3-time-1.1.0.tgz#b1e19d307dae9c900b7e5b25ffc5dcc249a8a0f1"
+    integrity sha512-Xh0isrZ5rPYYdqhAVk8VLnMEidhz5aP7htAADH6MfzgmmicPkTo8LhkLxci61/lCB7n7UmE3bN0leRt+qvkLxA==
+  
   dashdash@^1.12.0:
     version "1.14.1"
     resolved "https://registry.yarnpkg.com/dashdash/-/dashdash-1.14.1.tgz#853cfa0f7cbe2fed5de20326b8dd581035f6e2f0"
@@ -1868,6 +1944,11 @@ Lockfile:
     dependencies:
       is-descriptor "^1.0.2"
       isobject "^3.0.1"
+  
+  delaunator@^4.0.1:
+    version "4.0.1"
+    resolved "https://registry.yarnpkg.com/delaunator/-/delaunator-4.0.1.tgz#3d779687f57919a7a418f8ab947d3bddb6846957"
+    integrity sha512-WNPWi1IRKZfCt/qIDMfERkDp93+iZEmOxN2yy4Jg+Xhv8SLk2UTqqbe1sfiipn0and9QrE914/ihdx82Y/Giag==
   
   delayed-stream@~1.0.0:
     version "1.0.0"

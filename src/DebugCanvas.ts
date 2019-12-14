@@ -185,6 +185,14 @@ export class DebugDraw {
     this.stroke({ strokeWidth: HAIRLINE, stroke: color });
   }
 
+  public debugVectorAtPoint(
+    vector: ReadonlyVector2,
+    base: ReadonlyVector2,
+    options?: DebugOptions
+  ) {
+    this.debugArrow(base, base.cloneMutable().add(vector), options);
+  }
+
   public polygon(
     polygon: ReadonlyArray<ReadonlyVector2>,
     options: StrokeAndFillOptions = {}

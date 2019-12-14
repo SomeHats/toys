@@ -1,3 +1,5 @@
+import { normalizeAngle } from "./utils";
+
 export class ReadonlyVector2 {
   static readonly ZERO = new ReadonlyVector2(0, 0);
 
@@ -66,10 +68,20 @@ export class ReadonlyVector2 {
     return this === other || (this.x === other.x && this.y === other.y);
   }
 
-  distanceTo({ x, y }: Vector2): number {
+  distanceTo({ x, y }: ReadonlyVector2): number {
     const dx = x - this.x;
     const dy = y - this.y;
     return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  angleBetween(other: ReadonlyVector2): number {
+    return normalizeAngle(
+      Math.atan2(other.y, other.x) - Math.atan2(this.y, this.x)
+    );
+  }
+
+  dot(other: ReadonlyVector2): number {
+    return this.x * other.x + this.y * other.y;
   }
 }
 

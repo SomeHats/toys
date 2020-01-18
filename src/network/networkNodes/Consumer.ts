@@ -1,17 +1,17 @@
 // @flow
-import { assert } from "../../lib/assert";
-import SceneObject from "../../lib/scene/SceneObject";
-import Circle from "../../lib/geom/Circle";
-import Vector2 from "../../lib/geom/Vector2";
-import * as ShapeHelpers from "../../lib/canvasShapeHelpers";
-import { inBack, reverse, linear } from "../../lib/easings";
-import { constrain, mapRange } from "../../lib/utils";
-import Pulse from "../effects/Pulse";
-import { RED } from "../colors";
-import ConnectionSet from "../ConnectionSet";
-import ConnectionDirection from "../ConnectionDirection";
-import Road from "../Road";
-import { NetworkNode } from "./NetworkNode";
+import { assert } from '../../lib/assert';
+import SceneObject from '../../lib/scene/SceneObject';
+import Circle from '../../lib/geom/Circle';
+import Vector2 from '../../lib/geom/Vector2';
+import * as ShapeHelpers from '../../lib/canvasShapeHelpers';
+import { inBack, reverse, linear } from '../../lib/easings';
+import { constrain, mapRange } from '../../lib/utils';
+import Pulse from '../effects/Pulse';
+import { RED } from '../colors';
+import ConnectionSet from '../ConnectionSet';
+import ConnectionDirection from '../ConnectionDirection';
+import Road from '../Road';
+import { NetworkNode } from './NetworkNode';
 
 const DEFAULT_COOLDOWN = 1000;
 
@@ -71,7 +71,7 @@ export default class Consumer extends SceneObject implements NetworkNode {
   }
 
   consumeTraveller() {
-    assert(this.canConsumeTraveller, "must be ready to consumer traveller");
+    assert(this.canConsumeTraveller, 'must be ready to consumer traveller');
     this._resetTimer();
     this._pulse();
   }
@@ -85,7 +85,7 @@ export default class Consumer extends SceneObject implements NetworkNode {
     const colorMixAmount = constrain(
       0,
       1,
-      mapRange(0, CLOCK_FADE_DURATION, 1, 0, this._timer)
+      mapRange(0, CLOCK_FADE_DURATION, 1, 0, this._timer),
     );
     const bgColor = MAIN_COLOR.mix(CLOCK_COLOR, colorMixAmount);
 
@@ -95,7 +95,7 @@ export default class Consumer extends SceneObject implements NetworkNode {
       ctx,
       this._circle.center.x,
       this._circle.center.y,
-      this._circle.radius
+      this._circle.radius,
     );
     ctx.fill();
 
@@ -106,7 +106,7 @@ export default class Consumer extends SceneObject implements NetworkNode {
       ctx,
       this._circle.center.x,
       this._circle.center.y,
-      this._circle.radius * progress
+      this._circle.radius * progress,
     );
     ctx.fill();
   }
@@ -127,8 +127,8 @@ export default class Consumer extends SceneObject implements NetworkNode {
         color: PULSE_COLOR,
         easeRadius: inBack(4),
         easeOpacity: reverse(linear),
-        removeOnComplete: true
-      })
+        removeOnComplete: true,
+      }),
     );
   }
 }

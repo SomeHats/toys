@@ -1,13 +1,13 @@
 // @flow
-import Path from "./geom/Path";
-import StraightPathSegment from "./geom/StraightPathSegment";
-import CirclePathSegment from "./geom/CirclePathSegment";
+import Path from './geom/Path';
+import StraightPathSegment from './geom/StraightPathSegment';
+import CirclePathSegment from './geom/CirclePathSegment';
 
 export function circle(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
-  radius: number
+  radius: number,
 ) {
   ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
 }
@@ -27,7 +27,7 @@ export function path(ctx: CanvasRenderingContext2D, path: Path) {
         segment.circle.radius,
         segment.startAngle,
         segment.endAngle,
-        segment.isAnticlockwise
+        segment.isAnticlockwise,
       );
     } else {
       throw new Error(`Unknown path segment type: ${segment.toString()}`);

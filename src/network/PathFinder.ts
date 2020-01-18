@@ -1,7 +1,7 @@
 // @flow
-import { assert } from "../lib/assert";
-import Road from "./Road";
-import { NetworkNode } from "./networkNodes/NetworkNode";
+import { assert } from '../lib/assert';
+import Road from './Road';
+import { NetworkNode } from './networkNodes/NetworkNode';
 
 const PathFinder = {
   getNextRoad(initialNode: NetworkNode, destinationNode: NetworkNode): Road {
@@ -9,7 +9,7 @@ const PathFinder = {
     remainingNodes.add(initialNode);
     assert(
       remainingNodes.has(destinationNode),
-      "destination must be reachable"
+      'destination must be reachable',
     );
     const bestCosts = new Map();
     const prevRoads = new Map();
@@ -19,7 +19,7 @@ const PathFinder = {
     while (remainingNodes.size) {
       const { node, cost } = PathFinder._nodeWithShortestDistance(
         remainingNodes,
-        bestCosts
+        bestCosts,
       );
       remainingNodes.delete(node);
 
@@ -27,19 +27,19 @@ const PathFinder = {
         return PathFinder._nextRoadFromRoute(
           prevRoads,
           initialNode,
-          destinationNode
+          destinationNode,
         );
       }
 
       PathFinder._updateNeighbours(node, bestCosts, cost, prevRoads);
     }
 
-    throw new Error("unreachable i hope");
+    throw new Error('unreachable i hope');
   },
 
   _nodeWithShortestDistance(
     nodes: Set<NetworkNode>,
-    costs: Map<NetworkNode, number>
+    costs: Map<NetworkNode, number>,
   ): { node: NetworkNode; cost: number } {
     let bestCost = Infinity;
     let bestNode = null;
@@ -52,14 +52,14 @@ const PathFinder = {
       }
     });
 
-    assert(bestNode, "node must be found");
+    assert(bestNode, 'node must be found');
     return { node: bestNode, cost: bestCost };
   },
   _updateNeighbours(
     node: NetworkNode,
     bestCosts: Map<NetworkNode, number>,
     cost: number,
-    prevRoads: Map<NetworkNode, Road>
+    prevRoads: Map<NetworkNode, Road>,
   ) {
     node.outgoingConnections.forEach(road => {
       const nextNode = road.to;
@@ -74,18 +74,18 @@ const PathFinder = {
   _nextRoadFromRoute(
     prevRoads: Map<NetworkNode, Road>,
     start: NetworkNode,
-    finish: NetworkNode
+    finish: NetworkNode,
   ): Road {
     let node = finish;
     while (prevRoads.has(node)) {
       const road = prevRoads.get(node);
-      assert(road, "road must exist");
+      assert(road, 'road must exist');
       node = road.from;
       if (node === start) return road;
     }
 
-    throw new Error("prev road must be found");
-  }
+    throw new Error('prev road must be found');
+  },
 };
 
 export default PathFinder;

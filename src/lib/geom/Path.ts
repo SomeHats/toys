@@ -1,11 +1,11 @@
 // @flow
-import { assert } from "../assert";
-import { constrain, compact } from "../utils";
-import Circle from "./Circle";
-import Vector2 from "./Vector2";
-import StraightPathSegment from "./StraightPathSegment";
-import CirclePathSegment from "./CirclePathSegment";
-import Line2 from "./Line2";
+import { assert } from '../assert';
+import { constrain, compact } from '../utils';
+import Circle from './Circle';
+import Vector2 from './Vector2';
+import StraightPathSegment from './StraightPathSegment';
+import CirclePathSegment from './CirclePathSegment';
+import Line2 from './Line2';
 
 export interface PathSegment {
   getStart(): Vector2;
@@ -31,7 +31,7 @@ export default class Path implements PathSegment {
   static segmentAcrossCircle(
     containingCircle: Circle,
     entryAngle: number,
-    exitAngle: number
+    exitAngle: number,
   ): CirclePathSegment | StraightPathSegment {
     entryAngle = entryAngle + Math.PI;
     const entryPoint = containingCircle.pointOnCircumference(entryAngle);
@@ -39,11 +39,11 @@ export default class Path implements PathSegment {
 
     const entryLineNormal = new Line2(
       containingCircle.center,
-      entryPoint
+      entryPoint,
     ).perpendicularLineThroughPoint(entryPoint);
     const exitLineNormal = new Line2(
       containingCircle.center,
-      exitPoint
+      exitPoint,
     ).perpendicularLineThroughPoint(exitPoint);
 
     if (entryLineNormal.isParallelTo(exitLineNormal)) {
@@ -51,7 +51,7 @@ export default class Path implements PathSegment {
     }
 
     const roadCircleCenter = entryLineNormal.pointAtIntersectionWith(
-      exitLineNormal
+      exitLineNormal,
     );
     const roadCircleRadius = entryPoint.distanceTo(roadCircleCenter);
 
@@ -64,7 +64,7 @@ export default class Path implements PathSegment {
       roadCircleCenter,
       roadCircleRadius,
       entryPoint.sub(roadCircleCenter).angle,
-      exitPoint.sub(roadCircleCenter).angle
+      exitPoint.sub(roadCircleCenter).angle,
     );
   }
 
@@ -85,7 +85,7 @@ export default class Path implements PathSegment {
   getLength(): number {
     return this.segments.reduce(
       (length, segment) => length + segment.getLength(),
-      0
+      0,
     );
   }
 
@@ -98,7 +98,7 @@ export default class Path implements PathSegment {
       }
       soFar += segment.getLength();
     }
-    throw new Error("this is supposed to be unreachable oops");
+    throw new Error('this is supposed to be unreachable oops');
   }
 
   getAngleAtPosition(position: number): number {
@@ -110,7 +110,7 @@ export default class Path implements PathSegment {
       }
       soFar += segment.getLength();
     }
-    throw new Error("this is supposed to be unreachable oops");
+    throw new Error('this is supposed to be unreachable oops');
   }
 
   addSegment(segment: PathSegment): this {
@@ -120,7 +120,7 @@ export default class Path implements PathSegment {
         lastSegment.getEnd().equals(segment.getStart()),
         `segments must neatly join together - ${lastSegment
           .getEnd()
-          .toString()} !== ${segment.getStart().toString()}`
+          .toString()} !== ${segment.getStart().toString()}`,
       );
     }
     this.segments.push(segment);
@@ -145,7 +145,7 @@ export default class Path implements PathSegment {
 
       assert(
         lastSegment.getEnd().equals(segment.getStart()),
-        "segments must join"
+        'segments must join',
       );
 
       const entryAngle = lastSegment.angle;
@@ -153,13 +153,13 @@ export default class Path implements PathSegment {
       const usableRadius = Math.min(
         radius,
         lastSegment.getLength() / 2,
-        segment.getLength() / 2
+        segment.getLength() / 2,
       );
 
       const containingCircle = new Circle(
         segment.getStart().x,
         segment.getStart().y,
-        usableRadius
+        usableRadius,
       );
 
       return Path.segmentAcrossCircle(containingCircle, entryAngle, exitAngle);

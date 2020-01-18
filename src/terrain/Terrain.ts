@@ -1,25 +1,25 @@
-import { Delaunay } from "./Delaunay";
-import { TerrainCell } from "./TerrainCell";
-import Vector2 from "../lib/geom/Vector2";
+import { Delaunay } from './Delaunay';
+import { TerrainCell } from './TerrainCell';
+import Vector2 from '../lib/geom/Vector2';
 import {
   times,
   sample,
   removeFromArray,
   mapRange,
-  shuffle
-} from "../lib/utils";
-import RandomQueue from "../lib/RandomQueue";
-import AABB from "../lib/geom/AABB";
-import { TectonicPlate } from "./TectonicPlate";
-import * as config from "./config";
-import { makeFractalNoise2d, mapNoise2d } from "./fractalNoise";
-import { quadtree, Quadtree } from "d3-quadtree";
+  shuffle,
+} from '../lib/utils';
+import RandomQueue from '../lib/RandomQueue';
+import AABB from '../lib/geom/AABB';
+import { TectonicPlate } from './TectonicPlate';
+import * as config from './config';
+import { makeFractalNoise2d, mapNoise2d } from './fractalNoise';
+import { quadtree, Quadtree } from 'd3-quadtree';
 
 function assignPlates(plateCount: number, terrain: Terrain) {
   const remainingCellIds = new Set(terrain.activeCellIds);
   const queue = new RandomQueue(terrain.activeCellIds);
   const plateIdByCellId: Array<number> = new Array(
-    terrain.activeCellIds.length
+    terrain.activeCellIds.length,
   );
   let i = 0;
 
@@ -30,7 +30,7 @@ function assignPlates(plateCount: number, terrain: Terrain) {
     return {
       activeCellIds: new RandomQueue([initialCellId]),
       allCellIds: new Set([initialCellId]),
-      id
+      id,
     };
   });
 
@@ -51,7 +51,7 @@ function assignPlates(plateCount: number, terrain: Terrain) {
       const activeCellId = plate.activeCellIds.pop();
       const neighbourIds = terrain.cellsById[activeCellId].neighbourCellIds;
       const remainingNeighbourIds = neighbourIds.filter(neighbourId =>
-        remainingCellIds.has(neighbourId)
+        remainingCellIds.has(neighbourId),
       );
 
       if (remainingNeighbourIds.length) {
@@ -79,9 +79,9 @@ function assignPlates(plateCount: number, terrain: Terrain) {
         Math.max(1, plates.length - 1),
         config.MIN_PLATE_BASE_HEIGHT,
         config.MAX_PLATE_BASE_HEIGHT,
-        idx
-      )
-    )
+        idx,
+      ),
+    ),
   );
   return {
     plateIdByCellId,
@@ -92,9 +92,9 @@ function assignPlates(plateCount: number, terrain: Terrain) {
           terrain,
           baseHeights[idx],
           Array.from(allCellIds),
-          plateIdByCellId
-        )
-    )
+          plateIdByCellId,
+        ),
+    ),
   };
 }
 
@@ -110,47 +110,47 @@ export default class Terrain {
   constructor(delaunay: Delaunay, activeBounds: AABB) {
     this.allCellIds = delaunay.points.map((p, i) => i);
     this.isActiveByCellId = delaunay.points.map(point =>
-      activeBounds.contains(point)
+      activeBounds.contains(point),
     );
     this.activeCellIds = this.allCellIds.filter(
-      id => this.isActiveByCellId[id]
+      id => this.isActiveByCellId[id],
     );
 
     const heightNoise = mapNoise2d(
       config.CELL_NOISE_SCALE,
       -config.CELL_HEIGHT_NOISE_AMT,
       config.CELL_HEIGHT_NOISE_AMT,
-      makeFractalNoise2d(5)
+      makeFractalNoise2d(5),
     );
     const tectonicDriftNoise = mapNoise2d(
       config.DRIFT_NOISE_SCALE,
       1 - config.DRIFT_NOISE_AMT,
       1,
-      makeFractalNoise2d(5)
+      makeFractalNoise2d(5),
     );
     this.cellsById = delaunay.cellsByPointId.map(
       (cell, cellId) =>
-        new TerrainCell(cellId, cell, this, heightNoise, tectonicDriftNoise)
+        new TerrainCell(cellId, cell, this, heightNoise, tectonicDriftNoise),
     );
     this.cellsQuadTree = quadtree(
       this.cellsById,
       cell => cell.position.x,
-      cell => cell.position.y
+      cell => cell.position.y,
     );
 
-    console.time("assignPlates");
+    console.time('assignPlates');
     const { plateIdByCellId, platesById } = assignPlates(
       Math.ceil(this.activeCellIds.length / config.TARGET_CELLS_PER_PLATE),
-      this
+      this,
     );
-    console.timeEnd("assignPlates");
+    console.timeEnd('assignPlates');
     this.plateIdByCellId = plateIdByCellId;
     this.platesById = platesById;
   }
 
   getCellAtPosition(position: Vector2): TerrainCell | null {
     const cellId = this.activeCellIds.find(cellId =>
-      position.isInPolygon(this.cellsById[cellId].polygon)
+      position.isInPolygon(this.cellsById[cellId].polygon),
     );
     return cellId == null ? null : this.cellsById[cellId];
   }
@@ -160,7 +160,7 @@ export default class Terrain {
       config.CELL_SMOOTH_NOISE_SCALE,
       config.CELL_SMOOTH_MIN_RADIUS,
       config.CELL_SMOOTH_MAX_RADIUS,
-      makeFractalNoise2d(4)
+      makeFractalNoise2d(4),
     );
     for (const cellId of this.activeCellIds) {
       const cell = this.cellsById[cellId];
@@ -169,7 +169,7 @@ export default class Terrain {
 
       const sumPlateHeight = nearbyCells.reduce(
         (sum, nearbyCell) => sum + nearbyCell.getPlate().baseHeight,
-        0
+        0,
       );
       const averagePlateHeight = sumPlateHeight / nearbyCells.length;
 

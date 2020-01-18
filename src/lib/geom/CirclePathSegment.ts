@@ -1,8 +1,8 @@
 // @flow
-import { constrain, mapRange } from "../utils";
-import Vector2 from "./Vector2";
-import Circle from "./Circle";
-import { PathSegment } from "./Path";
+import { constrain, mapRange } from '../utils';
+import Vector2 from './Vector2';
+import Circle from './Circle';
+import { PathSegment } from './Path';
 
 export default class CirclePathSegment implements PathSegment {
   readonly circle: Circle;
@@ -13,7 +13,7 @@ export default class CirclePathSegment implements PathSegment {
     center: Vector2,
     radius: number,
     startAngle: number,
-    endAngle: number
+    endAngle: number,
   ) {
     this.circle = new Circle(center.x, center.y, radius);
     this.startAngle = startAngle;
@@ -32,7 +32,7 @@ export default class CirclePathSegment implements PathSegment {
   get angleDifference(): number {
     return Math.atan2(
       Math.sin(this.endAngle - this.startAngle),
-      Math.cos(this.endAngle - this.startAngle)
+      Math.cos(this.endAngle - this.startAngle),
     );
   }
 
@@ -51,7 +51,7 @@ export default class CirclePathSegment implements PathSegment {
       this.getLength(),
       this.startAngle,
       this.startAngle + this.angleDifference,
-      constrain(0, this.getLength(), position)
+      constrain(0, this.getLength(), position),
     );
     return this.circle.pointOnCircumference(angle);
   }
@@ -64,7 +64,7 @@ export default class CirclePathSegment implements PathSegment {
           this.getLength(),
           this.startAngle,
           this.startAngle + this.angleDifference,
-          constrain(0, this.getLength(), position)
+          constrain(0, this.getLength(), position),
         ) -
         Math.PI / 2
       );
@@ -75,7 +75,7 @@ export default class CirclePathSegment implements PathSegment {
           this.getLength(),
           this.startAngle,
           this.startAngle + this.angleDifference,
-          constrain(0, this.getLength(), position)
+          constrain(0, this.getLength(), position),
         ) +
         Math.PI / 2
       );

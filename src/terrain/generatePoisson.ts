@@ -1,13 +1,13 @@
-import Vector2 from "../lib/geom/Vector2";
-import { random } from "../lib/utils";
-import RandomQueue from "../lib/RandomQueue";
-import { Grid2 } from "./Grid2";
-import AABB from "../lib/geom/AABB";
+import Vector2 from '../lib/geom/Vector2';
+import { random } from '../lib/utils';
+import RandomQueue from '../lib/RandomQueue';
+import { Grid2 } from './Grid2';
+import AABB from '../lib/geom/AABB';
 
 export function generatePoisson(
   bounds: AABB,
   minimumDistance: number,
-  pointCount: number
+  pointCount: number,
 ): Array<Vector2> {
   const boundsAtZero = new AABB(Vector2.ZERO, bounds.size);
   const cellSize = minimumDistance / Math.SQRT2;
@@ -42,7 +42,7 @@ export function generatePoisson(
 
 function generateRandomPointAround(
   point: Vector2,
-  minimumDistance: number
+  minimumDistance: number,
 ): Vector2 {
   const radius = random(minimumDistance, 2 * minimumDistance);
   const angle = random(Math.PI * 2);
@@ -53,7 +53,7 @@ function isInNeighbourhood(
   grid: Grid2<Vector2>,
   point: Vector2,
   minimumDistance: number,
-  cellSize: number
+  cellSize: number,
 ): boolean {
   const gridPoint = grid.vectorToGridCoords(point, cellSize);
 

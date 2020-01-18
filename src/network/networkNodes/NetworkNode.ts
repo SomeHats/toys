@@ -1,8 +1,8 @@
 // @flow
-import Vector2 from "../../lib/geom/Vector2";
-import Road from "../Road";
-import Traveller from "../Traveller";
-import ConnectionDirection from "../ConnectionDirection";
+import Vector2 from '../../lib/geom/Vector2';
+import Road from '../Road';
+import Traveller from '../Traveller';
+import ConnectionDirection from '../ConnectionDirection';
 
 export interface NetworkNode {
   readonly canConsumeTraveller: boolean;

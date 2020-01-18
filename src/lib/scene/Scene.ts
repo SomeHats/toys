@@ -1,6 +1,6 @@
-import { assert } from "../assert";
-import SceneObject from "./SceneObject";
-import SceneSystem from "./SceneSystem";
+import { assert } from '../assert';
+import SceneObject from './SceneObject';
+import SceneSystem from './SceneSystem';
 
 const speed = 1;
 const scale = 1;
@@ -22,13 +22,13 @@ export default class Scene {
   private systemsByClass = new Map<SystemClass<SceneSystem>, SceneSystem>();
 
   constructor(width: number, height: number, scaleFactor: number = 1) {
-    this.canvas = document.createElement("canvas");
+    this.canvas = document.createElement('canvas');
     this.canvas.width = width * scaleFactor;
     this.canvas.height = height * scaleFactor;
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
-    const ctx = this.canvas.getContext("2d");
-    assert(ctx, "ctx");
+    const ctx = this.canvas.getContext('2d');
+    assert(ctx, 'ctx');
     this.ctx = ctx;
     this._scaleFactor = scaleFactor * scale;
 
@@ -54,7 +54,7 @@ export default class Scene {
   set isPlaying(newValue: boolean) {
     assert(
       this.frameHandle !== null,
-      "cannot set isPlaying without calling start"
+      'cannot set isPlaying without calling start',
     );
     this._isPlaying = newValue;
   }
@@ -74,14 +74,14 @@ export default class Scene {
   getSystem<T extends SceneSystem>(systemType: SystemClass<T>): T {
     const system = this.systemsByClass.get(systemType);
     assert(system, `system, ${systemType.systemName} not found`);
-    assert(system instanceof systemType, "system is wrong instance type");
+    assert(system instanceof systemType, 'system is wrong instance type');
     return system;
   }
 
   addSystem(system: SceneSystem) {
     assert(
       !this.hasSystem(system.constructor as any),
-      "only one system of each type allowed"
+      'only one system of each type allowed',
     );
     this.systemsByClass.set(system.constructor as any, system);
     system.afterAddToScene(this);
@@ -100,14 +100,14 @@ export default class Scene {
 
   addChildBefore(targetChild: SceneObject, newChild: SceneObject) {
     const index = this._children.indexOf(targetChild);
-    assert(index !== -1, "target child must be present");
+    assert(index !== -1, 'target child must be present');
 
     this.addChildAtIndex(index, newChild);
   }
 
   addChildAfter(targetChild: SceneObject, newChild: SceneObject) {
     const index = this._children.indexOf(targetChild);
-    assert(index !== -1, "target child must be present");
+    assert(index !== -1, 'target child must be present');
 
     this.addChildAtIndex(index + 1, newChild);
   }
@@ -193,7 +193,7 @@ export default class Scene {
 
   _setupVisiblityChange() {
     let playOnVisible = false;
-    document.addEventListener("visibilitychange", () => {
+    document.addEventListener('visibilitychange', () => {
       if (document.hidden && this.isPlaying) {
         playOnVisible = true;
         this.stop();

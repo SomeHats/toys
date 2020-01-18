@@ -1,14 +1,14 @@
 // @flow
-import SceneObject from "../lib/scene/SceneObject";
-import Path from "../lib/geom/Path";
-import StraightPathSegment from "../lib/geom/StraightPathSegment";
-import Vector2 from "../lib/geom/Vector2";
-import * as ShapeHelpers from "../lib/canvasShapeHelpers";
-import { YELLOW } from "./colors";
-import ConnectionDirection from "./ConnectionDirection";
-import { NetworkNode } from "./networkNodes/NetworkNode";
-import Junction from "./Junction";
-import Traveller from "./Traveller";
+import SceneObject from '../lib/scene/SceneObject';
+import Path from '../lib/geom/Path';
+import StraightPathSegment from '../lib/geom/StraightPathSegment';
+import Vector2 from '../lib/geom/Vector2';
+import * as ShapeHelpers from '../lib/canvasShapeHelpers';
+import { YELLOW } from './colors';
+import ConnectionDirection from './ConnectionDirection';
+import { NetworkNode } from './networkNodes/NetworkNode';
+import Junction from './Junction';
+import Traveller from './Traveller';
 
 // const ROAD_OUTER_COLOR = BLUE;
 // const ROAD_INNER_COLOR = LIGHT_BG;
@@ -36,7 +36,7 @@ export default class Road extends SceneObject {
   constructor(
     from: NetworkNode | Junction,
     to: NetworkNode | Junction,
-    { points, autoRound, path }: RoadOptions = {}
+    { points, autoRound, path }: RoadOptions = {},
   ) {
     super();
 
@@ -54,14 +54,14 @@ export default class Road extends SceneObject {
       this._path = Path.straightThroughPoints(
         from.getVisualConnectionPointAtAngle(angleFrom),
         ...points,
-        to.getVisualConnectionPointAtAngle(angleTo)
+        to.getVisualConnectionPointAtAngle(angleTo),
       );
     } else {
       this._path = new Path().addSegment(
         new StraightPathSegment(
           from.getVisualConnectionPointAtAngle(angleFrom),
-          to.getVisualConnectionPointAtAngle(angleTo)
-        )
+          to.getVisualConnectionPointAtAngle(angleTo),
+        ),
       );
     }
 
@@ -73,7 +73,7 @@ export default class Road extends SceneObject {
       this.from = from.connectToRoadAtAngle(
         this,
         angleFrom,
-        ConnectionDirection.OUT
+        ConnectionDirection.OUT,
       );
     } else {
       this.from = from;
@@ -105,7 +105,7 @@ export default class Road extends SceneObject {
       const avgSpeed =
         this._currentTravellers.reduce(
           (sum, traveller) => sum + traveller.speed,
-          0
+          0,
         ) / this._currentTravellers.length;
       return this.length / avgSpeed;
     }
@@ -188,8 +188,8 @@ export default class Road extends SceneObject {
 
   draw(ctx: CanvasRenderingContext2D, time: number) {
     ctx.beginPath();
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ShapeHelpers.path(ctx, this._path);
 
     // ctx.strokeStyle = ROAD_OUTER_COLOR.toString();

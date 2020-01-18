@@ -1,14 +1,14 @@
-import { assert } from "../lib/assert";
-import SceneObject from "../lib/scene/SceneObject";
-import Circle from "../lib/geom/Circle";
-import Vector2 from "../lib/geom/Vector2";
-import { outBack, inBack } from "../lib/easings";
-import { sample, constrain, mapRange, random } from "../lib/utils";
-import TravellerFinder from "./TravellerFinder";
-import { NetworkNode } from "./networkNodes/NetworkNode";
-import Intersection from "./networkNodes/Intersection";
-import Road from "./Road";
-import Pal from "../pals/Pal";
+import { assert } from '../lib/assert';
+import SceneObject from '../lib/scene/SceneObject';
+import Circle from '../lib/geom/Circle';
+import Vector2 from '../lib/geom/Vector2';
+import { outBack, inBack } from '../lib/easings';
+import { sample, constrain, mapRange, random } from '../lib/utils';
+import TravellerFinder from './TravellerFinder';
+import { NetworkNode } from './networkNodes/NetworkNode';
+import Intersection from './networkNodes/Intersection';
+import Road from './Road';
+import Pal from '../pals/Pal';
 
 // const TRAVELLER_COLOR = BLUE.fade(0.4);
 // const TRAVELLER_RADIUS = 14;
@@ -34,9 +34,9 @@ const enterEase = outBack(3);
 const exitEase = inBack(3);
 
 enum StopReason {
-  STOPPED_FOR_DESTINATION = "STOPPED_FOR_DESTINATION",
-  STOPPED_FOR_TRAFFIC_IN_FRONT = "STOPPED_FOR_TRAFFIC_IN_FRONT",
-  STOPPED_FOR_TRAFFIC_NEARBY = "STOPPED_FOR_TRAFFIC_NEARBY"
+  STOPPED_FOR_DESTINATION = 'STOPPED_FOR_DESTINATION',
+  STOPPED_FOR_TRAFFIC_IN_FRONT = 'STOPPED_FOR_TRAFFIC_IN_FRONT',
+  STOPPED_FOR_TRAFFIC_NEARBY = 'STOPPED_FOR_TRAFFIC_NEARBY',
 }
 
 export default class Traveller extends SceneObject {
@@ -45,7 +45,7 @@ export default class Traveller extends SceneObject {
 
   comfortableRadius = random(
     MIN_TRAVELLER_COMFORTABLE_RADIUS,
-    MAX_TRAVELLER_COMFORTABLE_RADIUS
+    MAX_TRAVELLER_COMFORTABLE_RADIUS,
   );
   safeRadius = random(MIN_TRAVELLER_SAFE_RADIUS, MAX_TRAVELLER_SAFE_RADIUS);
   _currentRoad: Road | null = null;
@@ -65,7 +65,7 @@ export default class Traveller extends SceneObject {
   }
 
   get position(): Vector2 {
-    assert(this._currentRoad, "currentRoad must be defined");
+    assert(this._currentRoad, 'currentRoad must be defined');
     return this._currentRoad.getPointAtPosition(this._positionOnCurrentRoad);
   }
 
@@ -79,7 +79,7 @@ export default class Traveller extends SceneObject {
 
   get predictedStopPoint(): Vector2 {
     const currentRoad = this._currentRoad;
-    assert(currentRoad, "currentRoad must be defined");
+    assert(currentRoad, 'currentRoad must be defined');
     const stopPosition = this._getPredictedStopPositionIfDecelerating();
     return this._getPredictedPointForPosition(currentRoad, stopPosition);
   }
@@ -91,7 +91,7 @@ export default class Traveller extends SceneObject {
 
   get potentialNextPredictedStopPoint(): Vector2 {
     const currentRoad = this._currentRoad;
-    assert(currentRoad, "currentRoad must be defined");
+    assert(currentRoad, 'currentRoad must be defined');
     const stopPosition = this._getPredictedStopPositionIfDecelerating();
     return this._getPredictedPointForPosition(currentRoad, stopPosition + 1);
   }
@@ -101,7 +101,7 @@ export default class Traveller extends SceneObject {
   }
 
   get distanceToEndOfCurrentRoad(): number {
-    assert(this._currentRoad, "traveller is not on a road");
+    assert(this._currentRoad, 'traveller is not on a road');
     return this._currentRoad.length - this._positionOnCurrentRoad;
   }
 
@@ -158,14 +158,14 @@ export default class Traveller extends SceneObject {
     this._stoppedFor = [];
 
     const currentRoad = this._currentRoad;
-    assert(currentRoad, "current road must be defined");
+    assert(currentRoad, 'current road must be defined');
 
     this._move(dtMilliseconds, currentRoad);
 
     this._getPal().updateWithPosition(
       this.position,
       currentRoad.getAngleAtPosition(this._positionOnCurrentRoad),
-      dtMilliseconds / 1000
+      dtMilliseconds / 1000,
     );
     // if (window.debugDraw) this._debugDraw();
 
@@ -175,7 +175,7 @@ export default class Traveller extends SceneObject {
 
   draw(ctx: CanvasRenderingContext2D) {
     const currentRoad = this._currentRoad;
-    assert(currentRoad, "current road must be defined");
+    assert(currentRoad, 'current road must be defined');
 
     this._getPal().draw(ctx);
 
@@ -231,7 +231,7 @@ export default class Traveller extends SceneObject {
 
   _getEnterTransitionScale() {
     return enterEase(
-      constrain(0, 1, mapRange(0, ENTER_DURATION, 0, 1, this._age))
+      constrain(0, 1, mapRange(0, ENTER_DURATION, 0, 1, this._age)),
     );
   }
 
@@ -248,9 +248,9 @@ export default class Traveller extends SceneObject {
             this._exitStartedAt + EXIT_DURATION,
             0,
             1,
-            this._age
-          )
-        )
+            this._age,
+          ),
+        ),
       )
     );
   }
@@ -289,7 +289,7 @@ export default class Traveller extends SceneObject {
     this._forceAccelerateTimer = constrain(
       0,
       FORCE_ACCELERATE_DURATION,
-      this._forceAccelerateTimer - dtMilliseconds
+      this._forceAccelerateTimer - dtMilliseconds,
     );
 
     if (
@@ -319,7 +319,7 @@ export default class Traveller extends SceneObject {
     }
 
     const nextTravellerOnRoad = currentRoad.getTravellerAfterPosition(
-      this._positionOnCurrentRoad
+      this._positionOnCurrentRoad,
     );
 
     const safeStopAheadPosition =
@@ -520,13 +520,13 @@ export default class Traveller extends SceneObject {
     this._speed = constrain(
       0,
       MAX_SPEED,
-      this._speed + acceleration * dtSeconds
+      this._speed + acceleration * dtSeconds,
     );
     const avgSpeed = (lastSpeed + this._speed) / 2;
     this._positionOnCurrentRoad = constrain(
       0,
       currentRoad.length,
-      this._positionOnCurrentRoad + avgSpeed * dtSeconds
+      this._positionOnCurrentRoad + avgSpeed * dtSeconds,
     );
   }
 

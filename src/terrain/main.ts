@@ -1,38 +1,38 @@
-import { assert } from "../lib/assert";
-import { generatePoisson } from "./generatePoisson";
-import AABB from "../lib/geom/AABB";
-import Vector2 from "../lib/geom/Vector2";
-import { Delaunay } from "./Delaunay";
-import { random } from "../lib/utils";
-import Terrain from "./Terrain";
-import { width, height, canvas, ctx } from "./canvas";
-import * as config from "./config";
-import { interpolateMagma } from "d3-scale-chromatic";
-import create3dRenderer from "./create3dRenderer";
+import { assert } from '../lib/assert';
+import { generatePoisson } from './generatePoisson';
+import AABB from '../lib/geom/AABB';
+import Vector2 from '../lib/geom/Vector2';
+import { Delaunay } from './Delaunay';
+import { random } from '../lib/utils';
+import Terrain from './Terrain';
+import { width, height, canvas, ctx } from './canvas';
+import * as config from './config';
+import { interpolateMagma } from 'd3-scale-chromatic';
+import create3dRenderer from './create3dRenderer';
 
 const spaceVec = new Vector2(config.POINT_SPACING, config.POINT_SPACING);
 const sizeVec = new Vector2(config.SIZE, config.SIZE);
 const baseBounds = new AABB(Vector2.ZERO, sizeVec);
 const expandedBounds = new AABB(
   spaceVec.negate(),
-  sizeVec.add(spaceVec).add(spaceVec)
+  sizeVec.add(spaceVec).add(spaceVec),
 );
 const contractedBounds = new AABB(
   spaceVec,
-  sizeVec.sub(spaceVec).sub(spaceVec)
+  sizeVec.sub(spaceVec).sub(spaceVec),
 );
 const activeBounds = baseBounds;
 
-console.time("generatePoisson");
+console.time('generatePoisson');
 const points = generatePoisson(expandedBounds, config.POINT_SPACING, 15);
-console.timeEnd("generatePoisson");
+console.timeEnd('generatePoisson');
 
 const delaunay = new Delaunay(points);
 console.log(delaunay);
 const terrain = new Terrain(delaunay, activeBounds);
 Object.assign(window, { delaunay, terrain });
 
-function drawDebugTriangles(color = "yellow") {
+function drawDebugTriangles(color = 'yellow') {
   canvas.beginPath();
   delaunay.forEachTriangleEdge((pointIdA, pointIdB) => {
     canvas.moveTo(terrain.cellsById[pointIdA].position);
@@ -41,7 +41,7 @@ function drawDebugTriangles(color = "yellow") {
   canvas.debugStroke(color);
 }
 
-function drawDebugPolygons(color = "cyan") {
+function drawDebugPolygons(color = 'cyan') {
   canvas.beginPath();
   delaunay.forEachPolygonEdge((p1, p2) => {
     canvas.moveTo(p1);
@@ -50,11 +50,11 @@ function drawDebugPolygons(color = "cyan") {
   canvas.debugStroke(color);
 }
 
-function drawDebugPoints(color = "magenta") {
+function drawDebugPoints(color = 'magenta') {
   for (const cellId of terrain.allCellIds) {
     canvas.debugPointX(terrain.cellsById[cellId].position, {
       label: String(cellId),
-      color: terrain.isActiveByCellId[cellId] ? "lime" : "red"
+      color: terrain.isActiveByCellId[cellId] ? 'lime' : 'red',
     });
   }
 }
@@ -66,12 +66,12 @@ function drawDebug() {
 }
 
 function drawPolygons() {
-  console.time("draw polygons");
+  console.time('draw polygons');
   for (const pointId of terrain.allCellIds) {
     const { polygon } = terrain.cellsById[pointId];
-    canvas.debugPolygon(polygon, { color: "cyan" });
+    canvas.debugPolygon(polygon, { color: 'cyan' });
   }
-  console.timeEnd("draw polygons");
+  console.timeEnd('draw polygons');
 }
 
 function drawPlates(shouldIncludeDrift = true) {
@@ -84,7 +84,7 @@ function drawPlates(shouldIncludeDrift = true) {
     canvas.polygon(cell.polygon, {
       fill: cell.getColor(shouldIncludeDrift),
       stroke: cell.getColor(shouldIncludeDrift),
-      strokeWidth: 1
+      strokeWidth: 1,
     });
   }
   for (const plate of terrain.platesById) {
@@ -105,13 +105,13 @@ function drawPlates(shouldIncludeDrift = true) {
   }
 }
 
-console.time("terrain.smoothCellsBasedOnPlateHeight");
+console.time('terrain.smoothCellsBasedOnPlateHeight');
 terrain.smoothCellsBasedOnPlateHeight();
-console.timeEnd("terrain.smoothCellsBasedOnPlateHeight");
+console.timeEnd('terrain.smoothCellsBasedOnPlateHeight');
 
-console.time("propagateTectonicDrift");
+console.time('propagateTectonicDrift');
 terrain.propagateTectonicDrift();
-console.timeEnd("propagateTectonicDrift");
+console.timeEnd('propagateTectonicDrift');
 
 // terrain.calculateDriftHeightOffsets();
 
@@ -144,7 +144,7 @@ drawPlates();
 // });
 
 let renderStage = 0;
-window.addEventListener("click", e => {
+window.addEventListener('click', e => {
   ctx.clearRect(0, 0, config.SIZE, config.SIZE);
 
   // const mousePosition = new Vector2(e.clientX, e.clientY);
@@ -159,20 +159,20 @@ window.addEventListener("click", e => {
     for (const cellId of terrain.activeCellIds) {
       const cell = terrain.cellsById[cellId];
       canvas.polygon(cell.polygon, {
-        fill: interpolateMagma(cell.getHeightFromDriftPressure())
+        fill: interpolateMagma(cell.getHeightFromDriftPressure()),
       });
     }
   } else {
     for (const cellId of terrain.activeCellIds) {
       const cell = terrain.cellsById[cellId];
-      canvas.polygon(cell.polygon, { stroke: "cyan", strokeWidth: 0.1 });
+      canvas.polygon(cell.polygon, { stroke: 'cyan', strokeWidth: 0.1 });
     }
 
     let i = 0;
     for (const plate of terrain.platesById) {
       canvas.polygon(plate.polygon, {
-        stroke: "red",
-        strokeWidth: 1
+        stroke: 'red',
+        strokeWidth: 1,
       });
       for (const cellId of plate.edgeCellIds) {
         const cell = terrain.cellsById[cellId];
@@ -180,7 +180,7 @@ window.addEventListener("click", e => {
         i++;
         if (i % 3 === 0) {
           canvas.debugVectorAtPoint(plate.drift.scale(15), cell.position, {
-            color: "white"
+            color: 'white',
           });
         }
       }

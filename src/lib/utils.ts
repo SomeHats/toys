@@ -33,13 +33,13 @@ export function mapRange(
   b1: number,
   a2: number,
   b2: number,
-  n: number
+  n: number,
 ): number {
   return lerp(a2, b2, invLerp(a1, b1, n));
 }
 
 export function random(a: number, b?: number) {
-  if (typeof b === "number") {
+  if (typeof b === 'number') {
     return lerp(a, b, Math.random());
   }
   return lerp(0, a, Math.random());
@@ -71,7 +71,7 @@ export function uniq<T>(arr: T[]): Array<T> {
 
 export function randomColor(): string {
   return `rgb(${Math.floor(random(256))},${Math.floor(
-    random(256)
+    random(256),
   )},${Math.floor(random(256))})`;
 }
 
@@ -100,7 +100,7 @@ export async function frameLoop(cb: () => void) {
 }
 
 export function fromEntries<K extends PropertyKey, V>(
-  entries: ReadonlyArray<[K, V]>
+  entries: ReadonlyArray<[K, V]>,
 ): Record<K, V> {
   const result = {} as Record<K, V>;
   for (const [key, value] of entries) {
@@ -111,7 +111,7 @@ export function fromEntries<K extends PropertyKey, V>(
 
 export function compact<T>(arr: ReadonlyArray<T>): Array<NonNullable<T>> {
   return arr.filter(
-    (item): item is NonNullable<T> => item !== null && item !== undefined
+    (item): item is NonNullable<T> => item !== null && item !== undefined,
   );
 }
 

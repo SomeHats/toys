@@ -1,9 +1,9 @@
-import Color from "color";
-import SceneObject from "../../lib/scene/SceneObject";
-import * as ShapeHelpers from "../../lib/canvasShapeHelpers";
-import Circle from "../../lib/geom/Circle";
-import { linear, Easing } from "../../lib/easings";
-import { lerp } from "../../lib/utils";
+import Color from 'color';
+import SceneObject from '../../lib/scene/SceneObject';
+import * as ShapeHelpers from '../../lib/canvasShapeHelpers';
+import Circle from '../../lib/geom/Circle';
+import { linear, Easing } from '../../lib/easings';
+import { lerp } from '../../lib/utils';
 
 type PulseOptions = {
   x: number;
@@ -37,7 +37,7 @@ export default class Pulse extends SceneObject {
     color,
     easeRadius = linear,
     easeOpacity = linear,
-    removeOnComplete = false
+    removeOnComplete = false,
   }: PulseOptions) {
     super();
     this._circle = new Circle(x, y, startRadius);
@@ -55,7 +55,11 @@ export default class Pulse extends SceneObject {
     const deltaProgress = deltaTime / this._duration;
     this._progress = Math.min(1, this._progress + deltaProgress);
     this._circle = this._circle.withRadius(
-      lerp(this._startRadius, this._endRadius, this._easeRadius(this._progress))
+      lerp(
+        this._startRadius,
+        this._endRadius,
+        this._easeRadius(this._progress),
+      ),
     );
 
     if (this._progress === 1 && this._removeOnComplete) {
@@ -71,7 +75,7 @@ export default class Pulse extends SceneObject {
       ctx,
       this._circle.center.x,
       this._circle.center.y,
-      this._circle.radius
+      this._circle.radius,
     );
     ctx.fill();
   }

@@ -1,4 +1,4 @@
-declare module "color" {
+declare module 'color' {
   type RGBObject = {
     r: number;
     g: number;

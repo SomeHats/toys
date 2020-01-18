@@ -1,17 +1,17 @@
-import { random, mapRange, wait, lerp } from "../lib/utils";
-import Terrain from "./Terrain";
-import { interpolateRgbBasis } from "d3-interpolate";
-import Vector2 from "../lib/geom/Vector2";
-import { TerrainCell } from "./TerrainCell";
-import { makeFractalNoise2d } from "./fractalNoise";
-import * as config from "./config";
-import { canvas } from "./canvas";
+import { random, mapRange, wait, lerp } from '../lib/utils';
+import Terrain from './Terrain';
+import { interpolateRgbBasis } from 'd3-interpolate';
+import Vector2 from '../lib/geom/Vector2';
+import { TerrainCell } from './TerrainCell';
+import { makeFractalNoise2d } from './fractalNoise';
+import * as config from './config';
+import { canvas } from './canvas';
 
 function findPlateEdges(
   currentPlateId: number,
   terrain: Terrain,
   cellIds: ReadonlyArray<number>,
-  plateIdByCellId: ReadonlyArray<number>
+  plateIdByCellId: ReadonlyArray<number>,
 ): { edgeCellIds: Set<number>; polygon: Array<Vector2> } {
   const isNeighbourCellIdInOtherPlate = (neighbourCellId: number | null) =>
     neighbourCellId === null ||
@@ -19,8 +19,8 @@ function findPlateEdges(
 
   const startingEdgeCellId = cellIds.find(cellId =>
     terrain.cellsById[cellId].neighbourCellIdsByEdgeIndex.some(
-      isNeighbourCellIdInOtherPlate
-    )
+      isNeighbourCellIdInOtherPlate,
+    ),
   );
   if (startingEdgeCellId == null) {
     throw new Error(`startingEdgeCellId must exist`);
@@ -31,10 +31,10 @@ function findPlateEdges(
 
   const startingEdgeCell = terrain.cellsById[startingEdgeCellId];
   const startingEdgeCellStartingEdgeIndex = startingEdgeCell.neighbourCellIdsByEdgeIndex.findIndex(
-    isNeighbourCellIdInOtherPlate
+    isNeighbourCellIdInOtherPlate,
   );
   if (startingEdgeCellStartingEdgeIndex === -1) {
-    throw new Error("startingEdgeCellStartingEdgeIndex must exist");
+    throw new Error('startingEdgeCellStartingEdgeIndex must exist');
   }
 
   let currentCell = startingEdgeCell;
@@ -47,7 +47,7 @@ function findPlateEdges(
     edgeCellIds.add(currentCell.id);
     const currentCellAtStartOfEdgeIteration = currentCell;
     for (const edgeIndex of currentCell.iterateEdgesStartingFromIndex(
-      currentEdgeIndexInCell
+      currentEdgeIndexInCell,
     )) {
       const neighbourCellId =
         currentCell.neighbourCellIdsByEdgeIndex[edgeIndex];
@@ -60,17 +60,17 @@ function findPlateEdges(
         polygonSet.add(lastPolygonPoint);
       } else {
         if (neighbourCellId === null) {
-          throw new Error("neighbourCellId must exist");
+          throw new Error('neighbourCellId must exist');
         }
         if (lastPolygonPoint === null) {
-          throw new Error("lastPolygonPoint must exist");
+          throw new Error('lastPolygonPoint must exist');
         }
         const nextCell = terrain.cellsById[neighbourCellId];
         const nextCellStartEdgeIndex = nextCell.polygon.findIndex(point =>
-          lastPolygonPoint!.equals(point)
+          lastPolygonPoint!.equals(point),
         );
         if (nextCellStartEdgeIndex === -1) {
-          throw new Error("currentEdgeIndexInCell must exist");
+          throw new Error('currentEdgeIndexInCell must exist');
         }
 
         currentCell = nextCell;
@@ -85,7 +85,7 @@ function findPlateEdges(
     }
   }
 
-  throw new Error("loop never completed");
+  throw new Error('loop never completed');
 }
 
 export class TectonicPlate {
@@ -96,7 +96,7 @@ export class TectonicPlate {
   public readonly cellIds: ReadonlySet<number>;
   public readonly drift: Vector2 = Vector2.fromPolar(
     random(-Math.PI, Math.PI),
-    random(config.MIN_TECTONIC_DRIFT, config.MAX_TECTONIC_DRIFT)
+    random(config.MIN_TECTONIC_DRIFT, config.MAX_TECTONIC_DRIFT),
   );
 
   constructor(
@@ -104,14 +104,14 @@ export class TectonicPlate {
     private readonly terrain: Terrain,
     public readonly baseHeight: number,
     cellIds: ReadonlyArray<number>,
-    plateIdByCellId: ReadonlyArray<number>
+    plateIdByCellId: ReadonlyArray<number>,
   ) {
     this.cellIds = new Set(cellIds);
-    console.time("plate.findPlateEdges");
+    console.time('plate.findPlateEdges');
     const plateEdges = findPlateEdges(id, terrain, cellIds, plateIdByCellId);
     this.edgeCellIds = plateEdges.edgeCellIds;
     this.polygon = plateEdges.polygon;
-    console.timeEnd("plate.findPlateEdges");
+    console.timeEnd('plate.findPlateEdges');
   }
 
   private getCell(cellId: number): TerrainCell {
@@ -126,12 +126,12 @@ export class TectonicPlate {
       const cell = this.getCell(edgeCellId);
       const neighbourDrifts = cell.neighbourCellIds
         .filter(
-          neighbourId => this.terrain.plateIdByCellId[neighbourId] !== this.id
+          neighbourId => this.terrain.plateIdByCellId[neighbourId] !== this.id,
         )
         .map(
           neighbourId =>
             this.terrain.platesById[this.terrain.plateIdByCellId[neighbourId]]
-              .drift
+              .drift,
         );
 
       if (!neighbourDrifts.length) continue;
@@ -139,7 +139,7 @@ export class TectonicPlate {
       const averageNeighbourDrift = Vector2.average(neighbourDrifts);
       const driftDotProduct = averageNeighbourDrift.dot(this.drift);
       canvas.debugPointX(cell.position, {
-        label: String(driftDotProduct.toFixed(1))
+        label: String(driftDotProduct.toFixed(1)),
       });
     }
   }

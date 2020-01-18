@@ -1,6 +1,6 @@
-import Vector2 from "./geom/Vector2";
+import Vector2 from './geom/Vector2';
 
-const DEFAULT_DEBUG_COLOR = "magenta";
+const DEFAULT_DEBUG_COLOR = 'magenta';
 const LABEL_OFFSET = new Vector2(5, 0);
 const DEBUG_POINT_SIZE = 3;
 const HAIRLINE = 0.5;
@@ -40,7 +40,7 @@ export class DebugDraw {
 
   public applyStrokeOptions({
     strokeWidth = 1,
-    stroke = undefined
+    stroke = undefined,
   }: StrokeOptions) {
     if (stroke) {
       this.ctx.lineWidth = strokeWidth;
@@ -79,7 +79,7 @@ export class DebugDraw {
   }
 
   public getDebugStrokeOptions(
-    color: string = DEFAULT_DEBUG_COLOR
+    color: string = DEFAULT_DEBUG_COLOR,
   ): StrokeOptions {
     return { stroke: color, strokeWidth: HAIRLINE };
   }
@@ -96,7 +96,7 @@ export class DebugDraw {
   public circle(
     center: Vector2,
     radius: number,
-    options: StrokeAndFillOptions
+    options: StrokeAndFillOptions,
   ) {
     this.beginPath();
     this.ctx.arc(center.x, center.y, radius, 0, 2 * Math.PI);
@@ -106,7 +106,7 @@ export class DebugDraw {
   public debugLabel(
     label: string | undefined,
     position: Vector2,
-    color: string
+    color: string,
   ) {
     if (label) {
       this.applyFillOptions({ fill: color });
@@ -116,46 +116,46 @@ export class DebugDraw {
 
   public debugPointX(
     position: Vector2,
-    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {}
+    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
   ) {
     this.debugLabel(label, position, color);
 
     this.beginPath();
     this.ctx.moveTo(
       position.x - DEBUG_POINT_SIZE,
-      position.y - DEBUG_POINT_SIZE
+      position.y - DEBUG_POINT_SIZE,
     );
     this.ctx.lineTo(
       position.x + DEBUG_POINT_SIZE,
-      position.y + DEBUG_POINT_SIZE
+      position.y + DEBUG_POINT_SIZE,
     );
     this.ctx.moveTo(
       position.x + DEBUG_POINT_SIZE,
-      position.y - DEBUG_POINT_SIZE
+      position.y - DEBUG_POINT_SIZE,
     );
     this.ctx.lineTo(
       position.x - DEBUG_POINT_SIZE,
-      position.y + DEBUG_POINT_SIZE
+      position.y + DEBUG_POINT_SIZE,
     );
     this.stroke({ strokeWidth: HAIRLINE, stroke: color });
   }
 
   public debugPointO(
     position: Vector2,
-    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {}
+    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
   ) {
     this.debugLabel(label, position, color);
 
     this.circle(position, DEBUG_POINT_SIZE, {
       strokeWidth: HAIRLINE,
-      stroke: color
+      stroke: color,
     });
   }
 
   public debugArrow(
     start: Vector2,
     end: Vector2,
-    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {}
+    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
   ) {
     this.debugLabel(label, Vector2.average([start, end]), color);
 
@@ -182,14 +182,14 @@ export class DebugDraw {
   public debugVectorAtPoint(
     vector: Vector2,
     base: Vector2,
-    options?: DebugOptions
+    options?: DebugOptions,
   ) {
     this.debugArrow(base, base.add(vector), options);
   }
 
   public polygon(
     polygon: ReadonlyArray<Vector2>,
-    options: StrokeAndFillOptions = {}
+    options: StrokeAndFillOptions = {},
   ) {
     this.beginPath();
     this.moveTo(polygon[polygon.length - 1]);
@@ -201,7 +201,7 @@ export class DebugDraw {
 
   public debugPolygon(
     polygon: ReadonlyArray<Vector2>,
-    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {}
+    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
   ) {
     this.debugLabel(label, polygon[0], color);
     this.polygon(polygon, this.getDebugStrokeOptions(color));

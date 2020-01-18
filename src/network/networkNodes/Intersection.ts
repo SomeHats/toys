@@ -1,13 +1,13 @@
 // @flow
-import { assert } from "../../lib/assert";
-import Vector2 from "../../lib/geom/Vector2";
-import { uniq, flatten } from "../../lib/utils";
-import ConnectionSet from "../ConnectionSet";
-import ConnectionDirection from "../ConnectionDirection";
-import PathFinder from "../PathFinder";
-import Road from "../Road";
-import Traveller from "../Traveller";
-import { NetworkNode } from "./NetworkNode";
+import { assert } from '../../lib/assert';
+import Vector2 from '../../lib/geom/Vector2';
+import { uniq, flatten } from '../../lib/utils';
+import ConnectionSet from '../ConnectionSet';
+import ConnectionDirection from '../ConnectionDirection';
+import PathFinder from '../PathFinder';
+import Road from '../Road';
+import Traveller from '../Traveller';
+import { NetworkNode } from './NetworkNode';
 
 export default class Intersection implements NetworkNode {
   isDestination = false;
@@ -32,12 +32,12 @@ export default class Intersection implements NetworkNode {
 
   consumeTraveller(traveller: Traveller) {
     const destination = traveller.destination;
-    assert(destination, "traveller must have destination");
+    assert(destination, 'traveller must have destination');
 
     const nextRoad = PathFinder.getNextRoad(this, destination);
     assert(
       this.outgoingConnections.includes(nextRoad),
-      "nextRoad must be from this intersection"
+      'nextRoad must be from this intersection',
     );
 
     traveller.removeFromCurrentRoad();
@@ -49,9 +49,9 @@ export default class Intersection implements NetworkNode {
     return uniq(
       flatten(
         this._connectionSet.outgoing.map(road =>
-          road.getAllReachableNodes(visited)
-        )
-      )
+          road.getAllReachableNodes(visited),
+        ),
+      ),
     );
   }
 

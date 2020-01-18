@@ -1,8 +1,8 @@
 // @flow
-import { assert } from "../assert";
-import Scene from "./Scene";
+import { assert } from '../assert';
+import Scene from './Scene';
 
-const DEFAULT_NAME = "$$AbstractSceneSystem$$";
+const DEFAULT_NAME = '$$AbstractSceneSystem$$';
 
 export default abstract class SceneSystem {
   static systemName = DEFAULT_NAME;
@@ -11,16 +11,16 @@ export default abstract class SceneSystem {
   constructor() {
     assert(
       this.constructor !== SceneSystem,
-      "SceneSystem is an abstract class that must be extended"
+      'SceneSystem is an abstract class that must be extended',
     );
     assert(
       (this.constructor as any).systemName !== DEFAULT_NAME,
-      "classes extending SceneSystem must override SceneSystem.systemName"
+      'classes extending SceneSystem must override SceneSystem.systemName',
     );
   }
 
   getScene(): Scene {
-    assert(this.scene, "scene is required");
+    assert(this.scene, 'scene is required');
     return this.scene;
   }
 

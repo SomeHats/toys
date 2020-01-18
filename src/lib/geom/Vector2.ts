@@ -1,4 +1,4 @@
-import { normalizeAngle, lerp } from "../utils";
+import { normalizeAngle, lerp } from '../utils';
 
 export default class Vector2 {
   static readonly ZERO = new Vector2(0, 0);
@@ -74,7 +74,7 @@ export default class Vector2 {
 
   angleBetween(other: Vector2): number {
     return normalizeAngle(
-      Math.atan2(other.y, other.x) - Math.atan2(this.y, this.x)
+      Math.atan2(other.y, other.x) - Math.atan2(this.y, this.x),
     );
   }
 

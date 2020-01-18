@@ -1,8 +1,8 @@
-import { interpolate } from "d3-interpolate";
-import { invLerp } from "../lib/utils";
+import { interpolate } from 'd3-interpolate';
+import { invLerp } from '../lib/utils';
 
 export default function makeInterpolateGradient(
-  stops: Array<{ color: string; stop: number }>
+  stops: Array<{ color: string; stop: number }>,
 ) {
   return (n: number): string => {
     if (n <= 0) {
@@ -18,7 +18,7 @@ export default function makeInterpolateGradient(
 
     return interpolate(
       start.color,
-      end.color
+      end.color,
     )(invLerp(start.stop, end.stop, n));
   };
 }

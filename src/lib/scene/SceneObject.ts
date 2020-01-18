@@ -1,5 +1,5 @@
-import { assert } from "../assert";
-import Scene from "./Scene";
+import { assert } from '../assert';
+import Scene from './Scene';
 
 const constructorIdCounts = {} as Record<string, number>;
 
@@ -17,7 +17,7 @@ export default abstract class SceneObject {
   }
 
   getScene(): Scene {
-    assert(this.scene, "scene must be present");
+    assert(this.scene, 'scene must be present');
     return this.scene;
   }
 

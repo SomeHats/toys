@@ -1,9 +1,9 @@
-import { assert } from "../lib/assert";
-import Color from "color";
-import SceneObject from "../lib/scene/SceneObject";
-import Vector2 from "../lib/geom/Vector2";
-import Circle from "../lib/geom/Circle";
-import * as ShapeHelpers from "../lib/canvasShapeHelpers";
+import { assert } from '../lib/assert';
+import Color from 'color';
+import SceneObject from '../lib/scene/SceneObject';
+import Vector2 from '../lib/geom/Vector2';
+import Circle from '../lib/geom/Circle';
+import * as ShapeHelpers from '../lib/canvasShapeHelpers';
 import {
   lerp,
   constrain,
@@ -14,10 +14,10 @@ import {
   randomInt,
   flatten,
   times,
-  shuffle
-} from "../lib/utils";
-import { BLUE } from "./colors";
-import PalLeg from "./PalLeg";
+  shuffle,
+} from '../lib/utils';
+import { BLUE } from './colors';
+import PalLeg from './PalLeg';
 
 // const RADIUS = 14;
 // const BOD_HEIGHT = 25;
@@ -96,7 +96,7 @@ const classicPalConfig: PalConfig = {
   stepThreshold: 0.2,
   fullStepDistance: 20,
   legWidth: 4,
-  legPairs: 1
+  legPairs: 1,
 };
 
 const generateRandomPalConfig = (): PalConfig => {
@@ -131,7 +131,7 @@ const generateRandomPalConfig = (): PalConfig => {
     stepThreshold: varyRelative(legLength * 0.01, 0.4),
     fullStepDistance: varyRelative(legLength * 0.7, 0.4),
     legWidth: varyRelative(radius * 0.3, 0.4),
-    legPairs: randomInt(1, 4)
+    legPairs: randomInt(1, 4),
   };
 };
 
@@ -148,7 +148,7 @@ export default class Pal extends SceneObject {
   constructor(
     x: number,
     y: number,
-    config: PalConfig = generateRandomPalConfig()
+    config: PalConfig = generateRandomPalConfig(),
   ) {
     super();
     this._position = new Vector2(x, y);
@@ -162,10 +162,14 @@ export default class Pal extends SceneObject {
           const progress = (n + 1) / (config.legPairs + 1);
           return [
             new PalLeg(this, config, lerp(HALF_PI - 1, HALF_PI + 1, progress)),
-            new PalLeg(this, config, lerp(-HALF_PI + 1, -HALF_PI - 1, progress))
+            new PalLeg(
+              this,
+              config,
+              lerp(-HALF_PI + 1, -HALF_PI - 1, progress),
+            ),
           ];
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -179,7 +183,7 @@ export default class Pal extends SceneObject {
     return new Circle(
       this._position.x,
       this._position.y - this.config.bodHeight - bob,
-      this.config.radius
+      this.config.radius,
     );
   }
 
@@ -208,14 +212,14 @@ export default class Pal extends SceneObject {
   }
 
   canLiftLeg(leg: PalLeg): boolean {
-    assert(this.legs.includes(leg), "whos leg even is this");
+    assert(this.legs.includes(leg), 'whos leg even is this');
     const enoughLegsOnFloor =
       this.legs.filter(l => l !== leg && !l.isStepping).length >
       Math.floor(Math.log(this.legs.length));
 
     const anyStepsJustStarted = this.legs.some(
       leg =>
-        leg.stepProgress > 0 && leg.stepProgress < 1 / (this.legs.length / 1.5)
+        leg.stepProgress > 0 && leg.stepProgress < 1 / (this.legs.length / 1.5),
     );
 
     return enoughLegsOnFloor && !anyStepsJustStarted;
@@ -258,7 +262,7 @@ export default class Pal extends SceneObject {
     this.speed = constrain(0, MAX_SPEED, this.speed + amt * dtSeconds);
     const avgSpeed = (lastSpeed + this.speed) / 2;
     this._position = this._position.add(
-      Vector2.fromPolar(this._heading, avgSpeed * dtSeconds)
+      Vector2.fromPolar(this._heading, avgSpeed * dtSeconds),
     );
   }
 
@@ -276,9 +280,9 @@ export default class Pal extends SceneObject {
       bod.radius * 0.8 * 0.3,
       0,
       0,
-      2 * Math.PI
+      2 * Math.PI,
     );
-    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
     ctx.fill();
 
     this.legs
@@ -308,13 +312,13 @@ export default class Pal extends SceneObject {
       ctx,
       faceX + bod.center.x + this.config.eyeX,
       bod.center.y - this.config.eyeY,
-      this.config.eyeRadius
+      this.config.eyeRadius,
     );
     ShapeHelpers.circle(
       ctx,
       faceX + bod.center.x - this.config.eyeX,
       bod.center.y - this.config.eyeY,
-      this.config.eyeRadius
+      this.config.eyeRadius,
     );
     ctx.fillStyle = this.config.color.darken(0.5).toString();
     ctx.fill();
@@ -323,13 +327,13 @@ export default class Pal extends SceneObject {
     ctx.beginPath();
     ctx.moveTo(
       faceX + bod.center.x - this.config.mouthWidth,
-      bod.center.y - this.config.mouthY
+      bod.center.y - this.config.mouthY,
     );
     ctx.quadraticCurveTo(
       faceX + bod.center.x,
       bod.center.y - this.config.mouthY + this.config.mouthSmile,
       faceX + bod.center.x + this.config.mouthWidth,
-      bod.center.y - this.config.mouthY
+      bod.center.y - this.config.mouthY,
     );
     ctx.lineWidth = this.config.mouthThickness;
     ctx.strokeStyle = this.config.color.darken(0.5).toString();
@@ -352,7 +356,7 @@ export default class Pal extends SceneObject {
       buttX * 1.7 + bod.center.x,
       bod.center.y + (this.config.buttTop + this.config.buttBottom) * 0.65,
       buttX + bod.center.x,
-      bod.center.y + this.config.buttBottom
+      bod.center.y + this.config.buttBottom,
     );
   }
 }

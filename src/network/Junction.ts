@@ -1,13 +1,13 @@
 // @flow
-import { compact } from "../lib/utils";
-import SceneObject from "../lib/scene/SceneObject";
-import Scene from "../lib/scene/Scene";
-import Vector2 from "../lib/geom/Vector2";
-import Circle from "../lib/geom/Circle";
-import Path from "../lib/geom/Path";
-import Road from "./Road";
-import Intersection from "./networkNodes/Intersection";
-import ConnectionDirection from "./ConnectionDirection";
+import { compact } from '../lib/utils';
+import SceneObject from '../lib/scene/SceneObject';
+import Scene from '../lib/scene/Scene';
+import Vector2 from '../lib/geom/Vector2';
+import Circle from '../lib/geom/Circle';
+import Path from '../lib/geom/Path';
+import Road from './Road';
+import Intersection from './networkNodes/Intersection';
+import ConnectionDirection from './ConnectionDirection';
 
 export default class Junction extends SceneObject {
   _circle: Circle;
@@ -37,7 +37,7 @@ export default class Junction extends SceneObject {
   connectToRoadAtAngle(
     road: Road,
     angle: number,
-    direction: ConnectionDirection
+    direction: ConnectionDirection,
   ): Intersection {
     const intersection = this._intersectionAtAngle(angle);
     intersection.connectTo(road, direction);
@@ -61,8 +61,8 @@ export default class Junction extends SceneObject {
           Path.segmentAcrossCircle(
             this._circle,
             this._circle.center.sub(intersection.position).angle,
-            other.position.sub(this._circle.center).angle
-          )
+            other.position.sub(this._circle.center).angle,
+          ),
         );
 
         this._addRoad(new Road(intersection, other, { path }));
@@ -73,8 +73,8 @@ export default class Junction extends SceneObject {
           Path.segmentAcrossCircle(
             this._circle,
             this._circle.center.sub(other.position).angle,
-            intersection.position.sub(this._circle.center).angle
-          )
+            intersection.position.sub(this._circle.center).angle,
+          ),
         );
         this._addRoad(new Road(other, intersection, { path }));
       }
@@ -102,8 +102,8 @@ export default class Junction extends SceneObject {
   get _intersections(): Intersection[] {
     return compact(
       Object.keys(this._intersectionsByAngle).map(
-        angle => this._intersectionsByAngle[angle]
-      )
+        angle => this._intersectionsByAngle[angle],
+      ),
     );
   }
 

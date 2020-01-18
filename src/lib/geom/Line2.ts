@@ -1,6 +1,6 @@
 // @flow
-import { assert } from "../assert";
-import Vector2 from "./Vector2";
+import { assert } from '../assert';
+import Vector2 from './Vector2';
 
 const isSlopeVertical = (slope: number) =>
   slope === Infinity || slope === -Infinity;
@@ -9,7 +9,7 @@ export default class Line2 {
   static fromSlopeAndDisplacement(slope: number, displacement: number) {
     assert(
       !isSlopeVertical(slope),
-      "cannot create vertical line from displacement"
+      'cannot create vertical line from displacement',
     );
 
     const start = new Vector2(0, displacement);
@@ -51,7 +51,7 @@ export default class Line2 {
   }
 
   get verticalX(): number {
-    assert(this.isVertical, "verticalX is not defined on non vertical lines");
+    assert(this.isVertical, 'verticalX is not defined on non vertical lines');
     return this.start.x;
   }
 
@@ -69,7 +69,7 @@ export default class Line2 {
   }
 
   pointAtIntersectionWith(other: Line2): Vector2 {
-    assert(!this.isParallelTo(other), "parallel lines do not intersect");
+    assert(!this.isParallelTo(other), 'parallel lines do not intersect');
 
     let x;
     if (this.isVertical) {

@@ -1,5 +1,5 @@
-import { makeNoise2D } from "open-simplex-noise";
-import { times, mapRange } from "../lib/utils";
+import { makeNoise2D } from 'open-simplex-noise';
+import { times, mapRange } from '../lib/utils';
 
 export type Noise2D = (x: number, y: number) => number;
 
@@ -7,7 +7,7 @@ export function mapNoise2d(
   scale: number,
   min: number,
   max: number,
-  noise: Noise2D
+  noise: Noise2D,
 ): Noise2D {
   return (x: number, y: number) =>
     mapRange(-1, 1, min, max, noise(x * scale, y * scale));
@@ -16,7 +16,7 @@ export function mapNoise2d(
 export function makeFractalNoise2d(
   count: number,
   scaleDropOff: number = 0.5,
-  sizeScale: number = 2
+  sizeScale: number = 2,
 ): Noise2D {
   const levels = times(count, () => makeNoise2D(Math.random()));
   return (x, y) => {

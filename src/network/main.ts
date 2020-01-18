@@ -1,19 +1,19 @@
 // @flow
-import { assert } from "../lib/assert";
-import Scene from "../lib/scene/Scene";
-import Consumer from "./networkNodes/Consumer";
-import Producer from "./networkNodes/Producer";
-import Road from "./Road";
-import Junction from "./Junction";
+import { assert } from '../lib/assert';
+import Scene from '../lib/scene/Scene';
+import Consumer from './networkNodes/Consumer';
+import Producer from './networkNodes/Producer';
+import Road from './Road';
+import Junction from './Junction';
 // import DebugOverlay from "./systems/DebugOverlay";
-import TravellerFinder from "./TravellerFinder";
-import Vector2 from "../lib/geom/Vector2";
+import TravellerFinder from './TravellerFinder';
+import Vector2 from '../lib/geom/Vector2';
 
 const ROUND = 50;
 
 const scene = new Scene(800, 600, window.devicePixelRatio);
-const root = document.getElementById("root");
-assert(root, "#root must be present");
+const root = document.getElementById('root');
+assert(root, '#root must be present');
 scene.appendTo(root);
 
 // scene.addSystem(new DebugOverlay());
@@ -39,8 +39,8 @@ function scenario1() {
   scene.addChild(
     new Road(junction1, consumer1, {
       points: [new Vector2(400, 100)],
-      autoRound: ROUND
-    })
+      autoRound: ROUND,
+    }),
   );
   scene.addChild(new Road(junction1, consumer2));
 
@@ -106,8 +106,8 @@ function scenario3() {
   scene.addChild(
     new Road(eastProducerSplit, mainJunction, {
       points: [new Vector2(400, 300), new Vector2(500, 50)],
-      autoRound: ROUND
-    })
+      autoRound: ROUND,
+    }),
   );
 
   // scene.addChild(new Road(westProducer, mainJunction));
@@ -162,8 +162,8 @@ function scenario6() {
       new Vector2(150, 350),
       new Vector2(400, 500),
       new Vector2(650, 350),
-      new Vector2(450, 150)
+      new Vector2(450, 150),
     ],
-    autoRound: 400
+    autoRound: 400,
   }).addTo(scene);
 }

@@ -1,17 +1,17 @@
 // @flow
-import SceneObject from "../../lib/scene/SceneObject";
-import Circle from "../../lib/geom/Circle";
-import Vector2 from "../../lib/geom/Vector2";
-import * as ShapeHelpers from "../../lib/canvasShapeHelpers";
-import { outSine } from "../../lib/easings";
-import { mapRange, constrain, flatten, uniq } from "../../lib/utils";
-import Pulse from "../effects/Pulse";
-import { TEAL } from "../colors";
-import ConnectionSet from "../ConnectionSet";
-import ConnectionDirection from "../ConnectionDirection";
-import Traveller from "../Traveller";
-import Road from "../Road";
-import { NetworkNode } from "./NetworkNode";
+import SceneObject from '../../lib/scene/SceneObject';
+import Circle from '../../lib/geom/Circle';
+import Vector2 from '../../lib/geom/Vector2';
+import * as ShapeHelpers from '../../lib/canvasShapeHelpers';
+import { outSine } from '../../lib/easings';
+import { mapRange, constrain, flatten, uniq } from '../../lib/utils';
+import Pulse from '../effects/Pulse';
+import { TEAL } from '../colors';
+import ConnectionSet from '../ConnectionSet';
+import ConnectionDirection from '../ConnectionDirection';
+import Traveller from '../Traveller';
+import Road from '../Road';
+import { NetworkNode } from './NetworkNode';
 
 const DEFAULT_COOLDOWN = 500;
 
@@ -61,9 +61,9 @@ export default class Producer extends SceneObject implements NetworkNode {
     return uniq(
       flatten(
         this._connectionSet.outgoing.map(road =>
-          road.getAllReachableNodes(visited)
-        )
-      )
+          road.getAllReachableNodes(visited),
+        ),
+      ),
     );
   }
 
@@ -72,7 +72,7 @@ export default class Producer extends SceneObject implements NetworkNode {
   }
 
   consumeTraveller() {
-    throw new Error("producer cannot consume traveller");
+    throw new Error('producer cannot consume traveller');
   }
 
   connectTo(node: Road, direction: ConnectionDirection) {
@@ -92,7 +92,7 @@ export default class Producer extends SceneObject implements NetworkNode {
     const colorMixAmount = constrain(
       0,
       1,
-      mapRange(0, CLOCK_FADE_DURATION, 1, 0, this._timer)
+      mapRange(0, CLOCK_FADE_DURATION, 1, 0, this._timer),
     );
     const bgColor = MAIN_COLOR.mix(CLOCK_COLOR, colorMixAmount);
 
@@ -102,7 +102,7 @@ export default class Producer extends SceneObject implements NetworkNode {
       ctx,
       this._circle.center.x,
       this._circle.center.y,
-      this._circle.radius
+      this._circle.radius,
     );
     ctx.fill();
 
@@ -115,7 +115,7 @@ export default class Producer extends SceneObject implements NetworkNode {
       this._circle.radius,
       -Math.PI / 2,
       progress * 2 * Math.PI - Math.PI / 2,
-      false
+      false,
     );
     ctx.fill();
 
@@ -125,7 +125,7 @@ export default class Producer extends SceneObject implements NetworkNode {
       ctx,
       this._circle.center.x,
       this._circle.center.y,
-      CLOCK_RADIUS
+      CLOCK_RADIUS,
     );
     ctx.fill();
   }
@@ -153,8 +153,8 @@ export default class Producer extends SceneObject implements NetworkNode {
         duration: PULSE_DURATION,
         color: PULSE_COLOR,
         easeRadius: outSine,
-        removeOnComplete: true
-      })
+        removeOnComplete: true,
+      }),
     );
   }
 

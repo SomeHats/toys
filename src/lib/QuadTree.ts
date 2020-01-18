@@ -1,6 +1,6 @@
-import AABB from "./geom/AABB";
-import Circle from "./geom/Circle";
-import Vector2 from "./geom/Vector2";
+import AABB from './geom/AABB';
+import Circle from './geom/Circle';
+import Vector2 from './geom/Vector2';
 
 type Subdivisions<T> = [QuadTree<T>, QuadTree<T>, QuadTree<T>, QuadTree<T>];
 
@@ -42,7 +42,7 @@ export default class QuadTree<T> {
     if (subdivisions[2].insert(item)) return true;
     if (subdivisions[3].insert(item)) return true;
 
-    throw new Error("Couldnt insert item");
+    throw new Error('Couldnt insert item');
   }
 
   remove(item: T): boolean {
@@ -111,7 +111,7 @@ export default class QuadTree<T> {
 
   findItemsInCircle(circle: Circle): T[] {
     return this.findItemsInRect(circle.getBoundingBox()).filter(item =>
-      circle.containsPoint(this._getPosition(item))
+      circle.containsPoint(this._getPosition(item)),
     );
   }
 
@@ -125,37 +125,37 @@ export default class QuadTree<T> {
           this.boundary.left,
           this.boundary.top,
           center.x,
-          center.y
+          center.y,
         ),
-        this._getPosition
+        this._getPosition,
       ),
       new QuadTree(
         AABB.fromLeftTopRightBottom(
           center.x,
           this.boundary.top,
           this.boundary.right,
-          center.y
+          center.y,
         ),
-        this._getPosition
+        this._getPosition,
       ),
       new QuadTree(
         AABB.fromLeftTopRightBottom(
           this.boundary.left,
           center.y,
           center.x,
-          this.boundary.bottom
+          this.boundary.bottom,
         ),
-        this._getPosition
+        this._getPosition,
       ),
       new QuadTree(
         AABB.fromLeftTopRightBottom(
           center.x,
           center.y,
           this.boundary.right,
-          this.boundary.bottom
+          this.boundary.bottom,
         ),
-        this._getPosition
-      )
+        this._getPosition,
+      ),
     ];
 
     this._subdivisions = subdivisions;

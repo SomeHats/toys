@@ -1,15 +1,15 @@
-import Vector2 from "./Vector2";
+import Vector2 from './Vector2';
 
 export default class AABB {
   static fromLeftTopRightBottom(
     left: number,
     top: number,
     right: number,
-    bottom: number
+    bottom: number,
   ): AABB {
     return new AABB(
       new Vector2(left, top),
-      new Vector2(right - left, bottom - top)
+      new Vector2(right - left, bottom - top),
     );
   }
 

@@ -1,6 +1,6 @@
 // @flow
-import Vector2 from "./Vector2";
-import AABB from "./AABB";
+import Vector2 from './Vector2';
+import AABB from './AABB';
 
 export default class Circle {
   readonly center: Vector2;
@@ -19,7 +19,7 @@ export default class Circle {
   getBoundingBox(): AABB {
     return new AABB(
       new Vector2(this.center.x, this.center.y),
-      new Vector2(this.radius * 2, this.radius * 2)
+      new Vector2(this.radius * 2, this.radius * 2),
     );
   }
 
@@ -35,7 +35,7 @@ export default class Circle {
   pointOnCircumference(radians: number): Vector2 {
     return new Vector2(
       this.center.x + Math.cos(radians) * this.radius,
-      this.center.y + Math.sin(radians) * this.radius
+      this.center.y + Math.sin(radians) * this.radius,
     );
   }
 

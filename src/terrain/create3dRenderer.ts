@@ -1,11 +1,11 @@
-import * as T from "three";
-import { frame, mapRange } from "../lib/utils";
-import Terrain from "./Terrain";
-import { POINT_SPACING, SIZE } from "./config";
-import { Delaunay } from "./Delaunay";
-import { canvasEl } from "./canvas";
-import Vector2 from "../lib/geom/Vector2";
-import { VertexColors } from "three";
+import * as T from 'three';
+import { frame, mapRange } from '../lib/utils';
+import Terrain from './Terrain';
+import { POINT_SPACING, SIZE } from './config';
+import { Delaunay } from './Delaunay';
+import { canvasEl } from './canvas';
+import Vector2 from '../lib/geom/Vector2';
+import { VertexColors } from 'three';
 
 function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
   const scene = new T.Scene();
@@ -13,7 +13,7 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
     75,
     window.innerWidth / window.innerHeight,
     0.1,
-    10000
+    10000,
   );
 
   const renderer = new T.WebGLRenderer();
@@ -21,9 +21,9 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
   renderer.setPixelRatio(window.devicePixelRatio);
   document.body.appendChild(renderer.domElement);
   Object.assign(renderer.domElement.style, {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
-    left: 0
+    left: 0,
   });
 
   const geometry = new T.Geometry();
@@ -38,7 +38,7 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
     a: T.Vector3,
     b: T.Vector3,
     c: T.Vector3,
-    color: string
+    color: string,
   ) => {
     a.setX(SIZE / 2 - a.x);
     a.setY(-(SIZE / 2 - a.y));
@@ -55,7 +55,7 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
     face.color = new T.Color(color);
     geometry.faces.push(face);
   };
-  console.time("addTriangles");
+  console.time('addTriangles');
   for (const cellId of terrain.activeCellIds) {
     const cell = terrain.cellsById[cellId];
     for (const edgeIndex of cell.iterateEdgesStartingFromIndex(0)) {
@@ -83,14 +83,14 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
           new T.Vector3(
             cell.polygon[nextEdgeIndex].x,
             cell.polygon[nextEdgeIndex].y,
-            (cellHeight + neighbour2Height + neighbour3Height) / 3
+            (cellHeight + neighbour2Height + neighbour3Height) / 3,
           ),
           new T.Vector3(
             cell.polygon[edgeIndex].x,
             cell.polygon[edgeIndex].y,
-            (cellHeight + neighbour1Height + neighbour2Height) / 3
+            (cellHeight + neighbour1Height + neighbour2Height) / 3,
           ),
-          cell.getColor()
+          cell.getColor(),
         );
       }
     }
@@ -106,7 +106,7 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
     //   )
     // );
   }
-  console.timeEnd("addTriangles");
+  console.timeEnd('addTriangles');
 
   // const triangles = delaunay.delaunator.triangles;
   // for (let tId = 0; tId < triangles.length; tId += 3) {
@@ -134,10 +134,10 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
   //   }
   // }
 
-  console.time("normals");
+  console.time('normals');
   geometry.computeFaceNormals();
   geometry.computeVertexNormals();
-  console.timeEnd("normals");
+  console.timeEnd('normals');
 
   // const material = new T.MeshNormalMaterial();
   // const material = new T.MeshBasicMaterial({
@@ -146,7 +146,7 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
   // material.map = new T.CanvasTexture(canvasEl);
   const material = new T.MeshPhongMaterial({
     shininess: 0,
-    vertexColors: T.FaceColors
+    vertexColors: T.FaceColors,
   });
   material.flatShading = true;
   const cube = new T.Mesh(geometry, material);
@@ -178,7 +178,7 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
 
   startRenderLoopAsync();
 
-  document.addEventListener("mousemove", e => {
+  document.addEventListener('mousemove', e => {
     cube.rotation.x = mapRange(0, window.innerHeight, -0.4, -1.5, e.clientY);
   });
 }

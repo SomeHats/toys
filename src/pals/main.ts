@@ -1,6 +1,5 @@
 import Scene from "../lib/scene/Scene";
 import { assert } from "../lib/assert";
-import { Plane } from "three";
 import Pal from "./Pal";
 import Vector2 from "../lib/geom/Vector2";
 

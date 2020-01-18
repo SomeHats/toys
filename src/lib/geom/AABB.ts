@@ -1,6 +1,18 @@
 import Vector2 from "./Vector2";
 
 export default class AABB {
+  static fromLeftTopRightBottom(
+    left: number,
+    top: number,
+    right: number,
+    bottom: number
+  ): AABB {
+    return new AABB(
+      new Vector2(left, top),
+      new Vector2(right - left, bottom - top)
+    );
+  }
+
   constructor(public readonly origin: Vector2, public readonly size: Vector2) {
     Object.freeze(this);
   }
@@ -9,6 +21,19 @@ export default class AABB {
     return (
       this.left <= x && x <= this.right && this.top <= y && y <= this.bottom
     );
+  }
+
+  intersects(other: AABB): boolean {
+    return !(
+      this.right < other.left ||
+      this.left > other.right ||
+      this.bottom < other.top ||
+      this.top > other.bottom
+    );
+  }
+
+  getCenter(): Vector2 {
+    return this.origin.add(this.size.scale(0.5));
   }
 
   get left(): number {

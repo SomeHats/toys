@@ -12,13 +12,17 @@ export default abstract class SceneObject {
   id: string = getNextCount(this.constructor.name);
   private scene: Scene | null = null;
 
+  hasScene(): boolean {
+    return this.scene !== null;
+  }
+
   getScene(): Scene {
     assert(this.scene, "scene must be present");
     return this.scene;
   }
 
-  abstract draw(ctx: CanvasRenderingContext2D, elapsedTime: number): void;
-  abstract update(delta: number): void;
+  draw(ctx: CanvasRenderingContext2D, elapsedTime: number): void {}
+  update(delta: number): void {}
 
   addTo(scene: Scene): this {
     scene.addChild(this);

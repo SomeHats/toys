@@ -117,7 +117,7 @@ export default class Path implements PathSegment {
     const lastSegment = this.segments[this.segments.length - 1];
     if (lastSegment) {
       assert(
-        lastSegment.getEnd().equals(segment.getEnd()),
+        lastSegment.getEnd().equals(segment.getStart()),
         `segments must neatly join together - ${lastSegment
           .getEnd()
           .toString()} !== ${segment.getStart().toString()}`

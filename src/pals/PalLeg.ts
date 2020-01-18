@@ -3,7 +3,6 @@
 import Vector2 from "../lib/geom/Vector2";
 import { normalizeAngle, constrain, lerp, mapRange } from "../lib/utils";
 import Pal, { PalConfig } from "./Pal";
-import { darken } from "./colors";
 
 // const HIP_HEIGHT = 10;
 const Y_SCALE = 0.3;
@@ -49,7 +48,7 @@ export default class PalLeg {
     this._floorRadius = getLegRadius(config);
 
     this._lastFootOnFloorXY = this._getIdealFootRestingXY();
-    this._lastFootOnFloorPalPosition = this._pal._position;
+    this._lastFootOnFloorPalPosition = this._pal.position;
   }
 
   get angle(): number {
@@ -89,7 +88,7 @@ export default class PalLeg {
 
       if (this._stepProgress === 1) {
         this._lastFootOnFloorXY = this._getCurrentFootXY();
-        this._lastFootOnFloorPalPosition = this._pal._position;
+        this._lastFootOnFloorPalPosition = this._pal.position;
         this._stepProgress = 0;
         this._restTimer = this._config.stepDuration;
       }
@@ -133,8 +132,7 @@ export default class PalLeg {
       1,
       Math.abs(normalizeAngle(-HALF_PI - this.angle) / HALF_PI)
     );
-    const legColor = darken(
-      this._config.color,
+    const legColor = this._config.color.darken(
       0.2 * (1 - colorDarkenAmount * colorDarkenAmount)
     );
 
@@ -176,7 +174,7 @@ export default class PalLeg {
   _projectZ(
     xy: Vector2,
     z: number,
-    origin: Vector2 = this._pal._position
+    origin: Vector2 = this._pal.position
   ): Vector2 {
     return new Vector2(xy.x, origin.y - z + (xy.y - origin.y) * Y_SCALE);
   }
@@ -185,7 +183,7 @@ export default class PalLeg {
     return Vector2.fromPolar(
       this._pal.heading + this._angleOffset,
       this._floorRadius
-    ).add(this._pal._position);
+    ).add(this._pal.position);
   }
 
   _getPredictedIdealFootXYAtEndOfOfStep(): Vector2 {
@@ -195,7 +193,7 @@ export default class PalLeg {
     const predictedPosition = this._pal
       .getVelocity()
       .scale(timeRemaining)
-      .add(this._pal._position);
+      .add(this._pal.position);
 
     const predictedHeading =
       this._pal.heading + this._pal.headingVelocity * timeRemaining;
@@ -232,7 +230,7 @@ export default class PalLeg {
   _getCurrentFootOrigin(): Vector2 {
     if (this.isStepping) {
       return this._lastFootOnFloorPalPosition.lerp(
-        this._pal._position,
+        this._pal.position,
         this._stepProgress
       );
     }
@@ -241,7 +239,7 @@ export default class PalLeg {
   }
 
   _getCurrentKneeXY(): Vector2 {
-    return this._pal._position
+    return this._pal.position
       .add(
         Vector2.fromPolar(
           this._pal.heading + this._angleOffset,
@@ -265,7 +263,7 @@ export default class PalLeg {
   }
 
   _getCurrentHipXY(): Vector2 {
-    return this._pal._position.add(
+    return this._pal.position.add(
       Vector2.fromPolar(this._pal.heading + this._angleOffset, this._hipRadius)
     );
     // return this._hipEllipse
@@ -276,13 +274,13 @@ export default class PalLeg {
   _getCurrentHipZ(): number {
     const bod = this._pal.getBod();
     return (
-      this._pal._position.y -
+      this._pal.position.y -
       bod.center.y -
       (bod.radius - this._config.hipHeight)
     );
   }
 
   _getCurrentHipOrigin(): Vector2 {
-    return this._pal._position;
+    return this._pal.position;
   }
 }

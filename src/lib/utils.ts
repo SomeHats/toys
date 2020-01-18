@@ -65,6 +65,10 @@ export function flatten<T>(arr: ReadonlyArray<ReadonlyArray<T>>): Array<T> {
   return arr.reduce<Array<T>>((a, b) => a.concat(b), []);
 }
 
+export function uniq<T>(arr: T[]): Array<T> {
+  return Array.from(new Set(arr));
+}
+
 export function randomColor(): string {
   return `rgb(${Math.floor(random(256))},${Math.floor(
     random(256)

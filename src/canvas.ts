@@ -1,9 +1,10 @@
 import { DebugDraw } from "./DebugCanvas";
+import * as config from "./config";
 
 export const canvasEl = document.createElement("canvas");
 export const ctx = canvasEl.getContext("2d")!;
-export const width = window.innerWidth;
-export const height = window.innerHeight;
+export const width = config.SIZE;
+export const height = config.SIZE;
 export const scale = window.devicePixelRatio;
 
 canvasEl.width = width * scale;

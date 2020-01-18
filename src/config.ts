@@ -1,3 +1,5 @@
+export const SIZE = Math.max(window.innerWidth, window.innerHeight);
+
 export const POINT_SPACING = 5;
 export const TARGET_CELLS_PER_PLATE = 1600;
 

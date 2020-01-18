@@ -70,7 +70,7 @@ function assignPlates(plateCount: number, terrain: Terrain) {
     plates.map((p, idx) =>
       mapRange(
         0,
-        plates.length - 1,
+        Math.max(1, plates.length - 1),
         config.MIN_PLATE_BASE_HEIGHT,
         config.MAX_PLATE_BASE_HEIGHT,
         idx

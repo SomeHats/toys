@@ -88,6 +88,14 @@ export class TerrainCell {
     );
   }
 
+  getSeaLevel(): number {
+    return mapRange(0, 1, -1, 1, 0.4);
+  }
+
+  get3dHeight(shouldIncludeDrift = true): number {
+    return Math.max(this.getSeaLevel(), this.getHeight(shouldIncludeDrift));
+  }
+
   getColor(shouldIncludeDrift = true): string {
     return interpolateBiome(
       mapRange(-1, 1, 0, 1, this.getHeight(shouldIncludeDrift))

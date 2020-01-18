@@ -26,6 +26,7 @@
     "d3-scale-chromatic": "^1.5.0",
     "delaunator": "^4.0.1",
     "open-simplex-noise": "^2.2.0",
+    "three": "^0.111.0",
     "utility-types": "^3.10.0"
   }
 }

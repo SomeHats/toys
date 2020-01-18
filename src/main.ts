@@ -8,9 +8,10 @@ import Terrain from "./Terrain";
 import { width, height, canvas, ctx } from "./canvas";
 import * as config from "./config";
 import { interpolateMagma } from "d3-scale-chromatic";
+import create3dRenderer from "./create3dRenderer";
 
 const spaceVec = new Vector2(config.POINT_SPACING, config.POINT_SPACING);
-const sizeVec = new Vector2(width, height);
+const sizeVec = new Vector2(config.SIZE, config.SIZE);
 const baseBounds = new AABB(Vector2.ZERO, sizeVec);
 const expandedBounds = new AABB(
   spaceVec.cloneMutable().negate(),
@@ -150,7 +151,7 @@ drawPlates();
 
 let renderStage = 0;
 window.addEventListener("click", e => {
-  ctx.clearRect(0, 0, width, height);
+  ctx.clearRect(0, 0, config.SIZE, config.SIZE);
 
   // const mousePosition = new Vector2(e.clientX, e.clientY);
   // const cell = terrain.getCellAtPosition(mousePosition);
@@ -206,3 +207,5 @@ window.addEventListener("click", e => {
   // }
   // drawPlates();
 });
+
+create3dRenderer(terrain, delaunay);

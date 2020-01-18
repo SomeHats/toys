@@ -1,7 +1,7 @@
-import Vector2, { ReadonlyVector2 } from "./Vector2";
+import Vector2 from "./geom/Vector2";
 
 const DEFAULT_DEBUG_COLOR = "magenta";
-const LABEL_OFFSET = new ReadonlyVector2(5, 0);
+const LABEL_OFFSET = new Vector2(5, 0);
 const DEBUG_POINT_SIZE = 3;
 const HAIRLINE = 0.5;
 const DEBUG_ARROW_ANGLE = Math.PI * 0.75;
@@ -30,11 +30,11 @@ export class DebugDraw {
     this.ctx.beginPath();
   }
 
-  public moveTo({ x, y }: ReadonlyVector2) {
+  public moveTo({ x, y }: Vector2) {
     this.ctx.moveTo(x, y);
   }
 
-  public lineTo({ x, y }: ReadonlyVector2) {
+  public lineTo({ x, y }: Vector2) {
     this.ctx.lineTo(x, y);
   }
 
@@ -88,17 +88,13 @@ export class DebugDraw {
     this.stroke(this.getDebugStrokeOptions(color));
   }
 
-  public fillText(
-    text: string,
-    position: ReadonlyVector2,
-    options: FillOptions = {}
-  ) {
+  public fillText(text: string, position: Vector2, options: FillOptions = {}) {
     this.applyFillOptions(options);
     this.ctx.fillText(text, position.x, position.y);
   }
 
   public circle(
-    center: ReadonlyVector2,
+    center: Vector2,
     radius: number,
     options: StrokeAndFillOptions
   ) {
@@ -109,17 +105,17 @@ export class DebugDraw {
 
   public debugLabel(
     label: string | undefined,
-    position: ReadonlyVector2,
+    position: Vector2,
     color: string
   ) {
     if (label) {
       this.applyFillOptions({ fill: color });
-      this.fillText(label, position.cloneMutable().add(LABEL_OFFSET));
+      this.fillText(label, position.add(LABEL_OFFSET));
     }
   }
 
   public debugPointX(
-    position: ReadonlyVector2,
+    position: Vector2,
     { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {}
   ) {
     this.debugLabel(label, position, color);
@@ -145,7 +141,7 @@ export class DebugDraw {
   }
 
   public debugPointO(
-    position: ReadonlyVector2,
+    position: Vector2,
     { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {}
   ) {
     this.debugLabel(label, position, color);
@@ -157,8 +153,8 @@ export class DebugDraw {
   }
 
   public debugArrow(
-    start: ReadonlyVector2,
-    end: ReadonlyVector2,
+    start: Vector2,
+    end: Vector2,
     { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {}
   ) {
     this.debugLabel(label, Vector2.average([start, end]), color);
@@ -167,16 +163,14 @@ export class DebugDraw {
     this.moveTo(start);
     this.lineTo(end);
 
-    const vector = end.cloneMutable().sub(start);
+    const vector = end.sub(start);
     const arrowLeftPoint = vector
-      .cloneMutable()
       .rotate(-DEBUG_ARROW_ANGLE)
-      .setMagnitude(DEBUG_ARROW_SIZE)
+      .withMagnitude(DEBUG_ARROW_SIZE)
       .add(end);
     const arrowRightPoint = vector
-      .cloneMutable()
       .rotate(+DEBUG_ARROW_ANGLE)
-      .setMagnitude(DEBUG_ARROW_SIZE)
+      .withMagnitude(DEBUG_ARROW_SIZE)
       .add(end);
 
     this.moveTo(arrowLeftPoint);
@@ -186,15 +180,15 @@ export class DebugDraw {
   }
 
   public debugVectorAtPoint(
-    vector: ReadonlyVector2,
-    base: ReadonlyVector2,
+    vector: Vector2,
+    base: Vector2,
     options?: DebugOptions
   ) {
-    this.debugArrow(base, base.cloneMutable().add(vector), options);
+    this.debugArrow(base, base.add(vector), options);
   }
 
   public polygon(
-    polygon: ReadonlyArray<ReadonlyVector2>,
+    polygon: ReadonlyArray<Vector2>,
     options: StrokeAndFillOptions = {}
   ) {
     this.beginPath();
@@ -206,7 +200,7 @@ export class DebugDraw {
   }
 
   public debugPolygon(
-    polygon: ReadonlyArray<ReadonlyVector2>,
+    polygon: ReadonlyArray<Vector2>,
     { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {}
   ) {
     this.debugLabel(label, polygon[0], color);

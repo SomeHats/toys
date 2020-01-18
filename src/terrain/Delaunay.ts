@@ -1,4 +1,4 @@
-import Vector2 from "./Vector2";
+import Vector2 from "../lib/geom/Vector2";
 import Delaunator from "delaunator";
 
 function nextHalfedge(edgeId: number) {
@@ -67,7 +67,11 @@ export class Delaunay {
 
   constructor(public readonly points: Array<Vector2>) {
     console.time("delauney.delaunator");
-    this.delaunator = Delaunator.from(points, p => p.x, p => p.y);
+    this.delaunator = Delaunator.from(
+      points,
+      p => p.x,
+      p => p.y
+    );
     console.timeEnd("delauney.delaunator");
     console.time("delauney.getTriangleCenters");
     this.triangleCenters = getTriangleCenters(this.delaunator, points);

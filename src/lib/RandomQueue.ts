@@ -1,5 +1,5 @@
 import { assert } from "./assert";
-import { rand } from "./utils";
+import { random } from "./utils";
 
 export default class RandomQueue<T> {
   private items: Array<T> = [];
@@ -18,7 +18,7 @@ export default class RandomQueue<T> {
 
   pop(): T {
     assert(this.size, "RandomQueue must not be empty");
-    const index = Math.floor(rand(this.items.length));
+    const index = Math.floor(random(this.items.length));
     const item = this.items[index];
     this.items.splice(index, 1);
     return item;

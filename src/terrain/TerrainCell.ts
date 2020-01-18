@@ -1,7 +1,7 @@
-import Vector2, { ReadonlyVector2 } from "./Vector2";
+import Vector2 from "../lib/geom/Vector2";
 import { DelaunayCell } from "./Delaunay";
 import Terrain from "./Terrain";
-import { fromEntries, compact, lerp, mapRange, clamp } from "./utils";
+import { fromEntries, compact, lerp, mapRange, clamp } from "../lib/utils";
 import { Noise2D } from "./fractalNoise";
 import { TectonicPlate } from "./TectonicPlate";
 import * as config from "./config";
@@ -22,13 +22,13 @@ const interpolateBiome = makeInterpolateGradiant([
 ]);
 
 export class TerrainCell {
-  public readonly position: ReadonlyVector2;
+  public readonly position: Vector2;
   public readonly neighbourCellIds: ReadonlyArray<number>;
   public readonly neighbourCellIdsByEdgeIndex: ReadonlyArray<number | null>;
   public readonly edgeIndexByNeighbourCellId: {
     [cellId: number]: number | undefined;
   };
-  public readonly polygon: ReadonlyArray<ReadonlyVector2>;
+  public readonly polygon: ReadonlyArray<Vector2>;
   private readonly noiseHeight: number;
   private heightAdjustment = 0;
   public totalDriftPressure = 0;
@@ -42,7 +42,7 @@ export class TerrainCell {
   ) {
     this.polygon = cell.map(edge => edge.leadingPoint);
 
-    this.position = ReadonlyVector2.average(this.polygon);
+    this.position = Vector2.average(this.polygon);
 
     this.neighbourCellIdsByEdgeIndex = cell
       .map(edge => edge.neighbourCellId)
@@ -130,11 +130,9 @@ export class TerrainCell {
 
   private getPressureForNeighbour(
     neighbour: TerrainCell,
-    pressure: ReadonlyVector2
+    pressure: Vector2
   ): Vector2 | null {
-    const positionDifference = neighbour.position
-      .cloneMutable()
-      .sub(this.position);
+    const positionDifference = neighbour.position.sub(this.position);
 
     const pressureCoefficient = Math.cos(
       clamp(
@@ -148,10 +146,10 @@ export class TerrainCell {
       return null;
     }
 
-    return pressure.cloneMutable().scale(pressureCoefficient);
+    return pressure.scale(pressureCoefficient);
   }
 
-  private applyPressureForDrift(pressure: ReadonlyVector2) {
+  private applyPressureForDrift(pressure: Vector2) {
     const magnitude = pressure.magnitude;
     this.totalDriftPressure += pressure.magnitude;
     if (magnitude < config.MIN_DRIFT_MAGNITUDE_TO_PROPAGATE) {
@@ -183,7 +181,7 @@ export class TerrainCell {
     for (const neighbourId of this.neighbourCellIds) {
       const neighbour = this.terrain.cellsById[neighbourId];
       const neighbourDrift = neighbour.getPlate().drift;
-      const pressure = drift.cloneMutable().sub(neighbourDrift);
+      const pressure = drift.sub(neighbourDrift);
 
       if (pressure.equals(Vector2.ZERO)) {
         continue;

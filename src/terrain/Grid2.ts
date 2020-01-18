@@ -1,15 +1,12 @@
-import Vector2, { ReadonlyVector2 } from "./Vector2";
-import { times } from "./utils";
+import Vector2 from "../lib/geom/Vector2";
+import { times } from "../lib/utils";
 
 export class Grid2<T> {
-  public size: ReadonlyVector2;
+  public size: Vector2;
   private rows: Array<Array<T | undefined>>;
 
   constructor(size: Vector2) {
-    this.size = size
-      .cloneMutable()
-      .floor()
-      .cloneReadonly();
+    this.size = size.floor();
     this.rows = times(this.size.y, () => times(this.size.y, () => undefined));
   }
 
@@ -22,28 +19,22 @@ export class Grid2<T> {
     );
   }
 
-  vectorToGridCoords(vector: ReadonlyVector2, cellSize: number): Vector2 {
-    return vector
-      .cloneMutable()
-      .div(cellSize)
-      .floor();
+  vectorToGridCoords(vector: Vector2, cellSize: number): Vector2 {
+    return vector.div(cellSize).floor();
   }
 
-  get({ x, y }: ReadonlyVector2): T | undefined {
+  get({ x, y }: Vector2): T | undefined {
     return this.rows[y][x];
   }
 
-  set({ x, y }: ReadonlyVector2, item: T | undefined) {
+  set({ x, y }: Vector2, item: T | undefined) {
     this.rows[y][x] = item;
   }
 
-  squareAroundCell(cell: ReadonlyVector2, size: number): Array<Vector2> {
+  squareAroundCell(cell: Vector2, size: number): Array<Vector2> {
     const result = [];
 
-    const squareOrigin = cell
-      .cloneMutable()
-      .sub(new Vector2(size, size).div(2))
-      .round();
+    const squareOrigin = cell.sub(new Vector2(size, size).div(2)).round();
 
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {

@@ -1,8 +1,8 @@
-import Vector2 from "./Vector2";
-import { rand } from "./utils";
-import RandomQueue from "./RandomQueue";
+import Vector2 from "../lib/geom/Vector2";
+import { random } from "../lib/utils";
+import RandomQueue from "../lib/RandomQueue";
 import { Grid2 } from "./Grid2";
-import { AABB } from "./AABB";
+import AABB from "../lib/geom/AABB";
 
 export function generatePoisson(
   bounds: AABB,
@@ -12,18 +12,13 @@ export function generatePoisson(
   const boundsAtZero = new AABB(Vector2.ZERO, bounds.size);
   const cellSize = minimumDistance / Math.SQRT2;
 
-  const grid = new Grid2<Vector2>(
-    bounds.size
-      .cloneMutable()
-      .div(cellSize)
-      .ceil()
-  );
+  const grid = new Grid2<Vector2>(bounds.size.div(cellSize).ceil());
   const processList = new RandomQueue<Vector2>();
   const samplePoints = [];
 
-  const firstPoint = new Vector2(rand(bounds.size.x), rand(bounds.size.y));
+  const firstPoint = new Vector2(random(bounds.size.x), random(bounds.size.y));
   processList.add(firstPoint);
-  samplePoints.push(firstPoint.cloneMutable().add(bounds.origin));
+  samplePoints.push(firstPoint.add(bounds.origin));
 
   while (processList.size) {
     const point = processList.pop();
@@ -36,7 +31,7 @@ export function generatePoisson(
         !isInNeighbourhood(grid, newPoint, minimumDistance, cellSize)
       ) {
         processList.add(newPoint);
-        samplePoints.push(newPoint.cloneMutable().add(bounds.origin));
+        samplePoints.push(newPoint.add(bounds.origin));
         grid.set(grid.vectorToGridCoords(newPoint, cellSize), newPoint);
       }
     }
@@ -49,8 +44,8 @@ function generateRandomPointAround(
   point: Vector2,
   minimumDistance: number
 ): Vector2 {
-  const radius = rand(minimumDistance, 2 * minimumDistance);
-  const angle = rand(Math.PI * 2);
+  const radius = random(minimumDistance, 2 * minimumDistance);
+  const angle = random(Math.PI * 2);
   return Vector2.fromPolar(angle, radius).add(point);
 }
 

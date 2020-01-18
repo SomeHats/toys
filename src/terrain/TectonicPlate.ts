@@ -1,7 +1,7 @@
-import { rand, mapRange, wait, lerp } from "./utils";
+import { random, mapRange, wait, lerp } from "../lib/utils";
 import Terrain from "./Terrain";
 import { interpolateRgbBasis } from "d3-interpolate";
-import { ReadonlyVector2 } from "./Vector2";
+import Vector2 from "../lib/geom/Vector2";
 import { TerrainCell } from "./TerrainCell";
 import { makeFractalNoise2d } from "./fractalNoise";
 import * as config from "./config";
@@ -12,7 +12,7 @@ function findPlateEdges(
   terrain: Terrain,
   cellIds: ReadonlyArray<number>,
   plateIdByCellId: ReadonlyArray<number>
-): { edgeCellIds: Set<number>; polygon: Array<ReadonlyVector2> } {
+): { edgeCellIds: Set<number>; polygon: Array<Vector2> } {
   const isNeighbourCellIdInOtherPlate = (neighbourCellId: number | null) =>
     neighbourCellId === null ||
     plateIdByCellId[neighbourCellId] !== currentPlateId;
@@ -27,7 +27,7 @@ function findPlateEdges(
   }
 
   const edgeCellIds = new Set<number>();
-  const polygonSet = new Set<ReadonlyVector2>();
+  const polygonSet = new Set<Vector2>();
 
   const startingEdgeCell = terrain.cellsById[startingEdgeCellId];
   const startingEdgeCellStartingEdgeIndex = startingEdgeCell.neighbourCellIdsByEdgeIndex.findIndex(
@@ -39,7 +39,7 @@ function findPlateEdges(
 
   let currentCell = startingEdgeCell;
   let currentEdgeIndexInCell = startingEdgeCellStartingEdgeIndex;
-  let lastPolygonPoint: ReadonlyVector2 | null = null;
+  let lastPolygonPoint: Vector2 | null = null;
   let i = 0;
   while (i < 50000) {
     i++;
@@ -92,11 +92,11 @@ export class TectonicPlate {
   // public readonly color = randomColor();
   // public readonly baseHeight = rand(-0.7, 0.5);
   public readonly edgeCellIds: ReadonlySet<number>;
-  public readonly polygon: ReadonlyArray<ReadonlyVector2>;
+  public readonly polygon: ReadonlyArray<Vector2>;
   public readonly cellIds: ReadonlySet<number>;
-  public readonly drift: ReadonlyVector2 = ReadonlyVector2.fromPolar(
-    rand(-Math.PI, Math.PI),
-    rand(config.MIN_TECTONIC_DRIFT, config.MAX_TECTONIC_DRIFT)
+  public readonly drift: Vector2 = Vector2.fromPolar(
+    random(-Math.PI, Math.PI),
+    random(config.MIN_TECTONIC_DRIFT, config.MAX_TECTONIC_DRIFT)
   );
 
   constructor(
@@ -136,7 +136,7 @@ export class TectonicPlate {
 
       if (!neighbourDrifts.length) continue;
 
-      const averageNeighbourDrift = ReadonlyVector2.average(neighbourDrifts);
+      const averageNeighbourDrift = Vector2.average(neighbourDrifts);
       const driftDotProduct = averageNeighbourDrift.dot(this.drift);
       canvas.debugPointX(cell.position, {
         label: String(driftDotProduct.toFixed(1))

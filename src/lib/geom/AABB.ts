@@ -1,12 +1,11 @@
-import Vector2, { ReadonlyVector2 } from "./Vector2";
+import Vector2 from "./Vector2";
 
-export class AABB {
-  constructor(
-    public readonly origin: ReadonlyVector2,
-    public readonly size: ReadonlyVector2
-  ) {}
+export default class AABB {
+  constructor(public readonly origin: Vector2, public readonly size: Vector2) {
+    Object.freeze(this);
+  }
 
-  contains({ x, y }: ReadonlyVector2): boolean {
+  contains({ x, y }: Vector2): boolean {
     return (
       this.left <= x && x <= this.right && this.top <= y && y <= this.bottom
     );

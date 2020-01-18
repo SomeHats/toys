@@ -1,10 +1,10 @@
 import * as T from "three";
-import { frame, mapRange } from "./utils";
+import { frame, mapRange } from "../lib/utils";
 import Terrain from "./Terrain";
 import { POINT_SPACING, SIZE } from "./config";
 import { Delaunay } from "./Delaunay";
 import { canvasEl } from "./canvas";
-import Vector2 from "./Vector2";
+import Vector2 from "../lib/geom/Vector2";
 import { VertexColors } from "three";
 
 function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {

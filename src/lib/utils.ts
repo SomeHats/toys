@@ -14,6 +14,20 @@ export function invLerp(a: number, b: number, n: number): number {
   return (n - a) / (b - a);
 }
 
+export function constrain(min: number, max: number, n: number): number {
+  return Math.min(max, Math.max(min, n));
+}
+
+export function constrainWrapped(min: number, max: number, n: number): number {
+  const size = max - min;
+  n = n - min;
+  while (n < 0) {
+    n += size;
+  }
+  n = n % size;
+  return min + n;
+}
+
 export function mapRange(
   a1: number,
   b1: number,
@@ -24,21 +38,37 @@ export function mapRange(
   return lerp(a2, b2, invLerp(a1, b1, n));
 }
 
-export function rand(a: number, b?: number) {
+export function random(a: number, b?: number) {
   if (typeof b === "number") {
     return lerp(a, b, Math.random());
   }
   return lerp(0, a, Math.random());
 }
 
+export function randomInt(a: number, b?: number) {
+  return Math.floor(random(a, b));
+}
+
+export function varyAbsolute(base: number, amount: number): number {
+  return random(base - amount, base + amount);
+}
+
+export function varyRelative(base: number, amount: number): number {
+  return varyAbsolute(base, base * amount);
+}
+
 export function sample<T>(arr: ReadonlyArray<T>): T {
-  return arr[Math.floor(rand(arr.length))];
+  return arr[Math.floor(random(arr.length))];
+}
+
+export function flatten<T>(arr: ReadonlyArray<ReadonlyArray<T>>): Array<T> {
+  return arr.reduce<Array<T>>((a, b) => a.concat(b), []);
 }
 
 export function randomColor(): string {
-  return `rgb(${Math.floor(rand(256))},${Math.floor(rand(256))},${Math.floor(
-    rand(256)
-  )})`;
+  return `rgb(${Math.floor(random(256))},${Math.floor(
+    random(256)
+  )},${Math.floor(random(256))})`;
 }
 
 export function removeFromArray<T>(array: Array<T>, item: T) {
@@ -82,11 +112,7 @@ export function compact<T>(arr: ReadonlyArray<T>): Array<NonNullable<T>> {
 }
 
 export function normalizeAngle(angle: number): number {
-  while (angle < 0) {
-    angle += 2 * Math.PI;
-  }
-  angle = angle % (2 * Math.PI);
-  return angle > Math.PI ? angle - 2 * Math.PI : angle;
+  return constrainWrapped(-Math.PI, Math.PI, angle);
 }
 
 export function clamp(min: number, max: number, n: number): number {

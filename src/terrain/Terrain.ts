@@ -1,9 +1,15 @@
 import { Delaunay } from "./Delaunay";
 import { TerrainCell } from "./TerrainCell";
-import Vector2, { ReadonlyVector2 } from "./Vector2";
-import { times, sample, removeFromArray, mapRange, shuffle } from "./utils";
-import RandomQueue from "./RandomQueue";
-import { AABB } from "./AABB";
+import Vector2 from "../lib/geom/Vector2";
+import {
+  times,
+  sample,
+  removeFromArray,
+  mapRange,
+  shuffle
+} from "../lib/utils";
+import RandomQueue from "../lib/RandomQueue";
+import AABB from "../lib/geom/AABB";
 import { TectonicPlate } from "./TectonicPlate";
 import * as config from "./config";
 import { makeFractalNoise2d, mapNoise2d } from "./fractalNoise";

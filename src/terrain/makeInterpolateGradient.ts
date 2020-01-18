@@ -1,5 +1,5 @@
 import { interpolate } from "d3-interpolate";
-import { invLerp } from "./utils";
+import { invLerp } from "../lib/utils";
 
 export default function makeInterpolateGradient(
   stops: Array<{ color: string; stop: number }>

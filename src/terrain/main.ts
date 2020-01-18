@@ -1,9 +1,9 @@
-import { assert } from "./assert";
+import { assert } from "../lib/assert";
 import { generatePoisson } from "./generatePoisson";
-import { AABB } from "./AABB";
-import Vector2, { ReadonlyVector2 } from "./Vector2";
+import AABB from "../lib/geom/AABB";
+import Vector2 from "../lib/geom/Vector2";
 import { Delaunay } from "./Delaunay";
-import { rand } from "./utils";
+import { random } from "../lib/utils";
 import Terrain from "./Terrain";
 import { width, height, canvas, ctx } from "./canvas";
 import * as config from "./config";
@@ -14,18 +14,12 @@ const spaceVec = new Vector2(config.POINT_SPACING, config.POINT_SPACING);
 const sizeVec = new Vector2(config.SIZE, config.SIZE);
 const baseBounds = new AABB(Vector2.ZERO, sizeVec);
 const expandedBounds = new AABB(
-  spaceVec.cloneMutable().negate(),
-  sizeVec
-    .cloneMutable()
-    .add(spaceVec)
-    .add(spaceVec)
+  spaceVec.negate(),
+  sizeVec.add(spaceVec).add(spaceVec)
 );
 const contractedBounds = new AABB(
   spaceVec,
-  sizeVec
-    .cloneMutable()
-    .sub(spaceVec)
-    .sub(spaceVec)
+  sizeVec.sub(spaceVec).sub(spaceVec)
 );
 const activeBounds = baseBounds;
 
@@ -185,11 +179,9 @@ window.addEventListener("click", e => {
 
         i++;
         if (i % 3 === 0) {
-          canvas.debugVectorAtPoint(
-            plate.drift.cloneMutable().scale(15),
-            cell.position,
-            { color: "white" }
-          );
+          canvas.debugVectorAtPoint(plate.drift.scale(15), cell.position, {
+            color: "white"
+          });
         }
       }
     }

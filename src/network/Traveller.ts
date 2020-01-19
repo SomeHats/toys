@@ -8,7 +8,9 @@ import TravellerFinder from './TravellerFinder';
 import { NetworkNode } from './networkNodes/NetworkNode';
 import Intersection from './networkNodes/Intersection';
 import Road from './Road';
-import Pal from '../pals/Pal';
+import Entity from '../lib/scene/Entity';
+import { makeAbsolutePal } from '../pals/makePal';
+import { PalAbsoluteController } from '../pals/PalController';
 
 // const TRAVELLER_COLOR = BLUE.fade(0.4);
 // const TRAVELLER_RADIUS = 14;
@@ -58,7 +60,7 @@ export default class Traveller extends SceneObject {
   _forceAccelerateTimer: number = 0;
   _stopReason: StopReason | null = null;
   _stoppedFor: Traveller[] = [];
-  _pal: Pal | null = null;
+  _pal: Entity | null = null;
 
   get currentRoad(): Road | null {
     return this._currentRoad;
@@ -162,22 +164,28 @@ export default class Traveller extends SceneObject {
 
     this._move(dtMilliseconds, currentRoad);
 
-    this._getPal().updateWithPosition(
-      this.position,
-      currentRoad.getAngleAtPosition(this._positionOnCurrentRoad),
-      dtMilliseconds / 1000,
-    );
+    const pal = this._getPal();
+    pal
+      .getComponent(PalAbsoluteController)
+      .setPosition(
+        this.position,
+        currentRoad.getAngleAtPosition(this._positionOnCurrentRoad),
+        dtMilliseconds / 1000,
+      );
+    pal.update(dtMilliseconds);
+
+    this._getEnterTransitionScale();
     // if (window.debugDraw) this._debugDraw();
 
     this._checkAtEndOfRoad(currentRoad);
     this._checkExit();
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, elapsedTime: number) {
     const currentRoad = this._currentRoad;
     assert(currentRoad, 'current road must be defined');
 
-    this._getPal().draw(ctx);
+    this._getPal().draw(ctx, elapsedTime);
 
     // const position = this.position;
     // const scale =
@@ -197,9 +205,9 @@ export default class Traveller extends SceneObject {
     return this._exitStartedAt !== null;
   }
 
-  _getPal(): Pal {
+  _getPal(): Entity {
     if (!this._pal) {
-      this._pal = new Pal(this.position.x, this.position.y);
+      this._pal = makeAbsolutePal(this.position);
     }
 
     return this._pal;

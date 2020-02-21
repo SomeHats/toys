@@ -10,6 +10,9 @@ const DEBUG_ARROW_SIZE = 5;
 type StrokeOptions = {
   strokeWidth?: number;
   stroke?: string;
+  strokeCap?: 'butt' | 'round' | 'square';
+  strokeDash?: number[];
+  strokeDashOffset?: number;
 };
 
 type FillOptions = {
@@ -26,6 +29,15 @@ type StrokeAndFillOptions = StrokeOptions & FillOptions;
 export class DebugDraw {
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
 
+  public clear(fill?: string) {
+    if (!fill) {
+      this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    }
+
+    this.applyFillOptions({ fill });
+    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+  }
+
   public beginPath() {
     this.ctx.beginPath();
   }
@@ -38,13 +50,33 @@ export class DebugDraw {
     this.ctx.lineTo(x, y);
   }
 
+  public arc(
+    { x, y }: Vector2,
+    radius: number,
+    startAngle: number,
+    endAngle: number,
+    anticlockwise?: boolean,
+  ) {
+    this.ctx.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+  }
+
+  public arcTo(p1: Vector2, p2: Vector2, radius: number) {
+    this.ctx.arcTo(p1.x, p1.y, p2.x, p2.y, radius);
+  }
+
   public applyStrokeOptions({
     strokeWidth = 1,
     stroke = undefined,
+    strokeCap = 'butt',
+    strokeDash = [],
+    strokeDashOffset = 0,
   }: StrokeOptions) {
     if (stroke) {
       this.ctx.lineWidth = strokeWidth;
       this.ctx.strokeStyle = stroke;
+      this.ctx.lineCap = strokeCap;
+      this.ctx.setLineDash(strokeDash);
+      this.ctx.lineDashOffset = strokeDashOffset;
     }
   }
 
@@ -99,7 +131,7 @@ export class DebugDraw {
     options: StrokeAndFillOptions,
   ) {
     this.beginPath();
-    this.ctx.arc(center.x, center.y, radius, 0, 2 * Math.PI);
+    this.arc(center, radius, 0, 2 * Math.PI);
     this.strokeAndFill(options);
   }
 

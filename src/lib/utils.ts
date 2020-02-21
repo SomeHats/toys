@@ -69,6 +69,17 @@ export function uniq<T>(arr: T[]): Array<T> {
   return Array.from(new Set(arr));
 }
 
+export function intersection<T>(a1: T[], a2: T[]): T[] {
+  const a1Items = new Set(a1);
+  const result = new Set<T>();
+  for (const item of a2) {
+    if (a1Items.has(item)) {
+      result.add(item);
+    }
+  }
+  return Array.from(result);
+}
+
 export function randomColor(): string {
   return `rgb(${Math.floor(random(256))},${Math.floor(
     random(256),
@@ -130,4 +141,10 @@ export function shuffle<T>(arr: ReadonlyArray<T>): Array<T> {
     [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
   }
   return newArr;
+}
+
+export function getId(prefix = ''): string {
+  return `${prefix}${Math.random()
+    .toString(36)
+    .slice(1)}`;
 }

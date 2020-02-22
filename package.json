@@ -10,7 +10,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "serve": "yarn run clean && parcel serve src/index.html",
-    "build": "yarn run clean && parcel build src/index.html --out-dir dist --public-url https://alex.dytry.ch/slowgramming/",
+    "build": "yarn run clean && parcel build src/index.html --out-dir dist --public-url https://alex.dytry.ch/toys/",
     "types": "tsc --noEmit",
     "test": "yarn run types"
   },

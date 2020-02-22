@@ -96,7 +96,7 @@ const makeSnake = () => {
 };
 const snakes: Snake[] = [];
 
-for (let si = 0; si < 100; si++) {
+for (let si = 0; si < 10; si++) {
   snakes.push(makeSnake());
 }
 

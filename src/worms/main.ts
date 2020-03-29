@@ -11,7 +11,7 @@ import {
   uniq,
   random,
 } from '../lib/utils';
-import createTriangleGrid, { Triangle } from './createTriangleGrid';
+import createTriangleGrid, { Triangle } from '../lib/createTriangleGrid';
 import { assert } from '../lib/assert';
 import { SNAKES, BG } from './colors';
 import { schemePaired } from 'd3-scale-chromatic';

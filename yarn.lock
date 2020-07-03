@@ -799,9 +799,9 @@
   integrity sha512-0ajFawWicfjsaCLh6NzxOyVDYhQAmMFbsiI3MPGLInorauHFEh9/Cl6UHNf+kt/J1jfoxKY/ZJaKAoDpbvde5Q==
 
 "@types/d3-scale-chromatic@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@types/d3-scale-chromatic/-/d3-scale-chromatic-1.3.1.tgz#a294ae688634027870f0307bf8802f863aa2ddb3"
-  integrity sha512-Ny3rLbV5tnmqgW7w/poCcef4kXP8mHPo/p8EjTS5d9OUk8MlqAeRaM8eF7Vyv7QMLiIXNE94Pa1cMLSPkXQBoQ==
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@types/d3-scale-chromatic/-/d3-scale-chromatic-1.5.0.tgz#315367557d51b823bec848614fac095325613fc3"
+  integrity sha512-9/D7cOBKdZdTCPc6re0HeSUFBM0aFzdNdmYggUWT9SRRiYSOa6Ys2xdTwHKgc1WS3gGfwTMatBOdWCS863REsg==
 
 "@types/delaunator@^3.0.0":
   version "3.0.0"
@@ -1774,10 +1774,15 @@ cssstyle@^1.1.1:
   resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-2.4.0.tgz#87f8b9ad11088769c82b5ea846bcb1cc9393f242"
   integrity sha512-KQ41bAF2BMakf/HdKT865ALd4cgND6VcIztVQZUTt0+BH3RWy6ZYnHghVXf6NFjt2ritLr8H1T8LreAAlfiNcw==
 
-d3-color@1, d3-color@^1.4.0:
+d3-color@1:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-1.4.0.tgz#89c45a995ed773b13314f06460df26d60ba0ecaf"
   integrity sha512-TzNPeJy2+iEepfiL92LAAB7fvnp/dV2YwANPVHdDWmYMm23qIJBYww3qT8I8C1wXrmrg4UWs7BKc2tKIgyjzHg==
+
+d3-color@^1.4.0:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-1.4.1.tgz#c52002bf8846ada4424d55d97982fef26eb3bc8a"
+  integrity sha512-p2sTHSLCJI2QKunbGb7ocOh7DgTAn8IrLx21QRc/BSnodXM4sv6aLQlnfpvehFMLZEfBc6g9pH9SWQccFYfJ9Q==
 
 d3-format@1:
   version "1.4.2"
@@ -3725,9 +3730,9 @@ onetime@^2.0.0:
     mimic-fn "^1.0.0"
 
 open-simplex-noise@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/open-simplex-noise/-/open-simplex-noise-2.2.0.tgz#c85b9c882e3b7140c1211ece5f5d8d5d36a6a0a1"
-  integrity sha512-5/OVHsZIY0cPQXTYZNLVmgYbIQokiwuN7nDj7WVZ5MBOcElLD1gKYRGjuVwCDEeL1wXDgozazewFIx/NyXQ1/Q==
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/open-simplex-noise/-/open-simplex-noise-2.3.1.tgz#fb3e04db8693f6487497536be76d6192f1b9b827"
+  integrity sha512-akJvOFDWOoyNHg/ahxZQLBkBvKofV4avYLksYcaSUXNEHU+Y0bJlRRlZEf0MV753CR+lVSMtEPBv7NacDM+0mg==
 
 opn@^5.1.0:
   version "5.5.0"
@@ -5330,9 +5335,9 @@ typedarray@^0.0.6:
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
 typescript@^3.7.2:
-  version "3.7.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.2.tgz#27e489b95fa5909445e9fef5ee48d81697ad18fb"
-  integrity sha512-ml7V7JfiN2Xwvcer+XAf2csGO1bPBdRbFCkYBczNZggrBZ9c7G3riSUeJmqEU5uOtXNPMhE3n+R4FA/3YOAWOQ==
+  version "3.9.6"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.6.tgz#8f3e0198a34c3ae17091b35571d3afd31999365a"
+  integrity sha512-Pspx3oKAPJtjNwE92YS05HQoY7z2SFyOpHo9MqJor3BXAGNaPUs83CuVp9VISFkSjyRfiTpmKuAYGJB7S7hOxw==
 
 uncss@^0.17.2:
   version "0.17.2"

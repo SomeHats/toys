@@ -127,7 +127,7 @@ function setRectangle(gl: WebGLRenderingContext, idx: number, rect: AABB) {
   );
 }
 
-times(rectCount, idx => {
+times(rectCount, (idx) => {
   const rect = new AABB(
     new Vector2(random(gl.canvas.width), random(gl.canvas.height)),
     new Vector2(random(200), random(200)),
@@ -139,13 +139,13 @@ times(rectCount, idx => {
 gl.bufferData(gl.ARRAY_BUFFER, vertexBuffer, gl.STATIC_DRAW);
 
 // Set a random color.
-gl.uniform4f(
-  colorUniformLocation,
-  Math.random(),
-  Math.random(),
-  Math.random(),
-  1,
-);
+// gl.uniform4f(
+//   colorUniformLocation,
+//   Math.random(),
+//   Math.random(),
+//   Math.random(),
+//   1,
+// );
 
 // Draw the rectangle.
 gl.drawArrays(gl.TRIANGLES, 0, rectCount * 6);

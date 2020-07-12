@@ -80,6 +80,47 @@ export function intersection<T>(a1: T[], a2: T[]): T[] {
   return Array.from(result);
 }
 
+export function groupBy<T, Key>(
+  items: ReadonlyArray<T>,
+  getKey: (item: T) => Key,
+): Map<Key, Array<T>> {
+  const groups = new Map<Key, T[]>();
+  for (const item of items) {
+    const key = getKey(item);
+    const existing = groups.get(key);
+    if (existing) {
+      existing.push(item);
+    } else {
+      groups.set(key, [item]);
+    }
+  }
+
+  return groups;
+}
+
+export function sortBy<T, Key extends number | string>(
+  items: ReadonlyArray<T>,
+  getKey: (item: T) => Key,
+): Array<T> {
+  return items.slice().sort((a, b) => (getKey(a) < getKey(b) ? -1 : 1));
+}
+
+export function partition<T>(
+  items: ReadonlyArray<T>,
+  condition: (item: T) => boolean,
+): [T[], T[]] {
+  const pass = [];
+  const fail = [];
+  for (const item of items) {
+    if (condition(item)) {
+      pass.push(item);
+    } else {
+      fail.push(item);
+    }
+  }
+  return [pass, fail];
+}
+
 export function randomColor(): string {
   return `rgb(${Math.floor(random(256))},${Math.floor(
     random(256),
@@ -93,20 +134,28 @@ export function removeFromArray<T>(array: Array<T>, item: T) {
   }
 }
 
-export function frame(): Promise<void> {
-  return new Promise(resolve => {
-    window.requestAnimationFrame(() => resolve());
+export function frame(): Promise<number> {
+  return new Promise((resolve) => {
+    window.requestAnimationFrame((time) => resolve(time));
   });
 }
 
 export function wait(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(() => resolve(), ms));
+  return new Promise((resolve) => setTimeout(() => resolve(), ms));
 }
 
-export async function frameLoop(cb: () => void) {
+export async function frameLoop(
+  cb: (time: number, cancel: () => void) => void,
+) {
+  let shouldCancel = false;
+  const cancel = () => {
+    shouldCancel = true;
+  };
   while (true) {
-    await frame();
-    cb();
+    cb(await frame(), cancel);
+    if (shouldCancel) {
+      return;
+    }
   }
 }
 
@@ -144,7 +193,37 @@ export function shuffle<T>(arr: ReadonlyArray<T>): Array<T> {
 }
 
 export function getId(prefix = ''): string {
-  return `${prefix}${Math.random()
-    .toString(36)
-    .slice(1)}`;
+  return `${prefix}${Math.random().toString(36).slice(1)}`;
+}
+
+export function getLocalStorageItem(
+  key: string,
+  fallback: unknown = null,
+): unknown {
+  try {
+    // Get from local storage by key
+    const item = window.localStorage.getItem(key);
+    // Parse stored json or if none return initialValue
+    return item ? JSON.parse(item) : fallback;
+  } catch (error) {
+    // If error also return initialValue
+    console.log(error);
+    return fallback;
+  }
+}
+
+export function setLocalStorageItem(key: string, value: unknown) {
+  window.localStorage.setItem(key, JSON.stringify(value));
+}
+
+export function debounce<Args extends Array<unknown>>(
+  ms: number,
+  fn: (...args: Args) => void,
+): (...args: Args) => void {
+  let timeoutHandle: number | undefined;
+
+  return (...args: Args) => {
+    clearTimeout(timeoutHandle);
+    timeoutHandle = setTimeout(() => fn(...args), ms);
+  };
 }

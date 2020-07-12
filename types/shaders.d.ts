@@ -1,9 +1,9 @@
 declare module '*.frag' {
-  const value: string;
-  export default value;
+  const fragmentShaderString: string;
+  export default fragmentShaderString;
 }
 
 declare module '*.vert' {
-  const value: string;
-  export default value;
+  const vertexShaderString: string;
+  export default vertexShaderString;
 }

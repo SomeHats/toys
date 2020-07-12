@@ -13,6 +13,7 @@ type StrokeOptions = {
   strokeCap?: 'butt' | 'round' | 'square';
   strokeDash?: number[];
   strokeDashOffset?: number;
+  strokeJoin?: 'bevel' | 'round' | 'miter';
 };
 
 type FillOptions = {
@@ -70,6 +71,7 @@ export class DebugDraw {
     strokeCap = 'butt',
     strokeDash = [],
     strokeDashOffset = 0,
+    strokeJoin = 'round',
   }: StrokeOptions) {
     if (stroke) {
       this.ctx.lineWidth = strokeWidth;
@@ -77,6 +79,7 @@ export class DebugDraw {
       this.ctx.lineCap = strokeCap;
       this.ctx.setLineDash(strokeDash);
       this.ctx.lineDashOffset = strokeDashOffset;
+      this.ctx.lineJoin = strokeJoin;
     }
   }
 
@@ -231,11 +234,28 @@ export class DebugDraw {
     this.strokeAndFill(options);
   }
 
+  public polyLine(points: ReadonlyArray<Vector2>, options: StrokeOptions = {}) {
+    this.beginPath();
+    this.moveTo(points[0]);
+    for (let i = 1; i < points.length; i++) {
+      this.lineTo(points[i]);
+    }
+    this.stroke(options);
+  }
+
   public debugPolygon(
     polygon: ReadonlyArray<Vector2>,
     { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
   ) {
     this.debugLabel(label, polygon[0], color);
     this.polygon(polygon, this.getDebugStrokeOptions(color));
+  }
+
+  public debugPolyLine(
+    polyLine: ReadonlyArray<Vector2>,
+    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+  ) {
+    this.debugLabel(label, polyLine[0], color);
+    this.polyLine(polyLine, this.getDebugStrokeOptions(color));
   }
 }

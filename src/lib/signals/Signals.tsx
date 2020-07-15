@@ -1,14 +1,12 @@
-import EventEmitter, { Unsubscribe } from '../lib/EventEmitter';
-import { assert } from '../lib/assert';
+import EventEmitter, { Unsubscribe } from '../EventEmitter';
+import { assert } from '../assert';
 import {
   mapRange,
   getLocalStorageItem,
   debounce,
   setLocalStorageItem,
   clamp,
-} from '../lib/utils';
-import * as rebound from 'rebound';
-import { NumberKeyframeTrack } from 'three';
+} from '../utils';
 
 export abstract class Signal {
   private currentValue: number | null = null;
@@ -130,12 +128,31 @@ export class SignalManager {
     return this._driver;
   }
 
-  controlled(name: string | null, initialValue: number): ControlledSignal {
-    return this.addSignal(name, new ControlledSignal(this, initialValue));
+  private optionalName<T>(
+    name: string | null | T,
+    value: T | undefined,
+  ): [string | null, T] {
+    if (value === undefined) {
+      return [null, name] as [string | null, T];
+    } else {
+      return [name, value] as [string | null, T];
+    }
   }
 
-  computed(name: string | null, compute: () => number): ComputedSignal {
-    return this.addSignal(name, new ComputedSignal(this, compute));
+  controlled(
+    name: string | null | number,
+    initialValue?: number,
+  ): ControlledSignal {
+    const [_name, _initialValue] = this.optionalName(name, initialValue);
+    return this.addSignal(_name, new ControlledSignal(this, _initialValue));
+  }
+
+  computed(
+    name: string | null | (() => number),
+    compute?: () => number,
+  ): ComputedSignal {
+    const [_name, _compute] = this.optionalName(name, compute);
+    return this.addSignal(_name, new ComputedSignal(this, _compute));
   }
 
   input(name: string, value: number, range?: [number, number]): Signal {

@@ -1,18 +1,13 @@
 import { Signal, SignalManager, ControllableSignal } from './Signals';
 import * as React from 'react';
 import { useSubscription } from 'use-subscription';
-import {
-  groupBy,
-  sortBy,
-  partition,
-  mapRange,
-  setLocalStorageItem,
-} from '../lib/utils';
-import { assert } from '../lib/assert';
-import useLocalStorage from '../lib/hooks/useLocalStorageState';
-import DragCover from '../lib/DragCover';
+import { groupBy, sortBy, partition, mapRange } from '../utils';
+import { assert } from '../assert';
+import useLocalStorage from '../hooks/useLocalStorageState';
+import DragCover from '../DragCover';
 import cx from 'classnames';
-import { ListenToMidiInputFn } from '../lib/midi';
+import { ListenToMidiInputFn } from '../midi';
+import useSignal from './useSignal';
 
 const format = (value: number, significantFigures: number): string => {
   const valueParts = value.toString().split('.');
@@ -37,15 +32,7 @@ const SignalValue = React.memo(function _SignalValue({
   signal: Signal;
   className?: string;
 }) {
-  const value = useSubscription(
-    React.useMemo(
-      () => ({
-        getCurrentValue: () => signal.read(),
-        subscribe: (cb) => signal.manager.onUpdate(cb),
-      }),
-      [signal],
-    ),
-  );
+  const value = useSignal(signal);
 
   return (
     <div className={cx('text-gray-400', className)}>{format(value, 5)}</div>

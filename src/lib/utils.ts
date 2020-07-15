@@ -213,7 +213,12 @@ export function getLocalStorageItem(
 }
 
 export function setLocalStorageItem(key: string, value: unknown) {
-  window.localStorage.setItem(key, JSON.stringify(value));
+  const stringified = JSON.stringify(value);
+  try {
+    window.localStorage.setItem(key, stringified);
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 export function debounce<Args extends Array<unknown>>(

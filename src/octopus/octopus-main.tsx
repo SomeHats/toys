@@ -205,39 +205,6 @@ function octopusScene(
     return points;
   });
 
-  // const freq = s.input('sin.outerFreq', 0.5);
-
-  // s.sin('sin.result', {
-  //   min: s.sin(null, {
-  //     min: 0,
-  //     max: 3,
-  //     frequency: freq,
-  //     offset: s.sin('sin.min offset', {
-  //       frequency: s.input('sin.min offset freq', 0.3, [0.1, 0.5]),
-  //     }),
-  //   }),
-  //   max: s.sin(null, {
-  //     min: 1,
-  //     max: 3.5,
-  //     frequency: freq,
-  //     offset: s.sin('sin.max offset', {
-  //       frequency: s.input('sin.max offset freq', 0.3, [0.1, 0.5]),
-  //     }),
-  //   }),
-  //   frequency: s.input('sin.freq', 10, [1, 30]),
-  // });
-
-  // s.sin('sin2.result', {
-  //   min: s.input('sin2.min', 0.25, [0, 1]),
-  //   max: s.input('sin2.max', 0.75, [0, 1]),
-  //   frequency: s.input('sin2.freq', 1, [-2, 2]),
-  // });
-
-  // s.spring('mouse x spring', {
-  //   target: mouseX,
-  //   friction: s.computed('friction', () => mouseY.read() / 50),
-  // });
-
   return {
     draw: () => {
       ctx.resetTransform();

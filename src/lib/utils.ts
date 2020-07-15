@@ -1,3 +1,6 @@
+export type TimeoutId = ReturnType<typeof setTimeout>;
+export type IntervalId = ReturnType<typeof setInterval>;
+
 export function times<T>(n: number, fn: (idx: number) => T): Array<T> {
   const result = [];
   for (let i = 0; i < n; i++) {
@@ -225,10 +228,12 @@ export function debounce<Args extends Array<unknown>>(
   ms: number,
   fn: (...args: Args) => void,
 ): (...args: Args) => void {
-  let timeoutHandle: number | undefined;
+  let timeoutHandle: TimeoutId | undefined;
 
   return (...args: Args) => {
-    clearTimeout(timeoutHandle);
+    if (timeoutHandle !== undefined) {
+      clearTimeout(timeoutHandle);
+    }
     timeoutHandle = setTimeout(() => fn(...args), ms);
   };
 }

@@ -36,6 +36,7 @@ function SignalsCanvas({
   scene: SignalsCanvasScene;
 }) {
   const [children, setChildren] = React.useState<null | React.ReactNode>(null);
+  const containerRef = React.useRef<null | HTMLDivElement>(null);
   const canvasRef = React.useRef<null | HTMLCanvasElement>(null);
   const [size, setSize] = React.useState({
     width: 100,
@@ -45,8 +46,9 @@ function SignalsCanvas({
 
   React.useEffect(() => {
     let isCancelled = false;
-    assert(canvasRef.current);
+    assert(canvasRef.current && containerRef.current);
     const canvas = canvasRef.current;
+    const container = containerRef.current;
     setSize({
       width: canvas.clientWidth,
       height: canvas.clientHeight,
@@ -92,7 +94,7 @@ function SignalsCanvas({
       signals.mouseY.set(event.clientY);
     });
 
-    window.addEventListener('mousedown', () => {
+    container.addEventListener('mousedown', () => {
       signals.mouseDown.set(1);
       const dragCover = new DragCover({
         up: () => {
@@ -133,20 +135,32 @@ function SignalsCanvas({
 
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0 }}>
-      <canvas
-        ref={canvasRef}
+      <div
+        ref={containerRef}
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
-          width: debuggerEnabled ? `calc(100% - ${INSPECTOR_WIDTH}px)` : '100%',
-          height: '100%',
-          zIndex: 10,
-          pointerEvents: 'none',
+          bottom: 0,
+          right: debuggerEnabled ? INSPECTOR_WIDTH : 0,
         }}
-        width={size.width * size.devicePixelRatio}
-        height={size.height * size.devicePixelRatio}
-      />
+      >
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 10,
+            pointerEvents: 'none',
+          }}
+          width={size.width * size.devicePixelRatio}
+          height={size.height * size.devicePixelRatio}
+        />
+        {children}
+      </div>
       {debuggerEnabled && (
         <SignalsInspector
           signalManager={signalManager}
@@ -154,7 +168,6 @@ function SignalsCanvas({
           width={INSPECTOR_WIDTH}
         />
       )}
-      {children}
     </div>
   );
 }

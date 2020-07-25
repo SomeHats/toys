@@ -2,7 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import { times } from '../lib/utils';
 
-const STANDARD_KEY_SIZE = 27;
+const STANDARD_KEY_SIZE = 45;
 const KEY_BORDER_SIZE = 1.5;
 const PIANO_BORDER_SIZE = 8;
 
@@ -31,10 +31,18 @@ const PianoKeyboardKey = React.memo(
     offset,
     isAccidental,
     styles,
+    isNoteDown,
+    note,
+    setRefForKey,
   }: {
     offset: number;
     isAccidental: boolean;
     styles: KeyRenderStyles;
+    // onNoteDown: (note: number, x: number, y: number) => void;
+    // onNoteUp: (note: number, x: number, y: number) => void;
+    isNoteDown: boolean;
+    note: number;
+    setRefForKey: (key: HTMLDivElement | null, note: number) => void;
   }) => {
     const style = isAccidental
       ? ({
@@ -55,13 +63,14 @@ const PianoKeyboardKey = React.memo(
 
     return (
       <div
+        ref={(el) => setRefForKey(el, note)}
         style={style}
-        className={cx(
-          'border-gray-600',
-          isAccidental
-            ? 'bg-black hover:bg-blue-900'
-            : 'bg-white hover:bg-blue-200',
-        )}
+        className={cx('border-gray-600', {
+          'bg-black hover:bg-blue-900': isAccidental,
+          'bg-white hover:bg-blue-200': !isAccidental,
+          'bg-purple-800': isAccidental && isNoteDown,
+          'bg-purple-300': !isAccidental && isNoteDown,
+        })}
       />
     );
   },
@@ -73,12 +82,16 @@ function _PianoKeyboard({
   scale,
   top,
   left,
+  notesDown,
+  setRefForKey,
 }: {
   lowestNote: number;
   highestNote: number;
   scale: number;
   top: number;
   left: number;
+  notesDown: Array<number>;
+  setRefForKey: (key: HTMLDivElement | null, note: number) => void;
 }) {
   const styles = React.useMemo((): KeyRenderStyles => {
     const keyCountForWidth = (highestNote - lowestNote) * (7 / 12);
@@ -117,9 +130,12 @@ function _PianoKeyboard({
         const key = (
           <PianoKeyboardKey
             key={note}
+            note={note}
             offset={offset}
             isAccidental={isAccidental}
             styles={styles}
+            isNoteDown={notesDown.includes(note)}
+            setRefForKey={setRefForKey}
           />
         );
         offset += isAccidental ? 0 : styles.standardWidth;

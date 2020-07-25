@@ -18,16 +18,17 @@ limited free time on actually making things with the tools.
 
 - octopus
   - [x] disable signals inspector in prod
-  - [ ] get tentacle retract motion feeling good
+  - [x] get tentacle retract motion feeling good
   - [x] make sure layout doesn't care about screen size
   - [x] render keyboard
   - [ ] clickable keyboard plays notes
   - [ ] get it working on ios
   - [ ] make touch controls work
   - [ ] click-and-drag keyboard plays notes
+  - [x] keyboard-controlled keyboard plays notes
   - [ ] midi-controlled keyboard plays notes
-  - [ ] tentacles hit keyboard keys
-  - [ ] octopus tentacle rendering
+  - [x] tentacles hit keyboard keys
+  - [x] octopus tentacle rendering
   - [ ] octopus facial expressions basics
   - [ ] octopus singing mouth
   - [ ] octopus singing text trails
@@ -37,5 +38,5 @@ limited free time on actually making things with the tools.
         tentacles etc
 - signals
   - [ ] make signal midi bindings work when inspector isn't rendered
-  - [ ] ADSR-style signal envelopes
+  - [x] ADSR-style signal envelopes
   - [ ] virtualized signal inspector list????

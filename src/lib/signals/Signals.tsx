@@ -6,7 +6,11 @@ import {
   debounce,
   setLocalStorageItem,
   clamp,
+  exhaustiveSwitchError,
+  lerp,
 } from '../utils';
+import { TARGET_CELLS_PER_PLATE } from '../../terrain/config';
+import { RGB_S3TC_DXT1_Format } from 'three';
 
 export abstract class Signal {
   private currentValue: number | null = null;
@@ -306,6 +310,130 @@ export class SignalManager {
         return bSignal.read();
       }
     });
+  }
+
+  adsr(
+    name: string | null,
+    {
+      target,
+      attack = 0,
+      delay = 0,
+      sustain = 1,
+      release = 0,
+      driver = this._driver,
+    }: {
+      target: Signal;
+      attack?: Signal | number;
+      delay?: Signal | number;
+      sustain?: Signal | number;
+      release?: Signal | number;
+      driver?: Signal;
+    },
+  ): Signal {
+    const attackSignal = this.toSignal(attack);
+    const delaySignal = this.toSignal(delay);
+    const sustainSignal = this.toSignal(sustain);
+    const releaseSignal = this.toSignal(release);
+
+    const enum AdsrState {
+      Off,
+      Attacking,
+      Holding,
+      Releasing,
+    }
+
+    let state = AdsrState.Off;
+    let currentValue = 0;
+    let releaseStartValue = 0;
+    return this.computed(name, () => {
+      const targetValue = target.read();
+      const isOn = targetValue !== 0;
+
+      if (isOn) {
+        if (state === AdsrState.Off || state === AdsrState.Releasing) {
+          if (attackSignal.read() === 0) {
+            state = AdsrState.Holding;
+          } else {
+            state = AdsrState.Attacking;
+          }
+        }
+
+        if (state === AdsrState.Attacking) {
+          console.log('attacking');
+          currentValue += (targetValue / attackSignal.read()) * driver.read();
+          if (currentValue >= targetValue) {
+            state = AdsrState.Holding;
+          }
+        }
+
+        if (state === AdsrState.Holding) {
+          console.log('holding');
+          const sustainTarget = targetValue * sustainSignal.read();
+          if (delaySignal.read() === 0) {
+            currentValue = sustainTarget;
+          } else {
+            currentValue = clamp(
+              sustainTarget,
+              targetValue,
+              currentValue +
+                ((sustainTarget - targetValue) / delaySignal.read()) *
+                  driver.read(),
+            );
+          }
+        }
+      } else {
+        if (state === AdsrState.Attacking || state === AdsrState.Holding) {
+          if (currentValue === 0) {
+            state = AdsrState.Off;
+          } else {
+            releaseStartValue = currentValue;
+            state = AdsrState.Releasing;
+          }
+        }
+
+        if (state === AdsrState.Releasing) {
+          currentValue -=
+            (releaseStartValue / releaseSignal.read()) * driver.read();
+          if (currentValue <= 0) {
+            currentValue = 0;
+            state = AdsrState.Off;
+          }
+        }
+
+        if (state === AdsrState.Off) {
+          currentValue = 0;
+        }
+      }
+
+      return currentValue;
+    });
+  }
+
+  easeExponential(
+    name: string | null,
+    { target, rate = 0.1 }: { target: Signal; rate?: Signal | number },
+  ): Signal {
+    const rateSignal = this.toSignal(rate);
+    let currentValue = target.read();
+    return this.computed(name, () => {
+      const difference = target.read() - currentValue;
+      currentValue += difference * rateSignal.read();
+      return currentValue;
+    });
+  }
+
+  lerp(
+    name: string | null,
+    a: Signal | number,
+    b: Signal | number,
+    n: Signal | number,
+  ): Signal {
+    const aSignal = this.toSignal(a);
+    const bSignal = this.toSignal(b);
+    const nSignal = this.toSignal(n);
+    return this.computed(name, () =>
+      lerp(aSignal.read(), bSignal.read(), nSignal.read()),
+    );
   }
 
   private addSignal<T extends Signal>(name: string | null, signal: T) {

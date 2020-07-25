@@ -182,8 +182,8 @@ export function normalizeAngle(angle: number): number {
   return constrainWrapped(-Math.PI, Math.PI, angle);
 }
 
-export function clamp(min: number, max: number, n: number): number {
-  return Math.max(min, Math.min(max, n));
+export function clamp(a: number, b: number, n: number): number {
+  return Math.max(Math.min(a, b), Math.min(Math.max(a, b), n));
 }
 
 export function shuffle<T>(arr: ReadonlyArray<T>): Array<T> {
@@ -236,4 +236,8 @@ export function debounce<Args extends Array<unknown>>(
     }
     timeoutHandle = setTimeout(() => fn(...args), ms);
   };
+}
+
+export function exhaustiveSwitchError(value: never): never {
+  throw new Error(`Unknown switch case ${value}`);
 }

@@ -1,6 +1,10 @@
 import * as React from 'react';
-import { SignalManager, Signal } from '../lib/signals/Signals';
-import { times, varyAbsolute } from '../lib/utils';
+import {
+  SignalManager,
+  Signal,
+  ControlledSignal,
+} from '../lib/signals/Signals';
+import { times, varyAbsolute, shuffle, uniq, sample } from '../lib/utils';
 import { assert } from '../lib/assert';
 import { DebugDraw } from '../lib/DebugCanvas';
 import Vector2 from '../lib/geom/Vector2';
@@ -8,13 +12,82 @@ import PianoKeyboard from './PianoKeyboard';
 import startSignalsApp from '../lib/signals/startSignalsApp';
 import { CanvasSignals } from '../lib/signals/SignalsCanvas';
 import useSignal from '../lib/signals/useSignal';
+import { BooleanKeyframeTrack } from 'three';
 
-const WIDTH = 1000;
-const HEIGHT = 1000;
-const LOWEST_NOTE_TO_RENDER = 36; // C3
-const HIGHEST_NOTE_TO_RENDER = 96; // C7
+const WIDTH = 1300;
+const HEIGHT = 1300;
+const LOWEST_NOTE_TO_RENDER = 33;
+const HIGHEST_NOTE_TO_RENDER = 72;
 
 const DEBUGGER_ENABLED = process.env.NODE_ENV !== 'production ';
+
+const THICKNESS = 46;
+const INNER_THICKNESS = THICKNESS - 12;
+
+const CENTER_X = WIDTH / 2;
+const CENTER_Y = HEIGHT / 2;
+
+const noteNumberByKeyCode: { [keyCode: string]: number | undefined } = {
+  // O3:
+  KeyA: 33,
+  KeyS: 34,
+  KeyD: 35,
+  KeyF: 36,
+  KeyG: 37,
+  KeyH: 38,
+  KeyJ: 39,
+  KeyK: 40,
+  KeyL: 41,
+  Semicolon: 42,
+  Quote: 43,
+  Backslash: 44,
+  // O4:
+  KeyQ: 45,
+  KeyW: 46,
+  KeyE: 47,
+  KeyR: 48,
+  KeyT: 49,
+  KeyY: 50,
+  KeyU: 51,
+  KeyI: 52,
+  KeyO: 53,
+  KeyP: 54,
+  BracketLeft: 55,
+  BracketRight: 56,
+  // O5:
+  Digit1: 57,
+  Digit2: 58,
+  Digit3: 59,
+  Digit4: 60,
+  Digit5: 61,
+  Digit6: 62,
+  Digit7: 63,
+  Digit8: 64,
+  Digit9: 65,
+  Digit0: 66,
+  Minus: 67,
+  Equal: 68,
+};
+
+type TentaclePoint = {
+  start: [Signal, Signal];
+  end: [Signal, Signal];
+  leftInner: [Signal, Signal];
+  rightInner: [Signal, Signal];
+  leftOuter: [Signal, Signal];
+  rightOuter: [Signal, Signal];
+};
+
+type Tentacle = {
+  isActive: ControlledSignal;
+  activeTargetX: ControlledSignal;
+  activeTargetY: ControlledSignal;
+  points: Array<TentaclePoint>;
+};
+
+function signalsToVector(signals: [Signal, Signal]): Vector2 {
+  return new Vector2(signals[0].read(), signals[1].read());
+}
 
 function screenToScene(
   coordinate: number,
@@ -48,8 +121,17 @@ function octopusScene(
   assert(ctx);
   const draw = new DebugDraw(ctx);
 
-  const centerX = WIDTH / 2;
-  const centerY = HEIGHT / 2;
+  // s.computed('mouse down', () => mouseDown.read());
+  // s.easeExponential('mouse down eased', { target: mouseDown });
+  // s.easeExponential('mouse down adsr eased', {
+  //   target: s.adsr('mouse down adsr', {
+  //     target: mouseDown,
+  //     attack: s.input('asdr attack', 0, [0, 2]),
+  //     sustain: s.input('asdr sustain', 1, [0, 2]),
+  //     delay: s.input('asdr delay', 0, [0, 2]),
+  //     release: s.input('asdr release', 0, [0, 2]),
+  //   }),
+  // });
 
   const canvasScale = s.computed(() =>
     Math.min(width.read() / WIDTH, height.read() / HEIGHT),
@@ -77,33 +159,42 @@ function octopusScene(
 
   const tentacleCount = 8;
   const segmentCount = 30;
-  const startAngle = s.input('startAngle', Math.PI / 2, [0, Math.PI]);
-  const activeFriction = s.input('spring.activeFriction', 15.5, [1, 40]);
-  const activeTension = s.input('spring.activeTension', 200, [1, 1000]);
-  const idleFriction = s.input('spring.idleFriction', 15.5, [1, 40]);
-  const idleTension = s.input('spring.idleTension', 200, [1, 1000]);
+  const activeFriction = s.input('spring.activeFriction', 35, [1, 40]);
+  const activeTension = s.input('spring.activeTension', 1000, [1, 1000]);
+  const idleFriction = s.input('spring.idleFriction', 25, [1, 40]);
+  const idleTension = s.input('spring.idleTension', 180, [1, 1000]);
 
   const tentacles = times(tentacleCount, (t) => {
-    const isTrackingMouse = s.switch(null, mouseDown, t === 3 ? 1 : 0, 0);
+    const isActive = s.controlled(null, 0);
+    const activeTargetX = s.controlled(null, 0);
+    const activeTargetY = s.controlled(null, 0);
 
-    const friction = s.switch(
+    const springSettingsForMouseDown = s.adsr(null, {
+      target: isActive,
+      release: 2,
+    });
+    const friction = s.lerp(
       null,
-      isTrackingMouse,
-      activeFriction,
       idleFriction,
+      activeFriction,
+      springSettingsForMouseDown,
     );
-    const tension = s.switch(null, isTrackingMouse, activeTension, idleTension);
+    const tension = s.lerp(
+      null,
+      idleTension,
+      activeTension,
+      springSettingsForMouseDown,
+    );
 
-    const startX = centerX + (t - tentacleCount / 2) * 60;
-    const startY = 80 + Math.sin((t / (tentacleCount - 1)) * Math.PI) * 100;
+    const startX = CENTER_X + (t - tentacleCount / 2) * 65;
+    const startY = 400 + Math.sin((t / (tentacleCount - 1)) * Math.PI) * 120;
 
-    let idleLastX: Signal = s.controlled(startX);
-    let idleLastY: Signal = s.controlled(startY);
-    let idleLastAngle: Signal = startAngle; // s.controlled(null, Math.PI / 2);
-    const points = [[idleLastX, idleLastY]];
+    let lastEndX: Signal = s.controlled(startX);
+    let lastEndY: Signal = s.controlled(startY);
+    let idleLastAngle: Signal = s.controlled(
+      Math.PI / 2 - (t - tentacleCount / 2) / (tentacleCount * 0.9),
+    );
 
-    const activeTargetX = mouseX;
-    const activeTargetY = mouseY;
     const activeDX = s.subtract(null, activeTargetX, startX);
     const activeDY = s.subtract(null, activeTargetY, startY);
     const activeAngle = s.computed(() =>
@@ -124,134 +215,386 @@ function octopusScene(
       offset: Math.random(),
     });
 
-    times(segmentCount, (i) => {
-      const idleAngleWave = s.sin(null, {
-        min: -0.3,
-        max: 0.3,
-        frequency: 0.2 * 1.1 ** (i / 2),
-        offset: Math.random(),
-      });
-      const idleEndAngle = s.add(null, idleAngleWave, idleLastAngle);
-      const idleLength = 24 * 0.95 ** (i / 2);
-      const idleEndX = s.add(
-        null,
-        idleLastX,
-        s.computed(() => Math.cos(idleEndAngle.read()) * idleLength),
-      );
-      const idleEndY = s.add(
-        null,
-        idleLastY,
-        s.computed(() => Math.sin(idleEndAngle.read()) * idleLength),
-      );
+    const points = times(
+      segmentCount,
+      (i): TentaclePoint => {
+        const idleAngleWave = s.sin(null, {
+          min: -0.3,
+          max: 0.3,
+          frequency: 0.2 * 1.1 ** (i / 2),
+          offset: Math.random(),
+        });
+        const idleEndAngle = s.add(null, idleAngleWave, idleLastAngle);
+        const idleLength = 24 * 0.95 ** (i / 2);
+        const idleEndX = s.add(
+          null,
+          lastEndX,
+          s.computed(() => Math.cos(idleEndAngle.read()) * idleLength),
+        );
+        const idleEndY = s.add(
+          null,
+          lastEndY,
+          s.computed(() => Math.sin(idleEndAngle.read()) * idleLength),
+        );
 
-      // const idleEndX = s.switch(
-      //   null,
-      //   shouldDisableSpring,
-      //   idleTargetX,
-      //   s.spring(null, { target: idleTargetX, tension, friction }),
-      // );
-      // const idleEndY = s.switch(
-      //   null,
-      //   shouldDisableSpring,
-      //   idleTargetY,
-      //   s.spring(null, { target: idleTargetY, tension, friction }),
-      // );
+        const activeProportion = (i + 1) / segmentCount;
 
-      const activeProportion = (i + 1) / segmentCount;
+        const activeWaveMagnitude = Math.sin(activeProportion * Math.PI) * 20;
+        const activeWave = s.sin(null, {
+          min: -activeWaveMagnitude,
+          max: activeWaveMagnitude,
+          offset: s.computed(() => (i / segmentCount) * activeWaveCount.read()),
+          frequency: activeWaveFreq,
+        });
 
-      const activeWaveMagnitude = Math.sin(activeProportion * Math.PI) * 20;
-      const activeWave = s.sin(null, {
-        min: -activeWaveMagnitude,
-        max: activeWaveMagnitude,
-        offset: s.computed(() => (i / segmentCount) * activeWaveCount.read()),
-        frequency: activeWaveFreq,
-      });
+        const activeEndX = s.computed(
+          null,
+          () =>
+            startX +
+            activeDX.read() * activeProportion +
+            Math.sin(-activeAngle.read()) * activeWave.read(),
+        );
+        const activeEndY = s.computed(
+          null,
+          () =>
+            startY +
+            activeDY.read() * activeProportion +
+            Math.cos(activeAngle.read()) * activeWave.read(),
+        );
 
-      const activeEndX = s.computed(
-        null,
-        () =>
-          startX +
-          activeDX.read() * activeProportion +
-          Math.sin(-activeAngle.read()) * activeWave.read(),
-      );
-      const activeEndY = s.computed(
-        null,
-        () =>
-          startY +
-          activeDY.read() * activeProportion +
-          Math.cos(activeAngle.read()) * activeWave.read(),
-      );
-
-      const endX = s.spring(
-        i === segmentCount - 1 ? `tentacle.${t}.endX` : null,
-        {
-          target: s.switch(null, isTrackingMouse, activeEndX, idleEndX),
+        const endX = s.spring(
+          i === segmentCount - 1 ? `tentacle.${t}.endX` : null,
+          {
+            target: s.switch(null, isActive, activeEndX, idleEndX),
+            friction: friction,
+            tension: tension,
+          },
+        );
+        const endY = s.spring(null, {
+          target: s.switch(null, isActive, activeEndY, idleEndY),
           friction: friction,
           tension: tension,
-        },
-      );
-      const endY = s.spring(null, {
-        target: s.switch(null, isTrackingMouse, activeEndY, idleEndY),
-        friction: friction,
-        tension: tension,
-      });
+        });
 
-      idleLastX = endX;
-      idleLastY = endY;
-      idleLastAngle = idleEndAngle;
-      points.push([endX, endY]);
-    });
+        const dx = s.subtract(null, endX, lastEndX);
+        const dy = s.subtract(null, endY, lastEndY);
+        const segmentLength = s.computed(null, () =>
+          Math.sqrt(dx.read() * dx.read() + dy.read() * dy.read()),
+        );
 
-    return points;
+        const tentaclePoint: TentaclePoint = {
+          start: [lastEndX, lastEndY],
+          end: [endX, endY],
+          leftInner: [
+            s.computed(
+              null,
+              () =>
+                endX.read() -
+                (dy.read() / segmentLength.read()) *
+                  (INNER_THICKNESS / 2 - i + 1),
+            ),
+            s.computed(
+              null,
+              () =>
+                endY.read() +
+                (dx.read() / segmentLength.read()) *
+                  (INNER_THICKNESS / 2 - i + 1),
+            ),
+          ],
+          rightInner: [
+            s.computed(
+              null,
+              () =>
+                endX.read() +
+                (dy.read() / segmentLength.read()) *
+                  (INNER_THICKNESS / 2 - i + 1),
+            ),
+            s.computed(
+              null,
+              () =>
+                endY.read() -
+                (dx.read() / segmentLength.read()) *
+                  (INNER_THICKNESS / 2 - i + 1),
+            ),
+          ],
+          leftOuter: [
+            s.computed(
+              null,
+              () =>
+                endX.read() -
+                (dy.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),
+            ),
+            s.computed(
+              null,
+              () =>
+                endY.read() +
+                (dx.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),
+            ),
+          ],
+          rightOuter: [
+            s.computed(
+              null,
+              () =>
+                endX.read() +
+                (dy.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),
+            ),
+            s.computed(
+              null,
+              () =>
+                endY.read() -
+                (dx.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),
+            ),
+          ],
+        };
+
+        lastEndX = endX;
+        lastEndY = endY;
+        idleLastAngle = idleEndAngle;
+
+        return tentaclePoint;
+      },
+    );
+
+    return {
+      points,
+      isActive,
+      activeTargetX,
+      activeTargetY,
+    };
   });
 
+  const notesByTentacle = new Map<Tentacle, number>();
+  const onNoteDown = (note: number, x: number, y: number) => {
+    const tentacle =
+      sample(tentacles.filter((t) => !notesByTentacle.has(t))) ??
+      sample(tentacles);
+    notesByTentacle.set(tentacle, note);
+    tentacle.isActive.set(1);
+    tentacle.activeTargetX.set(x);
+    tentacle.activeTargetY.set(y);
+  };
+  const onNoteUp = (note: number) => {
+    for (const [tentacle, activeNote] of notesByTentacle.entries()) {
+      if (activeNote === note) {
+        notesByTentacle.delete(tentacle);
+        tentacle.isActive.set(0);
+      }
+    }
+  };
+
+  const zOrderedTentacles = shuffle(tentacles);
   return {
     draw: () => {
       ctx.resetTransform();
       ctx.scale(devicePixelRatio.read(), devicePixelRatio.read());
+      ctx.fillStyle = '#7F95D1';
       ctx.clearRect(0, 0, width.read(), height.read());
 
       ctx.translate(canvasTranslateX.read(), canvasTranslateY.read());
       ctx.scale(canvasScale.read(), canvasScale.read());
 
-      for (const points of tentacles) {
-        draw.polyLine(
-          points.map(([x, y]) => new Vector2(x.read(), y.read())),
-          { stroke: 'white', strokeWidth: 2, strokeCap: 'round' },
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(
+        tentacles[0].points[0].start[0].read(),
+        tentacles[0].points[0].start[1].read(),
+      );
+      for (let i = 1; i < tentacles.length; i++) {
+        const prevTentacle = tentacles[i - 1];
+        const nextTentacle = tentacles[i];
+        ctx.lineTo(
+          prevTentacle.points[3].rightOuter[0].read(),
+          prevTentacle.points[3].rightOuter[1].read(),
+        );
+        ctx.bezierCurveTo(
+          prevTentacle.points[1].rightOuter[0].read(),
+          prevTentacle.points[1].rightOuter[1].read(),
+          nextTentacle.points[1].leftOuter[0].read(),
+          nextTentacle.points[1].leftOuter[1].read(),
+          nextTentacle.points[3].leftOuter[0].read(),
+          nextTentacle.points[3].leftOuter[1].read(),
         );
       }
+      ctx.lineTo(
+        tentacles[tentacles.length - 1].points[0].start[0].read(),
+        tentacles[tentacles.length - 1].points[0].start[1].read(),
+      );
+      ctx.fillStyle = '#FF709D';
+      ctx.fill();
+
+      for (let i = 0; i < zOrderedTentacles.length; i++) {
+        drawTentacle(ctx, zOrderedTentacles[i], '#FF709D', THICKNESS, 0);
+        drawTentacle(ctx, zOrderedTentacles[i], '#FF4782', INNER_THICKNESS, 3);
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(
+        tentacles[0].points[0].start[0].read(),
+        tentacles[0].points[0].start[1].read(),
+      );
+      for (let i = 1; i < tentacles.length; i++) {
+        const prevTentacle = tentacles[i - 1];
+        const nextTentacle = tentacles[i];
+        ctx.lineTo(
+          prevTentacle.points[1].rightInner[0].read(),
+          prevTentacle.points[1].rightInner[1].read(),
+        );
+        ctx.bezierCurveTo(
+          prevTentacle.points[0].rightInner[0].read(),
+          prevTentacle.points[0].rightInner[1].read(),
+          nextTentacle.points[0].leftInner[0].read(),
+          nextTentacle.points[0].leftInner[1].read(),
+          nextTentacle.points[1].leftInner[0].read(),
+          nextTentacle.points[1].leftInner[1].read(),
+        );
+      }
+      ctx.lineTo(
+        tentacles[tentacles.length - 1].points[0].start[0].read(),
+        tentacles[tentacles.length - 1].points[0].start[1].read(),
+      );
+      ctx.fillStyle = '#FF4782';
+      ctx.fill();
     },
     children: (
       <OctopusUi
         canvasScaleSignal={canvasScale}
         canvasTranslateXSignal={canvasTranslateX}
         canvasTranslateYSignal={canvasTranslateY}
+        onNoteDown={onNoteDown}
+        onNoteUp={onNoteUp}
       />
     ),
   };
+}
+
+function drawTentacle(
+  ctx: CanvasRenderingContext2D,
+  tentacle: Tentacle,
+  color: string,
+  thickness: number,
+  skipCount: number,
+) {
+  ctx.strokeStyle = color;
+  for (let i = 0; i < tentacle.points.length - skipCount; i++) {
+    const { start, end } = tentacle.points[i];
+    ctx.beginPath();
+    ctx.moveTo(start[0].read(), start[1].read());
+    ctx.lineTo(end[0].read(), end[1].read());
+    ctx.lineWidth = thickness - i;
+    ctx.stroke();
+  }
 }
 
 function OctopusUi({
   canvasScaleSignal,
   canvasTranslateXSignal,
   canvasTranslateYSignal,
+  onNoteDown,
+  onNoteUp,
 }: {
   canvasScaleSignal: Signal;
   canvasTranslateXSignal: Signal;
   canvasTranslateYSignal: Signal;
+  onNoteDown: (note: number, x: number, y: number) => void;
+  onNoteUp: (note: number) => void;
 }) {
+  const noteRefs = React.useRef(new Map<number, HTMLDivElement>());
+
   const canvasScale = useSignal(canvasScaleSignal);
   const canvasTranslateX = useSignal(canvasTranslateXSignal);
   const canvasTranslateY = useSignal(canvasTranslateYSignal);
 
+  const [notesDown, setNotesDown] = React.useState<Array<number>>([]);
+  console.log(notesDown);
+
+  const setRefForKey = React.useCallback(
+    (ref: HTMLDivElement | null, note: number) => {
+      if (ref) {
+        noteRefs.current.set(note, ref);
+      } else {
+        noteRefs.current.delete(note);
+      }
+    },
+    [],
+  );
+
+  const handleNoteDown = React.useCallback((note: number) => {
+    setNotesDown((prev) => {
+      if (prev.includes(note)) {
+        return prev;
+      }
+      const keyEl = noteRefs.current.get(note);
+      if (keyEl) {
+        const bbox = keyEl.getBoundingClientRect();
+        onNoteDown(
+          note,
+          screenToScene(
+            bbox.x + bbox.width / 2,
+            canvasTranslateXSignal.read(),
+            canvasScaleSignal.read(),
+          ),
+          screenToScene(
+            bbox.y + bbox.height * 0.8,
+            canvasTranslateYSignal.read(),
+            canvasScaleSignal.read(),
+          ),
+        );
+      }
+      return uniq([...prev, note]);
+    });
+  }, []);
+
+  const handleNoteUp = React.useCallback((note: number) => {
+    setNotesDown((prev) => {
+      if (!prev.includes(note)) {
+        return prev;
+      }
+      onNoteUp(note);
+      return prev.filter((n) => n !== note);
+    });
+  }, []);
+
+  React.useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const note = noteNumberByKeyCode[e.code];
+      if (note !== undefined) {
+        handleNoteDown(note);
+      }
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      const note = noteNumberByKeyCode[e.code];
+      if (note !== undefined) {
+        handleNoteUp(note);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+    };
+  }, []);
+
   return (
-    <PianoKeyboard
-      lowestNote={LOWEST_NOTE_TO_RENDER}
-      highestNote={HIGHEST_NOTE_TO_RENDER}
-      scale={canvasScale}
-      top={sceneToScreen(850, canvasTranslateY, canvasScale)}
-      left={sceneToScreen(500, canvasTranslateX, canvasScale)}
-    />
+    <>
+      <div
+        style={{ background: '#7F95D1' }}
+        className="absolute top-0 left-0 w-full h-full"
+      />
+      <PianoKeyboard
+        lowestNote={LOWEST_NOTE_TO_RENDER}
+        highestNote={HIGHEST_NOTE_TO_RENDER}
+        scale={canvasScale}
+        top={sceneToScreen(1100, canvasTranslateY, canvasScale)}
+        left={sceneToScreen(CENTER_X, canvasTranslateX, canvasScale)}
+        notesDown={notesDown}
+        setRefForKey={setRefForKey}
+      />
+    </>
   );
 }
 

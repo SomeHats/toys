@@ -56,15 +56,16 @@ function SignalsCanvas({
     });
 
     const signals = {
-      width: signalManager.controlled('canvas.width', canvas.clientWidth),
-      height: signalManager.controlled('canvas.height', canvas.clientHeight),
-      devicePixelRatio: signalManager.controlled(
-        'canvas.devicePixelRatio',
-        window.devicePixelRatio,
-      ),
-      mouseX: signalManager.controlled('canvas.mouseX', 0),
-      mouseY: signalManager.controlled('canvas.mouseY', 0),
-      mouseDown: signalManager.controlled('canvas.mouseDown', 0),
+      width: signalManager.controlled(canvas.clientWidth).debug('canvas.width'),
+      height: signalManager
+        .controlled(canvas.clientHeight)
+        .debug('canvas.height'),
+      devicePixelRatio: signalManager
+        .controlled(window.devicePixelRatio)
+        .debug('canvas.devicePixelRatio'),
+      mouseX: signalManager.controlled(0).debug('canvas.mouseX'),
+      mouseY: signalManager.controlled(0).debug('canvas.mouseY'),
+      mouseDown: signalManager.controlled(0).debug('canvas.mouseDown'),
     };
 
     const observer = new ResizeObserver(() => {
@@ -110,7 +111,7 @@ function SignalsCanvas({
     console.log(
       'get frame loop',
       Date.now() - start,
-      signalManager.signalsByName.size,
+      signalManager.debugSignalsByName.size,
     );
 
     let lastTime = 0;

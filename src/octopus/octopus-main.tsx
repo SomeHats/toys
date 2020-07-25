@@ -165,22 +165,20 @@ function octopusScene(
   const idleTension = s.input('spring.idleTension', 180, [1, 1000]);
 
   const tentacles = times(tentacleCount, (t) => {
-    const isActive = s.controlled(null, 0);
-    const activeTargetX = s.controlled(null, 0);
-    const activeTargetY = s.controlled(null, 0);
+    const isActive = s.controlled(0);
+    const activeTargetX = s.controlled(0);
+    const activeTargetY = s.controlled(0);
 
-    const springSettingsForMouseDown = s.adsr(null, {
+    const springSettingsForMouseDown = s.adsr({
       target: isActive,
       release: 2,
     });
     const friction = s.lerp(
-      null,
       idleFriction,
       activeFriction,
       springSettingsForMouseDown,
     );
     const tension = s.lerp(
-      null,
       idleTension,
       activeTension,
       springSettingsForMouseDown,
@@ -195,20 +193,20 @@ function octopusScene(
       Math.PI / 2 - (t - tentacleCount / 2) / (tentacleCount * 0.9),
     );
 
-    const activeDX = s.subtract(null, activeTargetX, startX);
-    const activeDY = s.subtract(null, activeTargetY, startY);
+    const activeDX = s.subtract(activeTargetX, startX);
+    const activeDY = s.subtract(activeTargetY, startY);
     const activeAngle = s.computed(() =>
       Math.atan2(activeDY.read(), activeDX.read()),
     );
 
-    const activeWaveFreq = s.sin(null, {
+    const activeWaveFreq = s.sin({
       min: varyAbsolute(-1, 0.75),
       max: varyAbsolute(1, 0.75),
       frequency: varyAbsolute(0.5, 0.4),
       offset: Math.random(),
     });
     const countBase = varyAbsolute(2, 1.5) * Math.sign(varyAbsolute(0, 1));
-    const activeWaveCount = s.sin(null, {
+    const activeWaveCount = s.sin({
       min: countBase - 2,
       max: countBase + 2,
       frequency: varyAbsolute(0.5, 0.4),
@@ -218,21 +216,19 @@ function octopusScene(
     const points = times(
       segmentCount,
       (i): TentaclePoint => {
-        const idleAngleWave = s.sin(null, {
+        const idleAngleWave = s.sin({
           min: -0.3,
           max: 0.3,
           frequency: 0.2 * 1.1 ** (i / 2),
           offset: Math.random(),
         });
-        const idleEndAngle = s.add(null, idleAngleWave, idleLastAngle);
+        const idleEndAngle = s.add(idleAngleWave, idleLastAngle);
         const idleLength = 24 * 0.95 ** (i / 2);
         const idleEndX = s.add(
-          null,
           lastEndX,
           s.computed(() => Math.cos(idleEndAngle.read()) * idleLength),
         );
         const idleEndY = s.add(
-          null,
           lastEndY,
           s.computed(() => Math.sin(idleEndAngle.read()) * idleLength),
         );
@@ -240,7 +236,7 @@ function octopusScene(
         const activeProportion = (i + 1) / segmentCount;
 
         const activeWaveMagnitude = Math.sin(activeProportion * Math.PI) * 20;
-        const activeWave = s.sin(null, {
+        const activeWave = s.sin({
           min: -activeWaveMagnitude,
           max: activeWaveMagnitude,
           offset: s.computed(() => (i / segmentCount) * activeWaveCount.read()),
@@ -248,37 +244,34 @@ function octopusScene(
         });
 
         const activeEndX = s.computed(
-          null,
           () =>
             startX +
             activeDX.read() * activeProportion +
             Math.sin(-activeAngle.read()) * activeWave.read(),
         );
         const activeEndY = s.computed(
-          null,
           () =>
             startY +
             activeDY.read() * activeProportion +
             Math.cos(activeAngle.read()) * activeWave.read(),
         );
 
-        const endX = s.spring(
-          i === segmentCount - 1 ? `tentacle.${t}.endX` : null,
-          {
-            target: s.switch(null, isActive, activeEndX, idleEndX),
+        const endX = s
+          .spring({
+            target: s.switch(isActive, activeEndX, idleEndX),
             friction: friction,
             tension: tension,
-          },
-        );
-        const endY = s.spring(null, {
-          target: s.switch(null, isActive, activeEndY, idleEndY),
+          })
+          .debug(i === segmentCount - 1 ? `tentacle.${t}.endX` : null);
+        const endY = s.spring({
+          target: s.switch(isActive, activeEndY, idleEndY),
           friction: friction,
           tension: tension,
         });
 
-        const dx = s.subtract(null, endX, lastEndX);
-        const dy = s.subtract(null, endY, lastEndY);
-        const segmentLength = s.computed(null, () =>
+        const dx = s.subtract(endX, lastEndX);
+        const dy = s.subtract(endY, lastEndY);
+        const segmentLength = s.computed(() =>
           Math.sqrt(dx.read() * dx.read() + dy.read() * dy.read()),
         );
 
@@ -287,14 +280,12 @@ function octopusScene(
           end: [endX, endY],
           leftInner: [
             s.computed(
-              null,
               () =>
                 endX.read() -
                 (dy.read() / segmentLength.read()) *
                   (INNER_THICKNESS / 2 - i + 1),
             ),
             s.computed(
-              null,
               () =>
                 endY.read() +
                 (dx.read() / segmentLength.read()) *
@@ -303,14 +294,12 @@ function octopusScene(
           ],
           rightInner: [
             s.computed(
-              null,
               () =>
                 endX.read() +
                 (dy.read() / segmentLength.read()) *
                   (INNER_THICKNESS / 2 - i + 1),
             ),
             s.computed(
-              null,
               () =>
                 endY.read() -
                 (dx.read() / segmentLength.read()) *
@@ -319,13 +308,11 @@ function octopusScene(
           ],
           leftOuter: [
             s.computed(
-              null,
               () =>
                 endX.read() -
                 (dy.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),
             ),
             s.computed(
-              null,
               () =>
                 endY.read() +
                 (dx.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),
@@ -333,13 +320,11 @@ function octopusScene(
           ],
           rightOuter: [
             s.computed(
-              null,
               () =>
                 endX.read() +
                 (dy.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),
             ),
             s.computed(
-              null,
               () =>
                 endY.read() -
                 (dx.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),

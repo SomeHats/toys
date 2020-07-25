@@ -9,8 +9,6 @@ import {
   exhaustiveSwitchError,
   lerp,
 } from '../utils';
-import { TARGET_CELLS_PER_PLATE } from '../../terrain/config';
-import { RGB_S3TC_DXT1_Format } from 'three';
 
 export abstract class Signal {
   private currentValue: number | null = null;
@@ -18,6 +16,13 @@ export abstract class Signal {
   constructor(public readonly manager: SignalManager) {}
 
   protected abstract update(): number;
+
+  debug(name: string | null): this {
+    if (name !== null) {
+      this.manager.debug(name, this);
+    }
+    return this;
+  }
 
   clear() {
     this.currentValue = null;
@@ -95,20 +100,21 @@ export class ComputedSignal extends Signal {
 }
 
 export class SignalManager {
-  public signalsByName = new Map<string, Signal>();
-  private readonly signalChangeEvent = new EventEmitter<undefined>();
+  public debugSignalsByName = new Map<string, Signal>();
+  private readonly debugSignalsChangeEvent = new EventEmitter<undefined>();
   private readonly updateEvent = new EventEmitter<undefined>();
+  private readonly signals = new Set<Signal>();
 
-  private readonly _driver: ControlledSignal;
+  private readonly driver: ControlledSignal;
   // private readonly reboundLooper = new rebound.SteppingSimulationLooper();
   // private readonly springSystem = new rebound.SpringSystem(this.reboundLooper);
 
   constructor() {
-    this._driver = this.controlled('internal.driver', 0);
+    this.driver = this.controlled(0).debug('internal.driver');
   }
 
-  onSignalsChange(cb: () => void): Unsubscribe {
-    return this.signalChangeEvent.listen(cb);
+  onDebugSignalsChange(cb: () => void): Unsubscribe {
+    return this.debugSignalsChangeEvent.listen(cb);
   }
 
   onUpdate(cb: () => void): Unsubscribe {
@@ -116,11 +122,11 @@ export class SignalManager {
   }
 
   update(dt: number) {
-    this._driver.set(Math.min(dt, 0.03));
-    for (const signal of this.signalsByName.values()) {
+    this.driver.set(Math.min(dt, 0.03));
+    for (const signal of this.signals) {
       signal.clear();
     }
-    for (const signal of this.signalsByName.values()) {
+    for (const signal of this.signals) {
       signal.read();
     }
 
@@ -128,67 +134,40 @@ export class SignalManager {
     // this.reboundLooper.step(dt);
   }
 
-  get driver(): Signal {
-    return this._driver;
+  controlled(initialValue: number): ControlledSignal {
+    return this.addSignal(new ControlledSignal(this, initialValue));
   }
 
-  private optionalName<T>(
-    name: string | null | T,
-    value: T | undefined,
-  ): [string | null, T] {
-    if (value === undefined) {
-      return [null, name] as [string | null, T];
-    } else {
-      return [name, value] as [string | null, T];
-    }
-  }
-
-  controlled(
-    name: string | null | number,
-    initialValue?: number,
-  ): ControlledSignal {
-    const [_name, _initialValue] = this.optionalName(name, initialValue);
-    return this.addSignal(_name, new ControlledSignal(this, _initialValue));
-  }
-
-  computed(
-    name: string | null | (() => number),
-    compute?: () => number,
-  ): ComputedSignal {
-    const [_name, _compute] = this.optionalName(name, compute);
-    return this.addSignal(_name, new ComputedSignal(this, _compute));
+  computed(compute: () => number): ComputedSignal {
+    return this.addSignal(new ComputedSignal(this, compute));
   }
 
   input(name: string, value: number, range?: [number, number]): Signal {
     return this.addSignal(
-      name,
       new ControllableSignal(this, name, value, range),
-    );
+    ).debug(name);
   }
 
-  sin(
-    name: string | null,
-    {
-      min = 0,
-      max = 1,
-      frequency = 1,
-      driver = this.driver,
-      offset = 0,
-    }: {
-      min?: Signal | number;
-      max?: Signal | number;
-      frequency?: Signal | number;
-      driver?: Signal;
-      offset?: Signal | number;
-    } = {},
-  ): Signal {
+  sin({
+    min = 0,
+    max = 1,
+    frequency = 1,
+    driver = this.driver,
+    offset = 0,
+  }: {
+    min?: Signal | number;
+    max?: Signal | number;
+    frequency?: Signal | number;
+    driver?: Signal;
+    offset?: Signal | number;
+  } = {}): Signal {
     const minSignal = this.toSignal(min);
     const maxSignal = this.toSignal(max);
     const frequencySignal = this.toSignal(frequency);
     const offsetSignal = this.toSignal(offset);
 
     let accumulator = 0;
-    return this.computed(name, () => {
+    return this.computed(() => {
       const frequency = frequencySignal.read();
       accumulator += driver.read() * frequency;
       return mapRange(
@@ -201,24 +180,21 @@ export class SignalManager {
     });
   }
 
-  spring(
-    name: string | null,
-    opts: {
-      target: Signal;
-      tension?: Signal | number;
-      friction?: Signal | number;
-      driver?: Signal;
-    },
-  ) {
+  spring(opts: {
+    target: Signal;
+    tension?: Signal | number;
+    friction?: Signal | number;
+    driver?: Signal;
+  }) {
     const targetSignal = opts.target;
-    const driverSignal = opts.driver ?? this._driver;
+    const driverSignal = opts.driver ?? this.driver;
     const tensionSignal = this.toSignal(opts.tension ?? 230);
     const frictionSignal = this.toSignal(opts.friction ?? 22);
 
     let currentPosition = targetSignal.read();
     let currentVelocity = 0;
 
-    return this.computed(name, () => {
+    return this.computed(() => {
       const targetPosition = targetSignal.read();
       const timeStep = driverSignal.read();
       const tension = tensionSignal.read();
@@ -262,40 +238,31 @@ export class SignalManager {
     });
   }
 
-  add(name: string | null, a: Signal | number, b: Signal | number): Signal {
+  add(a: Signal | number, b: Signal | number): Signal {
     const aSignal = this.toSignal(a);
     const bSignal = this.toSignal(b);
-    return this.computed(name, () => aSignal.read() + bSignal.read());
+    return this.computed(() => aSignal.read() + bSignal.read());
   }
 
-  subtract(
-    name: string | null,
-    a: Signal | number,
-    b: Signal | number,
-  ): Signal {
+  subtract(a: Signal | number, b: Signal | number): Signal {
     const aSignal = this.toSignal(a);
     const bSignal = this.toSignal(b);
-    return this.computed(name, () => aSignal.read() - bSignal.read());
+    return this.computed(() => aSignal.read() - bSignal.read());
   }
 
-  multiply(
-    name: string | null,
-    a: Signal | number,
-    b: Signal | number,
-  ): Signal {
+  multiply(a: Signal | number, b: Signal | number): Signal {
     const aSignal = this.toSignal(a);
     const bSignal = this.toSignal(b);
-    return this.computed(name, () => aSignal.read() * bSignal.read());
+    return this.computed(() => aSignal.read() * bSignal.read());
   }
 
-  divide(name: string | null, a: Signal | number, b: Signal | number): Signal {
+  divide(a: Signal | number, b: Signal | number): Signal {
     const aSignal = this.toSignal(a);
     const bSignal = this.toSignal(b);
-    return this.computed(name, () => aSignal.read() / bSignal.read());
+    return this.computed(() => aSignal.read() / bSignal.read());
   }
 
   switch(
-    name: string | null,
     control: Signal | number,
     a: Signal | number,
     b: Signal | number,
@@ -303,7 +270,7 @@ export class SignalManager {
     const controlSignal = this.toSignal(control);
     const aSignal = this.toSignal(a);
     const bSignal = this.toSignal(b);
-    return this.computed(name, () => {
+    return this.computed(() => {
       if (controlSignal.read()) {
         return aSignal.read();
       } else {
@@ -312,24 +279,21 @@ export class SignalManager {
     });
   }
 
-  adsr(
-    name: string | null,
-    {
-      target,
-      attack = 0,
-      delay = 0,
-      sustain = 1,
-      release = 0,
-      driver = this._driver,
-    }: {
-      target: Signal;
-      attack?: Signal | number;
-      delay?: Signal | number;
-      sustain?: Signal | number;
-      release?: Signal | number;
-      driver?: Signal;
-    },
-  ): Signal {
+  adsr({
+    target,
+    attack = 0,
+    delay = 0,
+    sustain = 1,
+    release = 0,
+    driver = this.driver,
+  }: {
+    target: Signal;
+    attack?: Signal | number;
+    delay?: Signal | number;
+    sustain?: Signal | number;
+    release?: Signal | number;
+    driver?: Signal;
+  }): Signal {
     const attackSignal = this.toSignal(attack);
     const delaySignal = this.toSignal(delay);
     const sustainSignal = this.toSignal(sustain);
@@ -345,7 +309,7 @@ export class SignalManager {
     let state = AdsrState.Off;
     let currentValue = 0;
     let releaseStartValue = 0;
-    return this.computed(name, () => {
+    return this.computed(() => {
       const targetValue = target.read();
       const isOn = targetValue !== 0;
 
@@ -409,57 +373,54 @@ export class SignalManager {
     });
   }
 
-  easeExponential(
-    name: string | null,
-    { target, rate = 0.1 }: { target: Signal; rate?: Signal | number },
-  ): Signal {
+  easeExponential({
+    target,
+    rate = 0.1,
+  }: {
+    target: Signal;
+    rate?: Signal | number;
+  }): Signal {
     const rateSignal = this.toSignal(rate);
     let currentValue = target.read();
-    return this.computed(name, () => {
+    return this.computed(() => {
       const difference = target.read() - currentValue;
       currentValue += difference * rateSignal.read();
       return currentValue;
     });
   }
 
-  lerp(
-    name: string | null,
-    a: Signal | number,
-    b: Signal | number,
-    n: Signal | number,
-  ): Signal {
+  lerp(a: Signal | number, b: Signal | number, n: Signal | number): Signal {
     const aSignal = this.toSignal(a);
     const bSignal = this.toSignal(b);
     const nSignal = this.toSignal(n);
-    return this.computed(name, () =>
+    return this.computed(() =>
       lerp(aSignal.read(), bSignal.read(), nSignal.read()),
     );
   }
 
-  private addSignal<T extends Signal>(name: string | null, signal: T) {
-    const nameString = typeof name === 'string' ? name : `_${Math.random()}`;
-
+  debug(name: string, signal: Signal) {
     assert(
-      !this.signalsByName.has(nameString),
+      this.signals.has(signal),
+      `signal called ${name} does not belong to this signal manager`,
+    );
+    assert(
+      !this.debugSignalsByName.has(name),
       `signal called ${name} already exists`,
     );
-    this.signalsByName = new Map(this.signalsByName);
-    this.signalsByName.set(nameString, signal);
-    this.signalChangeEvent.emit();
+    this.debugSignalsByName = new Map(this.debugSignalsByName);
+    this.debugSignalsByName.set(name, signal);
+    this.debugSignalsChangeEvent.emit();
+  }
+
+  private addSignal<T extends Signal>(signal: T) {
+    this.signals.add(signal);
     return signal;
   }
 
   private toSignal(source: Signal | number): Signal {
     if (typeof source === 'number') {
-      return this.controlled(null, source);
+      return this.controlled(source);
     }
     return source;
-  }
-
-  private appendName(name: string | null, suffix: string): string | null {
-    if (name === null) {
-      return null;
-    }
-    return `${name}.${suffix}`;
   }
 }

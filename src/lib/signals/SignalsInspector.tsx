@@ -303,8 +303,8 @@ const SignalsInspector = React.memo(function _SignalsInspector({
   const signalsByName = useSubscription(
     React.useMemo(
       () => ({
-        getCurrentValue: () => signalManager.signalsByName,
-        subscribe: (cb) => signalManager.onSignalsChange(cb),
+        getCurrentValue: () => signalManager.debugSignalsByName,
+        subscribe: (cb) => signalManager.onDebugSignalsChange(cb),
       }),
       [signalManager],
     ),

@@ -40,50 +40,42 @@ const SignalValue = React.memo(function _SignalValue({
 });
 
 const SignalGraph = React.memo(function _SignalGraph({
-  signal,
+  signals,
   width,
 }: {
-  signal: Signal;
+  signals: ReadonlyArray<Signal>;
   width: number;
 }) {
   const pad = 8;
   const rangeFontSize = 8;
 
-  let [{ points, min, max }, setState] = React.useState(() => ({
-    points: [signal.read()],
-    min: signal.read(),
-    max: signal.read(),
-  }));
+  let [{ lines, min, max }, setState] = React.useState(() => {
+    const initialValues = signals.map((s) => s.read());
+    return {
+      lines: initialValues.map((value) => [value]),
+      min: Math.min(...initialValues),
+      max: Math.max(...initialValues),
+    };
+  });
 
   React.useEffect(() => {
-    return signal.manager.onUpdate(() => {
-      const nextPoint = signal.read();
+    return signals[0].manager.onUpdate(() => {
+      const nextPoints = signals.map((s) => s.read());
       setState((prev) => ({
-        points: [nextPoint, ...prev.points.slice(0, width - 1)],
-        min: Math.min(prev.min, nextPoint),
-        max: Math.max(prev.max, nextPoint),
+        lines: prev.lines.map((prevLine, i) => [
+          nextPoints[i],
+          ...prevLine.slice(0, width - 1),
+        ]),
+        min: Math.min(prev.min, ...nextPoints),
+        max: Math.max(prev.max, ...nextPoints),
       }));
     });
-  }, [signal]);
+  }, [signals]);
 
   const height = Math.round(width / 2);
   if (min === max) {
     min = min - 0.1;
     max = max + 0.1;
-  }
-
-  let pathParts = [];
-  for (let i = 0; i < points.length; i++) {
-    const command = i === 0 ? 'M' : 'L';
-    pathParts.push(
-      `${command} ${width - i} ${mapRange(
-        min,
-        max,
-        height - pad,
-        pad,
-        points[i],
-      ).toFixed(1)}`,
-    );
   }
 
   return (
@@ -106,12 +98,30 @@ const SignalGraph = React.memo(function _SignalGraph({
       >
         {format(min, 5)}
       </text>
-      <path
-        d={pathParts.join(' ')}
-        stroke="#cbd5e0"
-        strokeWidth={1}
-        fill="none"
-      />
+      {lines.map((points, i) => {
+        let pathParts = [];
+        for (let i = 0; i < points.length; i++) {
+          const command = i === 0 ? 'M' : 'L';
+          pathParts.push(
+            `${command} ${width - i} ${mapRange(
+              min,
+              max,
+              height - pad,
+              pad,
+              points[i],
+            ).toFixed(1)}`,
+          );
+        }
+        return (
+          <path
+            key={i}
+            d={pathParts.join(' ')}
+            stroke="#cbd5e0"
+            strokeWidth={1}
+            fill="none"
+          />
+        );
+      })}
     </svg>
   );
 });
@@ -213,19 +223,22 @@ function SignalControl({
 }
 
 const SignalInspector = React.memo(function _SignalInspector({
-  signal,
+  signals,
   name,
   displayName = name,
   width,
   listenToMidi,
 }: {
-  signal: Signal;
+  signals: ReadonlyArray<Signal>;
   name: string;
   displayName?: string;
   width: number;
   listenToMidi: ListenToMidiInputFn;
 }) {
   const [isExpanded, setIsExpanded] = useLocalStorage(`signal.${name}`, false);
+  const controllableSignals = signals.filter(
+    (s): s is ControllableSignal => s instanceof ControllableSignal,
+  );
 
   return (
     <div className="text-xs border-t border-gray-700">
@@ -234,17 +247,17 @@ const SignalInspector = React.memo(function _SignalInspector({
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex-auto whitespace-pre px-2 py-1">{displayName}</div>
-        {signal instanceof ControllableSignal ? (
+        {controllableSignals.length ? (
           <SignalControl
             name={name}
-            signal={signal}
+            signal={controllableSignals[0]}
             listenToMidi={listenToMidi}
           />
         ) : (
-          <SignalValue signal={signal} className="px-2 py-1" />
+          <SignalValue signal={signals[0]} className="px-2 py-1" />
         )}
       </div>
-      {isExpanded && <SignalGraph signal={signal} width={width} />}
+      {isExpanded && <SignalGraph signals={signals} width={width} />}
     </div>
   );
 });
@@ -256,7 +269,7 @@ function SignalInspectorGroup({
   listenToMidi,
 }: {
   groupName: string;
-  signalNamePairs: Array<[string, Signal]>;
+  signalNamePairs: ReadonlyArray<readonly [string, ReadonlyArray<Signal>]>;
   width: number;
   listenToMidi: ListenToMidiInputFn;
 }) {
@@ -275,12 +288,12 @@ function SignalInspectorGroup({
       </div>
       {isExpanded && (
         <>
-          {signalNamePairs.map(([name, signal]) => (
+          {signalNamePairs.map(([name, signals]) => (
             <SignalInspector
               key={name}
               name={name}
               displayName={`  ${name.slice(groupName.length + 1)}`}
-              signal={signal}
+              signals={signals}
               width={width}
               listenToMidi={listenToMidi}
             />
@@ -311,7 +324,7 @@ const SignalsInspector = React.memo(function _SignalsInspector({
   );
 
   const signalNamePairs = sortBy(
-    Array.from(signalsByName).filter(([name]) => !name.startsWith('_')),
+    Object.entries(signalsByName).filter(([name]) => !name.startsWith('_')),
     (pair) => pair[0],
   );
   const [
@@ -340,11 +353,11 @@ const SignalsInspector = React.memo(function _SignalsInspector({
           listenToMidi={listenToMidi}
         />
       ))}
-      {ungroupedSignalNamePairs.map(([name, signal]) => (
+      {ungroupedSignalNamePairs.map(([name, signals]) => (
         <SignalInspector
           key={name}
           name={name}
-          signal={signal}
+          signals={signals}
           width={width - 1}
           listenToMidi={listenToMidi}
         />

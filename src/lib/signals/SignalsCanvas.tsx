@@ -22,7 +22,11 @@ export type SignalsCanvasScene = (
   signalManager: SignalManager,
   canvas: HTMLCanvasElement,
   signals: CanvasSignals,
-) => { draw: () => void; children: React.ReactNode | null };
+) => {
+  update?: () => void;
+  draw: () => void;
+  children: React.ReactNode | null;
+};
 
 function SignalsCanvas({
   debuggerEnabled,
@@ -122,6 +126,7 @@ function SignalsCanvas({
         const dt = time - lastTime;
         lastTime = time;
         signalManager.update(dt / 1000);
+        if (loop.update) loop.update();
         loop.draw();
       }
     });

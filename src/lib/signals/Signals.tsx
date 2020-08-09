@@ -6,9 +6,11 @@ import {
   debounce,
   setLocalStorageItem,
   clamp,
-  exhaustiveSwitchError,
   lerp,
+  ReadonlyRecord,
+  has,
 } from '../utils';
+import RingBuffer from '../RingBuffer';
 
 export abstract class Signal {
   private currentValue: number | null = null;
@@ -100,14 +102,12 @@ export class ComputedSignal extends Signal {
 }
 
 export class SignalManager {
-  public debugSignalsByName = new Map<string, Signal>();
+  public debugSignalsByName: ReadonlyRecord<string, ReadonlyArray<Signal>> = {};
   private readonly debugSignalsChangeEvent = new EventEmitter<undefined>();
   private readonly updateEvent = new EventEmitter<undefined>();
   private readonly signals = new Set<Signal>();
 
   private readonly driver: ControlledSignal;
-  // private readonly reboundLooper = new rebound.SteppingSimulationLooper();
-  // private readonly springSystem = new rebound.SpringSystem(this.reboundLooper);
 
   constructor() {
     this.driver = this.controlled(0).debug('internal.driver');
@@ -323,7 +323,6 @@ export class SignalManager {
         }
 
         if (state === AdsrState.Attacking) {
-          console.log('attacking');
           currentValue += (targetValue / attackSignal.read()) * driver.read();
           if (currentValue >= targetValue) {
             state = AdsrState.Holding;
@@ -331,7 +330,6 @@ export class SignalManager {
         }
 
         if (state === AdsrState.Holding) {
-          console.log('holding');
           const sustainTarget = targetValue * sustainSignal.read();
           if (delaySignal.read() === 0) {
             currentValue = sustainTarget;
@@ -398,17 +396,54 @@ export class SignalManager {
     );
   }
 
+  delay({
+    target,
+    amount = 0,
+    driver = this.driver,
+  }: {
+    target: Signal;
+    amount?: Signal | number;
+    driver?: Signal;
+  }) {
+    const amountSignal = this.toSignal(amount);
+    console.log(amountSignal.read());
+    const buffer = new RingBuffer<{ time: number; value: number }>(
+      (amountSignal.read() * 1.2) / (1 / 60),
+    );
+    let time = 0;
+    let lastValue = target.read();
+
+    return this.computed(() => {
+      time += driver.read();
+      const delayAmount = amountSignal.read();
+      buffer.push({ time: time, value: target.read() });
+
+      let next = null;
+      while ((next = buffer.first())) {
+        if (next.time + delayAmount <= time) {
+          lastValue = next.value;
+          buffer.shift();
+        } else {
+          break;
+        }
+      }
+
+      return lastValue;
+    });
+  }
+
   debug(name: string, signal: Signal) {
     assert(
       this.signals.has(signal),
       `signal called ${name} does not belong to this signal manager`,
     );
-    assert(
-      !this.debugSignalsByName.has(name),
-      `signal called ${name} already exists`,
-    );
-    this.debugSignalsByName = new Map(this.debugSignalsByName);
-    this.debugSignalsByName.set(name, signal);
+    const newArray = has(this.debugSignalsByName, name)
+      ? [...this.debugSignalsByName[name], signal]
+      : [signal];
+    this.debugSignalsByName = {
+      ...this.debugSignalsByName,
+      [name]: newArray,
+    };
     this.debugSignalsChangeEvent.emit();
   }
 

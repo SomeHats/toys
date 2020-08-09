@@ -12,7 +12,6 @@ import PianoKeyboard from './PianoKeyboard';
 import startSignalsApp from '../lib/signals/startSignalsApp';
 import { CanvasSignals } from '../lib/signals/SignalsCanvas';
 import useSignal from '../lib/signals/useSignal';
-import { BooleanKeyframeTrack } from 'three';
 
 const WIDTH = 1300;
 const HEIGHT = 1300;
@@ -121,18 +120,6 @@ function octopusScene(
   assert(ctx);
   const draw = new DebugDraw(ctx);
 
-  // s.computed('mouse down', () => mouseDown.read());
-  // s.easeExponential('mouse down eased', { target: mouseDown });
-  // s.easeExponential('mouse down adsr eased', {
-  //   target: s.adsr('mouse down adsr', {
-  //     target: mouseDown,
-  //     attack: s.input('asdr attack', 0, [0, 2]),
-  //     sustain: s.input('asdr sustain', 1, [0, 2]),
-  //     delay: s.input('asdr delay', 0, [0, 2]),
-  //     release: s.input('asdr release', 0, [0, 2]),
-  //   }),
-  // });
-
   const canvasScale = s.computed(() =>
     Math.min(width.read() / WIDTH, height.read() / HEIGHT),
   );
@@ -164,31 +151,28 @@ function octopusScene(
   const idleFriction = s.input('spring.idleFriction', 25, [1, 40]);
   const idleTension = s.input('spring.idleTension', 180, [1, 1000]);
 
+  const octopusXRoot = CENTER_X;
+  const octopusYRoot = 250;
+  const octopusXTarget = s.controlled(octopusXRoot);
+  const octopusYTarget = s.controlled(octopusYRoot);
+  const octopusX = s.spring({ target: octopusXTarget });
+  const octopusY = s.spring({ target: octopusYTarget });
+
   const tentacles = times(tentacleCount, (t) => {
     const isActive = s.controlled(0);
     const activeTargetX = s.controlled(0);
     const activeTargetY = s.controlled(0);
 
-    const springSettingsForMouseDown = s.adsr({
-      target: isActive,
-      release: 2,
-    });
-    const friction = s.lerp(
-      idleFriction,
-      activeFriction,
-      springSettingsForMouseDown,
+    const startX = s.computed(
+      () => octopusX.read() + (t - tentacleCount / 2) * 65,
     );
-    const tension = s.lerp(
-      idleTension,
-      activeTension,
-      springSettingsForMouseDown,
+    const startY = s.computed(
+      () =>
+        octopusY.read() + Math.sin((t / (tentacleCount - 1)) * Math.PI) * 120,
     );
 
-    const startX = CENTER_X + (t - tentacleCount / 2) * 65;
-    const startY = 400 + Math.sin((t / (tentacleCount - 1)) * Math.PI) * 120;
-
-    let lastEndX: Signal = s.controlled(startX);
-    let lastEndY: Signal = s.controlled(startY);
+    let lastEndX: Signal = startX;
+    let lastEndY: Signal = startY;
     let idleLastAngle: Signal = s.controlled(
       Math.PI / 2 - (t - tentacleCount / 2) / (tentacleCount * 0.9),
     );
@@ -216,6 +200,19 @@ function octopusScene(
     const points = times(
       segmentCount,
       (i): TentaclePoint => {
+        const idxFromEnd = segmentCount - (i + 1);
+        const springControl = s.adsr({
+          target: isActive,
+          attack: 0.05 * idxFromEnd,
+          release: 2,
+        });
+        const activeLerp = s.adsr({
+          target: isActive,
+          attack: 0.05 * idxFromEnd,
+        });
+        const friction = s.lerp(idleFriction, activeFriction, springControl);
+        const tension = s.lerp(idleTension, activeTension, springControl);
+
         const idleAngleWave = s.sin({
           min: -0.3,
           max: 0.3,
@@ -245,26 +242,26 @@ function octopusScene(
 
         const activeEndX = s.computed(
           () =>
-            startX +
+            startX.read() +
             activeDX.read() * activeProportion +
             Math.sin(-activeAngle.read()) * activeWave.read(),
         );
         const activeEndY = s.computed(
           () =>
-            startY +
+            startY.read() +
             activeDY.read() * activeProportion +
             Math.cos(activeAngle.read()) * activeWave.read(),
         );
 
         const endX = s
           .spring({
-            target: s.switch(isActive, activeEndX, idleEndX),
+            target: s.lerp(idleEndX, activeEndX, activeLerp),
             friction: friction,
             tension: tension,
           })
-          .debug(i === segmentCount - 1 ? `tentacle.${t}.endX` : null);
+          .debug(i === segmentCount - 1 ? `tentacle.endX` : null);
         const endY = s.spring({
-          target: s.switch(isActive, activeEndY, idleEndY),
+          target: s.lerp(idleEndY, activeEndY, activeLerp),
           friction: friction,
           tension: tension,
         });
@@ -367,8 +364,34 @@ function octopusScene(
     }
   };
 
+  const avgTentacleEndX = s.computed(() => {
+    let total = 0;
+    for (let i = 0; i < tentacleCount; i++) {
+      total += tentacles[i].points[segmentCount - 1].end[0].read();
+    }
+    return total / tentacleCount;
+  });
+  const avgTentacleEndY = s.computed(() => {
+    let total = 0;
+    for (let i = 0; i < tentacleCount; i++) {
+      total += tentacles[i].points[segmentCount - 1].end[1].read();
+    }
+    return total / tentacleCount;
+  });
+
   const zOrderedTentacles = shuffle(tentacles);
   return {
+    update: () => {
+      const avgEndDelta = new Vector2(
+        avgTentacleEndX.read() - octopusXRoot,
+        avgTentacleEndY.read() - 400 - octopusYRoot,
+      );
+      const octopusCenterAdjust = avgEndDelta.withMagnitude(
+        avgEndDelta.magnitude ** 0.9,
+      );
+      octopusXTarget.set(octopusXRoot + octopusCenterAdjust.x);
+      octopusYTarget.set(octopusYRoot + octopusCenterAdjust.y);
+    },
     draw: () => {
       ctx.resetTransform();
       ctx.scale(devicePixelRatio.read(), devicePixelRatio.read());
@@ -441,6 +464,11 @@ function octopusScene(
       );
       ctx.fillStyle = '#FF4782';
       ctx.fill();
+
+      draw.debugPointX(
+        new Vector2(avgTentacleEndX.read(), avgTentacleEndY.read()),
+        { label: 'avg end' },
+      );
     },
     children: (
       <OctopusUi

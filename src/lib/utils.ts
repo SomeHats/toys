@@ -1,6 +1,10 @@
 export type TimeoutId = ReturnType<typeof setTimeout>;
 export type IntervalId = ReturnType<typeof setInterval>;
 
+export type ReadonlyRecord<K extends keyof any, T> = {
+  readonly [P in K]: T;
+};
+
 export function times<T>(n: number, fn: (idx: number) => T): Array<T> {
   const result = [];
   for (let i = 0; i < n; i++) {
@@ -240,4 +244,8 @@ export function debounce<Args extends Array<unknown>>(
 
 export function exhaustiveSwitchError(value: never): never {
   throw new Error(`Unknown switch case ${value}`);
+}
+
+export function has(obj: object, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(obj, key);
 }

@@ -158,13 +158,16 @@ function octopusScene(
   const octopusX = s.spring({ target: octopusXTarget });
   const octopusY = s.spring({ target: octopusYTarget });
 
+  const octopusHeadX = octopusX; // s.spring({ target: octopusX });
+  const octopusHeadY = s.subtract(octopusY, 70); // s.spring({ target: s.subtract(octopusY, 70) });
+
   const tentacles = times(tentacleCount, (t) => {
     const isActive = s.controlled(0);
     const activeTargetX = s.controlled(0);
     const activeTargetY = s.controlled(0);
 
     const startX = s.computed(
-      () => octopusX.read() + (t - tentacleCount / 2) * 65,
+      () => octopusX.read() + (t - (tentacleCount - 1) / 2) * 65,
     );
     const startY = s.computed(
       () =>
@@ -393,6 +396,8 @@ function octopusScene(
       octopusYTarget.set(octopusYRoot + octopusCenterAdjust.y);
     },
     draw: () => {
+      const octopusHead = new Vector2(octopusHeadX.read(), octopusHeadY.read());
+
       ctx.resetTransform();
       ctx.scale(devicePixelRatio.read(), devicePixelRatio.read());
       ctx.fillStyle = '#7F95D1';
@@ -400,6 +405,11 @@ function octopusScene(
 
       ctx.translate(canvasTranslateX.read(), canvasTranslateY.read());
       ctx.scale(canvasScale.read(), canvasScale.read());
+
+      draw.ellipse(octopusHead, 250, 200, {
+        stroke: '#FF709D',
+        strokeWidth: 12,
+      });
 
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
@@ -436,6 +446,10 @@ function octopusScene(
         drawTentacle(ctx, zOrderedTentacles[i], '#FF709D', THICKNESS, 0);
         drawTentacle(ctx, zOrderedTentacles[i], '#FF4782', INNER_THICKNESS, 3);
       }
+
+      draw.ellipse(octopusHead, 250, 200, {
+        fill: '#FF4782',
+      });
 
       ctx.beginPath();
       ctx.moveTo(

@@ -138,6 +138,17 @@ export class DebugDraw {
     this.strokeAndFill(options);
   }
 
+  public ellipse(
+    center: Vector2,
+    radiusX: number,
+    radiusY: number,
+    options: StrokeAndFillOptions,
+  ) {
+    this.beginPath();
+    this.ctx.ellipse(center.x, center.y, radiusX, radiusY, 0, 0, Math.PI * 2);
+    this.strokeAndFill(options);
+  }
+
   public debugLabel(
     label: string | undefined,
     position: Vector2,

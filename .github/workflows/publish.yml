@@ -16,6 +16,12 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+      - name: Seup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          default: true
 
       - uses: actions/checkout@v1
 

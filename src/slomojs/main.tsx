@@ -5,7 +5,12 @@ import('./Cargo.toml').then((slomo) => {
   const source = `
   let x = 1 + 2 + 3, a = 1, b = 2;
   let y = "hello" + x;
-  console.log(y);
+  log(y, x, a, b, log);
+  __debugScope();
+  log(__debugScope);
   `.trim();
-  slomo.start(source, document.getElementById('root')!);
+  slomo
+    .start(source, document.getElementById('root')!)
+    .then((result) => console.log('success', result))
+    .catch((err) => console.log('error', err));
 });

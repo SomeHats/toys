@@ -1,1 +1,1 @@
-export function start(source: string, element: HTMLElement): void;
+export function start(source: string, element: HTMLElement): Promise<unknown>;

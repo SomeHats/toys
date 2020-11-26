@@ -1,201 +1,23 @@
-use paste::paste;
+use crate::display_list::{DisplayListBuilder, DisplayNode, DisplayTextId, Highlight, Spacing};
 use swc_ecma_ast as ast;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-
-const CHAR_HEIGHT: usize = 28;
-const CHAR_WIDTH: usize = 11;
-
-#[derive(Debug, PartialEq, Clone)]
-enum Spacing {
-  None,
-  BreakAfter,
-  SpaceAfter,
-  SpaceAround,
-}
-
-// impl std::ops::Add for Position {
-//   type Output = Self;
-//   fn add(self, other: Self) -> Self {
-//     if other.line == 0 {
-//       Self {
-//         line: self.line,
-//         column: self.column + other.column,
-//       }
-//     } else {
-//       Self {
-//         line: self.line + other.line,
-//         column: other.column,
-//       }
-//     }
-//   }
-// }
 
 #[derive(Debug)]
-pub struct DisplayTextId(usize);
-
-#[derive(Debug)]
-pub struct DisplayText {
-  id: usize,
-  spacing: Spacing,
-  contents: String,
-  line: usize,
-  column: usize,
-  element: web_sys::HtmlElement,
-}
-
-impl DisplayText {
-  fn new(
-    id: usize,
-    spacing: Spacing,
-    contents: &str,
-    line: usize,
-    column: usize,
-    document: &web_sys::Document,
-  ) -> Result<Self, JsValue> {
-    let text = DisplayText {
-      id: id,
-      spacing: spacing,
-      contents: contents.to_string(),
-      line: line,
-      column: column,
-      element: document.create_element("div")?.dyn_into()?,
-    };
-
-    text.element.set_inner_text(contents);
-    text
-      .element
-      .set_class_name("font-mono text-lg text-gray-800 absolute top-0 left-0 transition-transform");
-    text.element.style().set_property(
-      "transform",
-      &format!(
-        "translate({}px, {}px",
-        text.column * CHAR_WIDTH,
-        text.line * CHAR_HEIGHT
-      ),
-    )?;
-
-    Ok(text)
-  }
-}
-
-pub trait DisplayNode<'a, T>
-where
-  Self: std::marker::Sized,
-{
-  fn from_node(node: &'a T, builder: &mut SloMoJs) -> Result<Self, JsValue>;
-}
-
-#[derive(Debug)]
-pub struct SloMoJs {
-  items: Vec<DisplayText>,
-  line: usize,
-  column: usize,
-  document: web_sys::Document,
-  container: web_sys::HtmlElement,
-}
-
-impl SloMoJs {
-  pub fn new(document: web_sys::Document) -> Result<Self, JsValue> {
-    let slomo = Self {
-      items: vec![],
-      line: 0,
-      column: 0,
-      document: document.clone(),
-      container: document.create_element("div")?.dyn_into()?,
-    };
-
-    Ok(slomo)
-  }
-
-  pub fn get_container(&self) -> &web_sys::Element {
-    &self.container
-  }
-
-  // pub fn try_get_item(&self, id: DisplayTextId) -> Option<&DisplayText> {
-  //   self.items.get(id.0)
-  // }
-
-  // pub fn get_item(&self, id: DisplayTextId) -> &DisplayText {
-  //   self.try_get_item(id).unwrap()
-  // }
-
-  // pub fn try_get_item_mut(&mut self, id: DisplayTextId) -> Option<&mut DisplayText> {
-  //   self.items.get_mut(id.0)
-  // }
-
-  // pub fn get_item_mut(&mut self, id: DisplayTextId) -> &mut DisplayText {
-  //   self.try_get_item_mut(id).unwrap()
-  // }
-
-  fn add_text(&mut self, contents: &str, spacing: Spacing) -> Result<DisplayTextId, JsValue> {
-    let id = self.items.len();
-
-    if spacing == Spacing::SpaceAround {
-      self.column += 1
-    }
-
-    let display_text = DisplayText::new(
-      id,
-      spacing.clone(),
-      contents,
-      self.line,
-      self.column,
-      &self.document,
-    )?;
-
-    self.container.append_child(&display_text.element)?;
-    self.items.push(display_text);
-    self.column += contents.len();
-
-    match spacing {
-      Spacing::BreakAfter => {
-        self.line += 1;
-        self.column = 0;
-      }
-      Spacing::SpaceAfter => self.column += 1,
-      Spacing::SpaceAround => self.column += 1,
-      Spacing::None => (),
-    }
-
-    Ok(DisplayTextId(id))
-  }
-
-  pub fn add_node<'a, T: DisplayNode<'a, I>, I>(&mut self, node: &'a I) -> Result<T, JsValue> {
-    T::from_node(node, self)
-  }
-}
-
-impl std::fmt::Display for SloMoJs {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    for item in &self.items {
-      match &item.spacing {
-        Spacing::None => write!(f, "{}", item.contents)?,
-        Spacing::SpaceAfter => write!(f, "{} ", item.contents)?,
-        Spacing::SpaceAround => write!(f, " {} ", item.contents)?,
-        Spacing::BreakAfter => write!(f, "{}\n", item.contents)?,
-      }
-    }
-    Ok(())
-  }
-}
-
-#[derive(Debug)]
-struct SeparatedList<T> {
-  items: Vec<(T, Option<DisplayTextId>)>,
+pub struct SeparatedList<T> {
+  pub items: Vec<(T, Option<DisplayTextId>)>,
 }
 
 impl<T> SeparatedList<T> {
   fn from_iter<Item, Iter, FItem, FSep>(
     iter: Iter,
-    builder: &mut SloMoJs,
+    builder: &mut DisplayListBuilder,
     make_item: FItem,
     make_sep: FSep,
   ) -> Result<SeparatedList<T>, JsValue>
   where
     Iter: Iterator<Item = Item>,
-    FItem: Fn(Item, &mut SloMoJs) -> Result<T, JsValue>,
-    FSep: Fn(&mut SloMoJs) -> Result<DisplayTextId, JsValue>,
+    FItem: Fn(Item, &mut DisplayListBuilder) -> Result<T, JsValue>,
+    FSep: Fn(&mut DisplayListBuilder) -> Result<DisplayTextId, JsValue>,
   {
     let mut items = vec![];
     let mut iter = iter.peekable();
@@ -212,18 +34,22 @@ impl<T> SeparatedList<T> {
       }
     }
   }
+
+  pub fn iter(&self) -> std::slice::Iter<'_, (T, Option<DisplayTextId>)> {
+    self.items.iter()
+  }
 }
 
 trait SeparatedListIter<T, Item> {
   fn separated_list<FItem, FSep>(
     self,
-    builder: &mut SloMoJs,
+    builder: &mut DisplayListBuilder,
     make_item: FItem,
     make_sep: FSep,
   ) -> Result<SeparatedList<T>, JsValue>
   where
-    FItem: Fn(Item, &mut SloMoJs) -> Result<T, JsValue>,
-    FSep: Fn(&mut SloMoJs) -> Result<DisplayTextId, JsValue>;
+    FItem: Fn(Item, &mut DisplayListBuilder) -> Result<T, JsValue>,
+    FSep: Fn(&mut DisplayListBuilder) -> Result<DisplayTextId, JsValue>;
 }
 
 impl<Item, Iter, T> SeparatedListIter<T, Item> for Iter
@@ -232,13 +58,13 @@ where
 {
   fn separated_list<FItem, FSep>(
     self: Iter,
-    builder: &mut SloMoJs,
+    builder: &mut DisplayListBuilder,
     make_item: FItem,
     make_sep: FSep,
   ) -> Result<SeparatedList<T>, JsValue>
   where
-    FItem: Fn(Item, &mut SloMoJs) -> Result<T, JsValue>,
-    FSep: Fn(&mut SloMoJs) -> Result<DisplayTextId, JsValue>,
+    FItem: Fn(Item, &mut DisplayListBuilder) -> Result<T, JsValue>,
+    FSep: Fn(&mut DisplayListBuilder) -> Result<DisplayTextId, JsValue>,
   {
     Ok(SeparatedList::from_iter(
       self, builder, make_item, make_sep,
@@ -246,209 +72,344 @@ where
   }
 }
 
-macro_rules! define_ast_node {
-  ($AstName:path, $Name:ident<$lt:lifetime> { $($element:ident: $ty:ty,)* }) => {
-    paste! {
-      #[allow(dead_code)]
-      #[derive(Debug)]
-      pub struct $Name<$lt> {
-        node: &$lt $AstName,
-        ui: [<$Name Ui>]<$lt>,
-      }
+impl<T> IntoIterator for SeparatedList<T> {
+  type Item = (T, Option<DisplayTextId>);
+  type IntoIter = std::vec::IntoIter<Self::Item>;
 
-      #[allow(dead_code)]
-      #[derive(Debug)]
-      pub struct [<$Name Ui>]<$lt> {
-        $($element: $ty),*
-      }
-    }
-  };
-  ($AstName:path, $Name:ident { $($element:ident: $ty:ty,)* }) => {
-    paste! {
-      #[allow(dead_code)]
-      #[derive(Debug)]
-      pub struct $Name<'a> {
-        node: &'a $AstName,
-        ui: [<$Name Ui>],
-      }
-
-      #[allow(dead_code)]
-      #[derive(Debug)]
-      pub struct [<$Name Ui>] {
-        $($element: $ty),*
-      }
-    }
-  };
-  ($Name:ident<$lt:lifetime> { $($element:ident: $ty:ty,)* }) => {
-    define_ast_node!(ast::$Name, $Name<$lt> { $($element: $ty,)* });
-  };
-  ($Name:ident { $($element:ident: $ty:ty,)* }) => {
-    define_ast_node!(ast::$Name, $Name { $($element: $ty,)* });
-  };
-  ($Name:ident<$lt:lifetime> { $($element:ident: $ty:ty),* }) => {
-    define_ast_node!($Name<$lt> { $($element: $ty,)* });
-  };
-  ($Name:ident { $($element:ident: $ty:ty),* }) => {
-    define_ast_node!($Name { $($element: $ty,)* });
-  };
-}
-
-macro_rules! from_node {
-  ($AstName:path, $Name:ident, |$node:ident, $builder:ident| $from_node:expr) => {
-    #[allow(dead_code)]
-    impl<'a> DisplayNode<'a, $AstName> for $Name<'a> {
-      fn from_node($node: &'a $AstName, $builder: &mut SloMoJs) -> Result<$Name<'a>, JsValue> {
-        Ok($Name {
-          node: $node,
-          ui: $from_node,
-        })
-      }
-    }
-  };
-  ($Name:ident, |$node:ident, $builder:ident| $from_node:expr) => {
-    from_node!(ast::$Name, $Name, |$node, $builder| $from_node);
-  };
-}
-
-define_ast_node!(BinExpr<'a> {
-  left: Box<Expr<'a>>,
-  op: DisplayTextId,
-  right: Box<Expr<'a>>,
-});
-from_node!(BinExpr, |node, builder| BinExprUi {
-  left: Box::new(builder.add_node(&*node.left)?),
-  op: builder.add_text(node.op.as_str(), Spacing::SpaceAround)?,
-  right: Box::new(builder.add_node(&*node.right)?),
-});
-
-define_ast_node!(CallExpr<'a> {
-  callee: Box<ExprOrSuper<'a>>,
-  open_paren: DisplayTextId,
-  args: SeparatedList<ExprOrSpread<'a>>,
-  close_paren: DisplayTextId,
-});
-from_node!(CallExpr, |node, builder| CallExprUi {
-  callee: Box::new(builder.add_node(&node.callee)?),
-  open_paren: builder.add_text("(", Spacing::None)?,
-  args: node.args.iter().separated_list(
-    builder,
-    |node, b| Ok(b.add_node(node)?),
-    |b| Ok(b.add_text(",", Spacing::SpaceAfter)?)
-  )?,
-  close_paren: builder.add_text(")", Spacing::None)?,
-});
-
-define_ast_node!(ExprOrSpread<'a> {
-  spread: Option<DisplayTextId>,
-  expr: Box<Expr<'a>>,
-});
-from_node!(ExprOrSpread, |node, builder| ExprOrSpreadUi {
-  spread: node
-    .spread
-    .map(|_| builder.add_text("...", Spacing::None))
-    .transpose()?,
-  expr: Box::new(builder.add_node(&*node.expr)?),
-});
-
-define_ast_node!(ExprStmt<'a> { expr: Expr<'a> });
-from_node!(ExprStmt, |node, builder| ExprStmtUi {
-  expr: builder.add_node(&*node.expr)?, // Expr::from_node(&node.expr, builder)
-});
-
-define_ast_node!(Ident {
-  name: DisplayTextId
-});
-from_node!(Ident, |node, builder| IdentUi {
-  name: builder.add_text(&*node.sym, Spacing::None)?,
-});
-
-define_ast_node!(Script<'a> {
-  body: SeparatedList<Stmt<'a>>,
-});
-from_node!(Script, |node, builder| ScriptUi {
-  body: node.body.iter().separated_list(
-    builder,
-    |item, b| Ok(b.add_node(item)?),
-    |b| Ok(b.add_text(";", Spacing::BreakAfter)?)
-  )?
-});
-
-define_ast_node!(ast::MemberExpr, StaticMemberExpr<'a> {
-  obj: ExprOrSuper<'a>,
-  dot: DisplayTextId,
-  prop: Ident<'a>,
-});
-from_node!(ast::MemberExpr, StaticMemberExpr, |node, builder| {
-  StaticMemberExprUi {
-    obj: builder.add_node(&node.obj)?,
-    dot: builder.add_text(".", Spacing::None)?,
-    prop: match &*node.prop {
-      ast::Expr::Ident(ident) => builder.add_node(ident)?,
-      other => panic!("Can only use ident in static member, got {:?}", other),
-    },
+  fn into_iter(self) -> Self::IntoIter {
+    self.items.into_iter()
   }
-});
+}
 
-define_ast_node!(Number {
-  value: DisplayTextId,
-});
-from_node!(Number, |node, builder| NumberUi {
-  value: builder.add_text(&node.value.to_string(), Spacing::None)?,
-});
+// macro_rules! define_ast_node {
+//   ($AstName:path, $Name:ident<$lt:lifetime> { $($element:ident: $ty:ty,)* }) => {
+//     paste! {
+//       #[allow(dead_code)]
+//       #[derive(Debug)]
+//       pub struct $Name<$lt> {
+//         pub node: &$lt $AstName,
+//         pub ui: [<$Name Ui>]<$lt>,
+//       }
 
-define_ast_node!(Str {
-  open: DisplayTextId,
-  contents: DisplayTextId,
-  close: DisplayTextId,
-});
-from_node!(Str, |node, builder| StrUi {
-  open: builder.add_text("\"", Spacing::None)?,
-  contents: builder.add_text(&*node.value, Spacing::None)?,
-  close: builder.add_text("\"", Spacing::None)?,
-});
+//       #[allow(dead_code)]
+//       #[derive(Debug)]
+//       pub struct [<$Name Ui>]<$lt> {
+//         pub $($element: $ty),*
+//       }
+//     }
+//   };
+//   ($AstName:path, $Name:ident { $($element:ident: $ty:ty,)* }) => {
+//     paste! {
+//       #[allow(dead_code)]
+//       #[derive(Debug)]
+//       pub struct $Name<'a> {
+//         pub node: &'a $AstName,
+//         pub ui: [<$Name Ui>],
+//       }
 
-define_ast_node!(Super {
-  name: DisplayTextId
-});
-from_node!(Super, |node, builder| SuperUi {
-  name: builder.add_text("super".into(), Spacing::None)?
-});
+//       #[allow(dead_code)]
+//       #[derive(Debug)]
+//       pub struct [<$Name Ui>] {
+//         pub $($element: $ty),*
+//       }
+//     }
+//   };
+//   ($Name:ident<$lt:lifetime> { $($element:ident: $ty:ty,)* }) => {
+//     pub struct ast::$Name, $Name<$lt> { $($element: $ty,)* }
+//     node: &'a ast::,,
+//   };
+//   ($Name:ident { $($element:ident: $ty:ty,)* }) => {
+//     pub struct ast::$Name, $Name { $($element: $ty,)* }
+//     node: &'a ast::,,
+//   };
+//   ($Name:ident<$lt:lifetime> { $($element:ident: $ty:ty),* }) => {
+//     pub struct $Name<$lt> { $($element: $ty,)* }
+//     node: &'a ast::,,
+//   };
+//   ($Name:ident { $($element:ident: $ty:ty),* }) => {
+//     pub struct $Name { $($element: $ty,)* }
+//     node: &'a ast::,,
+//   };
+// }
 
-define_ast_node!(VarDecl<'a> {
-  kind: DisplayTextId,
-  decls: SeparatedList<VarDeclarator<'a>>,
-});
-from_node!(VarDecl, |node, builder| VarDeclUi {
-  kind: builder.add_text(node.kind.as_str(), Spacing::SpaceAfter)?,
-  decls: node.decls.iter().separated_list(
-    builder,
-    |item, b| Ok(b.add_node(item)?),
-    |b| Ok(b.add_text(",", Spacing::SpaceAfter)?)
-  )?
-});
-
-define_ast_node!(VarDeclarator<'a> {
-  name: Pat<'a>,
-  init: Option<(DisplayTextId, Box<Expr<'a>>)>,
-});
-from_node!(VarDeclarator, |node, builder| VarDeclaratorUi {
-  name: builder.add_node(&node.name)?,
-  init: node
-    .init
-    .as_deref()
-    .map::<Result<(DisplayTextId, Box<Expr<'a>>), JsValue>, _>(|init| Ok((
-      builder.add_text("=", Spacing::SpaceAround)?,
-      Box::new(builder.add_node(&*init)?)
-    )))
-    .transpose()?
-});
+// macro_rules! from_node {
+//   ($AstName:path, $Name:ident, |$node:ident, $builder:ident| $from_node:expr) => {
+//     #[allow(dead_code)]
+//     impl<'a> DisplayNode<'a, $AstName> for $Name<'a> {
+//       fn from_node(
+//         $node: &'a $AstName,
+//         $builder: &mut DisplayListBuilder,
+//       ) -> Result<$Name<'a>, JsValue> {
+//         Ok($Name {
+//           node: $node,
+//           ui: $from_node,
+//         })
+//       }
+//     }
+//   };
+//   ($Name:ident, |$node:ident, $builder:ident| $from_node:expr) => {
+//     from_node !(ast::$Name, $Name, |$node, $builder| $from_node);
+//   };
+// }
 
 #[derive(Debug)]
-enum Decl<'a> {
+pub struct BinExpr<'a> {
+  pub node: &'a ast::BinExpr,
+  pub left: Box<Expr<'a>>,
+  pub op: DisplayTextId,
+  pub right: Box<Expr<'a>>,
+}
+impl<'a> DisplayNode<'a, ast::BinExpr> for BinExpr<'a> {
+  fn from_node(
+    node: &'a ast::BinExpr,
+    builder: &mut DisplayListBuilder,
+  ) -> Result<BinExpr<'a>, JsValue> {
+    Ok(BinExpr {
+      node,
+      left: Box::new(builder.add_node(&*node.left)?),
+      op: builder.add_text(node.op.as_str(), Spacing::SpaceAround, Highlight::Operator)?,
+      right: Box::new(builder.add_node(&*node.right)?),
+    })
+  }
+}
+
+#[derive(Debug)]
+pub struct CallExpr<'a> {
+  pub node: &'a ast::CallExpr,
+  pub callee: Box<ExprOrSuper<'a>>,
+  pub open_paren: DisplayTextId,
+  pub args: SeparatedList<ExprOrSpread<'a>>,
+  pub close_paren: DisplayTextId,
+}
+impl<'a> DisplayNode<'a, ast::CallExpr> for CallExpr<'a> {
+  fn from_node(
+    node: &'a ast::CallExpr,
+    builder: &mut DisplayListBuilder,
+  ) -> Result<CallExpr<'a>, JsValue> {
+    Ok(CallExpr {
+      node,
+      callee: Box::new(builder.add_node(&node.callee)?),
+      open_paren: builder.add_text("(", Spacing::None, Highlight::Punctuation)?,
+      args: node.args.iter().separated_list(
+        builder,
+        |node, b| Ok(b.add_node(node)?),
+        |b| Ok(b.add_text(",", Spacing::SpaceAfter, Highlight::Punctuation)?),
+      )?,
+      close_paren: builder.add_text(")", Spacing::None, Highlight::Punctuation)?,
+    })
+  }
+}
+
+#[derive(Debug)]
+pub struct ExprOrSpread<'a> {
+  pub node: &'a ast::ExprOrSpread,
+  pub spread: Option<DisplayTextId>,
+  pub expr: Box<Expr<'a>>,
+}
+impl<'a> DisplayNode<'a, ast::ExprOrSpread> for ExprOrSpread<'a> {
+  fn from_node(
+    node: &'a ast::ExprOrSpread,
+    builder: &mut DisplayListBuilder,
+  ) -> Result<ExprOrSpread<'a>, JsValue> {
+    Ok(ExprOrSpread {
+      node,
+      spread: node
+        .spread
+        .map(|_| builder.add_text("...", Spacing::None, Highlight::Punctuation))
+        .transpose()?,
+      expr: Box::new(builder.add_node(&*node.expr)?),
+    })
+  }
+}
+
+#[derive(Debug)]
+pub struct ExprStmt<'a> {
+  pub node: &'a ast::ExprStmt,
+  pub expr: Expr<'a>,
+}
+impl<'a> DisplayNode<'a, ast::ExprStmt> for ExprStmt<'a> {
+  fn from_node(
+    node: &'a ast::ExprStmt,
+    builder: &mut DisplayListBuilder,
+  ) -> Result<ExprStmt<'a>, JsValue> {
+    Ok(ExprStmt {
+      node,
+      expr: builder.add_node(&*node.expr)?, // Expr::from_node(&node.expr, builder)
+    })
+  }
+}
+
+#[derive(Debug)]
+pub struct Ident<'a> {
+  pub node: &'a ast::Ident,
+  pub name: DisplayTextId,
+}
+impl<'a> DisplayNode<'a, ast::Ident> for Ident<'a> {
+  fn from_node(
+    node: &'a ast::Ident,
+    builder: &mut DisplayListBuilder,
+  ) -> Result<Ident<'a>, JsValue> {
+    Ok(Ident {
+      node,
+      name: builder.add_text(&*node.sym, Spacing::None, Highlight::Identifier)?,
+    })
+  }
+}
+
+#[derive(Debug)]
+pub struct Script<'a> {
+  pub node: &'a ast::Script,
+  pub body: SeparatedList<Stmt<'a>>,
+}
+impl<'a> DisplayNode<'a, ast::Script> for Script<'a> {
+  fn from_node(
+    node: &'a ast::Script,
+    builder: &mut DisplayListBuilder,
+  ) -> Result<Script<'a>, JsValue> {
+    Ok(Script {
+      node,
+      body: node.body.iter().separated_list(
+        builder,
+        |item, b| Ok(b.add_node(item)?),
+        |b| Ok(b.add_text(";", Spacing::BreakAfter, Highlight::Punctuation)?),
+      )?,
+    })
+  }
+}
+
+#[derive(Debug)]
+pub struct StaticMemberExpr<'a> {
+  pub node: &'a ast::MemberExpr,
+  pub obj: ExprOrSuper<'a>,
+  pub dot: DisplayTextId,
+  pub prop: Ident<'a>,
+}
+impl<'a> DisplayNode<'a, ast::MemberExpr> for StaticMemberExpr<'a> {
+  fn from_node(
+    node: &'a ast::MemberExpr,
+    builder: &mut DisplayListBuilder,
+  ) -> Result<StaticMemberExpr<'a>, JsValue> {
+    Ok(StaticMemberExpr {
+      node,
+      obj: builder.add_node(&node.obj)?,
+      dot: builder.add_text(".", Spacing::None, Highlight::Punctuation)?,
+      prop: match &*node.prop {
+        ast::Expr::Ident(ident) => builder.add_node(ident)?,
+        other => panic!("Can only use ident in static member, got {:?}", other),
+      },
+    })
+  }
+}
+
+#[derive(Debug)]
+pub struct Number<'a> {
+  pub node: &'a ast::Number,
+  pub value: DisplayTextId,
+}
+impl<'a> DisplayNode<'a, ast::Number> for Number<'a> {
+  fn from_node(
+    node: &'a ast::Number,
+    builder: &mut DisplayListBuilder,
+  ) -> Result<Number<'a>, JsValue> {
+    Ok(Number {
+      node,
+      value: builder.add_text(&node.value.to_string(), Spacing::None, Highlight::Literal)?,
+    })
+  }
+}
+
+#[derive(Debug)]
+pub struct Str<'a> {
+  pub node: &'a ast::Str,
+  pub open: DisplayTextId,
+  pub contents: DisplayTextId,
+  pub close: DisplayTextId,
+}
+impl<'a> DisplayNode<'a, ast::Str> for Str<'a> {
+  fn from_node(node: &'a ast::Str, builder: &mut DisplayListBuilder) -> Result<Str<'a>, JsValue> {
+    Ok(Str {
+      node,
+      open: builder.add_text("\"", Spacing::None, Highlight::String)?,
+      contents: builder.add_text(&*node.value, Spacing::None, Highlight::String)?,
+      close: builder.add_text("\"", Spacing::None, Highlight::String)?,
+    })
+  }
+}
+
+#[derive(Debug)]
+pub struct Super<'a> {
+  pub node: &'a ast::Super,
+  pub name: DisplayTextId,
+}
+impl<'a> DisplayNode<'a, ast::Super> for Super<'a> {
+  fn from_node(
+    node: &'a ast::Super,
+    builder: &mut DisplayListBuilder,
+  ) -> Result<Super<'a>, JsValue> {
+    Ok(Super {
+      node,
+      name: builder.add_text("super".into(), Spacing::None, Highlight::Keyword)?,
+    })
+  }
+}
+
+#[derive(Debug)]
+pub struct VarDecl<'a> {
+  pub node: &'a ast::VarDecl,
+  pub kind: DisplayTextId,
+  pub decls: SeparatedList<VarDeclarator<'a>>,
+}
+impl<'a> DisplayNode<'a, ast::VarDecl> for VarDecl<'a> {
+  fn from_node(
+    node: &'a ast::VarDecl,
+    builder: &mut DisplayListBuilder,
+  ) -> Result<VarDecl<'a>, JsValue> {
+    Ok(VarDecl {
+      node,
+      kind: builder.add_text(node.kind.as_str(), Spacing::SpaceAfter, Highlight::Keyword)?,
+      decls: node.decls.iter().separated_list(
+        builder,
+        |item, b| Ok(b.add_node(item)?),
+        |b| Ok(b.add_text(",", Spacing::SpaceAfter, Highlight::Punctuation)?),
+      )?,
+    })
+  }
+}
+
+#[derive(Debug)]
+pub struct VarDeclarator<'a> {
+  pub node: &'a ast::VarDeclarator,
+  pub name: Pat<'a>,
+  pub init: Option<(DisplayTextId, Box<Expr<'a>>)>,
+}
+impl<'a> DisplayNode<'a, ast::VarDeclarator> for VarDeclarator<'a> {
+  fn from_node(
+    node: &'a ast::VarDeclarator,
+    builder: &mut DisplayListBuilder,
+  ) -> Result<VarDeclarator<'a>, JsValue> {
+    Ok(VarDeclarator {
+      node,
+      name: builder.add_node(&node.name)?,
+      init: node
+        .init
+        .as_deref()
+        .map::<Result<(DisplayTextId, Box<Expr<'a>>), JsValue>, _>(|init| {
+          Ok((
+            builder.add_text("=", Spacing::SpaceAround, Highlight::Operator)?,
+            Box::new(builder.add_node(&*init)?),
+          ))
+        })
+        .transpose()?,
+    })
+  }
+}
+
+#[derive(Debug)]
+pub enum Decl<'a> {
   Var(VarDecl<'a>),
 }
 impl<'a> DisplayNode<'a, ast::Decl> for Decl<'a> {
-  fn from_node(node: &'a ast::Decl, builder: &mut SloMoJs) -> Result<Decl<'a>, JsValue> {
+  fn from_node(node: &'a ast::Decl, builder: &mut DisplayListBuilder) -> Result<Decl<'a>, JsValue> {
     match node {
       ast::Decl::Var(val) => Ok(Decl::Var(builder.add_node(val)?)),
       other => panic!("Unknown node type for Decl: {:?}", other),
@@ -457,7 +418,7 @@ impl<'a> DisplayNode<'a, ast::Decl> for Decl<'a> {
 }
 
 #[derive(Debug)]
-enum Expr<'a> {
+pub enum Expr<'a> {
   Bin(BinExpr<'a>),
   Call(CallExpr<'a>),
   Ident(Ident<'a>),
@@ -465,7 +426,7 @@ enum Expr<'a> {
   StaticMember(StaticMemberExpr<'a>),
 }
 impl<'a> DisplayNode<'a, ast::Expr> for Expr<'a> {
-  fn from_node(node: &'a ast::Expr, builder: &mut SloMoJs) -> Result<Expr<'a>, JsValue> {
+  fn from_node(node: &'a ast::Expr, builder: &mut DisplayListBuilder) -> Result<Expr<'a>, JsValue> {
     match node {
       ast::Expr::Bin(val) => Ok(Expr::Bin(builder.add_node(val)?)),
       ast::Expr::Call(val) => Ok(Expr::Call(builder.add_node(val)?)),
@@ -484,14 +445,14 @@ impl<'a> DisplayNode<'a, ast::Expr> for Expr<'a> {
 }
 
 #[derive(Debug)]
-enum ExprOrSuper<'a> {
+pub enum ExprOrSuper<'a> {
   Super(Super<'a>),
   Expr(Box<Expr<'a>>),
 }
 impl<'a> DisplayNode<'a, ast::ExprOrSuper> for ExprOrSuper<'a> {
   fn from_node(
     node: &'a ast::ExprOrSuper,
-    builder: &mut SloMoJs,
+    builder: &mut DisplayListBuilder,
   ) -> Result<ExprOrSuper<'a>, JsValue> {
     match node {
       ast::ExprOrSuper::Super(val) => Ok(ExprOrSuper::Super(builder.add_node(val)?)),
@@ -501,12 +462,12 @@ impl<'a> DisplayNode<'a, ast::ExprOrSuper> for ExprOrSuper<'a> {
 }
 
 #[derive(Debug)]
-enum Lit<'a> {
+pub enum Lit<'a> {
   Str(Str<'a>),
   Num(Number<'a>),
 }
 impl<'a> DisplayNode<'a, ast::Lit> for Lit<'a> {
-  fn from_node(node: &'a ast::Lit, builder: &mut SloMoJs) -> Result<Lit<'a>, JsValue> {
+  fn from_node(node: &'a ast::Lit, builder: &mut DisplayListBuilder) -> Result<Lit<'a>, JsValue> {
     match node {
       ast::Lit::Str(val) => Ok(Lit::Str(builder.add_node(val)?)),
       ast::Lit::Num(val) => Ok(Lit::Num(builder.add_node(val)?)),
@@ -516,11 +477,11 @@ impl<'a> DisplayNode<'a, ast::Lit> for Lit<'a> {
 }
 
 #[derive(Debug)]
-enum Pat<'a> {
+pub enum Pat<'a> {
   Ident(Ident<'a>),
 }
 impl<'a> DisplayNode<'a, ast::Pat> for Pat<'a> {
-  fn from_node(node: &'a ast::Pat, builder: &mut SloMoJs) -> Result<Pat<'a>, JsValue> {
+  fn from_node(node: &'a ast::Pat, builder: &mut DisplayListBuilder) -> Result<Pat<'a>, JsValue> {
     match node {
       ast::Pat::Ident(val) => Ok(Pat::Ident(builder.add_node(val)?)),
       other => panic!("Unknown node type for Pat: {:?}", other),
@@ -529,12 +490,12 @@ impl<'a> DisplayNode<'a, ast::Pat> for Pat<'a> {
 }
 
 #[derive(Debug)]
-enum Stmt<'a> {
+pub enum Stmt<'a> {
   Expr(ExprStmt<'a>),
   Decl(Decl<'a>),
 }
 impl<'a> DisplayNode<'a, ast::Stmt> for Stmt<'a> {
-  fn from_node(node: &'a ast::Stmt, builder: &mut SloMoJs) -> Result<Stmt<'a>, JsValue> {
+  fn from_node(node: &'a ast::Stmt, builder: &mut DisplayListBuilder) -> Result<Stmt<'a>, JsValue> {
     match node {
       ast::Stmt::Expr(val) => Ok(Stmt::Expr(builder.add_node(val)?)),
       ast::Stmt::Decl(val) => Ok(Stmt::Decl(builder.add_node(val)?)),

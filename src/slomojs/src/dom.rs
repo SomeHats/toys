@@ -26,7 +26,7 @@ impl DomBuilder {
   }
 
   pub fn styles(self, styles: &[(&str, &str)]) -> Self {
-    set_styles(self.el, styles);
+    set_styles(&self.el, styles);
     self
   }
 

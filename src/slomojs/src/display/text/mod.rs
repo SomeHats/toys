@@ -18,5 +18,7 @@ impl TextBuilder {
     }
   }
 
-  pub fn add(&mut self, config: TextConfig) -> WordId {}
+  pub fn add(&mut self, config: TextConfig) -> WordId {
+    todo!();
+  }
 }

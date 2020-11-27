@@ -13,14 +13,32 @@ pub fn set_panic_hook() {
 }
 
 #[macro_export]
+macro_rules! await_option {
+  ($exp:expr) => {
+    match $exp {
+      Some(val) => Some(val.await),
+      None => None,
+    }
+  };
+}
+
+#[macro_export]
 macro_rules! log {
   ( $( $t:tt )* ) => {
-      {web_sys::console::log_1(&format!( $( $t )* ).into());}
+      {crate::utils::log_str(&format!( $( $t )* ));}
   }
 }
 
+pub fn log_str(string: &str) {
+  web_sys::console::log_1(&JsValue::from_str(string));
+}
+
 pub fn log_value<T: Serialize>(value: &T) {
-  web_sys::console::log_1(&JsValue::from_serde(&value).unwrap())
+  web_sys::console::log_1(&JsValue::from_serde(&value).unwrap());
+}
+
+pub fn log_js_value(value: &JsValue) {
+  web_sys::console::log_1(value);
 }
 
 pub struct ConsoleWriter {

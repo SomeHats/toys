@@ -1,4 +1,9 @@
+#[macro_use]
+extern crate lazy_static;
+
+mod display;
 mod display_list;
+mod dom;
 mod eval;
 mod t;
 mod utils;
@@ -6,7 +11,7 @@ mod utils;
 // use itertools::Itertools;
 // use serde::{Deserialize, Serialize};
 // use std::iter;
-use display_list::DisplayListBuilder;
+use display_list::{DisplayListBuilder, Highlight, Spacing, Transition};
 use swc_common::{errors, sync::Lrc, FileName, SourceMap};
 use swc_ecma_ast as ast;
 use swc_ecma_parser::{lexer::Lexer, Parser, StringInput, Syntax};
@@ -30,13 +35,55 @@ pub async fn start(source: String, element: web_sys::HtmlElement) -> Result<(), 
    // log!("{}", script_to_range(&script));
    // log!("bees {:#?}", script)
 
-   let mut display_list = DisplayListBuilder::new(document.clone())?;
-   let script: t::Script = display_list.add_node(&script)?;
-   let display_list = display_list.build();
+   let mut display_list = DisplayListBuilder::new(document.clone());
+   let script: t::Script = display_list.add_node(&script);
 
+   // let a = display_list.add_text("a", Spacing::SpaceAfter, Highlight::Keyword)?;
+   // let b = display_list.add_text("b", Spacing::SpaceAfter, Highlight::Keyword)?;
+   // let c = display_list.add_text("c", Spacing::SpaceAfter, Highlight::Keyword)?;
+   // let d = display_list.add_text("d", Spacing::SpaceAfter, Highlight::Keyword)?;
+   // let e = display_list.add_text("e", Spacing::SpaceAfter, Highlight::Keyword)?;
+   let display_list = display_list.build();
    element.append_child(display_list.get_container())?;
 
-   eval::eval_script(&script, &mut eval::ExecutionContext::new(display_list)).await;
+   // display_list
+   //    .animate(|mut animate| {
+   //       let after_c = animate.insert_after(
+   //          Transition::Animated,
+   //          c,
+   //          "after C",
+   //          Spacing::SpaceAfter,
+   //          Highlight::Literal,
+   //       );
+   //       animate.insert_before(
+   //          Transition::Animated,
+   //          c,
+   //          "before C",
+   //          Spacing::SpaceAfter,
+   //          Highlight::Literal,
+   //       );
+   //       animate.insert_before(
+   //          Transition::Animated,
+   //          after_c,
+   //          "before after C",
+   //          Spacing::SpaceAfter,
+   //          Highlight::String,
+   //       );
+   //       animate.insert_after(
+   //          Transition::Animated,
+   //          d,
+   //          ";",
+   //          Spacing::BreakAfter,
+   //          Highlight::Punctuation,
+   //       );
+   //    })
+   //    .await;
+
+   eval::eval_script(
+      script,
+      &mut eval::ExecutionContext::new_with_defaults(display_list),
+   )
+   .await;
 
    Ok(())
 }

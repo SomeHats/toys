@@ -13,7 +13,7 @@ default = ["console_error_panic_hook"]
 [dependencies]
 wasm-bindgen = { version = "0.2.61", features = ["serde-serialize"] }
 js-sys = "0.3.45"
-web-sys = { version = "0.3.45", features = ["console", "Document", "Element", "HtmlElement", "Node", "Window", "CssStyleDeclaration"] }
+web-sys = { version = "0.3.45", features = ["console", "Document", "Element", "HtmlElement", "Node", "Window", "CssStyleDeclaration", "Animation", "AnimationEffect", "KeyframeEffect", "KeyframeEffectOptions", "FillMode"] }
 swc_ecma_parser = "0.42.0"
 swc_common = { version = "0.10.5", features = ["tty-emitter"] }
 swc_ecma_ast = "0.34.0"
@@ -23,6 +23,7 @@ paste = "1.0"
 wasm-bindgen-futures = "0.4.18"
 async-trait = "0.1.42"
 futures = "0.3.8"
+lazy_static = "1.4.0"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

@@ -1,6 +1,4 @@
-use super::constants::{
-    ANIMATION_DURATION_MS, CHAR_HEIGHT_CSS, CHAR_HEIGHT_PX, CHAR_WIDTH_CSS, CHAR_WIDTH_PX,
-};
+use super::constants::{ANIMATION_DURATION_MS, CHAR_HEIGHT_CSS, CHAR_WIDTH_CSS, CHAR_WIDTH_PX};
 use super::cursor::CursorPosition;
 use crate::animation::Animation;
 use crate::display_list::{Spacing, TextConfig};

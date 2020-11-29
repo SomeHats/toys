@@ -3,7 +3,7 @@ use crate::display_list::{Highlight, Spacing, TextConfig};
 use swc_ecma_ast as ast;
 
 /// Each display node is a wrapper of an swc ast node, with data props replaced with UI props
-trait DisplayNode<'a, T>
+pub trait DisplayNode<'a, T>
 where
     Self: std::marker::Sized,
 {
@@ -224,7 +224,7 @@ impl<'a> DisplayNode<'a, ast::Number> for Number<'a> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct DisplayString {
     pub open: WordId,
     pub contents: WordId,

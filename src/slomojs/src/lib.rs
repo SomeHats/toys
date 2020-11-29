@@ -5,17 +5,19 @@ mod animation;
 mod display;
 mod display_list;
 mod dom;
-// mod eval;
+mod eval;
 mod t;
 mod utils;
 
 // use itertools::Itertools;
 // use serde::{Deserialize, Serialize};
 // use std::iter;
-use display_list::{DisplayListBuilder, Highlight, Spacing, TextConfig, Transition};
+use display::{Text, TextBuilder};
+use display_list::{Spacing, TextConfig};
 use swc_common::{errors, sync::Lrc, FileName, SourceMap};
 use swc_ecma_ast as ast;
 use swc_ecma_parser::{lexer::Lexer, Parser, StringInput, Syntax};
+use t::DisplayNode;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -46,84 +48,53 @@ pub async fn tester(element: dom::HtmlElement) -> Result<(), JsValue> {
 
     element.append_child(text.get_container_element());
 
-    text.replace_word_config(thing, TextConfig::str_body("NEW DIFFERENT"));
-    text.replace_word_config(add, TextConfig::empty());
+    text.replace_word_config(&l, TextConfig::keyword("LET", Spacing::SpaceAfter));
     text.apply_pending_ops().await;
 
-    let mut count = 0;
-    loop {
-        count += 1;
-        text.replace_word_config(num, TextConfig::literal(&count.to_string()));
-        text.apply_pending_ops().await;
-    }
+    // to string:
+    text.replace_word_config(&num, TextConfig::str_body("1234"));
+    let quo = text.insert_word_before(&num, TextConfig::str_quote());
+    text.insert_word_after(&num, TextConfig::str_quote());
+    // text.apply_pending_ops().await;
+
+    // concat:
+    text.remove_word(add);
+    text.remove_word(str_close);
+    text.remove_word(quo);
+    text.insert_word_after_instant_at_end(&str_open, TextConfig::str_body("Hello1234"));
+    text.remove_word_instant_at_end(str_contents);
+    text.remove_word_instant_at_end(num);
+    text.apply_pending_ops().await;
 
     Ok(())
 }
 
-// #[wasm_bindgen]
-// pub async fn start(source: String, element: web_sys::HtmlElement) -> Result<(), JsValue> {
-//     utils::set_panic_hook();
+#[wasm_bindgen]
+pub async fn start(source: String, element: web_sys::HtmlElement) -> Result<(), JsValue> {
+    utils::set_panic_hook();
 
-//     let window = web_sys::window().expect("no global `window` exists");
-//     let document = window.document().expect("should have a document on window");
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
 
-//     let script = parse(source);
-//     // utils::log_value(&script);
-//     // log!("{}", script_to_range(&script));
-//     // log!("bees {:#?}", script)
+    let script = parse(source);
+    // utils::log_value(&script);
+    // log!("{}", script_to_range(&script));
+    // log!("bees {:#?}", script)
 
-//     let mut display_list = DisplayListBuilder::new(document.clone());
-//     let script: t::Script = display_list.add_node(&script);
+    let mut display_list = TextBuilder::new(&document);
+    let script = t::Script::from_node(&script, &mut display_list);
 
-//     // let a = display_list.add_text("a", Spacing::SpaceAfter, Highlight::Keyword)?;
-//     // let b = display_list.add_text("b", Spacing::SpaceAfter, Highlight::Keyword)?;
-//     // let c = display_list.add_text("c", Spacing::SpaceAfter, Highlight::Keyword)?;
-//     // let d = display_list.add_text("d", Spacing::SpaceAfter, Highlight::Keyword)?;
-//     // let e = display_list.add_text("e", Spacing::SpaceAfter, Highlight::Keyword)?;
-//     let display_list = display_list.build();
-//     element.append_child(display_list.get_container())?;
+    let display_list: Text = display_list.into();
+    dom::append_child(&element, display_list.get_container_element());
 
-//     // display_list
-//     //    .animate(|mut animate| {
-//     //       let after_c = animate.insert_after(
-//     //          Transition::Animated,
-//     //          c,
-//     //          "after C",
-//     //          Spacing::SpaceAfter,
-//     //          Highlight::Literal,
-//     //       );
-//     //       animate.insert_before(
-//     //          Transition::Animated,
-//     //          c,
-//     //          "before C",
-//     //          Spacing::SpaceAfter,
-//     //          Highlight::Literal,
-//     //       );
-//     //       animate.insert_before(
-//     //          Transition::Animated,
-//     //          after_c,
-//     //          "before after C",
-//     //          Spacing::SpaceAfter,
-//     //          Highlight::String,
-//     //       );
-//     //       animate.insert_after(
-//     //          Transition::Animated,
-//     //          d,
-//     //          ";",
-//     //          Spacing::BreakAfter,
-//     //          Highlight::Punctuation,
-//     //       );
-//     //    })
-//     //    .await;
+    eval::eval_script(
+        script,
+        &mut eval::ExecutionContext::new_with_defaults(display_list),
+    )
+    .await?;
 
-//     eval::eval_script(
-//         script,
-//         &mut eval::ExecutionContext::new_with_defaults(display_list),
-//     )
-//     .await;
-
-//     Ok(())
-// }
+    Ok(())
+}
 
 fn parse(source: String) -> ast::Script {
     let cm: Lrc<SourceMap> = Default::default();

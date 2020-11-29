@@ -30,6 +30,13 @@ impl DomBuilder {
         self
     }
 
+    pub fn data_attr(self, name: &str, value: &str) -> Self {
+        self.el
+            .set_attribute(&format!("data-{}", name), value)
+            .unwrap();
+        self
+    }
+
     pub fn class_name(self, name: &str) -> Self {
         self.el.set_class_name(name);
         self

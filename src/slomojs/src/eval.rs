@@ -1,6 +1,5 @@
-use crate::display_list::{
-    DisplayList, DisplayListTransaction, DisplayTextId, InsertPosition, TextConfig, Transition,
-};
+use crate::display::{Text, WordId};
+use crate::display_list::TextConfig;
 use crate::t;
 use crate::t::DisplayString;
 use futures::future::{FutureExt, LocalBoxFuture};
@@ -50,14 +49,14 @@ impl Scope {
 }
 
 pub struct ExecutionContext {
-    display_list: DisplayList,
+    display: Text,
     scope: Scope,
 }
 
 impl ExecutionContext {
-    pub fn new_with_defaults(display_list: DisplayList) -> Self {
+    pub fn new_with_defaults(display: Text) -> Self {
         let mut ctx = Self {
-            display_list,
+            display,
             scope: Scope::new(),
         };
 
@@ -71,7 +70,7 @@ impl ExecutionContext {
                     BindingKind::Let,
                     Value::Function(FunctionValue::new(
                         Rc::new(value),
-                        ctx.display_list.add_text_hidden(TextConfig::builtin(name)),
+                        ctx.display.add_hidden(TextConfig::builtin(name)),
                     )),
                 ),
             )
@@ -83,7 +82,7 @@ impl ExecutionContext {
 
 type Completion<T> = Result<T, String>;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct DisplayValue<Value, Display> {
     value: Value,
     display: Display,
@@ -95,13 +94,13 @@ impl<Value, Display> DisplayValue<Value, Display> {
     }
 }
 
-type SimpleDisplayValue<Value> = DisplayValue<Value, DisplayTextId>;
+type SimpleDisplayValue<Value> = DisplayValue<Value, WordId>;
 type UndefinedValue = SimpleDisplayValue<()>;
 type StringValue = DisplayValue<String, DisplayString>;
 type NumberValue = SimpleDisplayValue<f64>;
 type FunctionValue = SimpleDisplayValue<Rc<dyn Function>>;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 enum Value {
     Undefined(UndefinedValue),
     String(StringValue),
@@ -109,50 +108,50 @@ enum Value {
     Function(FunctionValue),
 }
 
-impl Value {
-    fn duplicate_animated(
-        &self,
-        animate: &mut DisplayListTransaction,
-        transition: Transition,
-        insert_position: InsertPosition,
-    ) -> Self {
-        match self {
-            Self::Undefined(val) => Self::Undefined(UndefinedValue::new(
-                (),
-                animate.clone_item(transition, insert_position, val.display),
-            )),
-            Self::String(val) => {
-                let open = animate.clone_item(transition, insert_position, val.display.open);
-                let contents = animate.clone_item(
-                    transition,
-                    InsertPosition::After(open),
-                    val.display.contents,
-                );
-                let close = animate.clone_item(
-                    transition,
-                    InsertPosition::After(contents),
-                    val.display.close,
-                );
-                Self::String(StringValue::new(
-                    val.value.clone(),
-                    DisplayString {
-                        open,
-                        close,
-                        contents,
-                    },
-                ))
-            }
-            Self::Number(val) => Self::Number(NumberValue::new(
-                val.value,
-                animate.clone_item(transition, insert_position, val.display),
-            )),
-            Self::Function(val) => Self::Function(FunctionValue::new(
-                val.value.clone(),
-                animate.clone_item(transition, insert_position, val.display),
-            )),
-        }
-    }
-}
+// impl Value {
+//     fn duplicate_animated(
+//         &self,
+//         animate: &mut DisplayListTransaction,
+//         transition: Transition,
+//         insert_position: InsertPosition,
+//     ) -> Self {
+//         match self {
+//             Self::Undefined(val) => Self::Undefined(UndefinedValue::new(
+//                 (),
+//                 animate.clone_item(transition, insert_position, val.display),
+//             )),
+//             Self::String(val) => {
+//                 let open = animate.clone_item(transition, insert_position, val.display.open);
+//                 let contents = animate.clone_item(
+//                     transition,
+//                     InsertPosition::After(open),
+//                     val.display.contents,
+//                 );
+//                 let close = animate.clone_item(
+//                     transition,
+//                     InsertPosition::After(contents),
+//                     val.display.close,
+//                 );
+//                 Self::String(StringValue::new(
+//                     val.value.clone(),
+//                     DisplayString {
+//                         open,
+//                         close,
+//                         contents,
+//                     },
+//                 ))
+//             }
+//             Self::Number(val) => Self::Number(NumberValue::new(
+//                 val.value,
+//                 animate.clone_item(transition, insert_position, val.display),
+//             )),
+//             Self::Function(val) => Self::Function(FunctionValue::new(
+//                 val.value.clone(),
+//                 animate.clone_item(transition, insert_position, val.display),
+//             )),
+//         }
+//     }
+// }
 
 trait Function: std::fmt::Debug {
     fn call<'a>(
@@ -189,43 +188,34 @@ enum ToPrimitivePreferredType {
 }
 async fn to_primitive(input: Value, preferred_type: ToPrimitivePreferredType) -> Completion<Value> {
     // TODO: handle objects
-    Ok(input.clone())
+    Ok(input)
 }
 
 // 7.1.17 https://www.ecma-international.org/ecma-262/#sec-tostring
 async fn to_string(input: Value, ctx: &mut ExecutionContext) -> Completion<StringValue> {
     match input {
-        Value::Number(num) => {
-            let num_str = format!("{}", num.value);
-            let str_display = ctx
-                .display_list
-                .animate(|mut animate| {
-                    animate.remove_item(Transition::Animated, num.display);
-                    let open = animate.insert_item(
-                        Transition::Animated,
-                        InsertPosition::Before(num.display),
-                        TextConfig::str_quote(),
-                    );
-                    let contents = animate.insert_item(
-                        Transition::Animated,
-                        InsertPosition::After(num.display),
-                        TextConfig::str_body(&num_str),
-                    );
-                    let close = animate.insert_item(
-                        Transition::Animated,
-                        InsertPosition::After(contents),
-                        TextConfig::str_quote(),
-                    );
-                    DisplayString {
-                        open,
-                        contents,
-                        close,
-                    }
-                })
-                .await;
-            Ok(StringValue::new(num_str, str_display))
+        Value::Number(DisplayValue { value, display }) => {
+            let num_str = format!("{}", value);
+
+            ctx.display
+                .replace_word_config(&display, TextConfig::str_body(&num_str));
+            let open = ctx
+                .display
+                .insert_word_before(&display, TextConfig::str_quote());
+            let close = ctx
+                .display
+                .insert_word_after(&display, TextConfig::str_quote());
+
+            Ok(StringValue::new(
+                num_str,
+                DisplayString {
+                    open,
+                    close,
+                    contents: display,
+                },
+            ))
         }
-        Value::String(str) => Ok(str.clone()),
+        Value::String(val) => Ok(val),
         other => panic!("unimplemented to_string {:?}", other),
     }
 }
@@ -239,7 +229,7 @@ async fn to_numeric(value: Value, ctx: &mut ExecutionContext) -> Completion<Numb
 // 7.1.4 https://www.ecma-international.org/ecma-262/#sec-tonumber
 async fn to_number(value: Value, _ctx: &mut ExecutionContext) -> Completion<NumberValue> {
     match value {
-        Value::Number(val) => Ok(val.clone()),
+        Value::Number(val) => Ok(val),
         other => panic!("unimplemented to_number {:?}", other),
     }
 }
@@ -259,56 +249,66 @@ async fn eval_bin_expr(expr: t::BinExpr<'_>, ctx: &mut ExecutionContext) -> Comp
 
             match (&lprim, &rprim) {
                 (Value::String(_), _) | (_, Value::String(_)) => {
-                    let lstr = to_string(lprim, ctx).await?;
-                    let rstr = to_string(rprim, ctx).await?;
-                    let joined_str = format!("{}{}", lstr.value, rstr.value);
-
-                    ctx.display_list
-                        .animate(|mut animate| {
-                            animate.remove_item(Transition::Animated, lstr.display.close);
-                            animate.remove_item(Transition::Animated, op);
-                            animate.remove_item(Transition::Animated, rstr.display.open);
-                        })
-                        .await;
-                    let display_str = ctx
-                        .display_list
-                        .animate(|mut animate| {
-                            animate.remove_item(Transition::Instant, lstr.display.contents);
-                            animate.remove_item(Transition::Instant, rstr.display.contents);
-                            let new_contents = animate.insert_item(
-                                Transition::Instant,
-                                InsertPosition::Before(lstr.display.contents),
-                                TextConfig::str_body(&joined_str),
-                            );
+                    let DisplayValue {
+                        display:
                             DisplayString {
-                                open: lstr.display.open,
-                                contents: new_contents,
-                                close: rstr.display.close,
-                            }
-                        })
-                        .await;
-                    Ok(Value::String(StringValue::new(joined_str, display_str)))
+                                open: l_open,
+                                contents: l_contents,
+                                close: l_close,
+                            },
+                        value: l_str,
+                    } = to_string(lprim, ctx).await?;
+                    let DisplayValue {
+                        display:
+                            DisplayString {
+                                open: r_open,
+                                contents: r_contents,
+                                close: r_close,
+                            },
+                        value: r_str,
+                    } = to_string(rprim, ctx).await?;
+                    let joined_str = format!("{}{}", l_str, r_str);
+
+                    ctx.display.remove_word(l_close);
+                    ctx.display.remove_word(op);
+                    ctx.display.remove_word(r_open);
+                    ctx.display.remove_word_instant_at_end(l_contents);
+                    ctx.display.remove_word_instant_at_end(r_contents);
+                    let joined_contents = ctx.display.insert_word_after_instant_at_end(
+                        &l_open,
+                        TextConfig::str_body(&joined_str),
+                    );
+                    ctx.display.apply_pending_ops().await;
+
+                    Ok(Value::String(StringValue::new(
+                        joined_str,
+                        DisplayString {
+                            open: l_open,
+                            contents: joined_contents,
+                            close: r_close,
+                        },
+                    )))
                 }
                 _ => {
-                    let lnum = to_numeric(lprim, ctx).await?;
-                    let rnum = to_numeric(rprim, ctx).await?;
-                    let value = lnum.value + rnum.value;
+                    let DisplayValue {
+                        value: l_num,
+                        display: l_display,
+                    } = to_numeric(lprim, ctx).await?;
+                    let DisplayValue {
+                        value: r_num,
+                        display: r_display,
+                    } = to_numeric(rprim, ctx).await?;
 
-                    let display = ctx
-                        .display_list
-                        .animate(|mut animate| {
-                            animate.remove_item(Transition::Animated, lnum.display);
-                            animate.remove_item(Transition::Animated, op);
-                            animate.remove_item(Transition::Animated, rnum.display);
-                            animate.insert_item(
-                                Transition::Animated,
-                                InsertPosition::After(rnum.display),
-                                TextConfig::literal(&value.to_string()),
-                            )
-                        })
-                        .await;
+                    let value = l_num + r_num;
 
-                    Ok(Value::Number(NumberValue::new(value, display)))
+                    // TODO: group merge
+                    ctx.display
+                        .replace_word_config(&l_display, TextConfig::literal(&value.to_string()));
+                    ctx.display.remove_word(r_display);
+                    ctx.display.remove_word(op);
+                    ctx.display.apply_pending_ops().await;
+
+                    Ok(Value::Number(NumberValue::new(value, l_display)))
                 }
             }
         }
@@ -341,7 +341,7 @@ async fn eval_call_expr(
                 .call(
                     Value::Undefined(UndefinedValue::new(
                         (),
-                        ctx.display_list.add_text_hidden(TextConfig::undefined()),
+                        ctx.display.add_hidden(TextConfig::undefined()),
                     )),
                     args,
                     ctx,
@@ -370,17 +370,48 @@ fn eval_expr<'a>(
             t::Expr::Call(call_expr) => Ok(eval_call_expr(call_expr, ctx).await?),
             t::Expr::Ident(ident) => {
                 let binding = ctx.scope.lookup_ident(&ident)?;
-                let local = ctx
-                    .display_list
-                    .animate(|mut animate| {
-                        animate.remove_item(Transition::Animated, ident.name);
-                        binding.value.duplicate_animated(
-                            &mut animate,
-                            Transition::Animated,
-                            InsertPosition::After(ident.name),
-                        )
-                    })
-                    .await;
+                let display = ident.name;
+
+                let local = match &binding.value {
+                    Value::Undefined(_) => {
+                        ctx.display
+                            .replace_word_config(&display, TextConfig::undefined());
+                        ctx.display.apply_pending_ops().await;
+                        Value::Undefined(UndefinedValue::new((), display))
+                    }
+                    Value::String(string) => {
+                        // TODO: better animation:
+                        let open = ctx
+                            .display
+                            .insert_word_before(&display, TextConfig::str_quote());
+                        let close = ctx
+                            .display
+                            .insert_word_after(&display, TextConfig::str_quote());
+                        ctx.display
+                            .replace_word_config(&display, TextConfig::str_body(&string.value));
+                        ctx.display.apply_pending_ops().await;
+                        Value::String(StringValue::new(
+                            string.value.clone(),
+                            DisplayString {
+                                open,
+                                close,
+                                contents: display,
+                            },
+                        ))
+                    }
+                    Value::Number(number) => {
+                        ctx.display.replace_word_config(
+                            &display,
+                            TextConfig::literal(&number.value.to_string()),
+                        );
+                        ctx.display.apply_pending_ops().await;
+                        Value::Number(NumberValue::new(number.value, display))
+                    }
+                    Value::Function(function) => {
+                        Value::Function(FunctionValue::new(function.value.clone(), display))
+                    }
+                };
+
                 Ok(local)
             }
             t::Expr::Lit(lit) => Ok(eval_lit(lit, ctx).await?),
@@ -433,26 +464,18 @@ async fn eval_var_decl(decl: t::VarDecl<'_>, ctx: &mut ExecutionContext) -> Comp
     for (var, _) in decl.decls.into_iter() {
         let init = match var.init {
             Some((_, expr)) => eval_expr(*expr, ctx).await?,
-            None => Value::Undefined(UndefinedValue::new(
-                (),
-                ctx.display_list
-                    .animate(|mut animate| {
-                        let eq = animate.insert_item(
-                            Transition::Animated,
-                            match &var.name {
-                                t::Pat::Ident(ident) => InsertPosition::After(ident.name),
-                                // other => panic!("unknown pat type {:?}", other),
-                            },
-                            TextConfig::spaced_operator("="),
-                        );
-                        animate.insert_item(
-                            Transition::Animated,
-                            InsertPosition::After(eq),
-                            TextConfig::undefined(),
-                        )
-                    })
-                    .await,
-            )),
+            None => {
+                let eq = ctx.display.insert_word_after(
+                    match &var.name {
+                        t::Pat::Ident(ident) => &ident.name,
+                        // other => panic!("unknown pat type {:?}", other),
+                    },
+                    TextConfig::spaced_operator("="),
+                );
+                let display = ctx.display.insert_word_after(&eq, TextConfig::undefined());
+                ctx.display.apply_pending_ops().await;
+                Value::Undefined(UndefinedValue::new((), display))
+            }
         };
 
         let name = match &var.node.name {
@@ -486,14 +509,14 @@ impl Function for BuiltinFunction {
                     crate::log!("{:?}", args);
                     Ok(Value::Undefined(UndefinedValue::new(
                         (),
-                        ctx.display_list.add_text_hidden(TextConfig::undefined()),
+                        ctx.display.add_hidden(TextConfig::undefined()),
                     )))
                 }
                 BuiltinFunction::DebugScope => {
                     crate::log!("{:#?}", ctx.scope);
                     Ok(Value::Undefined(UndefinedValue::new(
                         (),
-                        ctx.display_list.add_text_hidden(TextConfig::undefined()),
+                        ctx.display.add_hidden(TextConfig::undefined()),
                     )))
                 }
             }

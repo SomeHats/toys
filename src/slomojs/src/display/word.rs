@@ -4,6 +4,8 @@ use crate::animation::Animation;
 use crate::display_list::{Spacing, TextConfig};
 use crate::dom;
 
+const SHOW_DEBUG: bool = false;
+
 pub struct Word {
     pub id: WordId,
     config: TextConfig,
@@ -16,6 +18,7 @@ impl Word {
     pub fn new(document: &dom::Document, config: TextConfig, id: WordId) -> Self {
         let content_el = create_content_el(document, &config);
         let container_el = dom::div(document)
+            .data_attr("id", &id.0.to_string())
             .styles(&[
                 ("display", "block"),
                 ("position", "absolute"),
@@ -27,6 +30,17 @@ impl Word {
             .class_name("font-mono text-lg")
             .child(&content_el)
             .into();
+
+        if SHOW_DEBUG {
+            dom::append_child(
+                &container_el,
+                &dom::div(document)
+                    .class_name("absolute bg-gray-100 bg-opacity-75 z-10")
+                    .styles(&[("font-size", "8px")])
+                    .text_content(&format!("{}", id.0))
+                    .into(),
+            );
+        }
 
         Self {
             id,
@@ -41,7 +55,7 @@ impl Word {
         &self.container_el
     }
 
-    pub fn effective_characteristics(&self) -> (usize, Spacing) {
+    pub fn characteristics(&self) -> (usize, Spacing) {
         self.config.characteristics()
     }
 
@@ -53,74 +67,73 @@ impl Word {
         )
     }
 
-    pub fn update_dom_position_animated(
+    pub fn animate_update_dom_position(
         &self,
         old_position: &CursorPosition,
         new_position: &CursorPosition,
     ) -> Animation {
         let (old_x, old_y) = old_position.pixel_coords();
         let (new_x, new_y) = new_position.pixel_coords();
+        self.update_dom_position_sync(new_position);
         Animation::animate(&self.container_el, ANIMATION_DURATION_MS, |keys| {
             keys.transform_translate_x(old_x, new_x)
                 .transform_translate_y(old_y, new_y)
         })
     }
 
-    pub fn begin_op(&mut self, op: WordOp) -> (Animation, IntermediateWordOp) {
-        match op {
-            WordOp::ReplaceConfig(new_config) => {
-                let old_config = &self.config;
-                let new_width = text_width_px(&new_config);
-                let old_width = text_width_px(old_config);
-                let old_content_el = std::mem::replace(
-                    &mut self.content_el,
-                    create_content_el(&self.document, &new_config),
-                );
-                let new_content_el = &self.content_el;
+    /// replace config. returns the animation, and the previous content element. it's up to the
+    /// caller to remove the element when the animation is done.
+    pub fn animate_replace_config(
+        &mut self,
+        new_config: TextConfig,
+    ) -> (Animation, dom::HtmlElement) {
+        let old_config = &self.config;
+        let new_width = text_width_px(&new_config);
+        let old_width = text_width_px(old_config);
+        let old_content_el = std::mem::replace(
+            &mut self.content_el,
+            create_content_el(&self.document, &new_config),
+        );
+        let new_content_el = &self.content_el;
 
-                dom::append_child(&self.container_el, &new_content_el);
-                self.config = new_config;
+        dom::append_child(&self.container_el, &new_content_el);
+        dom::set_styles(
+            &self.container_el,
+            &[("width", &format!("{}px", text_width_px(&self.config)))],
+        );
+        self.config = new_config;
 
-                let animation =
-                    Animation::animate(&old_content_el, ANIMATION_DURATION_MS, |keys| {
-                        keys.transform_scale_x(1., new_width / old_width)
-                    })
-                    .and(&new_content_el, ANIMATION_DURATION_MS, |keys| {
-                        keys.opacity(0., 1.)
-                            .transform_scale_x(old_width / new_width, 1.)
-                    });
+        let animation = Animation::animate(&old_content_el, ANIMATION_DURATION_MS, |keys| {
+            keys.transform_scale_x(1., new_width / old_width)
+        })
+        .and(&new_content_el, ANIMATION_DURATION_MS, |keys| {
+            keys.opacity(0., 1.)
+                .transform_scale_x(old_width / new_width, 1.)
+        });
 
-                (
-                    animation,
-                    IntermediateWordOp::ReplaceConfig { old_content_el },
-                )
-            }
-        }
+        (animation, old_content_el)
     }
 
-    pub fn finalize_op(&mut self, op: IntermediateWordOp) {
-        match op {
-            IntermediateWordOp::ReplaceConfig { old_content_el } => {
-                old_content_el.remove();
-                dom::set_styles(
-                    &self.container_el,
-                    &[("width", &format!("{}px", text_width_px(&self.config)))],
-                )
-            }
-        }
+    pub fn animate_remove(&mut self) -> Animation {
+        self.config = TextConfig::empty();
+        Animation::animate(&self.content_el, ANIMATION_DURATION_MS, |keys| {
+            keys.transform_scale_x(1., 0.).opacity(1., 0.)
+        })
+    }
+
+    pub fn animate_insert(&self) -> Animation {
+        Animation::animate(&self.content_el, ANIMATION_DURATION_MS, |keys| {
+            keys.opacity(0., 1.).transform_scale_x(0., 1.)
+        })
     }
 }
 
-pub enum WordOp {
-    ReplaceConfig(TextConfig),
-}
-
-pub enum IntermediateWordOp {
-    ReplaceConfig { old_content_el: dom::HtmlElement },
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub struct WordId(usize);
+
+pub fn clone_word_id(id: &WordId) -> WordId {
+    WordId(id.0)
+}
 
 pub struct WordIdGenerator {
     next: usize,

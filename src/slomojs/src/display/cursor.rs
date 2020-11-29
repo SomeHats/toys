@@ -2,7 +2,7 @@ use super::constants::{CHAR_HEIGHT_PX, CHAR_WIDTH_PX};
 use crate::display_list::Spacing;
 
 /// (line, column)
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CursorPosition(usize, usize);
 impl CursorPosition {
     pub fn new(line: usize, column: usize) -> Self {

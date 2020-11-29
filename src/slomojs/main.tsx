@@ -27,17 +27,17 @@ if (!has(Animation.prototype, 'finished')) {
 }
 
 import('./Cargo.toml').then((slomo) => {
-  slomo.tester(document.getElementById('root')!);
+  // slomo.tester(document.getElementById('root')!);
 
-  //   const source = `
-  //   let x = "1" + 2000 + 3, a = 1, b = 2, c;
-  //   let y = "hello" + x;
-  //   log(y, x, a, b, log);
-  //   __debugScope();
-  //   log(__debugScope);
-  //   `.trim();
-  //   slomo
-  //     .start(source, document.getElementById('root')!)
-  //     .then((result) => console.log('success', result))
-  //     .catch((err) => console.log('error', err));
+  const source = `
+    let x = "1" + 2000 + 3, a = 1, b = 2, c;
+    let y = "hello" + x;
+    log(y, x, a, b, log);
+    __debugScope();
+    log(__debugScope);
+    `.trim();
+  slomo
+    .start(source, document.getElementById('root')!)
+    .then((result) => console.log('success', result))
+    .catch((err) => console.log('error', err));
 });

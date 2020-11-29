@@ -1,3 +1,4 @@
+use super::constants::CHAR_HEIGHT_PX;
 use super::cursor::CursorPosition;
 use super::word::{clone_word_id, Word, WordId, WordIdGenerator};
 use crate::animation::Animation;

@@ -1,11 +1,16 @@
 use super::constants::CHAR_HEIGHT_PX;
 use super::cursor::CursorPosition;
-use super::word::{clone_word_id, Word, WordId, WordIdGenerator};
+use super::word::{InternalWordId, Word, WordId, WordIdGenerator};
 use crate::animation::Animation;
 use crate::display_list::{Highlight, Spacing, TextConfig};
 use crate::dom;
 use std::collections::HashMap;
 use std::convert::identity;
+use unzip_n::unzip_n;
+
+unzip_n!(3);
+
+type TextCharacteristics = (usize, Spacing);
 
 pub struct TextBuilder {
     items: Vec<Word>,
@@ -24,30 +29,29 @@ impl TextBuilder {
 
     pub fn add(&mut self, config: TextConfig) -> WordId {
         let id = self.id_gen.next();
-        self.items
-            .push(Word::new(&self.document, config, clone_word_id(&id)));
-        id
+        self.items.push(Word::new(&self.document, config, id));
+        id.to_external()
     }
 }
 
 pub struct Text {
     words: Vec<Word>,
-    positions_by_id: HashMap<WordId, CursorPosition>,
+    positions_by_id: HashMap<InternalWordId, CursorPosition>,
     document: dom::Document,
     id_gen: WordIdGenerator,
     container_el: dom::HtmlElement,
     pending_ops: Vec<TextOp>,
-    hidden_region_divider: WordId,
-    words_pending_insert: Vec<WordId>,
+    hidden_region_divider: InternalWordId,
 }
 
 impl From<TextBuilder> for Text {
     fn from(mut text_builder: TextBuilder) -> Self {
-        let hidden_region_divider = text_builder.add(TextConfig::new(
-            "// HIDDEN REGION:",
-            Spacing::BreakAfter,
-            Highlight::Punctuation,
-        ));
+        let hidden_region_divider =
+            InternalWordId::from_external(&text_builder.add(TextConfig::new(
+                "// HIDDEN REGION:",
+                Spacing::BreakAfter,
+                Highlight::Punctuation,
+            )));
         let document = text_builder.document;
         let words = text_builder.items;
         let container_el = dom::div(&document)
@@ -64,7 +68,6 @@ impl From<TextBuilder> for Text {
             id_gen: text_builder.id_gen,
             pending_ops: Vec::new(),
             hidden_region_divider,
-            words_pending_insert: vec![],
         };
 
         text.layout()
@@ -79,22 +82,45 @@ impl Text {
         &self.container_el
     }
 
-    fn word_id_to_idx(&self, word_id: &WordId) -> usize {
+    fn word_id_to_idx(&self, word_id: InternalWordId) -> usize {
         self.words
             .iter()
             .enumerate()
-            .find(|(idx, word)| word.id == clone_word_id(word_id))
+            .find(|(idx, word)| word.id == word_id)
             .unwrap_or_else(|| panic!("Cannot find word with id {:?}", word_id))
             .0
     }
 
-    fn word_by_id_mut(&mut self, word_id: &WordId) -> &mut Word {
+    fn word_by_id_mut(&mut self, word_id: InternalWordId) -> &mut Word {
         let idx = self.word_id_to_idx(word_id);
         self.words.get_mut(idx).unwrap()
     }
-    fn word_by_id(&self, word_id: &WordId) -> &Word {
+    fn word_by_id(&self, word_id: InternalWordId) -> &Word {
         let idx = self.word_id_to_idx(word_id);
         self.words.get(idx).unwrap()
+    }
+    fn characteristics_by_idx(
+        &self,
+        idx: usize,
+        temporary_layout_changes: Option<&Vec<TemporaryLayoutChange>>,
+    ) -> TextCharacteristics {
+        let word = self.words.get(idx).unwrap();
+
+        temporary_layout_changes
+            .and_then(|changes| {
+                changes.iter().find_map(|change| match change {
+                    TemporaryLayoutChange::IgnoreWord(word_id) if *word_id == word.id => {
+                        Some((0, Spacing::None))
+                    }
+                    TemporaryLayoutChange::ReplaceWord(word_id, characteristics)
+                        if *word_id == word.id =>
+                    {
+                        Some(characteristics.clone())
+                    }
+                    _ => None,
+                })
+            })
+            .unwrap_or(word.characteristics())
     }
 
     fn layout<'a>(&'a mut self) -> impl Iterator<Item = LayoutChange<'a>> + 'a {
@@ -116,7 +142,7 @@ impl Text {
                 let old_position = positions_by_id.get(&word.id).map(|p| p.clone());
                 let should_update = old_position.as_ref().map_or(true, |p| *p != new_position);
                 if should_update {
-                    positions_by_id.insert(clone_word_id(&word.id), new_position.clone());
+                    positions_by_id.insert(word.id, new_position.clone());
                     crate::log!(
                         "Updated position of {:?} from {:?} to {:?}",
                         word.id,
@@ -131,7 +157,6 @@ impl Text {
     }
 
     fn add_pending_op(&mut self, new_op: TextOp) {
-        // let new_pending_ops = Vec::with_capacity(self.pending_ops.capacity() + 1);
         let mut idx_to_remove = None;
         let mut op_to_insert = Some(new_op);
         for (idx, old_op) in self.pending_ops.iter_mut().enumerate() {
@@ -161,25 +186,32 @@ impl Text {
     }
 
     pub fn replace_word_config(&mut self, target_id: &WordId, new_config: TextConfig) {
-        self.add_pending_op(TextOp::ReplaceWord(clone_word_id(target_id), new_config))
+        self.add_pending_op(TextOp::ReplaceWord(
+            InternalWordId::from_external(target_id),
+            new_config,
+        ))
     }
     pub fn remove_word(&mut self, target_id: WordId) {
-        self.add_pending_op(TextOp::RemoveWord(target_id))
+        self.add_pending_op(TextOp::RemoveWord(InternalWordId::from_external(
+            &target_id,
+        )))
     }
     pub fn remove_word_instant_at_end(&mut self, target_id: WordId) {
-        self.add_pending_op(TextOp::InstantAtEnd(InstantTextOp::RemoveWord(target_id)))
+        self.add_pending_op(TextOp::InstantAtEnd(InstantTextOp::RemoveWord(
+            InternalWordId::from_external(&target_id),
+        )))
     }
     fn insert_word(
         &mut self,
         is_before: bool,
         instant_at_end: bool,
-        target_id: &WordId,
+        target_id: InternalWordId,
         config: TextConfig,
     ) -> WordId {
         let new_word_id = self.id_gen.next();
         let insert = InsertWord {
-            target_id: clone_word_id(target_id),
-            new_word_id: clone_word_id(&new_word_id),
+            target_id,
+            new_word_id,
             config,
             is_before,
         };
@@ -188,37 +220,73 @@ impl Text {
         } else {
             TextOp::InsertWord(insert)
         });
-        new_word_id
+        new_word_id.to_external()
     }
     pub fn insert_word_before(&mut self, target_id: &WordId, config: TextConfig) -> WordId {
-        self.insert_word(true, false, target_id, config)
+        let new_word_id = self.id_gen.next();
+        self.add_pending_op(TextOp::InsertWord(InsertWord {
+            target_id: InternalWordId::from_external(target_id),
+            new_word_id,
+            config,
+            is_before: true,
+        }));
+        new_word_id.to_external()
     }
     pub fn insert_word_after(&mut self, target_id: &WordId, config: TextConfig) -> WordId {
-        self.insert_word(false, false, target_id, config)
+        let new_word_id = self.id_gen.next();
+        self.add_pending_op(TextOp::InsertWord(InsertWord {
+            target_id: InternalWordId::from_external(target_id),
+            new_word_id,
+            config,
+            is_before: false,
+        }));
+        new_word_id.to_external()
     }
     pub fn insert_word_before_instant_at_end(
         &mut self,
         target_id: &WordId,
         config: TextConfig,
     ) -> WordId {
-        self.insert_word(true, true, target_id, config)
+        let new_word_id = self.id_gen.next();
+        self.add_pending_op(TextOp::InstantAtEnd(InstantTextOp::InsertWord(
+            InsertWord {
+                target_id: InternalWordId::from_external(target_id),
+                new_word_id,
+                config,
+                is_before: true,
+            },
+        )));
+        new_word_id.to_external()
     }
     pub fn insert_word_after_instant_at_end(
         &mut self,
         target_id: &WordId,
         config: TextConfig,
     ) -> WordId {
-        self.insert_word(false, true, target_id, config)
+        let new_word_id = self.id_gen.next();
+        self.add_pending_op(TextOp::InstantAtEnd(InstantTextOp::InsertWord(
+            InsertWord {
+                target_id: InternalWordId::from_external(target_id),
+                new_word_id,
+                config,
+                is_before: false,
+            },
+        )));
+        new_word_id.to_external()
     }
+    // pub fn replace(&mut self, words_to_replace: Vec<WordId>)
     pub fn add_hidden(&mut self, config: TextConfig) -> WordId {
         let new_id = self.id_gen.next();
-        self.apply_insert_word(InsertWord {
-            target_id: clone_word_id(&self.hidden_region_divider),
-            new_word_id: clone_word_id(&new_id),
-            config,
-            is_before: false,
-        });
-        new_id
+        self.apply_insert_word(
+            InsertWord {
+                target_id: self.hidden_region_divider,
+                new_word_id: new_id,
+                config,
+                is_before: false,
+            },
+            None,
+        );
+        new_id.to_external()
     }
 
     pub async fn apply_pending_ops(&mut self) {
@@ -228,8 +296,20 @@ impl Text {
         //     return;
         // }
 
-        let (animations, finalization_ops): (Vec<_>, Vec<_>) =
-            pending_ops.into_iter().map(|op| self.apply_op(op)).unzip();
+        let (animations, finalization_ops): (Vec<_>, Vec<_>) = pending_ops
+            .into_iter()
+            .scan(
+                Vec::<TemporaryLayoutChange>::new(),
+                |temporary_layout_changes, op| {
+                    let (animation, finalization_op, temporary_layout_change) =
+                        self.apply_op(op, temporary_layout_changes);
+                    if let Some(temporary_layout_change) = temporary_layout_change {
+                        temporary_layout_changes.push(temporary_layout_change);
+                    }
+                    Some((animation, finalization_op))
+                },
+            )
+            .unzip();
 
         Animation::concurrent(
             animations
@@ -260,35 +340,47 @@ impl Text {
             .for_each(|(word, _, new_position)| word.update_dom_position_sync(&new_position))
     }
 
-    fn apply_op(&mut self, op: TextOp) -> (Option<Animation>, Option<InstantTextOp>) {
+    fn apply_op(
+        &mut self,
+        op: TextOp,
+        temporary_layout_changes: &Vec<TemporaryLayoutChange>,
+    ) -> (
+        Option<Animation>,
+        Option<InstantTextOp>,
+        Option<TemporaryLayoutChange>,
+    ) {
         match op {
             TextOp::ReplaceWord(target_id, new_config) => {
-                let target = self.word_by_id_mut(&target_id);
-                let (animation, old_content_el) = target.animate_replace_config(new_config);
+                let target = self.word_by_id_mut(target_id);
+                let (animation, old_content_el, old_config) =
+                    target.animate_replace_config(new_config);
+                let (char_len, spacing) = old_config.characteristics();
                 (
                     Some(animation),
                     Some(InstantTextOp::FinalizeReplaceWord(old_content_el)),
+                    Some(TemporaryLayoutChange::ReplaceWord(
+                        target_id,
+                        (char_len, spacing),
+                    )),
                 )
             }
             TextOp::RemoveWord(target_id) => {
-                let target = self.word_by_id_mut(&target_id);
+                let target = self.word_by_id_mut(target_id);
                 (
                     Some(target.animate_remove()),
                     Some(InstantTextOp::RemoveWord(target_id)),
+                    None,
                 )
             }
             TextOp::InsertWord(insert) => {
-                self.words_pending_insert
-                    .push(clone_word_id(&insert.new_word_id));
-                let inserted_word = self.apply_insert_word(insert);
+                let inserted_word = self.apply_insert_word(insert, Some(temporary_layout_changes));
                 (
                     Some(inserted_word.animate_insert()),
-                    Some(InstantTextOp::FinalizeInsertWord(clone_word_id(
-                        &inserted_word.id,
-                    ))),
+                    None,
+                    Some(TemporaryLayoutChange::IgnoreWord(inserted_word.id)),
                 )
             }
-            TextOp::InstantAtEnd(instant_op) => (None, Some(instant_op)),
+            TextOp::InstantAtEnd(instant_op) => (None, Some(instant_op), None),
         }
     }
 
@@ -297,22 +389,14 @@ impl Text {
             InstantTextOp::FinalizeReplaceWord(old_content_el) => {
                 old_content_el.remove();
             }
-            InstantTextOp::FinalizeInsertWord(inserted_id) => {
-                let index = self
-                    .words_pending_insert
-                    .iter()
-                    .position(|word_id| *word_id == inserted_id)
-                    .unwrap();
-                self.words_pending_insert.swap_remove(index);
-            }
             InstantTextOp::RemoveWord(target_id) => {
-                let target_idx = self.word_id_to_idx(&target_id);
+                let target_idx = self.word_id_to_idx(target_id);
                 let target = self.words.remove(target_idx);
                 self.positions_by_id.remove(&target_id);
                 target.get_container_element().remove();
             }
             InstantTextOp::InsertWord(insert) => {
-                self.apply_insert_word(insert);
+                self.apply_insert_word(insert, None);
             }
         }
     }
@@ -325,21 +409,21 @@ impl Text {
             config,
             is_before,
         }: InsertWord,
+        temporary_layout_changes: Option<&Vec<TemporaryLayoutChange>>,
     ) -> &Word {
-        let target_idx = self.word_id_to_idx(&target_id);
+        let target_idx = self.word_id_to_idx(target_id);
         let target_position = self.positions_by_id.get(&target_id);
 
-        let new_word = Word::new(&self.document, config, clone_word_id(&new_word_id));
+        let new_word = Word::new(&self.document, config, new_word_id);
         if let Some(mut new_word_position) = target_position.cloned() {
-            if !is_before && !self.words_pending_insert.contains(&target_id) {
+            if !is_before {
                 let (target_char_len, target_spacing) =
-                    self.words.get(target_idx).unwrap().characteristics();
+                    self.characteristics_by_idx(target_idx, temporary_layout_changes);
                 new_word_position.inc_columns(target_char_len);
                 new_word_position.inc_spacing_after(target_spacing);
             }
             new_word.update_dom_position_sync(&new_word_position);
-            self.positions_by_id
-                .insert(clone_word_id(&new_word_id), new_word_position);
+            self.positions_by_id.insert(new_word_id, new_word_position);
         }
 
         dom::append_child(&self.container_el, new_word.get_container_element());
@@ -355,24 +439,29 @@ impl Text {
 }
 
 struct InsertWord {
-    target_id: WordId,
+    target_id: InternalWordId,
     is_before: bool,
-    new_word_id: WordId,
+    new_word_id: InternalWordId,
     config: TextConfig,
 }
 
+enum TemporaryLayoutChange {
+    IgnoreWord(InternalWordId),
+    ReplaceWord(InternalWordId, TextCharacteristics),
+}
+
 enum TextOp {
-    ReplaceWord(WordId, TextConfig),
-    RemoveWord(WordId),
+    // Replace(Vec<InternalWordId>, Vec<InsertWord>),
+    ReplaceWord(InternalWordId, TextConfig),
+    RemoveWord(InternalWordId),
     InsertWord(InsertWord),
     InstantAtEnd(InstantTextOp),
 }
 
 enum InstantTextOp {
-    RemoveWord(WordId),
+    RemoveWord(InternalWordId),
     InsertWord(InsertWord),
     FinalizeReplaceWord(dom::HtmlElement),
-    FinalizeInsertWord(WordId),
 }
 
 type LayoutChange<'a> = (&'a mut Word, Option<CursorPosition>, CursorPosition);
@@ -394,9 +483,9 @@ fn coalesce_text_ops(old: &TextOp, new: TextOp) -> CoalesceResult {
             if insert.new_word_id == new_id =>
         {
             CoalesceResult::Replace(TextOp::InsertWord(InsertWord {
-                target_id: clone_word_id(&insert.target_id),
+                target_id: insert.target_id,
                 is_before: insert.is_before,
-                new_word_id: clone_word_id(&insert.new_word_id),
+                new_word_id: insert.new_word_id,
                 config: new_config.clone(),
             }))
         }

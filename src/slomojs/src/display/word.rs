@@ -7,7 +7,7 @@ use crate::dom;
 const SHOW_DEBUG: bool = false;
 
 pub struct Word {
-    pub id: WordId,
+    pub id: InternalWordId,
     config: TextConfig,
     container_el: dom::HtmlElement,
     content_el: dom::HtmlElement,
@@ -15,7 +15,7 @@ pub struct Word {
 }
 
 impl Word {
-    pub fn new(document: &dom::Document, config: TextConfig, id: WordId) -> Self {
+    pub fn new(document: &dom::Document, config: TextConfig, id: InternalWordId) -> Self {
         let content_el = create_content_el(document, &config);
         let container_el = dom::div(document)
             .data_attr("id", &id.0.to_string())
@@ -86,10 +86,10 @@ impl Word {
     pub fn animate_replace_config(
         &mut self,
         new_config: TextConfig,
-    ) -> (Animation, dom::HtmlElement) {
+    ) -> (Animation, dom::HtmlElement, TextConfig) {
         let old_config = &self.config;
         let new_width = text_width_px(&new_config);
-        let old_width = text_width_px(old_config);
+        let old_width = text_width_px(&self.config);
         let old_content_el = std::mem::replace(
             &mut self.content_el,
             create_content_el(&self.document, &new_config),
@@ -101,7 +101,8 @@ impl Word {
             &self.container_el,
             &[("width", &format!("{}px", text_width_px(&self.config)))],
         );
-        self.config = new_config;
+
+        let old_config = std::mem::replace(&mut self.config, new_config);
 
         let animation = Animation::animate(&old_content_el, ANIMATION_DURATION_MS, |keys| {
             keys.transform_scale_x(1., new_width / old_width)
@@ -111,7 +112,7 @@ impl Word {
                 .transform_scale_x(old_width / new_width, 1.)
         });
 
-        (animation, old_content_el)
+        (animation, old_content_el, old_config)
     }
 
     pub fn animate_remove(&mut self) -> Animation {
@@ -131,8 +132,16 @@ impl Word {
 #[derive(PartialEq, Eq, Hash, Debug)]
 pub struct WordId(usize);
 
-pub fn clone_word_id(id: &WordId) -> WordId {
-    WordId(id.0)
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub struct InternalWordId(usize);
+
+impl InternalWordId {
+    pub fn to_external(&self) -> WordId {
+        WordId(self.0)
+    }
+    pub fn from_external(external: &WordId) -> InternalWordId {
+        InternalWordId(external.0)
+    }
 }
 
 pub struct WordIdGenerator {
@@ -144,8 +153,8 @@ impl WordIdGenerator {
         WordIdGenerator { next: 0 }
     }
 
-    pub fn next(&mut self) -> WordId {
-        let id = WordId(self.next);
+    pub fn next(&mut self) -> InternalWordId {
+        let id = InternalWordId(self.next);
         self.next += 1;
         id
     }

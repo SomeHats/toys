@@ -381,14 +381,15 @@ fn eval_expr<'a>(
                     }
                     Value::String(string) => {
                         // TODO: better animation:
+                        ctx.display
+                            .replace_word_config(&display, TextConfig::str_body(&string.value));
                         let open = ctx
                             .display
                             .insert_word_before(&display, TextConfig::str_quote());
                         let close = ctx
                             .display
                             .insert_word_after(&display, TextConfig::str_quote());
-                        ctx.display
-                            .replace_word_config(&display, TextConfig::str_body(&string.value));
+
                         ctx.display.apply_pending_ops().await;
                         Value::String(StringValue::new(
                             string.value.clone(),

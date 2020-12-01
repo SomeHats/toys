@@ -24,6 +24,7 @@ wasm-bindgen-futures = "0.4.18"
 async-trait = "0.1.42"
 futures = "0.3.8"
 lazy_static = "1.4.0"
+unzip-n = "0.1.2"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

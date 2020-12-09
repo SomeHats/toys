@@ -162,31 +162,8 @@ trait Function: std::fmt::Debug {
     ) -> LocalBoxFuture<'a, Completion<Value>>;
 }
 
-// 6.1 https://www.ecma-international.org/ecma-262/#sec-ecmascript-language-types
-#[derive(Debug, PartialEq)]
-enum Type {
-    Undefined,
-    String,
-    Number,
-    Function,
-}
-
-fn get_type(value: &Value) -> Type {
-    match value {
-        Value::Undefined(_) => Type::Undefined,
-        Value::String(_) => Type::String,
-        Value::Number(_) => Type::Number,
-        Value::Function(_) => Type::Function,
-    }
-}
-
 // 7.1.1 https://www.ecma-international.org/ecma-262/#sec-toprimitive
-enum ToPrimitivePreferredType {
-    Default,
-    String,
-    Number,
-}
-async fn to_primitive(input: Value, preferred_type: ToPrimitivePreferredType) -> Completion<Value> {
+async fn to_primitive(input: Value) -> Completion<Value> {
     // TODO: handle objects
     Ok(input)
 }
@@ -222,7 +199,7 @@ async fn to_string(input: Value, ctx: &mut ExecutionContext) -> Completion<Strin
 
 // 7.1.3 https://www.ecma-international.org/ecma-262/#sec-tonumeric
 async fn to_numeric(value: Value, ctx: &mut ExecutionContext) -> Completion<NumberValue> {
-    let prim_value = to_primitive(value, ToPrimitivePreferredType::Number).await?;
+    let prim_value = to_primitive(value).await?;
     Ok(to_number(prim_value, ctx).await?)
 }
 
@@ -244,8 +221,8 @@ async fn eval_bin_expr(expr: t::BinExpr<'_>, ctx: &mut ExecutionContext) -> Comp
         ast::BinaryOp::Add => {
             let lval = eval_expr(*left, ctx).await?;
             let rval = eval_expr(*right, ctx).await?;
-            let lprim = to_primitive(lval, ToPrimitivePreferredType::Default).await?;
-            let rprim = to_primitive(rval, ToPrimitivePreferredType::Default).await?;
+            let lprim = to_primitive(lval).await?;
+            let rprim = to_primitive(rval).await?;
 
             match (&lprim, &rprim) {
                 (Value::String(_), _) | (_, Value::String(_)) => {
@@ -380,25 +357,16 @@ fn eval_expr<'a>(
                         Value::Undefined(UndefinedValue::new((), display))
                     }
                     Value::String(string) => {
-                        // TODO: better animation:
-                        ctx.display
-                            .replace_word_config(&display, TextConfig::str_body(&string.value));
-                        let open = ctx
-                            .display
-                            .insert_word_before(&display, TextConfig::str_quote());
-                        let close = ctx
-                            .display
-                            .insert_word_after(&display, TextConfig::str_quote());
+                        let display_string =
+                            ctx.display.replace(vec![display], |text| DisplayString {
+                                open: text.add(TextConfig::str_quote()),
+                                contents: text.add(TextConfig::str_body(&string.value)),
+                                close: text.add(TextConfig::str_quote()),
+                            });
 
                         ctx.display.apply_pending_ops().await;
-                        Value::String(StringValue::new(
-                            string.value.clone(),
-                            DisplayString {
-                                open,
-                                close,
-                                contents: display,
-                            },
-                        ))
+
+                        Value::String(StringValue::new(string.value.clone(), display_string))
                     }
                     Value::Number(number) => {
                         ctx.display.replace_word_config(

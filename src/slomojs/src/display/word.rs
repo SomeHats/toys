@@ -87,7 +87,6 @@ impl Word {
         &mut self,
         new_config: TextConfig,
     ) -> (Animation, dom::HtmlElement, TextConfig) {
-        let old_config = &self.config;
         let new_width = text_width_px(&new_config);
         let old_width = text_width_px(&self.config);
         let old_content_el = std::mem::replace(

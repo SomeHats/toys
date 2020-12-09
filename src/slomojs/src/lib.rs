@@ -36,18 +36,18 @@ pub async fn tester(element: dom::HtmlElement) -> Result<(), JsValue> {
 
     let mut builder = display::TextBuilder::new(&document);
     let l = builder.add(TextConfig::keyword("let", Spacing::SpaceAfter));
-    let thing = builder.add(TextConfig::identifier("thing"));
-    let eq = builder.add(TextConfig::spaced_operator("="));
+    let _thing = builder.add(TextConfig::identifier("thing"));
+    let _eq = builder.add(TextConfig::spaced_operator("="));
     let str_open = builder.add(TextConfig::str_quote());
     let str_contents = builder.add(TextConfig::str_body("Hello"));
     let str_close = builder.add(TextConfig::str_quote());
     let add = builder.add(TextConfig::spaced_operator("+"));
     let num = builder.add(TextConfig::literal("1234"));
-    let semi = builder.add(TextConfig::punctuation(";", Spacing::BreakAfter));
-    let extra = builder.add(TextConfig::identifier("hiiiiii"));
+    let _semi = builder.add(TextConfig::punctuation(";", Spacing::BreakAfter));
+    let _extra = builder.add(TextConfig::identifier("hiiiiii"));
     let mut text: display::Text = builder.into();
 
-    element.append_child(text.get_container_element());
+    element.append_child(text.get_container_element())?;
 
     text.replace_word_config(&l, TextConfig::keyword("LET", Spacing::SpaceAfter));
     text.apply_pending_ops().await;
@@ -109,7 +109,7 @@ fn parse(source: String) -> ast::Script {
         Default::default(),
     );
 
-    let fm = cm.new_source_file(FileName::Custom("test.js".into()), source.clone());
+    let fm = cm.new_source_file(FileName::Custom("test.js".into()), source);
 
     let lexer = Lexer::new(
         // We want to parse ecmascript

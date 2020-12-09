@@ -30,6 +30,8 @@ import('./Cargo.toml').then((slomo) => {
   // slomo.tester(document.getElementById('root')!);
 
   const source = `
+    let str = "hello, world";
+    log(str);
     let x = 1 + 2000 + 3 + "hiii", a = 1, b = 2, c;
     let y = "hello" + x;
     log(y, x, a, b + b + a, log);

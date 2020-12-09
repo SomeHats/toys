@@ -32,12 +32,6 @@ pub struct SeparatedList<T> {
     pub items: Vec<(T, Option<WordId>)>,
 }
 
-impl<'a, T> SeparatedList<T> {
-    pub fn iter(&self) -> std::slice::Iter<'_, (T, Option<WordId>)> {
-        self.items.iter()
-    }
-}
-
 trait SeparatedListIter<T, Item> {
     fn separated_list<FSep>(self, builder: &mut TextBuilder, make_sep: FSep) -> SeparatedList<T>
     where
@@ -67,7 +61,7 @@ where
                     items.push((display_item, display_sep));
                 }
                 None => {
-                    return SeparatedList { items: items };
+                    return SeparatedList { items };
                 }
             }
         }

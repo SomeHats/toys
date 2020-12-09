@@ -25,18 +25,37 @@ macro_rules! await_option {
 #[macro_export]
 macro_rules! log {
   ( $( $t:tt )* ) => {
-      {crate::utils::log_str(&format!( $( $t )* ));}
+      {$crate::utils::log_str(&format!( $( $t )* ));}
   }
 }
+
+// #[macro_export]
+// macro_rules! dbg_format {
+//     ( $ex:expr ) => {
+//         format!("{} = {:?}", stringify!($ex), $ex)
+//     };
+//     ( $ex:expr $(, $recur:expr )* ) => {
+//         format!("{}, {}", $crate::dbg_format!($ex), $crate::dbg_format!($($recur),*))
+//     };
+// }
+
+// #[macro_export]
+// macro_rules! dbg {
+//     ( $( $recur:expr ),* ) => {
+//         {$crate::log_str(&$crate::dbg_format!($($recur),*));}
+//     }
+// }
 
 pub fn log_str(string: &str) {
     web_sys::console::log_1(&JsValue::from_str(string));
 }
 
+#[allow(dead_code)]
 pub fn log_value<T: Serialize>(value: &T) {
     web_sys::console::log_1(&JsValue::from_serde(&value).unwrap());
 }
 
+#[allow(dead_code)]
 pub fn log_js_value(value: &JsValue) {
     web_sys::console::log_1(value);
 }

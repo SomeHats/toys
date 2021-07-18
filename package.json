@@ -46,7 +46,7 @@
     "regenerator-runtime": "^0.13.7",
     "resize-observer-polyfill": "^1.5.1",
     "tailwindcss": "^1.4.6",
-    "three": "^0.111.0",
+    "three": "^0.125.0",
     "use-resize-observer": "^7.0.0",
     "use-subscription": "^1.4.1",
     "utility-types": "^3.10.0",

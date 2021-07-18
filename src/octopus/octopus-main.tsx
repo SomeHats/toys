@@ -6,7 +6,7 @@ import {
 } from '../lib/signals/Signals';
 import { times, varyAbsolute, shuffle, uniq, sample } from '../lib/utils';
 import { assert } from '../lib/assert';
-import { DebugDraw } from '../lib/DebugCanvas';
+import { DebugDraw } from '../lib/DebugDraw';
 import Vector2 from '../lib/geom/Vector2';
 import PianoKeyboard from './PianoKeyboard';
 import startSignalsApp from '../lib/signals/startSignalsApp';

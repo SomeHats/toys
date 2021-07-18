@@ -1,4 +1,4 @@
-import { DebugDraw } from '../lib/DebugCanvas';
+import { DebugDraw } from '../lib/DebugDraw';
 import * as config from './config';
 
 export const canvasEl = document.createElement('canvas');

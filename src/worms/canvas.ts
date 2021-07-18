@@ -1,4 +1,4 @@
-import { DebugDraw } from '../lib/DebugCanvas';
+import { DebugDraw } from '../lib/DebugDraw';
 
 export const canvasEl = document.createElement('canvas');
 export const ctx = canvasEl.getContext('2d')!;

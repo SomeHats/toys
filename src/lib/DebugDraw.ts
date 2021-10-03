@@ -1,3 +1,4 @@
+import AABB from './geom/AABB';
 import Vector2 from './geom/Vector2';
 
 const DEFAULT_DEBUG_COLOR = 'magenta';
@@ -7,7 +8,7 @@ const HAIRLINE = 0.5;
 const DEBUG_ARROW_ANGLE = Math.PI * 0.75;
 const DEBUG_ARROW_SIZE = 5;
 
-type StrokeOptions = {
+export type StrokeOptions = {
   strokeWidth?: number;
   stroke?: string;
   strokeCap?: 'butt' | 'round' | 'square';
@@ -16,16 +17,16 @@ type StrokeOptions = {
   strokeJoin?: 'bevel' | 'round' | 'miter';
 };
 
-type FillOptions = {
+export type FillOptions = {
   fill?: string;
 };
 
-type DebugOptions = {
+export type DebugOptions = {
   color?: string;
   label?: string;
 };
 
-type StrokeAndFillOptions = StrokeOptions & FillOptions;
+export type StrokeAndFillOptions = StrokeOptions & FillOptions;
 
 export class DebugDraw {
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
@@ -269,5 +270,21 @@ export class DebugDraw {
   ) {
     this.debugLabel(label, polyLine[0], color);
     this.polyLine(polyLine, this.getDebugStrokeOptions(color));
+  }
+
+  public aabb(
+    aabb: AABB,
+    opts: StrokeAndFillOptions & { debug?: DebugOptions },
+  ) {
+    if (opts.debug) {
+      this.debugLabel(
+        opts.debug.label,
+        aabb.origin,
+        opts.debug.color || DEFAULT_DEBUG_COLOR,
+      );
+    }
+    this.ctx.beginPath();
+    this.ctx.rect(aabb.left, aabb.top, aabb.width, aabb.height);
+    this.strokeAndFill(opts);
   }
 }

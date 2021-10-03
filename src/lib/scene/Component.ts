@@ -24,4 +24,8 @@ export default abstract class Component {
   draw(ctx: CanvasRenderingContext2D, time: number) {}
 
   afterDraw(ctx: CanvasRenderingContext2D, time: number) {}
+
+  getScene(): Scene {
+    return this.entity.getScene();
+  }
 }

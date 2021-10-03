@@ -51,4 +51,12 @@ export default class AABB {
   get bottom(): number {
     return this.origin.y + this.size.y;
   }
+
+  get width(): number {
+    return this.size.x;
+  }
+
+  get height(): number {
+    return this.size.y;
+  }
 }

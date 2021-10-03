@@ -5,7 +5,6 @@ import { POINT_SPACING, SIZE } from './config';
 import { Delaunay } from './Delaunay';
 import { canvasEl } from './canvas';
 import Vector2 from '../lib/geom/Vector2';
-import { VertexColors } from 'three';
 
 function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
   const scene = new T.Scene();
@@ -26,7 +25,7 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
     left: 0,
   });
 
-  const geometry = new T.Geometry();
+  const geometry = new T.BufferGeometry();
 
   const vertexIndexByCellId = {} as Record<number, number>;
   const seaLevelAdjust = 0 - terrain.cellsById[0].getSeaLevel();
@@ -34,6 +33,7 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
     z += seaLevelAdjust;
     return z ** 1.3 * 30;
   };
+  const allPoints: Array<T.Vector3> = [];
   const addTriangle = (
     a: T.Vector3,
     b: T.Vector3,
@@ -49,11 +49,12 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
     c.setX(SIZE / 2 - c.x);
     c.setY(-(SIZE / 2 - c.y));
     c.setZ(adjustZ(c.z));
-    const vBase = geometry.vertices.length;
-    geometry.vertices.push(a, b, c);
-    const face = new T.Face3(vBase, vBase + 1, vBase + 2);
-    face.color = new T.Color(color);
-    geometry.faces.push(face);
+    // TODO: fixme
+    // const vBase = geometry.vertices.length;
+    // geometry.vertices.push(a, b, c);
+    // const face = new T.Face3(vBase, vBase + 1, vBase + 2);
+    // face.color = new T.Color(color);
+    // geometry.faces.push(face);
   };
   console.time('addTriangles');
   for (const cellId of terrain.activeCellIds) {
@@ -135,7 +136,6 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
   // }
 
   console.time('normals');
-  geometry.computeFaceNormals();
   geometry.computeVertexNormals();
   console.timeEnd('normals');
 
@@ -146,7 +146,8 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
   // material.map = new T.CanvasTexture(canvasEl);
   const material = new T.MeshPhongMaterial({
     shininess: 0,
-    vertexColors: T.FaceColors,
+    // TODO: fixme
+    // vertexColors: T.FaceColors,
   });
   material.flatShading = true;
   const cube = new T.Mesh(geometry, material);
@@ -178,7 +179,7 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
 
   startRenderLoopAsync();
 
-  document.addEventListener('mousemove', e => {
+  document.addEventListener('mousemove', (e) => {
     cube.rotation.x = mapRange(0, window.innerHeight, -0.4, -1.5, e.clientY);
   });
 }

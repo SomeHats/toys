@@ -13,7 +13,7 @@ type SystemClass<T extends SceneSystem = SceneSystem> = {
 
 export default class Scene {
   canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
+  ctx: CanvasRenderingContext2D;
   private _scaleFactor: number;
   private _children: SceneObject[] = [];
   private _isPlaying: boolean = false;
@@ -137,7 +137,7 @@ export default class Scene {
       for (const system of this.systemsByClass.values()) {
         system.beforeUpdate(delta);
       }
-      this._children.forEach(child => child.update(delta));
+      this._children.forEach((child) => child.update(delta));
       for (const system of this.systemsByClass.values()) {
         system.afterUpdate(delta);
       }
@@ -154,7 +154,7 @@ export default class Scene {
     }
     this._children
       .sort((a, b) => a.getSortOrder() - b.getSortOrder())
-      .forEach(child => child.draw(this.ctx, elapsedTime));
+      .forEach((child) => child.draw(this.ctx, elapsedTime));
     for (const system of this.systemsByClass.values()) {
       system.afterDraw(this.ctx, elapsedTime);
     }

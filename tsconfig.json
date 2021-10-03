@@ -6,7 +6,8 @@
     "strict": true,
     "lib": ["es2019", "dom"],
     "target": "es5",
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "skipLibCheck": true,
   },
   "include": ["src/**/*", "types/**/*"]
 }

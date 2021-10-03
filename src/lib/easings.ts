@@ -1,10 +1,119 @@
+import { approxEq } from './utils';
+
 /** n should be between 0 and 1 */
 export type Easing = (n: number) => number;
 
+// based on https://github.com/servo/servo/blob/0d0cfd030347ab0711b3c0607a9ee07ffe7124cf/components/style/bezier.rs
+class UnitBezier {
+  private static readonly NEWTON_METHOD_ITERATIONS = 8;
+  private static readonly DEFAULT_EPSILON = 1e-6;
+  private readonly ax: number;
+  private readonly bx: number;
+  private readonly cx: number;
+  private readonly ay: number;
+  private readonly by: number;
+  private readonly cy: number;
+
+  constructor(x1: number, y1: number, x2: number, y2: number) {
+    const cx = 3 * x1;
+    const bx = 3 * (x2 - x1) - cx;
+
+    const cy = 3 * y1;
+    const by = 3 * (y2 - y1) - cy;
+
+    this.ax = 1.0 - cx - bx;
+    this.bx = bx;
+    this.cx = cx;
+    this.ay = 1.0 - cy - by;
+    this.by = by;
+    this.cy = cy;
+  }
+
+  private sampleCurveX(t: number): number {
+    return ((this.ax * t + this.bx) * t + this.cx) * t;
+  }
+
+  private sampleCurveY(t: number): number {
+    return ((this.ay * t + this.by) * t + this.cy) * t;
+  }
+
+  private sampleCurveDerivativeX(t: number): number {
+    return (3.0 * this.ax * t + 2.0 * this.bx) * t + this.cx;
+  }
+
+  private solveCurveX(x: number, epsilon: number): number {
+    // Fast path: Use Newton's method.
+    let t = x;
+    for (let i = 0; i < UnitBezier.NEWTON_METHOD_ITERATIONS; i++) {
+      let x2 = this.sampleCurveX(t);
+      if (approxEq(x2, x, epsilon)) {
+        return t;
+      }
+      let dx = this.sampleCurveDerivativeX(t);
+      if (approxEq(dx, 0.0, 1e-6)) {
+        break;
+      }
+      t -= (x2 - x) / dx;
+    }
+
+    // Slow path: Use bisection.
+    let lo = 0;
+    let hi = 1;
+    t = x;
+
+    if (t < lo) {
+      return lo;
+    }
+    if (t > hi) {
+      return hi;
+    }
+
+    while (lo < hi) {
+      let x2 = this.sampleCurveX(t);
+      if (approxEq(x2, x, epsilon)) {
+        return t;
+      }
+      if (x > x2) {
+        lo = t;
+      } else {
+        hi = t;
+      }
+      t = (hi - lo) / 2.0 + lo;
+    }
+
+    return t;
+  }
+
+  solve(x: number, epsilon: number = UnitBezier.DEFAULT_EPSILON): number {
+    return this.sampleCurveY(this.solveCurveX(x, epsilon));
+  }
+}
+
+export const cubicBezier = (
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): Easing => {
+  const bezier = new UnitBezier(x1, y1, x2, y2);
+  return (x) => bezier.solve(x);
+};
+
+/**
+ * P(t) = (1-t)^3*P0 + 3*t*(1-t)^2*P1 + 3*t^2*(1-t)*P2 + t^3*P3
+ * x = 3*t*(1-t)^2*p1x + 3*t^2*(1-t)*p2x + t^3
+ * y(t) = 3*t*(1-t)^2*p1y + 3*t^2*(1-t)*p2y + t^3
+ *
+ *
+ * y = 3*u1*(1-x)^2*x + 3*u2*(1-x)*x^2 + x^3
+ */
+
 // https://gist.github.com/rezoner/713615dabedb59a15470
 // http://gsgd.co.uk/sandbox/jquery/easing/
-export const reverse = (easing: (n: number) => number) => (n: number): number =>
-  easing(1 - n);
+export const reverse =
+  (easing: (n: number) => number) =>
+  (n: number): number =>
+    easing(1 - n);
 
 export const linear = (n: number): number => n;
 
@@ -130,19 +239,26 @@ export const inOutElastic = (t: number): number => {
   );
 };
 
-export const inBack = (s: number = 1.70158) => (t: number): number => {
-  return 1 * t * t * ((s + 1) * t - s);
-};
+export const inBack =
+  (s: number = 1.70158) =>
+  (t: number): number => {
+    return 1 * t * t * ((s + 1) * t - s);
+  };
 
-export const outBack = (s: number = 1.70158) => (t: number): number => {
-  t = t - 1;
-  return 1 * (t * t * ((s + 1) * t + s) + 1);
-};
+export const outBack =
+  (s: number = 1.70158) =>
+  (t: number): number => {
+    t = t - 1;
+    return 1 * (t * t * ((s + 1) * t + s) + 1);
+  };
 
-export const inOutBack = (s: number = 1.70158) => (t: number): number => {
-  if ((t /= 1 / 2) < 1) return (1 / 2) * (t * t * (((s *= 1.525) + 1) * t - s));
-  return (1 / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2);
-};
+export const inOutBack =
+  (s: number = 1.70158) =>
+  (t: number): number => {
+    if ((t /= 1 / 2) < 1)
+      return (1 / 2) * (t * t * (((s *= 1.525) + 1) * t - s));
+    return (1 / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2);
+  };
 
 export const inBounce = (t: number): number => {
   return 1 - outBounce(1 - t);

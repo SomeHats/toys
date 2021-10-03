@@ -176,6 +176,20 @@ export function fromEntries<K extends PropertyKey, V>(
   return result;
 }
 
+export function keys<K extends string, V>(object: Record<K, V>): Array<K> {
+  return Object.keys(object) as K[];
+}
+
+export function values<K extends string, V>(object: Record<K, V>): Array<V> {
+  return Object.values(object) as V[];
+}
+
+export function entries<K extends string, V>(
+  object: Record<K, V>,
+): Array<[K, V]> {
+  return Object.entries(object) as [K, V][];
+}
+
 export function compact<T>(arr: ReadonlyArray<T>): Array<NonNullable<T>> {
   return arr.filter(
     (item): item is NonNullable<T> => item !== null && item !== undefined,
@@ -248,4 +262,48 @@ export function exhaustiveSwitchError(value: never): never {
 
 export function has(obj: object, key: string): boolean {
   return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+export function approxEq(a: number, b: number, epsilon: number): boolean {
+  return Math.abs(a - b) < epsilon;
+}
+
+export function queueMicrotask(callback: () => void): () => void {
+  let isCancelled = false;
+  Promise.resolve()
+    .then(() => {
+      if (isCancelled) {
+        return;
+      }
+      callback();
+    })
+    .catch((e) =>
+      setTimeout(() => {
+        throw e;
+      }),
+    );
+  return () => {
+    isCancelled = true;
+  };
+}
+
+export function promiseFromEvents<T>(
+  setupResolve: (resolve: (value: T) => void) => void,
+  setupReject: (reject: (error: unknown) => void) => void,
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    setupResolve(resolve);
+    setupReject(reject);
+  });
+}
+
+export function mapObjectValues<K extends string, V, U>(
+  object: Record<K, V>,
+  fn: (value: V, key: K, obj: Record<K, V>) => U,
+): Record<K, U> {
+  const result = {} as Record<K, U>;
+  for (const [k, v] of entries(object)) {
+    result[k] = fn(v, k, object);
+  }
+  return result;
 }

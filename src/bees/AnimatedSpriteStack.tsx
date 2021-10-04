@@ -1,6 +1,6 @@
 import { Sprite } from 'pixi.js';
 import { AnimatedSpriteStackSheet } from './AnimatedSpriteStackSheet';
-import { Driver } from './Driver';
+import { Driver } from './driver';
 
 export class AnimatedSpriteStack extends Sprite {
   public heading = 0;

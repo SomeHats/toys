@@ -23,7 +23,7 @@
     "clean": "rm -rf dist",
     "start": "yarn run serve",
     "serve": "yarn run clean && parcel serve src/index.html",
-    "build": "yarn run clean && NODE_ENV=production parcel build src/index.html --out-dir dist --public-url https://alex.dytry.ch/toys/",
+    "build": "yarn run clean && NODE_ENV=production parcel build src/index.html --public-url https://alex.dytry.ch/toys/",
     "rust:release": "wasm-pack build crates/slomojs --release",
     "rust:dev": "wasm-pack build crates/slomojs --dev",
     "types": "tsc --noEmit",

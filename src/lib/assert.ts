@@ -1,5 +1,9 @@
+export function fail(message: string): never {
+  throw new Error(message);
+}
+
 export function assert(value: unknown, message?: string): asserts value {
   if (!value) {
-    throw new Error(message || 'Assertion Error');
+    fail(message || 'Assertion Error');
   }
 }

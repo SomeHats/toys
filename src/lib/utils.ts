@@ -264,6 +264,18 @@ export function has(obj: object, key: string): boolean {
   return Object.prototype.hasOwnProperty.call(obj, key);
 }
 
+export function get<K extends string, V>(
+  obj: Partial<Record<K, V>>,
+  key: K,
+): V | undefined;
+export function get(obj: object, key: string): unknown;
+export function get(obj: object, key: string): unknown {
+  if (!has(obj, key)) {
+    return undefined;
+  }
+  return (obj as any)[key];
+}
+
 export function approxEq(a: number, b: number, epsilon: number): boolean {
   return Math.abs(a - b) < epsilon;
 }

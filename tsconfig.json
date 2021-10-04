@@ -5,9 +5,11 @@
     "jsx": "preserve",
     "strict": true,
     "lib": ["es2019", "dom"],
-    "target": "es5",
+    "target": "es2019",
     "downlevelIteration": true,
     "skipLibCheck": true,
+    "moduleResolution": "node",
+    "module": "es2020"
   },
   "include": ["src/**/*", "types/**/*"]
 }

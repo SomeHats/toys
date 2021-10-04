@@ -1,8 +1,8 @@
-import { loadImage } from '../lib/loadImage';
+import { loadImage } from '../lib/load';
 import { C, SpriteOpts } from './C';
 
 export type SpriteManifest = {
-  url: Promise<{ default: string }>;
+  src: URL;
   scale: number;
   originX: number;
   originY: number;
@@ -10,8 +10,7 @@ export type SpriteManifest = {
 
 export class Sprite {
   static async load(manifest: SpriteManifest) {
-    const { default: url } = await manifest.url;
-    const image = await loadImage(url);
+    const image = await loadImage(manifest.src);
     return new Sprite(image, manifest);
   }
 

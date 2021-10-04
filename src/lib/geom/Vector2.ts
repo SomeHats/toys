@@ -12,6 +12,10 @@ export default class Vector2 {
     return sum.div(points.length);
   }
 
+  static fromVectorLike({ x, y }: { x: number; y: number }): Vector2 {
+    return new Vector2(x, y);
+  }
+
   constructor(public readonly x: number, public readonly y: number) {}
 
   toString(): string {
@@ -116,6 +120,10 @@ export default class Vector2 {
 
   withMagnitude(newMagnitude: number): Vector2 {
     return Vector2.fromPolar(this.angle, newMagnitude);
+  }
+
+  normalize(): Vector2 {
+    return this.withMagnitude(1);
   }
 
   withAngle(newAngle: number): Vector2 {

@@ -1,40 +1,69 @@
-import { PromiseType } from 'utility-types';
+import { BaseTexture } from 'pixi.js';
 import { assert } from '../lib/assert';
-import { entries, mapObjectValues } from '../lib/utils';
+import { loadImage } from '../lib/load';
+import { has, keys } from '../lib/utils';
 
-export class AssetBundle<AssetMap extends Record<string, any>> {
-  private loadedAssets: AssetMap | null = null;
-  private loadingPromise: Promise<unknown> | null = null;
+type Id<T> = T extends infer U ? { [K in keyof U]: U[K] } : never;
 
-  constructor(
-    private readonly loaders: {
-      [K in keyof AssetMap]: () => Promise<AssetMap[K]>;
-    },
-  ) {}
+export class AssetBundle<AssetMap extends Record<string, any> = {}> {
+  static async loadBaseTexture(url: URL): Promise<BaseTexture> {
+    const image = await loadImage(url);
+    return new BaseTexture(image);
+  }
+
+  loaders: {
+    [K in keyof AssetMap]: (
+      dep: <Dep extends keyof AssetMap>(dep: Dep) => Promise<AssetMap[Dep]>,
+    ) => Promise<AssetMap[K]>;
+  };
+  private loadedAssets: Partial<AssetMap> = {};
+  private loadAllPromise: Promise<unknown> | null = null;
+  private loadPromises = new Map<keyof AssetMap, Promise<void>>();
+
+  constructor() {
+    this.loaders = {} as any;
+  }
+
+  add<Key extends string, Type>(
+    key: Key,
+    loader: (
+      dep: <Dep extends keyof AssetMap>(dep: Dep) => Promise<AssetMap[Dep]>,
+    ) => Promise<Type>,
+  ): AssetBundle<Id<AssetMap & { [K in Key]: Type }>> {
+    assert(!has(this.loaders, key));
+    (this.loaders as any)[key] = loader;
+    return this as any;
+  }
+
+  async load<K extends keyof AssetMap>(key: K): Promise<void> {
+    let loadPromise = this.loadPromises.get(key);
+    if (!loadPromise) {
+      loadPromise = (async () => {
+        const asset = await this.loaders[key]((dep) => this.getAsync(dep));
+        this.loadedAssets[key] = asset;
+      })();
+      this.loadPromises.set(key, loadPromise);
+    }
+    await loadPromise;
+  }
 
   async loadAll(): Promise<void> {
-    if (!this.loadingPromise) {
-      this.loadingPromise = (async () => {
-        const loadedEntries = await Promise.all(
-          entries(this.loaders).map(
-            async ([key, load]): Promise<[string, unknown]> => [
-              key,
-              await load(),
-            ],
-          ),
-        );
-
-        this.loadedAssets = Object.fromEntries(loadedEntries) as any;
-      })();
+    if (!this.loadAllPromise) {
+      this.loadAllPromise = Promise.all(
+        keys(this.loaders).map((key) => this.load(key)),
+      );
     }
-    await this.loadingPromise;
+    await this.loadAllPromise;
+  }
+
+  async getAsync<K extends keyof AssetMap>(key: K): Promise<AssetMap[K]> {
+    await this.load(key);
+    return this.get(key);
   }
 
   get<K extends keyof AssetMap>(key: K): AssetMap[K] {
-    assert(
-      this.loadedAssets,
-      'must call AssetBundle.loadAll before accessing assets',
-    );
-    return this.loadedAssets[key];
+    const asset = this.loadedAssets[key];
+    assert(asset !== undefined, `asset ${key} is not loaded`);
+    return asset!;
   }
 }

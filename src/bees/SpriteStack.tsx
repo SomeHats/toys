@@ -1,6 +1,6 @@
 import { mapRange, normalizeAngle } from '../lib/utils';
 import { C, SpriteOpts } from './C';
-import { loadImage } from '../lib/loadImage';
+import { loadImage } from '../lib/load';
 
 export type SpriteStackData = {
   width: number;
@@ -15,7 +15,7 @@ export type SpriteStackData = {
 
 export type SpriteStackManifest = {
   geometry: Promise<{ default: SpriteStackData }>;
-  url: Promise<{ default: string }>;
+  url: URL;
   scale: number;
   frameRate: number;
   originX: number;
@@ -25,7 +25,7 @@ export type SpriteStackManifest = {
 
 export class SpriteStack {
   static async load(manifest: SpriteStackManifest) {
-    const [{ default: data }, { default: url }] = await Promise.all([
+    const [{ default: data }, url] = await Promise.all([
       manifest.geometry,
       manifest.url,
     ]);

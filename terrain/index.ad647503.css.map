@@ -1,1 +1,0 @@
-{"mappings":"AAAA,UAGE,WAAY,CACZ,QAAS,CACT,SAAU,CAHV,UAIF,CAEA,OACE,eACF","sources":["src/terrain/index.css"],"sourcesContent":["html,\nbody {\n  width: 100%;\n  height: 100%;\n  margin: 0;\n  padding: 0;\n}\n\ncanvas {\n  background: black;\n}\n"],"names":[],"version":3,"file":"index.ad647503.css.map"}

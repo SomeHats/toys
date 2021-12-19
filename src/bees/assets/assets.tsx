@@ -31,6 +31,20 @@ export const assets = new AssetBundle()
       originY: 0.7,
       angleOffset: 0.5,
     }),
+  )
+  .add('beeFlatBaseTexture', () =>
+    AssetBundle.loadBaseTexture(new URL('./bee-flat.png', import.meta.url)),
+  )
+  .add('beeFlat', (dependency) =>
+    AnimatedSpriteStackSheet.load({
+      geometry: new URL('raw:./bee-flat.json', import.meta.url),
+      baseTexture: dependency('beeFlatBaseTexture'),
+      resolution: 0.3,
+      framesPerSecond: 12,
+      originX: 0.5,
+      originY: 0.7,
+      angleOffset: 0.5,
+    }),
   );
 
 // export const assets = new AssetBundle({

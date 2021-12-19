@@ -7,7 +7,7 @@ import {
   Texture,
 } from 'pixi.js';
 import Vector2 from '../lib/geom/Vector2';
-import { lerp } from '../lib/utils';
+import { lerp, random, times } from '../lib/utils';
 import { AnimatedSpriteStack } from './AnimatedSpriteStack';
 import { assets } from './assets/assets';
 import { BG_COLOR } from './constants';
@@ -26,10 +26,17 @@ const application = new Application({
 document.body.appendChild(application.view);
 
 assets.loadAll().then(() => {
+  times(20, makeBee);
+});
+
+function makeBee() {
+  const sp = random(1, 5);
+  const rsp = random(0.01, 0.15);
+
   const bee = new AnimatedSpriteStack(assets.get('beeFly'), driver);
   application.stage.addChild(bee);
-  bee.x = 100;
-  bee.y = 100;
+  bee.x = Math.random() * 1000;
+  bee.y = Math.random() * 1000;
 
   driver.addFixedUpdate({
     on() {},
@@ -43,16 +50,14 @@ assets.loadAll().then(() => {
 
       const headingVec = Vector2.fromPolar(bee.heading, 1);
       const targetVec = mousePosition.sub(beePosition).normalize();
-      const newVec = headingVec.lerp(targetVec, 0.1);
+      const newVec = headingVec.lerp(targetVec, rsp);
 
       bee.heading = newVec.angle;
       bee.position.copyFrom(
         Vector2.fromVectorLike(bee.position).add(
-          Vector2.fromPolar(bee.heading, 2),
+          Vector2.fromPolar(bee.heading, sp),
         ),
       );
     },
   });
-
-  const x = new Texture(assets.get('beeOutlineBaseTexture'));
-});
+}

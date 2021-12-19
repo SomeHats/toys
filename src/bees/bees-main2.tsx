@@ -1,6 +1,7 @@
 import {
   Application,
   InteractionManager,
+  Renderer,
   SCALE_MODES,
   settings,
   Sprite,
@@ -12,6 +13,9 @@ import { AnimatedSpriteStack } from './AnimatedSpriteStack';
 import { assets } from './assets/assets';
 import { BG_COLOR } from './constants';
 import { driver } from './driver';
+
+Renderer.registerPlugin('interaction', InteractionManager);
+console.log({ Renderer, InteractionManager });
 
 settings.STRICT_TEXTURE_CACHE = true;
 settings.SCALE_MODE = SCALE_MODES.NEAREST;

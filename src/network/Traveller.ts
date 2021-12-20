@@ -88,7 +88,7 @@ export default class Traveller extends SceneObject {
 
   get predictedStopArea(): Circle {
     const center = this.predictedStopPoint;
-    return new Circle(center.x, center.y, this.safeRadius);
+    return Circle.create(center.x, center.y, this.safeRadius);
   }
 
   get potentialNextPredictedStopPoint(): Vector2 {
@@ -140,9 +140,7 @@ export default class Traveller extends SceneObject {
   }
 
   onRemovedFromRoad() {
-    this.getScene()
-      .getSystem(TravellerFinder)
-      .removeTraveller(this);
+    this.getScene().getSystem(TravellerFinder).removeTraveller(this);
     this._currentRoad = null;
   }
 
@@ -218,12 +216,12 @@ export default class Traveller extends SceneObject {
   //   if (!currentRoad) return;
 
   //   const predictedStopPoint = this.predictedStopPoint;
-  //   new Circle(
+  //   Circle.create(
   //     this.position.x,
   //     this.position.y,
   //     this.comfortableRadius
   //   ).debugDraw("rgba(0, 255, 0, 0.4)");
-  //   new Circle(this.position.x, this.position.y, this.safeRadius).debugDraw(
+  //   Circle.create(this.position.x, this.position.y, this.safeRadius).debugDraw(
   //     this._forceAccelerateTimer ? "cyan" : "red"
   //   );
   //   predictedStopPoint.debugDraw("lime");
@@ -286,7 +284,7 @@ export default class Traveller extends SceneObject {
     if (!this._currentRoad) return;
     const potentialDestinations = this._currentRoad
       .getAllReachableNodes()
-      .filter(node => node.isDestination);
+      .filter((node) => node.isDestination);
     const destination = sample(potentialDestinations);
     this._destination = destination;
   }
@@ -317,7 +315,8 @@ export default class Traveller extends SceneObject {
   }
 
   _shouldDecelerate(currentRoad: Road): boolean {
-    const predictedStopPosition = this._getPredictedStopPositionIfDecelerating();
+    const predictedStopPosition =
+      this._getPredictedStopPositionIfDecelerating();
     if (
       currentRoad.to === this._destination &&
       currentRoad.length + ROAD_END_OVERSHOOT < predictedStopPosition
@@ -374,7 +373,7 @@ export default class Traveller extends SceneObject {
     }
 
     // const currentPoint = this.position;
-    // const currentSafeCircle = new Circle(
+    // const currentSafeCircle = Circle.create(
     //   currentPoint.x,
     //   currentPoint.y,
     //   this.safeRadius,
@@ -391,7 +390,7 @@ export default class Traveller extends SceneObject {
     // const predictedStopPoint = this._getPredictedStopPointIfDecelerating(
     //   currentRoad,
     // );
-    // const predictedSafeCircle = new Circle(
+    // const predictedSafeCircle = Circle.create(
     //   predictedStopPoint.x,
     //   predictedStopPoint.y,
     //   this.safeRadius,

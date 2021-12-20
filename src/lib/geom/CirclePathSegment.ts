@@ -15,7 +15,7 @@ export default class CirclePathSegment implements PathSegment {
     startAngle: number,
     endAngle: number,
   ) {
-    this.circle = new Circle(center.x, center.y, radius);
+    this.circle = Circle.create(center.x, center.y, radius);
     this.startAngle = startAngle;
     this.endAngle = endAngle;
     Object.freeze(this);

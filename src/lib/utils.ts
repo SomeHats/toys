@@ -21,6 +21,10 @@ export function invLerp(a: number, b: number, n: number): number {
   return (n - a) / (b - a);
 }
 
+export function isWithin(a: number, b: number, n: number): boolean {
+  return a > b ? b <= n && n <= a : a <= n && n <= b;
+}
+
 export function constrain(min: number, max: number, n: number): number {
   return Math.min(max, Math.max(min, n));
 }
@@ -319,3 +323,22 @@ export function mapObjectValues<K extends string, V, U>(
   }
   return result;
 }
+
+export function last<T>(arr: ReadonlyArray<T>): T | undefined {
+  if (!arr.length) {
+    return undefined;
+  }
+  return arr[arr.length - 1];
+}
+
+export function* indexed<T>(
+  iterable: Iterable<T>,
+): Generator<[number, T], void> {
+  let i = 0;
+  for (const item of iterable) {
+    yield [i, item];
+    i++;
+  }
+}
+
+export function noop() {}

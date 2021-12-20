@@ -18,7 +18,7 @@ export default class Junction extends SceneObject {
 
   constructor(x: number, y: number, radius: number) {
     super();
-    this._circle = new Circle(x, y, radius);
+    this._circle = Circle.create(x, y, radius);
   }
 
   get position(): Vector2 {
@@ -27,7 +27,7 @@ export default class Junction extends SceneObject {
 
   onAddedToScene(scene: Scene) {
     super.onAddedToScene(scene);
-    this._roads.forEach(road => scene.addChild(road));
+    this._roads.forEach((road) => scene.addChild(road));
   }
 
   getVisualConnectionPointAtAngle(radians: number): Vector2 {
@@ -53,7 +53,7 @@ export default class Junction extends SceneObject {
     if (isIncoming) this._incomingIntersections.add(intersection);
     if (isOutgoing) this._outgoingIntersections.add(intersection);
 
-    this._intersections.forEach(other => {
+    this._intersections.forEach((other) => {
       if (other === intersection) return;
 
       if (isIncoming && this._outgoingIntersections.has(other)) {
@@ -102,7 +102,7 @@ export default class Junction extends SceneObject {
   get _intersections(): Intersection[] {
     return compact(
       Object.keys(this._intersectionsByAngle).map(
-        angle => this._intersectionsByAngle[angle],
+        (angle) => this._intersectionsByAngle[angle],
       ),
     );
   }

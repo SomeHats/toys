@@ -1,4 +1,5 @@
 import AABB from './geom/AABB';
+import Line2 from './geom/Line2';
 import Vector2 from './geom/Vector2';
 
 const DEFAULT_DEBUG_COLOR = 'magenta';
@@ -29,7 +30,7 @@ export type DebugOptions = {
 export type StrokeAndFillOptions = StrokeOptions & FillOptions;
 
 export class DebugDraw {
-  constructor(private readonly ctx: CanvasRenderingContext2D) {}
+  constructor(public readonly ctx: CanvasRenderingContext2D) {}
 
   public clear(fill?: string) {
     if (!fill) {
@@ -65,6 +66,20 @@ export class DebugDraw {
 
   public arcTo(p1: Vector2, p2: Vector2, radius: number) {
     this.ctx.arcTo(p1.x, p1.y, p2.x, p2.y, radius);
+  }
+
+  public quadraticCurveTo(control: Vector2, target: Vector2) {
+    this.ctx.quadraticCurveTo(control.x, control.y, target.x, target.y);
+  }
+  public bezierCurveTo(control1: Vector2, control2: Vector2, target: Vector2) {
+    this.ctx.bezierCurveTo(
+      control1.x,
+      control1.y,
+      control2.x,
+      control2.y,
+      target.x,
+      target.y,
+    );
   }
 
   public applyStrokeOptions({
@@ -270,6 +285,38 @@ export class DebugDraw {
   ) {
     this.debugLabel(label, polyLine[0], color);
     this.polyLine(polyLine, this.getDebugStrokeOptions(color));
+  }
+  public debugQuadraticCurve(
+    from: Vector2,
+    control: Vector2,
+    to: Vector2,
+    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+  ) {
+    this.debugLabel(label, from, color);
+    this.beginPath();
+    this.moveTo(from);
+    this.quadraticCurveTo(control, to);
+    this.stroke(this.getDebugStrokeOptions(color));
+  }
+  public debugBezierCurve(
+    from: Vector2,
+    control1: Vector2,
+    control2: Vector2,
+    to: Vector2,
+    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+  ) {
+    this.debugLabel(label, from, color);
+    this.beginPath();
+    this.moveTo(from);
+    this.bezierCurveTo(control1, control2, to);
+    this.stroke(this.getDebugStrokeOptions(color));
+  }
+  public debugLine2(
+    line: Line2,
+    { color = DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+  ) {
+    this.debugLabel(label, line.start, color);
+    this.debugArrow(line.start, line.end, { color, label });
   }
 
   public aabb(

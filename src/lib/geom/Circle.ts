@@ -1,16 +1,13 @@
 // @flow
 import Vector2 from './Vector2';
 import AABB from './AABB';
+import Line2 from './Line2';
 
 export default class Circle {
-  readonly center: Vector2;
-  readonly radius: number;
-
-  constructor(x: number, y: number, radius: number) {
-    this.center = new Vector2(x, y);
-    this.radius = radius;
-    Object.freeze(this);
+  static create(x: number, y: number, radius: number): Circle {
+    return new Circle(new Vector2(x, y), radius);
   }
+  constructor(readonly center: Vector2, readonly radius: number) {}
 
   get circumference(): number {
     return 2 * Math.PI * this.radius;
@@ -48,6 +45,28 @@ export default class Circle {
   }
 
   withRadius(radius: number): Circle {
-    return new Circle(this.center.x, this.center.y, radius);
+    return Circle.create(this.center.x, this.center.y, radius);
+  }
+
+  outerTangentsWith(other: Circle): [Line2, Line2] | undefined {
+    const distance = this.center.distanceTo(other.center);
+    if (distance <= Math.abs(this.radius - other.radius)) {
+      // The circles are coinciding. There are no valid tangents.
+      return undefined;
+    }
+
+    const angle = this.center.angleTo(other.center);
+    const normalAngle = Math.acos((this.radius - other.radius) / distance);
+
+    return [
+      new Line2(
+        this.pointOnCircumference(angle - normalAngle),
+        other.pointOnCircumference(angle - normalAngle),
+      ),
+      new Line2(
+        this.pointOnCircumference(angle + normalAngle),
+        other.pointOnCircumference(angle + normalAngle),
+      ),
+    ];
   }
 }

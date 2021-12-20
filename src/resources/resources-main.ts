@@ -13,7 +13,7 @@ const triangleQuadTree = new QuadTree<Triangle>(
     new Vector2(-TILE_SIZE, -TILE_SIZE),
     new Vector2(width + TILE_SIZE, height + TILE_SIZE),
   ),
-  triangle => triangle.center,
+  (triangle) => triangle.center,
 );
 for (const triangle of triangles.values()) {
   triangleQuadTree.insert(triangle);
@@ -21,7 +21,7 @@ for (const triangle of triangles.values()) {
 
 const items = triangleQuadTree.findItemsInRect(
   new AABB(new Vector2(100, 100), new Vector2(200, 200)),
-  // new Circle(width * 0.75, height * 0.35, TILE_SIZE * 8),
+  // Circle.create(width * 0.75, height * 0.35, TILE_SIZE * 8),
 );
 
 console.log(items);

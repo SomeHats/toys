@@ -36,8 +36,12 @@ export default class Consumer extends SceneObject implements NetworkNode {
 
   constructor(x: number, y: number, cooldown: number = DEFAULT_COOLDOWN) {
     super();
-    this._circle = new Circle(x, y, RADIUS);
-    this._visualConnectionCircle = new Circle(x, y, VISUAL_CONNECTION_RADIUS);
+    this._circle = Circle.create(x, y, RADIUS);
+    this._visualConnectionCircle = Circle.create(
+      x,
+      y,
+      VISUAL_CONNECTION_RADIUS,
+    );
     this._cooldown = cooldown;
   }
 

@@ -1,5 +1,6 @@
 // @flow
 import { assert } from '../assert';
+import { isWithin } from '../utils';
 import Vector2 from './Vector2';
 
 const isSlopeVertical = (slope: number) =>
@@ -40,6 +41,14 @@ export default class Line2 {
 
   get slope(): number {
     return (this.end.y - this.start.y) / (this.end.x - this.start.x);
+  }
+
+  get angle(): number {
+    return this.start.angleTo(this.end);
+  }
+
+  get length(): number {
+    return this.start.distanceTo(this.end);
   }
 
   get displacement(): number {
@@ -85,5 +94,28 @@ export default class Line2 {
       : this.slope * x + this.displacement;
 
     return new Vector2(x, y);
+  }
+
+  pointAtIntersectionConstrained(other: Line2): Vector2 | undefined {
+    if (this.isParallelTo(other)) return undefined;
+    const point = this.pointAtIntersectionWith(other);
+    if (this.isPointWithinBounds(point) && other.isPointWithinBounds(point)) {
+      return point;
+    }
+    return undefined;
+  }
+
+  midpoint(): Vector2 {
+    return new Vector2(
+      (this.start.x + this.end.x) / 2,
+      (this.start.y + this.end.y) / 2,
+    );
+  }
+
+  isPointWithinBounds({ x, y }: Vector2): boolean {
+    return (
+      isWithin(this.start.x, this.end.x, x) &&
+      isWithin(this.start.y, this.end.y, y)
+    );
   }
 }

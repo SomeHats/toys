@@ -33,7 +33,7 @@ export default class PalGeom extends Component {
     this.controlData = entity.getComponent(PalControlData);
     this.legs = shuffle(
       flatten(
-        times(config.legPairs, n => {
+        times(config.legPairs, (n) => {
           const progress = (n + 1) / (config.legPairs + 1);
           return [
             new PalLegGeom(
@@ -75,7 +75,7 @@ export default class PalGeom extends Component {
   getBod(): Circle {
     const bob = this.config.bodBob * this.bobAmount;
 
-    return new Circle(
+    return Circle.create(
       this.controlData.position.x,
       this.controlData.position.y - this.config.bodHeight - bob,
       this.config.radius,

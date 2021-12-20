@@ -40,7 +40,7 @@ export default class Pulse extends SceneObject {
     removeOnComplete = false,
   }: PulseOptions) {
     super();
-    this._circle = new Circle(x, y, startRadius);
+    this._circle = Circle.create(x, y, startRadius);
     this._startRadius = startRadius;
     this._endRadius = endRadius;
     this._duration = duration;

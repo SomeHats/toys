@@ -50,9 +50,8 @@ export default class Path implements PathSegment {
       return new StraightPathSegment(entryPoint, exitPoint);
     }
 
-    const roadCircleCenter = entryLineNormal.pointAtIntersectionWith(
-      exitLineNormal,
-    );
+    const roadCircleCenter =
+      entryLineNormal.pointAtIntersectionWith(exitLineNormal);
     const roadCircleRadius = entryPoint.distanceTo(roadCircleCenter);
 
     // containingCircle.center.debugDraw('lime');
@@ -128,7 +127,7 @@ export default class Path implements PathSegment {
   }
 
   addSegments(...segments: PathSegment[]): this {
-    segments.forEach(segment => this.addSegment(segment));
+    segments.forEach((segment) => this.addSegment(segment));
     return this;
   }
 
@@ -156,7 +155,7 @@ export default class Path implements PathSegment {
         segment.getLength() / 2,
       );
 
-      const containingCircle = new Circle(
+      const containingCircle = Circle.create(
         segment.getStart().x,
         segment.getStart().y,
         usableRadius,
@@ -172,7 +171,7 @@ export default class Path implements PathSegment {
     let lastPoint = start;
     this.segments = [];
 
-    compacted.forEach(segment => {
+    compacted.forEach((segment) => {
       if (segment.getStart().equals(lastPoint)) {
         this.addSegment(segment);
       } else {

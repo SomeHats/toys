@@ -1,17 +1,10 @@
-import WebMidi from 'webmidi';
+import { WebMidi } from 'webmidi';
+import { assert, assertNumber } from './assert';
 import EventEmitter, { Unsubscribe } from './EventEmitter';
 import { mapRange } from './utils';
 
-export function enableMidi(): Promise<typeof WebMidi> {
-  return new Promise((resolve, reject) => {
-    WebMidi.enable((err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(WebMidi);
-      }
-    });
-  });
+export async function enableMidi(): Promise<typeof WebMidi> {
+  return await WebMidi.enable();
 }
 
 export type MidiInputChangeEvent = {
@@ -34,25 +27,25 @@ export async function getListenToMidiInput(): Promise<ListenToMidiInputFn> {
 
   const midiEventEmitter = new EventEmitter<{ id: string; value: number }>();
   for (const input of WebMidi.inputs) {
-    input.addListener('controlchange', 'all', (event) => {
+    input.addListener('controlchange', (event) => {
       midiEventEmitter.emit({
         id: `${input.id}.${event.type}.${event.controller.number}`,
-        value: mapRange(0, 127, 0, 1, event.value),
+        value: assertNumber(event.value),
       });
     });
-    input.addListener('pitchbend', 'all', (event) => {
+    input.addListener('pitchbend', (event) => {
       midiEventEmitter.emit({
-        id: `${input.id}.${event.type}.${event.channel}`,
-        value: mapRange(-1, 1, 0, 1, event.value),
+        id: `${input.id}.${event.type}`,
+        value: mapRange(-1, 1, 0, 1, assertNumber(event.value)),
       });
     });
-    input.addListener('noteon', 'all', (event) => {
+    input.addListener('noteon', (event) => {
       midiEventEmitter.emit({
         id: `${input.id}.note.${event.note.number}`,
-        value: event.velocity,
+        value: assertNumber(event.value),
       });
     });
-    input.addListener('noteoff', 'all', (event) => {
+    input.addListener('noteoff', (event) => {
       midiEventEmitter.emit({
         id: `${input.id}.note.${event.note.number}`,
         value: 0,

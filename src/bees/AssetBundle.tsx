@@ -63,7 +63,7 @@ export class AssetBundle<AssetMap extends Record<string, any> = {}> {
 
   get<K extends keyof AssetMap>(key: K): AssetMap[K] {
     const asset = this.loadedAssets[key];
-    assert(asset !== undefined, `asset ${key} is not loaded`);
+    assert(asset !== undefined, `asset ${String(key)} is not loaded`);
     return asset!;
   }
 }

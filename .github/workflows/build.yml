@@ -1,0 +1,44 @@
+# https://help.github.com/en/github/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
+
+name: build
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    build:
+        runs-on: ubuntu-18.04
+        timeout-minutes: 30
+        steps:
+            - name: Setup Node
+              uses: actions/setup-node@v1
+              with:
+                  node-version: "16.x"
+            - name: Setup Rust
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  default: true
+            - name: Setup wasm-pack
+              uses: jetli/wasm-pack-action@v0.3.0
+              with:
+                  version: "latest"
+
+            - uses: actions/checkout@v3
+
+            - name: Install dependencies
+              run: yarn --immutable
+            - name: Test
+              run: yarn run test
+            - name: Build rust
+              run: yarn build:rust:slomojs --release
+            - name: Build web
+              run: yarn build
+            - name: Upload artifact
+              uses: actions/upload-artifact@v3
+              with:
+                  name: web
+                  path: dist/ # or

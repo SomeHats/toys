@@ -4,7 +4,7 @@ import { sample, times, randomInt, frameLoop, uniq, random, lerp, mapRange } fro
 import createTriangleGrid, { Triangle } from "../lib/createTriangleGrid";
 import { assert } from "../lib/assert";
 
-const TILE_SIZE = 15;
+const TILE_SIZE = 5;
 const ARC_LENGTH = (Math.PI * TILE_SIZE) / 6;
 
 const trianglesById = createTriangleGrid(TILE_SIZE, width, height);

@@ -1,19 +1,152 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta charset="utf-8" />
+        <title>toys</title>
+        <link rel="stylesheet" href="../tailwind.css" />
+    </head>
     <body>
-        <ul>
-            <li><a href="terrain/index.html">terrain (slow)</a></li>
-            <li><a href="pals/index.html">pals</a></li>
-            <li><a href="network/index.html">network</a></li>
-            <li><a href="worms/index.html">worms</a></li>
-            <li><a href="wiggle-gradient/index.html">wiggle gradient</a></li>
-            <li><a href="resources/index.html">resources</a></li>
-            <li><a href="webgl/index.html">webgl</a></li>
-            <li><a href="octopus/index.html">octopus</a></li>
-            <li><a href="slomojs/index.html">slomojs</a></li>
-            <li><a href="platformer/index.html">platformer</a></li>
-            <li><a href="bees/index.html">bees</a></li>
-            <li><a href="blob-tree/index.html">blob tree</a></li>
-        </ul>
+        <main class="mx-auto max-w-2xl px-4 py-6 text-zinc-900">
+            <h1 class="mb-2 text-2xl">toys :)</h1>
+            <p class="mb-8">weird little things that i make. mostly unfinished.</p>
+
+            <h2 class="mb-2 text-xl">kinda cool ones</h2>
+            <ul class="mb-8 grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-3">
+                <li class="group">
+                    <a href="terrain/">
+                        <div class="flex border-b border-zinc-200 text-lg text-zinc-600">
+                            terrain
+                            <span
+                                class="ml-auto inline-block self-end pb-1 text-xs text-zinc-400 group-hover:hidden"
+                            >
+                                2019
+                            </span>
+                            <span class="ml-auto hidden group-hover:inline-block">→</span>
+                        </div>
+                        <p class="group-hover:text-da text-sm text-zinc-500">
+                            generate terrain by simulating tectonic drift (slow)
+                        </p>
+                    </a>
+                </li>
+                <li class="group">
+                    <a href="pals/">
+                        <div class="flex border-b border-zinc-200 text-lg text-zinc-600">
+                            pal
+                            <span
+                                class="ml-auto inline-block self-end pb-1 text-xs text-zinc-400 group-hover:hidden"
+                            >
+                                2018
+                            </span>
+                            <span class="ml-auto hidden group-hover:inline-block">→</span>
+                        </div>
+                        <p class="group-hover:text-da text-sm text-zinc-500">
+                            a friend for your cursor. refresh for another
+                        </p>
+                    </a>
+                </li>
+                <li class="group">
+                    <a href="network/">
+                        <div class="flex border-b border-zinc-200 text-lg text-zinc-600">
+                            network
+                            <span
+                                class="ml-auto inline-block self-end pb-1 text-xs text-zinc-400 group-hover:hidden"
+                            >
+                                2018
+                            </span>
+                            <span class="ml-auto hidden group-hover:inline-block">→</span>
+                        </div>
+                        <p class="group-hover:text-da text-sm text-zinc-500">
+                            many friends commute to work and get stuck in traffic
+                        </p>
+                    </a>
+                </li>
+                <li class="group">
+                    <a href="worms/">
+                        <div class="flex border-b border-zinc-200 text-lg text-zinc-600">
+                            worms
+                            <span
+                                class="ml-auto inline-block self-end pb-1 text-xs text-zinc-400 group-hover:hidden"
+                            >
+                                2020
+                            </span>
+                            <span class="ml-auto hidden group-hover:inline-block">→</span>
+                        </div>
+                        <p class="group-hover:text-da text-sm text-zinc-500">they wigglin!!!!</p>
+                    </a>
+                </li>
+                <li class="group">
+                    <a href="octopus/">
+                        <div class="flex border-b border-zinc-200 text-lg text-zinc-600">
+                            octopus
+                            <span
+                                class="ml-auto inline-block self-end pb-1 text-xs text-zinc-400 group-hover:hidden"
+                            >
+                                2020
+                            </span>
+                            <span class="ml-auto hidden group-hover:inline-block">→</span>
+                        </div>
+                        <p class="group-hover:text-da text-sm text-zinc-500">
+                            the oceans greatest & wiggliest piano player
+                        </p>
+                    </a>
+                </li>
+                <li class="group">
+                    <a href="slomojs/">
+                        <div class="flex border-b border-zinc-200 text-lg text-zinc-600">
+                            slomojs
+                            <span
+                                class="ml-auto inline-block self-end pb-1 text-xs text-zinc-400 group-hover:hidden"
+                            >
+                                2020
+                            </span>
+                            <span class="ml-auto hidden group-hover:inline-block">→</span>
+                        </div>
+                        <p class="group-hover:text-da text-sm text-zinc-500">
+                            animated javascript in slow motion
+                        </p>
+                    </a>
+                </li>
+            </ul>
+
+            <h2 class="mb-2 text-lg">unsuccessful mess that i keep around for my own reference</h2>
+            <ul class="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-3">
+                <li class="group">
+                    <a href="wiggle-gradient/" class="flex border-zinc-200 text-zinc-600">
+                        wiggle gradient
+                        <span class="ml-auto hidden group-hover:inline-block">→</span>
+                    </a>
+                </li>
+                <li class="group">
+                    <a href="resources/" class="flex border-zinc-200 text-zinc-600">
+                        resources
+                        <span class="ml-auto hidden group-hover:inline-block">→</span>
+                    </a>
+                </li>
+                <li class="group">
+                    <a href="webgl/" class="flex border-zinc-200 text-zinc-600">
+                        webgl
+                        <span class="ml-auto hidden group-hover:inline-block">→</span>
+                    </a>
+                </li>
+                <li class="group">
+                    <a href="platformer/" class="flex border-zinc-200 text-zinc-600">
+                        platforms
+                        <span class="ml-auto hidden group-hover:inline-block">→</span>
+                    </a>
+                </li>
+                <li class="group">
+                    <a href="bees/" class="flex border-zinc-200 text-zinc-600">
+                        bees
+                        <span class="ml-auto hidden group-hover:inline-block">→</span>
+                    </a>
+                </li>
+                <li class="group">
+                    <a href="blob-tree/" class="flex border-zinc-200 text-zinc-600">
+                        blob tree
+                        <span class="ml-auto hidden group-hover:inline-block">→</span>
+                    </a>
+                </li>
+            </ul>
+        </main>
     </body>
 </html>

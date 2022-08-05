@@ -21,12 +21,14 @@ jobs:
               uses: actions/setup-node@v1
               with:
                   node-version: "16.x"
+
             - name: Setup Rust
               uses: actions-rs/toolchain@v1
               with:
                   profile: minimal
                   toolchain: stable
                   default: true
+
             - name: Setup wasm-pack
               uses: jetli/wasm-pack-action@v0.3.0
               with:
@@ -38,7 +40,8 @@ jobs:
               id: yarn-cache-dir-path
               run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
 
-            - uses: actions/cache@v3
+            - name: Yarn cache
+              uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
                   path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -46,7 +49,8 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-yarn-
 
-            - uses: actions/cache@v3
+            - name: Cargo cache
+              uses: actions/cache@v3
               with:
                   path: |
                       ~/.cargo/bin/
@@ -58,12 +62,16 @@ jobs:
 
             - name: Install dependencies
               run: yarn --immutable
+
             - name: Build rust
               run: yarn build:rust:slomojs --release
+
             - name: Build web
               run: yarn build
+
             - name: Test
               run: yarn run test
+
             - name: Upload artifact
               uses: actions/upload-artifact@v3
               with:

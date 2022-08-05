@@ -1,14 +1,14 @@
-import Scene from '../lib/scene/Scene';
-import { assert } from '../lib/assert';
-import Vector2 from '../lib/geom/Vector2';
-import Entity from '../lib/scene/Entity';
-import { PalTargetController } from './PalController';
-import PalGeom from './PalGeom';
-import PalRenderer from './PalRenderer';
-import PalWalkAnimationController from './PalWalkAnimationController';
-import { generateRandomPalConfig } from './PalConfig';
+import Scene from "../lib/scene/Scene";
+import { assert } from "../lib/assert";
+import Vector2 from "../lib/geom/Vector2";
+import Entity from "../lib/scene/Entity";
+import { PalTargetController } from "./PalController";
+import PalGeom from "./PalGeom";
+import PalRenderer from "./PalRenderer";
+import PalWalkAnimationController from "./PalWalkAnimationController";
+import { generateRandomPalConfig } from "./PalConfig";
 
-const root = document.getElementById('root');
+const root = document.getElementById("root");
 assert(root);
 
 const scene = new Scene(800, 600, window.devicePixelRatio);
@@ -23,10 +23,10 @@ geom.setAnimationController(new PalWalkAnimationController(config));
 pal.addComponent(PalRenderer, config);
 scene.addChild(pal);
 
-root.addEventListener('mousemove', e => {
-  const x = e.clientX - scene.canvas.offsetLeft;
-  const y = e.clientY - scene.canvas.offsetTop;
-  pal.getComponent(PalTargetController).setTarget(new Vector2(x - 50, y));
+root.addEventListener("mousemove", (e) => {
+    const x = e.clientX - scene.canvas.offsetLeft;
+    const y = e.clientY - scene.canvas.offsetTop;
+    pal.getComponent(PalTargetController).setTarget(new Vector2(x - 50, y));
 });
 
 scene.start();

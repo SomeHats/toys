@@ -1,78 +1,78 @@
 // import { assert } from './assert';
 // import { has } from './utils';
 
-import { fail } from './assert';
+import { fail } from "./assert";
 
 export abstract class Result<T, E> {
-  static ok<T>(value: T): OkResult<T, never> {
-    return new OkResult(value);
-  }
-  static error<E>(error: E): ErrorResult<never, E> {
-    return new ErrorResult(error);
-  }
-  static collect<T, E>(results: Array<Result<T, E>>): Result<Array<T>, E> {
-    const arr: Array<T> = [];
-    for (const result of results) {
-      if (result.isOk()) {
-        arr.push(result.value);
-      } else {
-        return result as any;
-      }
+    static ok<T>(value: T): OkResult<T, never> {
+        return new OkResult(value);
     }
-    return Result.ok(arr);
-  }
+    static error<E>(error: E): ErrorResult<never, E> {
+        return new ErrorResult(error);
+    }
+    static collect<T, E>(results: Array<Result<T, E>>): Result<Array<T>, E> {
+        const arr: Array<T> = [];
+        for (const result of results) {
+            if (result.isOk()) {
+                arr.push(result.value);
+            } else {
+                return result as any;
+            }
+        }
+        return Result.ok(arr);
+    }
 
-  constructor() {}
+    constructor() {}
 
-  abstract isOk(): this is OkResult<T, E>;
-  abstract isError(): this is ErrorResult<T, E>;
-  abstract unwrap(message: string): T;
-  abstract map<T2>(map: (value: T) => T2): Result<T2, E>;
-  abstract mapErr<E2>(map: (err: E) => E2): Result<T, E2>;
+    abstract isOk(): this is OkResult<T, E>;
+    abstract isError(): this is ErrorResult<T, E>;
+    abstract unwrap(message: string): T;
+    abstract map<T2>(map: (value: T) => T2): Result<T2, E>;
+    abstract mapErr<E2>(map: (err: E) => E2): Result<T, E2>;
 }
 
 export class OkResult<T, E> extends Result<T, E> {
-  constructor(public readonly value: T) {
-    super();
-  }
+    constructor(public readonly value: T) {
+        super();
+    }
 
-  isOk() {
-    return true;
-  }
-  isError() {
-    return false;
-  }
-  unwrap() {
-    return this.value;
-  }
-  map<T2>(map: (value: T) => T2): Result<T2, E> {
-    return Result.ok(map(this.value));
-  }
-  mapErr<E2>(map: (err: E) => E2): Result<T, E2> {
-    return this as any;
-  }
+    isOk() {
+        return true;
+    }
+    isError() {
+        return false;
+    }
+    unwrap() {
+        return this.value;
+    }
+    map<T2>(map: (value: T) => T2): Result<T2, E> {
+        return Result.ok(map(this.value));
+    }
+    mapErr<E2>(map: (err: E) => E2): Result<T, E2> {
+        return this as any;
+    }
 }
 
 export class ErrorResult<T, E> extends Result<T, E> {
-  constructor(public readonly error: E) {
-    super();
-  }
+    constructor(public readonly error: E) {
+        super();
+    }
 
-  isOk() {
-    return false;
-  }
-  isError() {
-    return true;
-  }
-  unwrap(message: string): never {
-    fail(`${message}: ${String(this.error)}`);
-  }
-  map<T2>(map: (value: T) => T2): Result<T2, E> {
-    return this as any;
-  }
-  mapErr<E2>(map: (err: E) => E2): Result<T, E2> {
-    return Result.error(map(this.error));
-  }
+    isOk() {
+        return false;
+    }
+    isError() {
+        return true;
+    }
+    unwrap(message: string): never {
+        fail(`${message}: ${String(this.error)}`);
+    }
+    map<T2>(map: (value: T) => T2): Result<T2, E> {
+        return this as any;
+    }
+    mapErr<E2>(map: (err: E) => E2): Result<T, E2> {
+        return Result.error(map(this.error));
+    }
 }
 
 // export type OkResult<T> = { readonly value: T; readonly error?: undefined };

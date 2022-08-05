@@ -1,6 +1,6 @@
 enum ConnectionDirection {
-  IN = 'in',
-  OUT = 'out',
+    IN = "in",
+    OUT = "out",
 }
 
 export default ConnectionDirection;

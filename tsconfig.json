@@ -1,16 +1,17 @@
 {
-  "compilerOptions": {
-    "noEmit": true,
-    "esModuleInterop": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "strict": true,
-    "lib": ["es2019", "dom"],
-    "target": "es2019",
-    "downlevelIteration": true,
-    "skipLibCheck": true,
-    "moduleResolution": "node",
-    "module": "es2020"
-  },
-  "include": ["src/**/*", "types/**/*"]
+    "compilerOptions": {
+        "noEmit": true,
+        "esModuleInterop": true,
+        "isolatedModules": true,
+        "jsx": "preserve",
+        "strict": true,
+        "lib": ["es2019", "dom"],
+        "target": "es2019",
+        "downlevelIteration": true,
+        "skipLibCheck": true,
+        "moduleResolution": "node",
+        "module": "es2020",
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": ["src/**/*", "types/**/*"]
 }

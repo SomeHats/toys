@@ -1,3 +1,3 @@
-declare module '*/slomojs/Cargo.toml' {
-  export function start(source: string): void;
+declare module "*/slomojs/Cargo.toml" {
+    export function start(source: string): void;
 }

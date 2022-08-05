@@ -1,7 +1,7 @@
-import { DebugDraw } from '../lib/DebugDraw';
+import { DebugDraw } from "../lib/DebugDraw";
 
-export const canvasEl = document.createElement('canvas');
-export const ctx = canvasEl.getContext('2d')!;
+export const canvasEl = document.createElement("canvas");
+export const ctx = canvasEl.getContext("2d")!;
 export const width = document.body.clientWidth;
 export const height = document.body.clientHeight;
 export const scale = window.devicePixelRatio;

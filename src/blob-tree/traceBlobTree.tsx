@@ -1,9 +1,9 @@
-import { assert } from '../lib/assert';
-import { DebugDraw } from '../lib/DebugDraw';
-import { fakeConsole } from '../lib/fakeConsole';
-import Vector2 from '../lib/geom/Vector2';
-import { constrainWrapped, indexed, sortBy } from '../lib/utils';
-import { BlobTree, BlobTreeNode } from './BlobTree';
+import { assert } from "../lib/assert";
+import { DebugDraw } from "../lib/DebugDraw";
+import { fakeConsole } from "../lib/fakeConsole";
+import Vector2 from "../lib/geom/Vector2";
+import { constrainWrapped, indexed, sortBy } from "../lib/utils";
+import { BlobTree, BlobTreeNode } from "./BlobTree";
 
 // interface TracerInterface {
 //   moveTo(x: number, y: number);
@@ -12,79 +12,70 @@ import { BlobTree, BlobTreeNode } from './BlobTree';
 
 const TENSION = 0.2;
 
-export function traceBlobTree(
-  blobTree: BlobTree,
-  debugDraw: DebugDraw,
-  console = fakeConsole,
-) {
-  for (const rootNode of blobTree.iterateRootNodes()) {
-    traceBlobTreeRoot(blobTree, rootNode, debugDraw, console);
-  }
+export function traceBlobTree(blobTree: BlobTree, debugDraw: DebugDraw, console = fakeConsole) {
+    for (const rootNode of blobTree.iterateRootNodes()) {
+        traceBlobTreeRoot(blobTree, rootNode, debugDraw, console);
+    }
 }
 
 export function traceBlobTreeRoot(
-  tree: BlobTree,
-  root: BlobTreeNode,
-  debugDraw: DebugDraw,
-  console = fakeConsole,
+    tree: BlobTree,
+    root: BlobTreeNode,
+    debugDraw: DebugDraw,
+    console = fakeConsole,
 ) {
-  const prevNode = root;
-  const node: BlobTreeNode | undefined = Array.from(
-    tree.iterateChildNodes(root),
-  )[0];
-  const nextNode = node
-    ? Array.from(tree.iterateChildNodes(node))[0]
-    : undefined;
+    const prevNode = root;
+    const node: BlobTreeNode | undefined = Array.from(tree.iterateChildNodes(root))[0];
+    const nextNode = node ? Array.from(tree.iterateChildNodes(node))[0] : undefined;
 
-  if (!prevNode || !node || !nextNode) {
-    return;
-  }
+    if (!prevNode || !node || !nextNode) {
+        return;
+    }
 
-  const prevCircle = prevNode.toCircle();
-  const circle = node.toCircle();
-  const nextCircle = nextNode.toCircle();
+    const prevCircle = prevNode.toCircle();
+    const circle = node.toCircle();
+    const nextCircle = nextNode.toCircle();
 
-  const prevTangents = prevCircle.outerTangentsWith(circle);
-  const nextTangents = circle.outerTangentsWith(nextCircle);
+    const prevTangents = prevCircle.outerTangentsWith(circle);
+    const nextTangents = circle.outerTangentsWith(nextCircle);
 
-  if (!prevTangents || !nextTangents) {
-    return;
-  }
+    if (!prevTangents || !nextTangents) {
+        return;
+    }
 
-  const incomingTangentAtNode = prevTangents[0];
-  const outgoingTangentAtNode = nextTangents[0];
-  debugDraw.debugLine2(incomingTangentAtNode, { color: 'lime' });
-  debugDraw.debugLine2(outgoingTangentAtNode, { color: 'lime' });
-  const tangentIntersection = incomingTangentAtNode.pointAtIntersectionWith(
-    outgoingTangentAtNode,
-  );
-  const connectionNormal = circle.center.angleTo(tangentIntersection);
-  const connectionPoint =
-    incomingTangentAtNode.isPointWithinBounds(tangentIntersection) &&
-    outgoingTangentAtNode.isPointWithinBounds(tangentIntersection)
-      ? tangentIntersection
-      : circle.pointOnCircumference(connectionNormal);
+    const incomingTangentAtNode = prevTangents[0];
+    const outgoingTangentAtNode = nextTangents[0];
+    debugDraw.debugLine2(incomingTangentAtNode, { color: "lime" });
+    debugDraw.debugLine2(outgoingTangentAtNode, { color: "lime" });
+    const tangentIntersection =
+        incomingTangentAtNode.pointAtIntersectionWith(outgoingTangentAtNode);
+    const connectionNormal = circle.center.angleTo(tangentIntersection);
+    const connectionPoint =
+        incomingTangentAtNode.isPointWithinBounds(tangentIntersection) &&
+        outgoingTangentAtNode.isPointWithinBounds(tangentIntersection)
+            ? tangentIntersection
+            : circle.pointOnCircumference(connectionNormal);
 
-  debugDraw.debugPointX(connectionPoint);
+    debugDraw.debugPointX(connectionPoint);
 
-  const startPoint = incomingTangentAtNode.start;
-  const endPoint = connectionPoint;
-  const startDerivative = incomingTangentAtNode.start
-    .lerp(incomingTangentAtNode.end, TENSION)
-    .sub(startPoint);
-  const endDerivative = Vector2.fromPolar(
-    connectionNormal + Math.PI / 2,
-    incomingTangentAtNode.length * TENSION,
-  );
-  debugDraw.debugVectorAtPoint(startDerivative, startPoint);
-  debugDraw.debugVectorAtPoint(endDerivative, endPoint);
+    const startPoint = incomingTangentAtNode.start;
+    const endPoint = connectionPoint;
+    const startDerivative = incomingTangentAtNode.start
+        .lerp(incomingTangentAtNode.end, TENSION)
+        .sub(startPoint);
+    const endDerivative = Vector2.fromPolar(
+        connectionNormal + Math.PI / 2,
+        incomingTangentAtNode.length * TENSION,
+    );
+    debugDraw.debugVectorAtPoint(startDerivative, startPoint);
+    debugDraw.debugVectorAtPoint(endDerivative, endPoint);
 
-  debugDraw.debugBezierCurve(
-    startPoint,
-    startPoint.add(startDerivative),
-    endPoint.sub(endDerivative),
-    endPoint,
-  );
+    debugDraw.debugBezierCurve(
+        startPoint,
+        startPoint.add(startDerivative),
+        endPoint.sub(endDerivative),
+        endPoint,
+    );
 }
 
 // export function traceBlobTreeRoot(

@@ -1,14 +1,14 @@
 // @flow
-import SceneObject from '../lib/scene/SceneObject';
-import Path from '../lib/geom/Path';
-import StraightPathSegment from '../lib/geom/StraightPathSegment';
-import Vector2 from '../lib/geom/Vector2';
-import * as ShapeHelpers from '../lib/canvasShapeHelpers';
-import { YELLOW } from './colors';
-import ConnectionDirection from './ConnectionDirection';
-import { NetworkNode } from './networkNodes/NetworkNode';
-import Junction from './Junction';
-import Traveller from './Traveller';
+import SceneObject from "../lib/scene/SceneObject";
+import Path from "../lib/geom/Path";
+import StraightPathSegment from "../lib/geom/StraightPathSegment";
+import Vector2 from "../lib/geom/Vector2";
+import * as ShapeHelpers from "../lib/canvasShapeHelpers";
+import { YELLOW } from "./colors";
+import ConnectionDirection from "./ConnectionDirection";
+import { NetworkNode } from "./networkNodes/NetworkNode";
+import Junction from "./Junction";
+import Traveller from "./Traveller";
 
 // const ROAD_OUTER_COLOR = BLUE;
 // const ROAD_INNER_COLOR = LIGHT_BG;
@@ -21,209 +21,200 @@ const ROAD_IDEAL_DASH_LENGTH = ROAD_IDEAL_DASH.reduce((a, b) => a + b, 0);
 const ROAD_DASH_SPEED = 0.05;
 
 export type RoadOptions = {
-  autoRound?: number;
-  points?: Array<Vector2>;
-  path?: Path;
+    autoRound?: number;
+    points?: Array<Vector2>;
+    path?: Path;
 };
 
 export default class Road extends SceneObject {
-  isNode = false;
-  from: NetworkNode;
-  to: NetworkNode;
-  _path: Path;
-  _currentTravellers: Traveller[] = [];
+    isNode = false;
+    from: NetworkNode;
+    to: NetworkNode;
+    _path: Path;
+    _currentTravellers: Traveller[] = [];
 
-  constructor(
-    from: NetworkNode | Junction,
-    to: NetworkNode | Junction,
-    { points, autoRound, path }: RoadOptions = {},
-  ) {
-    super();
+    constructor(
+        from: NetworkNode | Junction,
+        to: NetworkNode | Junction,
+        { points, autoRound, path }: RoadOptions = {},
+    ) {
+        super();
 
-    const angleFrom = points
-      ? from.position.angleTo(points[0])
-      : from.position.angleTo(to.position);
+        const angleFrom = points
+            ? from.position.angleTo(points[0])
+            : from.position.angleTo(to.position);
 
-    const angleTo = points
-      ? to.position.angleTo(points[points.length - 1])
-      : to.position.angleTo(from.position);
+        const angleTo = points
+            ? to.position.angleTo(points[points.length - 1])
+            : to.position.angleTo(from.position);
 
-    if (path) {
-      this._path = path;
-    } else if (points) {
-      this._path = Path.straightThroughPoints(
-        from.getVisualConnectionPointAtAngle(angleFrom),
-        ...points,
-        to.getVisualConnectionPointAtAngle(angleTo),
-      );
-    } else {
-      this._path = new Path().addSegment(
-        new StraightPathSegment(
-          from.getVisualConnectionPointAtAngle(angleFrom),
-          to.getVisualConnectionPointAtAngle(angleTo),
-        ),
-      );
+        if (path) {
+            this._path = path;
+        } else if (points) {
+            this._path = Path.straightThroughPoints(
+                from.getVisualConnectionPointAtAngle(angleFrom),
+                ...points,
+                to.getVisualConnectionPointAtAngle(angleTo),
+            );
+        } else {
+            this._path = new Path().addSegment(
+                new StraightPathSegment(
+                    from.getVisualConnectionPointAtAngle(angleFrom),
+                    to.getVisualConnectionPointAtAngle(angleTo),
+                ),
+            );
+        }
+
+        if (autoRound != null) {
+            this._path.autoRound(autoRound);
+        }
+
+        if (from instanceof Junction) {
+            this.from = from.connectToRoadAtAngle(this, angleFrom, ConnectionDirection.OUT);
+        } else {
+            this.from = from;
+            from.connectTo(this, ConnectionDirection.OUT);
+        }
+
+        if (to instanceof Junction) {
+            this.to = to.connectToRoadAtAngle(this, angleTo, ConnectionDirection.IN);
+        } else {
+            this.to = to;
+            to.connectTo(this, ConnectionDirection.IN);
+        }
     }
 
-    if (autoRound != null) {
-      this._path.autoRound(autoRound);
+    get length(): number {
+        return this._path.getLength();
     }
 
-    if (from instanceof Junction) {
-      this.from = from.connectToRoadAtAngle(
-        this,
-        angleFrom,
-        ConnectionDirection.OUT,
-      );
-    } else {
-      this.from = from;
-      from.connectTo(this, ConnectionDirection.OUT);
+    get start(): Vector2 {
+        return this._path.getStart();
     }
 
-    if (to instanceof Junction) {
-      this.to = to.connectToRoadAtAngle(this, angleTo, ConnectionDirection.IN);
-    } else {
-      this.to = to;
-      to.connectTo(this, ConnectionDirection.IN);
-    }
-  }
-
-  get length(): number {
-    return this._path.getLength();
-  }
-
-  get start(): Vector2 {
-    return this._path.getStart();
-  }
-
-  get end(): Vector2 {
-    return this._path.getEnd();
-  }
-
-  get expectedTimeFromStartToEnd(): number {
-    if (this._currentTravellers.length) {
-      const avgSpeed =
-        this._currentTravellers.reduce(
-          (sum, traveller) => sum + traveller.speed,
-          0,
-        ) / this._currentTravellers.length;
-      return this.length / avgSpeed;
+    get end(): Vector2 {
+        return this._path.getEnd();
     }
 
-    return this.length / (Traveller.MAX_SPEED * 0.7);
-  }
+    get expectedTimeFromStartToEnd(): number {
+        if (this._currentTravellers.length) {
+            const avgSpeed =
+                this._currentTravellers.reduce((sum, traveller) => sum + traveller.speed, 0) /
+                this._currentTravellers.length;
+            return this.length / avgSpeed;
+        }
 
-  canAddTravellerAtStart(): boolean {
-    const nextTraveller = this.getTravellerAfterPosition(0);
-    if (!nextTraveller) return true;
-    return (
-      nextTraveller.positionOnCurrentRoad > nextTraveller.comfortableRadius
-    );
-  }
+        return this.length / (Traveller.MAX_SPEED * 0.7);
+    }
 
-  addTravellerAtStart(traveller: Traveller) {
-    this._currentTravellers.push(traveller);
-    traveller.onAddedToRoad(this);
-  }
+    canAddTravellerAtStart(): boolean {
+        const nextTraveller = this.getTravellerAfterPosition(0);
+        if (!nextTraveller) return true;
+        return nextTraveller.positionOnCurrentRoad > nextTraveller.comfortableRadius;
+    }
 
-  removeTraveller(traveller: Traveller): boolean {
-    const index = this._currentTravellers.indexOf(traveller);
-    if (index === -1) return false;
-    this.removeTravellerAtIndex(index);
-    return true;
-  }
+    addTravellerAtStart(traveller: Traveller) {
+        this._currentTravellers.push(traveller);
+        traveller.onAddedToRoad(this);
+    }
 
-  removeTravellerAtIndex(index: number): Traveller {
-    const traveller = this._currentTravellers[index];
-    this._currentTravellers.splice(index, 1);
-    traveller.onRemovedFromRoad();
-    return traveller;
-  }
+    removeTraveller(traveller: Traveller): boolean {
+        const index = this._currentTravellers.indexOf(traveller);
+        if (index === -1) return false;
+        this.removeTravellerAtIndex(index);
+        return true;
+    }
 
-  getAllReachableNodes(visited: Set<NetworkNode> = new Set()): NetworkNode[] {
-    const nodes = [] as Array<NetworkNode>;
-    if (visited.has(this.to)) return nodes;
-    return [...this.to.getAllReachableNodes(visited), this.to];
-  }
+    removeTravellerAtIndex(index: number): Traveller {
+        const traveller = this._currentTravellers[index];
+        this._currentTravellers.splice(index, 1);
+        traveller.onRemovedFromRoad();
+        return traveller;
+    }
 
-  getPointAtPosition(position: number): Vector2 {
-    return this._path.getPointAtPosition(position);
-  }
+    getAllReachableNodes(visited: Set<NetworkNode> = new Set()): NetworkNode[] {
+        const nodes = [] as Array<NetworkNode>;
+        if (visited.has(this.to)) return nodes;
+        return [...this.to.getAllReachableNodes(visited), this.to];
+    }
 
-  getAngleAtPosition(position: number): number {
-    return this._path.getAngleAtPosition(position);
-  }
+    getPointAtPosition(position: number): Vector2 {
+        return this._path.getPointAtPosition(position);
+    }
 
-  getTravellerAfterPosition(position: number): Traveller | null {
-    let bestTraveller = null;
-    let bestDistance = Infinity;
+    getAngleAtPosition(position: number): number {
+        return this._path.getAngleAtPosition(position);
+    }
 
-    this._currentTravellers.forEach(traveller => {
-      const distance = traveller.positionOnCurrentRoad - position;
-      if (distance <= 0) return;
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        bestTraveller = traveller;
-      }
-    });
+    getTravellerAfterPosition(position: number): Traveller | null {
+        let bestTraveller = null;
+        let bestDistance = Infinity;
 
-    return bestTraveller;
-  }
+        this._currentTravellers.forEach((traveller) => {
+            const distance = traveller.positionOnCurrentRoad - position;
+            if (distance <= 0) return;
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestTraveller = traveller;
+            }
+        });
 
-  getTravellerBeforePosition(position: number): Traveller | null {
-    let bestTraveller = null;
-    let bestDistance = Infinity;
+        return bestTraveller;
+    }
 
-    this._currentTravellers.forEach(traveller => {
-      const distance = position - traveller.positionOnCurrentRoad;
-      if (distance <= 0) return;
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        bestTraveller = traveller;
-      }
-    });
+    getTravellerBeforePosition(position: number): Traveller | null {
+        let bestTraveller = null;
+        let bestDistance = Infinity;
 
-    return bestTraveller;
-  }
+        this._currentTravellers.forEach((traveller) => {
+            const distance = position - traveller.positionOnCurrentRoad;
+            if (distance <= 0) return;
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestTraveller = traveller;
+            }
+        });
 
-  draw(ctx: CanvasRenderingContext2D, time: number) {
-    ctx.beginPath();
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ShapeHelpers.path(ctx, this._path);
+        return bestTraveller;
+    }
 
-    // ctx.strokeStyle = ROAD_OUTER_COLOR.toString();
-    // ctx.lineWidth = ROAD_OUTER_WIDTH;
-    // ctx.stroke();
+    draw(ctx: CanvasRenderingContext2D, time: number) {
+        ctx.beginPath();
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ShapeHelpers.path(ctx, this._path);
 
-    // ctx.strokeStyle = ROAD_INNER_COLOR.toString();
-    // ctx.lineWidth = ROAD_INNER_WIDTH;
-    // ctx.stroke();
+        // ctx.strokeStyle = ROAD_OUTER_COLOR.toString();
+        // ctx.lineWidth = ROAD_OUTER_WIDTH;
+        // ctx.stroke();
 
-    const dashScale = this._getLineDashScale();
-    const dashLength = ROAD_IDEAL_DASH_LENGTH * dashScale;
-    ctx.setLineDash(ROAD_IDEAL_DASH.map(length => length * dashScale));
-    ctx.strokeStyle = ROAD_DASH_COLOR.toString();
-    ctx.lineDashOffset = (-time * ROAD_DASH_SPEED * dashScale) % dashLength;
-    ctx.lineWidth = ROAD_DASH_WIDTH;
-    // ctx.strokeStyle = 'black';
-    // ctx.lineWidth = 1;
-    ctx.stroke();
-  }
+        // ctx.strokeStyle = ROAD_INNER_COLOR.toString();
+        // ctx.lineWidth = ROAD_INNER_WIDTH;
+        // ctx.stroke();
 
-  _getLineDashScale(): number {
-    const wholeDashCount = Math.floor(this.length / ROAD_IDEAL_DASH_LENGTH);
-    const wholeDashLength = wholeDashCount * ROAD_IDEAL_DASH_LENGTH;
+        const dashScale = this._getLineDashScale();
+        const dashLength = ROAD_IDEAL_DASH_LENGTH * dashScale;
+        ctx.setLineDash(ROAD_IDEAL_DASH.map((length) => length * dashScale));
+        ctx.strokeStyle = ROAD_DASH_COLOR.toString();
+        ctx.lineDashOffset = (-time * ROAD_DASH_SPEED * dashScale) % dashLength;
+        ctx.lineWidth = ROAD_DASH_WIDTH;
+        // ctx.strokeStyle = 'black';
+        // ctx.lineWidth = 1;
+        ctx.stroke();
+    }
 
-    const roundDownLength = this.length - wholeDashLength;
-    const roundUpLength =
-      wholeDashLength + ROAD_IDEAL_DASH_LENGTH - this.length;
+    _getLineDashScale(): number {
+        const wholeDashCount = Math.floor(this.length / ROAD_IDEAL_DASH_LENGTH);
+        const wholeDashLength = wholeDashCount * ROAD_IDEAL_DASH_LENGTH;
 
-    const dashScale =
-      roundDownLength < roundUpLength
-        ? this.length / wholeDashLength
-        : this.length / (wholeDashLength + ROAD_IDEAL_DASH_LENGTH);
+        const roundDownLength = this.length - wholeDashLength;
+        const roundUpLength = wholeDashLength + ROAD_IDEAL_DASH_LENGTH - this.length;
 
-    return dashScale;
-  }
+        const dashScale =
+            roundDownLength < roundUpLength
+                ? this.length / wholeDashLength
+                : this.length / (wholeDashLength + ROAD_IDEAL_DASH_LENGTH);
+
+        return dashScale;
+    }
 }

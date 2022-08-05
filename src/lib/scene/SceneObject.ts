@@ -1,43 +1,43 @@
-import { assert } from '../assert';
-import Scene from './Scene';
+import { assert } from "../assert";
+import Scene from "./Scene";
 
 const constructorIdCounts = {} as Record<string, number>;
 
 const getNextCount = (name: string): string => {
-  if (!constructorIdCounts[name]) constructorIdCounts[name] = 0;
-  return `${name}@${constructorIdCounts[name]++}`;
+    if (!constructorIdCounts[name]) constructorIdCounts[name] = 0;
+    return `${name}@${constructorIdCounts[name]++}`;
 };
 
 export default abstract class SceneObject {
-  id: string = getNextCount(this.constructor.name);
-  private scene: Scene | null = null;
+    id: string = getNextCount(this.constructor.name);
+    private scene: Scene | null = null;
 
-  hasScene(): boolean {
-    return this.scene !== null;
-  }
+    hasScene(): boolean {
+        return this.scene !== null;
+    }
 
-  getScene(): Scene {
-    assert(this.scene, 'scene must be present');
-    return this.scene;
-  }
+    getScene(): Scene {
+        assert(this.scene, "scene must be present");
+        return this.scene;
+    }
 
-  draw(ctx: CanvasRenderingContext2D, elapsedTime: number): void {}
-  update(delta: number): void {}
+    draw(ctx: CanvasRenderingContext2D, elapsedTime: number): void {}
+    update(delta: number): void {}
 
-  addTo(scene: Scene): this {
-    scene.addChild(this);
-    return this;
-  }
+    addTo(scene: Scene): this {
+        scene.addChild(this);
+        return this;
+    }
 
-  onAddedToScene(scene: Scene) {
-    this.scene = scene;
-  }
+    onAddedToScene(scene: Scene) {
+        this.scene = scene;
+    }
 
-  onRemovedFromScene() {
-    this.scene = null;
-  }
+    onRemovedFromScene() {
+        this.scene = null;
+    }
 
-  getSortOrder(): number {
-    return 0;
-  }
+    getSortOrder(): number {
+        return 0;
+    }
 }

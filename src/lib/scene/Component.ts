@@ -1,31 +1,31 @@
-import Entity from './Entity';
-import Scene from './Scene';
+import Entity from "./Entity";
+import Scene from "./Scene";
 
 export default abstract class Component {
-  readonly entity: Entity;
-  constructor(entity: Entity) {
-    this.entity = entity;
-  }
+    readonly entity: Entity;
+    constructor(entity: Entity) {
+        this.entity = entity;
+    }
 
-  onRemove() {}
+    onRemove() {}
 
-  onAddedToScene(scene: Scene) {}
+    onAddedToScene(scene: Scene) {}
 
-  onRemovedFromScene(scene: Scene) {}
+    onRemovedFromScene(scene: Scene) {}
 
-  beforeUpdate(delta: number) {}
+    beforeUpdate(delta: number) {}
 
-  update(delta: number) {}
+    update(delta: number) {}
 
-  afterUpdate(delta: number) {}
+    afterUpdate(delta: number) {}
 
-  beforeDraw(ctx: CanvasRenderingContext2D, time: number) {}
+    beforeDraw(ctx: CanvasRenderingContext2D, time: number) {}
 
-  draw(ctx: CanvasRenderingContext2D, time: number) {}
+    draw(ctx: CanvasRenderingContext2D, time: number) {}
 
-  afterDraw(ctx: CanvasRenderingContext2D, time: number) {}
+    afterDraw(ctx: CanvasRenderingContext2D, time: number) {}
 
-  getScene(): Scene {
-    return this.entity.getScene();
-  }
+    getScene(): Scene {
+        return this.entity.getScene();
+    }
 }

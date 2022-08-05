@@ -1,8 +1,8 @@
-import { DebugDraw } from '../lib/DebugDraw';
-import * as config from './config';
+import { DebugDraw } from "../lib/DebugDraw";
+import * as config from "./config";
 
-export const canvasEl = document.createElement('canvas');
-export const ctx = canvasEl.getContext('2d')!;
+export const canvasEl = document.createElement("canvas");
+export const ctx = canvasEl.getContext("2d")!;
 export const width = config.SIZE;
 export const height = config.SIZE;
 export const scale = window.devicePixelRatio;

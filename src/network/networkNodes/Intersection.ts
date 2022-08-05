@@ -1,96 +1,89 @@
 // @flow
-import { assert } from '../../lib/assert';
-import Vector2 from '../../lib/geom/Vector2';
-import { uniq, flatten } from '../../lib/utils';
-import ConnectionSet from '../ConnectionSet';
-import ConnectionDirection from '../ConnectionDirection';
-import PathFinder from '../PathFinder';
-import Road from '../Road';
-import Traveller from '../Traveller';
-import { NetworkNode } from './NetworkNode';
+import { assert } from "../../lib/assert";
+import Vector2 from "../../lib/geom/Vector2";
+import { uniq, flatten } from "../../lib/utils";
+import ConnectionSet from "../ConnectionSet";
+import ConnectionDirection from "../ConnectionDirection";
+import PathFinder from "../PathFinder";
+import Road from "../Road";
+import Traveller from "../Traveller";
+import { NetworkNode } from "./NetworkNode";
 
 export default class Intersection implements NetworkNode {
-  isDestination = false;
-  position: Vector2;
-  _connectionSet: ConnectionSet = new ConnectionSet();
+    isDestination = false;
+    position: Vector2;
+    _connectionSet: ConnectionSet = new ConnectionSet();
 
-  constructor(x: number, y: number) {
-    this.position = new Vector2(x, y);
-  }
+    constructor(x: number, y: number) {
+        this.position = new Vector2(x, y);
+    }
 
-  get incomingConnections(): ReadonlyArray<Road> {
-    return this._connectionSet.incoming;
-  }
+    get incomingConnections(): ReadonlyArray<Road> {
+        return this._connectionSet.incoming;
+    }
 
-  get outgoingConnections(): ReadonlyArray<Road> {
-    return this._connectionSet.outgoing;
-  }
+    get outgoingConnections(): ReadonlyArray<Road> {
+        return this._connectionSet.outgoing;
+    }
 
-  get canConsumeTraveller(): boolean {
-    return true;
-  }
+    get canConsumeTraveller(): boolean {
+        return true;
+    }
 
-  consumeTraveller(traveller: Traveller) {
-    const destination = traveller.destination;
-    assert(destination, 'traveller must have destination');
+    consumeTraveller(traveller: Traveller) {
+        const destination = traveller.destination;
+        assert(destination, "traveller must have destination");
 
-    const nextRoad = PathFinder.getNextRoad(this, destination);
-    assert(
-      this.outgoingConnections.includes(nextRoad),
-      'nextRoad must be from this intersection',
-    );
+        const nextRoad = PathFinder.getNextRoad(this, destination);
+        assert(
+            this.outgoingConnections.includes(nextRoad),
+            "nextRoad must be from this intersection",
+        );
 
-    traveller.removeFromCurrentRoad();
-    nextRoad.addTravellerAtStart(traveller);
-  }
+        traveller.removeFromCurrentRoad();
+        nextRoad.addTravellerAtStart(traveller);
+    }
 
-  getAllReachableNodes(visited: Set<NetworkNode> = new Set()): NetworkNode[] {
-    visited.add(this);
-    return uniq(
-      flatten(
-        this._connectionSet.outgoing.map(road =>
-          road.getAllReachableNodes(visited),
-        ),
-      ),
-    );
-  }
+    getAllReachableNodes(visited: Set<NetworkNode> = new Set()): NetworkNode[] {
+        visited.add(this);
+        return uniq(
+            flatten(this._connectionSet.outgoing.map((road) => road.getAllReachableNodes(visited))),
+        );
+    }
 
-  getVisualConnectionPointAtAngle(): Vector2 {
-    return this.position;
-  }
+    getVisualConnectionPointAtAngle(): Vector2 {
+        return this.position;
+    }
 
-  getClosestOutgoingTraveller(): Traveller | null {
-    let bestTraveller = null;
-    let shortestDistance = Infinity;
-    this.outgoingConnections.forEach(road => {
-      const traveller = road.getTravellerAfterPosition(-1);
-      if (traveller && traveller.positionOnCurrentRoad < shortestDistance) {
-        bestTraveller = traveller;
-        shortestDistance = traveller.positionOnCurrentRoad;
-      }
-    });
+    getClosestOutgoingTraveller(): Traveller | null {
+        let bestTraveller = null;
+        let shortestDistance = Infinity;
+        this.outgoingConnections.forEach((road) => {
+            const traveller = road.getTravellerAfterPosition(-1);
+            if (traveller && traveller.positionOnCurrentRoad < shortestDistance) {
+                bestTraveller = traveller;
+                shortestDistance = traveller.positionOnCurrentRoad;
+            }
+        });
 
-    return bestTraveller;
-  }
+        return bestTraveller;
+    }
 
-  getClosestIncomingTraveller(): Traveller | null {
-    let bestTraveller = null;
-    let shortestDistance = Infinity;
-    this.incomingConnections.forEach(road => {
-      const traveller = road.getTravellerBeforePosition(road.length);
-      if (
-        traveller &&
-        traveller.distanceToEndOfCurrentRoad < shortestDistance
-      ) {
-        bestTraveller = traveller;
-        shortestDistance = traveller.distanceToEndOfCurrentRoad;
-      }
-    });
+    getClosestIncomingTraveller(): Traveller | null {
+        let bestTraveller = null;
+        let shortestDistance = Infinity;
+        this.incomingConnections.forEach((road) => {
+            const traveller = road.getTravellerBeforePosition(road.length);
+            if (traveller && traveller.distanceToEndOfCurrentRoad < shortestDistance) {
+                bestTraveller = traveller;
+                shortestDistance = traveller.distanceToEndOfCurrentRoad;
+            }
+        });
 
-    return bestTraveller;
-  }
+        return bestTraveller;
+    }
 
-  connectTo(node: Road, direction: ConnectionDirection) {
-    this._connectionSet.add(node, direction);
-  }
+    connectTo(node: Road, direction: ConnectionDirection) {
+        this._connectionSet.add(node, direction);
+    }
 }

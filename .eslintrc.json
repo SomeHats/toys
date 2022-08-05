@@ -24,5 +24,10 @@
         "@typescript-eslint/no-empty-function": "off",
         "no-constant-condition": ["error", { "checkLoops": false }],
         "prefer-const": ["error", { "destructuring": "all" }]
+    },
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
     }
 }

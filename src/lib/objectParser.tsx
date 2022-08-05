@@ -25,7 +25,7 @@ class ParserError {
 }
 
 export type Parser<T> = (input: unknown) => Result<T, ParserError>;
-export type ParserType<T extends Parser<any>> = T extends Parser<infer U> ? U : never;
+export type ParserType<T extends Parser<unknown>> = T extends Parser<infer U> ? U : never;
 
 function createTypeofParser<T>(type: string): Parser<T> {
     return (input: unknown) => {
@@ -56,7 +56,7 @@ export function createArrayParser<T>(parseItem: Parser<T>): Parser<Array<T>> {
     };
 }
 
-export function createShapeParser<T extends Record<string, any>>(parserMap: {
+export function createShapeParser<T extends Record<string, unknown>>(parserMap: {
     [K in keyof T]: Parser<T[K]>;
 }): Parser<T> {
     return (input: unknown) => {

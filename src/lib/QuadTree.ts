@@ -9,7 +9,7 @@ export default class QuadTree<T> {
 
     boundary: AABB;
     _items: (T | void)[] = [];
-    _nextItemIndex: number = 0;
+    _nextItemIndex = 0;
     _subdivisions: null | Subdivisions<T> = null;
     _getPosition: (item: T) => Vector2;
 

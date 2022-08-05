@@ -9,8 +9,8 @@ export function mapNoise2d(scale: number, min: number, max: number, noise: Noise
 
 export function makeFractalNoise2d(
     count: number,
-    scaleDropOff: number = 0.5,
-    sizeScale: number = 2,
+    scaleDropOff = 0.5,
+    sizeScale = 2,
 ): Noise2D {
     const levels = times(count, () => makeNoise2D(Math.random()));
     return (x, y) => {

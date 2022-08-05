@@ -12,8 +12,8 @@
         "rust:release": "wasm-pack build crates/slomojs --release",
         "rust:dev": "wasm-pack build crates/slomojs --dev",
         "types": "tsc --noEmit",
-        "lint": "git ls-files | grep -E '.*\\.(js|mjs|cjs|ts|jsx|tsx)$' | xargs eslint --report-unused-disable-directives",
-        "test": "yarn run types",
+        "lint": "eslint --report-unused-disable-directives .",
+        "test": "yarn run types && yarn run lint",
         "format": "git ls-files | grep -E '.*\\.(js|mjs|cjs|ts|jsx|tsx|html|css|json|yml|md)$' | xargs prettier --write"
     },
     "devDependencies": {

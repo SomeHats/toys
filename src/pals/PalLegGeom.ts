@@ -20,7 +20,7 @@ export default class PalLegGeom {
 
     footXY: Vector2;
     footOrigin: Vector2;
-    liftAmount: number = 0;
+    liftAmount = 0;
 
     constructor(
         private palData: PalControlData,

@@ -31,7 +31,7 @@ export default class Consumer extends SceneObject implements NetworkNode {
     _circle: Circle;
     _visualConnectionCircle: Circle;
     _cooldown: number;
-    _timer: number = 0;
+    _timer = 0;
     _connectionSet: ConnectionSet = new ConnectionSet();
 
     constructor(x: number, y: number, cooldown: number = DEFAULT_COOLDOWN) {
@@ -76,11 +76,11 @@ export default class Consumer extends SceneObject implements NetworkNode {
         this._pulse();
     }
 
-    update(delta: number) {
+    override update(delta: number) {
         this._timer = constrain(0, this._cooldown, this._timer + delta);
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    override draw(ctx: CanvasRenderingContext2D) {
         const progress = this._timer / this._cooldown;
         const colorMixAmount = constrain(0, 1, mapRange(0, CLOCK_FADE_DURATION, 1, 0, this._timer));
         const bgColor = MAIN_COLOR.mix(CLOCK_COLOR, colorMixAmount);

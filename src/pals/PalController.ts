@@ -8,10 +8,10 @@ const ACCELERATION = 200;
 const DECELERATION = 200;
 
 export class PalControlData extends Component {
-    speed: number = 0;
+    speed = 0;
     position: Vector2;
-    heading: number = 0;
-    headingVelocity: number = 0;
+    heading = 0;
+    headingVelocity = 0;
 
     constructor(entity: Entity, position: Vector2) {
         super(entity);
@@ -41,7 +41,7 @@ export class PalTargetController extends Component {
         this.target = newTarget;
     }
 
-    update(dtMilliseconds: number) {
+    override update(dtMilliseconds: number) {
         const dtSeconds = dtMilliseconds / 1000;
         const angleToTarget = this.data.position.angleTo(this.target);
 

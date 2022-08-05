@@ -6,6 +6,7 @@ import { TerrainCell } from "./TerrainCell";
 import { makeFractalNoise2d } from "./fractalNoise";
 import * as config from "./config";
 import { canvas } from "./canvas";
+import { assertExists } from "../lib/assert";
 
 function findPlateEdges(
     currentPlateId: number,
@@ -60,7 +61,7 @@ function findPlateEdges(
                 }
                 const nextCell = terrain.cellsById[neighbourCellId];
                 const nextCellStartEdgeIndex = nextCell.polygon.findIndex((point) =>
-                    lastPolygonPoint!.equals(point),
+                    assertExists(lastPolygonPoint).equals(point),
                 );
                 if (nextCellStartEdgeIndex === -1) {
                     throw new Error("currentEdgeIndexInCell must exist");

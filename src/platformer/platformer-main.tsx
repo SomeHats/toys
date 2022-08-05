@@ -1,3 +1,4 @@
+import { assertExists } from "../lib/assert";
 import { ButtonMapping } from "../lib/ButtonMapping";
 import { DebugDraw, StrokeAndFillOptions } from "../lib/DebugDraw";
 import AABB from "../lib/geom/AABB";
@@ -9,27 +10,27 @@ import Scene from "../lib/scene/Scene";
 import SceneSystem from "../lib/scene/SceneSystem";
 
 class DebugDrawSystem extends SceneSystem {
-    static systemName = "DebugDragSystem";
+    static override systemName = "DebugDragSystem";
 
     debugDraw!: DebugDraw;
 
-    afterAddToScene(scene: Scene) {
+    override afterAddToScene(scene: Scene) {
         super.afterAddToScene(scene);
         this.debugDraw = new DebugDraw(scene.ctx);
     }
 }
 
 class AABBDrawSystem extends SceneSystem {
-    static systemName = "AABBDebugDrawSystem";
+    static override systemName = "AABBDebugDrawSystem";
 
     debugDraw!: DebugDraw;
 
-    afterAddToScene(scene: Scene) {
+    override afterAddToScene(scene: Scene) {
         super.afterAddToScene(scene);
         this.debugDraw = new DebugDraw(scene.ctx);
     }
 
-    afterDraw() {}
+    override afterDraw() {}
 }
 
 class AABBComponent extends Component {
@@ -44,11 +45,11 @@ class AABBComponent extends Component {
         this.value = new AABB(origin, this.value.size);
     }
 
-    beforeDraw(ctx: CanvasRenderingContext2D, time: number) {
+    override beforeDraw(ctx: CanvasRenderingContext2D, time: number) {
         ctx.save();
         ctx.translate(this.value.left, this.value.top);
     }
-    afterDraw(ctx: CanvasRenderingContext2D, time: number) {
+    override afterDraw(ctx: CanvasRenderingContext2D, time: number) {
         ctx.restore();
     }
 }
@@ -62,7 +63,7 @@ class AABBRenderer extends Component {
         return this.entity.getComponent(AABBComponent).value;
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    override draw(ctx: CanvasRenderingContext2D) {
         this.getScene()
             .getSystem(DebugDrawSystem)
             .debugDraw.aabb(new AABB(Vector2.ZERO, this.getAABB().size), this.opts);
@@ -78,7 +79,7 @@ class PlayerController extends Component {
         super(entity);
     }
 
-    update(delta: number) {
+    override update(delta: number) {
         const aabbComponent = this.entity.getComponent(AABBComponent);
         let origin = aabbComponent.value.origin;
         if (this.controls.isDown("left")) {
@@ -120,7 +121,7 @@ player.addComponent(
 );
 scene.addChild(player);
 
-scene.appendTo(document.getElementById("root")!);
+scene.appendTo(assertExists(document.getElementById("root")));
 scene.start();
 
 console.log(scene);

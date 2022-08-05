@@ -26,7 +26,7 @@ export default class PalGeom extends Component {
     private controlData: PalControlData;
     legs: Array<PalLegGeom>;
     private animationController: PalAnimationController | null = null;
-    private bobAmount: number = 0;
+    private bobAmount = 0;
 
     constructor(entity: Entity, private config: PalConfig) {
         super(entity);
@@ -58,7 +58,7 @@ export default class PalGeom extends Component {
         this.animationController = animationController;
     }
 
-    update(dtMilliseconds: number) {
+    override update(dtMilliseconds: number) {
         if (this.animationController) {
             const update = this.animationController.update(
                 dtMilliseconds,

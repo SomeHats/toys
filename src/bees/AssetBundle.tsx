@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseTexture } from "pixi.js";
-import { assert } from "../lib/assert";
+import { assert, assertExists } from "../lib/assert";
 import { loadImage } from "../lib/load";
 import { has, keys } from "../lib/utils";
 
 type Id<T> = T extends infer U ? { [K in keyof U]: U[K] } : never;
 
-export class AssetBundle<AssetMap extends Record<string, any> = {}> {
+export class AssetBundle<AssetMap extends Record<string, unknown> = Record<string, never>> {
     static async loadBaseTexture(url: URL): Promise<BaseTexture> {
         const image = await loadImage(url);
         return new BaseTexture(image);
@@ -21,7 +22,8 @@ export class AssetBundle<AssetMap extends Record<string, any> = {}> {
     private loadPromises = new Map<keyof AssetMap, Promise<void>>();
 
     constructor() {
-        this.loaders = {} as any;
+        // @ts-expect-error always starts empty
+        this.loaders = {};
     }
 
     add<Key extends string, Type>(
@@ -62,6 +64,6 @@ export class AssetBundle<AssetMap extends Record<string, any> = {}> {
     get<K extends keyof AssetMap>(key: K): AssetMap[K] {
         const asset = this.loadedAssets[key];
         assert(asset !== undefined, `asset ${String(key)} is not loaded`);
-        return asset!;
+        return assertExists(asset);
     }
 }

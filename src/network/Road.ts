@@ -178,7 +178,7 @@ export default class Road extends SceneObject {
         return bestTraveller;
     }
 
-    draw(ctx: CanvasRenderingContext2D, time: number) {
+    override draw(ctx: CanvasRenderingContext2D, time: number) {
         ctx.beginPath();
         ctx.lineCap = "round";
         ctx.lineJoin = "round";

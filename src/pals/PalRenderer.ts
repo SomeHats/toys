@@ -22,7 +22,7 @@ export default class PalRenderer extends Component {
         this.geom = entity.getComponent(PalGeom);
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    override draw(ctx: CanvasRenderingContext2D) {
         const heading = normalizeAngle(this.data.heading);
 
         ctx.setLineDash([]);

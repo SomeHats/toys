@@ -49,12 +49,12 @@ export default class Traveller extends SceneObject {
     safeRadius = random(MIN_TRAVELLER_SAFE_RADIUS, MAX_TRAVELLER_SAFE_RADIUS);
     _currentRoad: Road | null = null;
     _destination: NetworkNode | null = null;
-    _positionOnCurrentRoad: number = 0;
+    _positionOnCurrentRoad = 0;
     _speed: number = INITIAL_SPEED;
-    _age: number = 0;
+    _age = 0;
     _exitStartedAt: number | null = null;
-    _stoppedTime: number = 0;
-    _forceAccelerateTimer: number = 0;
+    _stoppedTime = 0;
+    _forceAccelerateTimer = 0;
     _stopReason: StopReason | null = null;
     _stoppedFor: Traveller[] = [];
     _pal: Entity | null = null;
@@ -141,7 +141,7 @@ export default class Traveller extends SceneObject {
         this._currentRoad = null;
     }
 
-    onRemovedFromScene() {
+    override onRemovedFromScene() {
         this.removeFromCurrentRoad();
     }
 
@@ -149,7 +149,7 @@ export default class Traveller extends SceneObject {
         if (this._currentRoad) this._currentRoad.removeTraveller(this);
     }
 
-    update(dtMilliseconds: number) {
+    override update(dtMilliseconds: number) {
         this._age += dtMilliseconds;
         this._stopReason = null;
         this._stoppedFor = [];
@@ -174,7 +174,7 @@ export default class Traveller extends SceneObject {
         this._checkExit();
     }
 
-    draw(ctx: CanvasRenderingContext2D, elapsedTime: number) {
+    override draw(ctx: CanvasRenderingContext2D, elapsedTime: number) {
         const currentRoad = this._currentRoad;
         assert(currentRoad, "current road must be defined");
 
@@ -190,7 +190,7 @@ export default class Traveller extends SceneObject {
         // ctx.fill();
     }
 
-    getSortOrder(): number {
+    override getSortOrder(): number {
         return this.position.y;
     }
 

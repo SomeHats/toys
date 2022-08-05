@@ -1,10 +1,11 @@
 import "regenerator-runtime/runtime";
+import { assertExists } from "../lib/assert";
 import { has } from "../lib/utils";
 // import * as slomo from './Cargo.toml';
 
 // Chrome does not seem to expose the Animation constructor globally
 if (typeof Animation === "undefined") {
-    // @ts-expect-error
+    // @ts-expect-error oohhh its all spooky like
     window.Animation = document.body.animate({}).constructor;
 }
 
@@ -39,7 +40,7 @@ import("./Cargo.toml").then((slomo) => {
     log(__debugScope);
     `.trim();
     slomo
-        .start(source, document.getElementById("root")!)
+        .start(source, assertExists(document.getElementById("root")))
         .then((result) => console.log("success", result))
         .catch((err) => console.log("error", err));
 });

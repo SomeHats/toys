@@ -1,11 +1,11 @@
 import { times } from "./utils";
 
 export default class RingBuffer<T> {
-    private start: number = 0;
-    private end: number = 0;
+    private start = 0;
+    private end = 0;
     private buffer: Array<T | null>;
 
-    constructor(size: number = 32) {
+    constructor(size = 32) {
         this.buffer = times(Math.max(size, 1), () => null);
     }
 

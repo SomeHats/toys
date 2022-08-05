@@ -97,9 +97,6 @@ export class Delaunay {
             if (halfEdgeId > otherHalfEdgeId && otherHalfEdgeId !== -1) {
                 const p1 = this.triangleCenters[Math.floor(halfEdgeId / 3)];
                 const p2 = this.triangleCenters[Math.floor(otherHalfEdgeId / 3)];
-                if (!p1 || !p2) {
-                    debugger;
-                }
                 cb(p1, p2);
             }
         }

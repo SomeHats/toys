@@ -45,11 +45,11 @@ class UnitBezier {
         // Fast path: Use Newton's method.
         let t = x;
         for (let i = 0; i < UnitBezier.NEWTON_METHOD_ITERATIONS; i++) {
-            let x2 = this.sampleCurveX(t);
+            const x2 = this.sampleCurveX(t);
             if (approxEq(x2, x, epsilon)) {
                 return t;
             }
-            let dx = this.sampleCurveDerivativeX(t);
+            const dx = this.sampleCurveDerivativeX(t);
             if (approxEq(dx, 0.0, 1e-6)) {
                 break;
             }
@@ -69,7 +69,7 @@ class UnitBezier {
         }
 
         while (lo < hi) {
-            let x2 = this.sampleCurveX(t);
+            const x2 = this.sampleCurveX(t);
             if (approxEq(x2, x, epsilon)) {
                 return t;
             }
@@ -216,20 +216,20 @@ export const inOutElastic = (t: number): number => {
 };
 
 export const inBack =
-    (s: number = 1.70158) =>
+    (s = 1.70158) =>
     (t: number): number => {
         return 1 * t * t * ((s + 1) * t - s);
     };
 
 export const outBack =
-    (s: number = 1.70158) =>
+    (s = 1.70158) =>
     (t: number): number => {
         t = t - 1;
         return 1 * (t * t * ((s + 1) * t + s) + 1);
     };
 
 export const inOutBack =
-    (s: number = 1.70158) =>
+    (s = 1.70158) =>
     (t: number): number => {
         if ((t /= 1 / 2) < 1) return (1 / 2) * (t * t * (((s *= 1.525) + 1) * t - s));
         return (1 / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2);

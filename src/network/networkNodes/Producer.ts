@@ -75,14 +75,14 @@ export default class Producer extends SceneObject implements NetworkNode {
         this._connectionSet.add(node, direction);
     }
 
-    update(delta: number) {
+    override update(delta: number) {
         this._timer = constrain(0, this._cooldown, this._timer + delta);
         if (this._timer >= this._cooldown) {
             this._onTimerEnd();
         }
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    override draw(ctx: CanvasRenderingContext2D) {
         const progress = this._timer / this._cooldown;
 
         const colorMixAmount = constrain(0, 1, mapRange(0, CLOCK_FADE_DURATION, 1, 0, this._timer));

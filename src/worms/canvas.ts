@@ -1,7 +1,8 @@
+import { assertExists } from "../lib/assert";
 import { DebugDraw } from "../lib/DebugDraw";
 
 export const canvasEl = document.createElement("canvas");
-export const ctx = canvasEl.getContext("2d")!;
+export const ctx = assertExists(canvasEl.getContext("2d"));
 export const width = document.body.clientWidth;
 export const height = document.body.clientHeight;
 export const scale = window.devicePixelRatio;

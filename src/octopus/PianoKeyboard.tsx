@@ -26,55 +26,53 @@ function isNoteAccidental(note: number): boolean {
     );
 }
 
-const PianoKeyboardKey = React.memo(
-    ({
-        offset,
-        isAccidental,
-        styles,
-        isNoteDown,
-        note,
-        setRefForKey,
-    }: {
-        offset: number;
-        isAccidental: boolean;
-        styles: KeyRenderStyles;
-        // onNoteDown: (note: number, x: number, y: number) => void;
-        // onNoteUp: (note: number, x: number, y: number) => void;
-        isNoteDown: boolean;
-        note: number;
-        setRefForKey: (key: HTMLDivElement | null, note: number) => void;
-    }) => {
-        const style = isAccidental
-            ? ({
-                  left: offset - styles.accidentalWidth / 2,
-                  width: styles.accidentalWidth,
-                  height: styles.accidentalHeight,
-                  position: "absolute",
-                  zIndex: 1,
-                  borderWidth: styles.scale * KEY_BORDER_SIZE,
-              } as const)
-            : ({
-                  left: offset,
-                  width: styles.standardWidth,
-                  height: styles.standardHeight,
-                  position: "absolute",
-                  borderWidth: styles.scale * KEY_BORDER_SIZE,
-              } as const);
+const PianoKeyboardKey = React.memo(function PianoKeyboardKey({
+    offset,
+    isAccidental,
+    styles,
+    isNoteDown,
+    note,
+    setRefForKey,
+}: {
+    offset: number;
+    isAccidental: boolean;
+    styles: KeyRenderStyles;
+    // onNoteDown: (note: number, x: number, y: number) => void;
+    // onNoteUp: (note: number, x: number, y: number) => void;
+    isNoteDown: boolean;
+    note: number;
+    setRefForKey: (key: HTMLDivElement | null, note: number) => void;
+}) {
+    const style = isAccidental
+        ? ({
+              left: offset - styles.accidentalWidth / 2,
+              width: styles.accidentalWidth,
+              height: styles.accidentalHeight,
+              position: "absolute",
+              zIndex: 1,
+              borderWidth: styles.scale * KEY_BORDER_SIZE,
+          } as const)
+        : ({
+              left: offset,
+              width: styles.standardWidth,
+              height: styles.standardHeight,
+              position: "absolute",
+              borderWidth: styles.scale * KEY_BORDER_SIZE,
+          } as const);
 
-        return (
-            <div
-                ref={(el) => setRefForKey(el, note)}
-                style={style}
-                className={cx("border-gray-600", {
-                    "bg-black hover:bg-blue-900": isAccidental,
-                    "bg-white hover:bg-blue-200": !isAccidental,
-                    "bg-purple-800": isAccidental && isNoteDown,
-                    "bg-purple-300": !isAccidental && isNoteDown,
-                })}
-            />
-        );
-    },
-);
+    return (
+        <div
+            ref={(el) => setRefForKey(el, note)}
+            style={style}
+            className={cx("border-gray-600", {
+                "bg-black hover:bg-blue-900": isAccidental,
+                "bg-white hover:bg-blue-200": !isAccidental,
+                "bg-purple-800": isAccidental && isNoteDown,
+                "bg-purple-300": !isAccidental && isNoteDown,
+            })}
+        />
+    );
+});
 
 function _PianoKeyboard({
     lowestNote,

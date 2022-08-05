@@ -68,7 +68,7 @@ const SignalGraph = React.memo(function _SignalGraph({
                 max: Math.max(prev.max, ...nextPoints),
             }));
         });
-    }, [signals]);
+    }, [signals, width]);
 
     const height = Math.round(width / 2);
     if (min === max) {
@@ -97,7 +97,7 @@ const SignalGraph = React.memo(function _SignalGraph({
                 {format(min, 5)}
             </text>
             {lines.map((points, i) => {
-                let pathParts = [];
+                const pathParts = [];
                 for (let i = 0; i < points.length; i++) {
                     const command = i === 0 ? "M" : "L";
                     pathParts.push(
@@ -152,7 +152,7 @@ function SignalControl({
                 signal.set(mapRange(0, 1, signal.range[0], signal.range[1], value));
             }
         });
-    }, [listenToMidi, signal, isWaitingForMidi, midiControlId]);
+    }, [listenToMidi, signal, isWaitingForMidi, midiControlId, setMidiControlId]);
 
     function onClickMidiButton(e: React.MouseEvent) {
         e.stopPropagation();

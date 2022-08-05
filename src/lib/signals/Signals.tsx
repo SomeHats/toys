@@ -74,7 +74,7 @@ export class ControllableSignal extends ControlledSignal {
         this.range = range || null;
     }
 
-    set(newValue: number) {
+    override set(newValue: number) {
         newValue = _clamp(newValue, this.range);
         super.set(newValue);
         this.saveDebounced(newValue);

@@ -7,7 +7,7 @@ import AABB from "../lib/geom/AABB";
 import Traveller from "./Traveller";
 
 export default class TravellerFinder extends SceneSystem {
-    static systemName = "TravellerFinder";
+    static override systemName = "TravellerFinder";
 
     _quadTree!: QuadTree<Traveller>;
 
@@ -15,7 +15,7 @@ export default class TravellerFinder extends SceneSystem {
         this._quadTree.remove(traveller);
     }
 
-    afterAddToScene(scene: Scene) {
+    override afterAddToScene(scene: Scene) {
         super.afterAddToScene(scene);
         this._quadTree = new QuadTree(
             AABB.fromLeftTopRightBottom(0, 0, scene.width, scene.height),
@@ -23,7 +23,7 @@ export default class TravellerFinder extends SceneSystem {
         );
     }
 
-    beforeUpdate() {
+    override beforeUpdate() {
         const scene = this.getScene();
         this._quadTree.clear();
         scene.children.forEach((child) => {

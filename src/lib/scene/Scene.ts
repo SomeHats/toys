@@ -16,12 +16,12 @@ export default class Scene {
     ctx: CanvasRenderingContext2D;
     private _scaleFactor: number;
     private _children: SceneObject[] = [];
-    private _isPlaying: boolean = false;
+    private _isPlaying = false;
     private frameHandle: number | null = null;
     private lastElapsedTime: number | null = null;
     private systemsByClass = new Map<SystemClass<SceneSystem>, SceneSystem>();
 
-    constructor(width: number, height: number, scaleFactor: number = 1) {
+    constructor(width: number, height: number, scaleFactor = 1) {
         this.canvas = document.createElement("canvas");
         this.canvas.width = width * scaleFactor;
         this.canvas.height = height * scaleFactor;
@@ -76,8 +76,11 @@ export default class Scene {
     }
 
     addSystem(system: SceneSystem) {
-        assert(!this.hasSystem(system.constructor as any), "only one system of each type allowed");
-        this.systemsByClass.set(system.constructor as any, system);
+        assert(
+            !this.hasSystem(system.constructor as SystemClass<SceneSystem>),
+            "only one system of each type allowed",
+        );
+        this.systemsByClass.set(system.constructor as SystemClass<SceneSystem>, system);
         system.afterAddToScene(this);
     }
 

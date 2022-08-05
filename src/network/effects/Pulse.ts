@@ -51,7 +51,7 @@ export default class Pulse extends SceneObject {
         this._removeOnComplete = removeOnComplete;
     }
 
-    update(deltaTime: number) {
+    override update(deltaTime: number) {
         const deltaProgress = deltaTime / this._duration;
         this._progress = Math.min(1, this._progress + deltaProgress);
         this._circle = this._circle.withRadius(
@@ -63,7 +63,7 @@ export default class Pulse extends SceneObject {
         }
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    override draw(ctx: CanvasRenderingContext2D) {
         ctx.beginPath();
         const opacity = this._easeOpacity(this._progress);
         ctx.fillStyle = this._color.fade(opacity).toString();

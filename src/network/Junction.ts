@@ -25,7 +25,7 @@ export default class Junction extends SceneObject {
         return this._circle.center;
     }
 
-    onAddedToScene(scene: Scene) {
+    override onAddedToScene(scene: Scene) {
         super.onAddedToScene(scene);
         this._roads.forEach((road) => scene.addChild(road));
     }

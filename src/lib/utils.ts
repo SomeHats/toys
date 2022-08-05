@@ -1,7 +1,7 @@
 export type TimeoutId = ReturnType<typeof setTimeout>;
 export type IntervalId = ReturnType<typeof setInterval>;
 
-export type ReadonlyRecord<K extends keyof any, T> = {
+export type ReadonlyRecord<K extends PropertyKey, T> = {
     readonly [P in K]: T;
 };
 
@@ -254,7 +254,8 @@ export function get(obj: object, key: string): unknown {
     if (!has(obj, key)) {
         return undefined;
     }
-    return (obj as any)[key];
+    // @ts-expect-error we know the property exists
+    return obj[key];
 }
 
 export function approxEq(a: number, b: number, epsilon: number): boolean {

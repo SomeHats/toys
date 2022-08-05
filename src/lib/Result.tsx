@@ -16,7 +16,8 @@ export abstract class Result<T, E> {
             if (result.isOk()) {
                 arr.push(result.value);
             } else {
-                return result as any;
+                // @ts-expect-error error type matches
+                return result;
             }
         }
         return Result.ok(arr);
@@ -49,7 +50,8 @@ export class OkResult<T, E> extends Result<T, E> {
         return Result.ok(map(this.value));
     }
     mapErr<E2>(map: (err: E) => E2): Result<T, E2> {
-        return this as any;
+        // @ts-expect-error error type matches
+        return this;
     }
 }
 
@@ -68,7 +70,8 @@ export class ErrorResult<T, E> extends Result<T, E> {
         fail(`${message}: ${String(this.error)}`);
     }
     map<T2>(map: (value: T) => T2): Result<T2, E> {
-        return this as any;
+        // @ts-expect-error error type matches
+        return this;
     }
     mapErr<E2>(map: (err: E) => E2): Result<T, E2> {
         return Result.error(map(this.error));

@@ -24,6 +24,8 @@ frameLoop(() => {
     editor.draw();
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 if ((module as any).hot) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (module as any).hot.dispose(() => window.location.reload());
 }

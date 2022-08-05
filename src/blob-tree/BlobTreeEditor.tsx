@@ -115,12 +115,6 @@ export class BlobTreeEditor {
                 };
                 return;
             }
-            case "selectedIdle":
-                this.state = {
-                    type: "createNode",
-                    node: this.blobTree.createNewChild(this.state.node, position, 1),
-                };
-                return;
             case "createNode":
             case "moveNode":
             case "resizeNode":
@@ -165,6 +159,7 @@ export class BlobTreeEditor {
             case "resizeNode":
                 this.state.node.radius =
                     this.mousePosition.distanceTo(this.state.node.position) + this.state.offset;
+                return;
             case "selectedIdle":
                 return;
             default:

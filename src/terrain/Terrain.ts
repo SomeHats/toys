@@ -13,7 +13,7 @@ function assignPlates(plateCount: number, terrain: Terrain) {
     const remainingCellIds = new Set(terrain.activeCellIds);
     const queue = new RandomQueue(terrain.activeCellIds);
     const plateIdByCellId: Array<number> = new Array(terrain.activeCellIds.length);
-    let i = 0;
+    const i = 0;
 
     const plates = times(plateCount, (id) => {
         const initialCellId = queue.pop();
@@ -29,7 +29,7 @@ function assignPlates(plateCount: number, terrain: Terrain) {
     const activePlates = plates.slice();
 
     while (remainingCellIds.size > 0) {
-        let plate = sample(activePlates);
+        const plate = sample(activePlates);
         if (!plate) {
             break;
         }

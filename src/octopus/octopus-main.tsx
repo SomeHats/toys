@@ -502,41 +502,47 @@ function OctopusUi({
         }
     }, []);
 
-    const handleNoteDown = React.useCallback((note: number) => {
-        setNotesDown((prev) => {
-            if (prev.includes(note)) {
-                return prev;
-            }
-            const keyEl = noteRefs.current.get(note);
-            if (keyEl) {
-                const bbox = keyEl.getBoundingClientRect();
-                onNoteDown(
-                    note,
-                    screenToScene(
-                        bbox.x + bbox.width / 2,
-                        canvasTranslateXSignal.read(),
-                        canvasScaleSignal.read(),
-                    ),
-                    screenToScene(
-                        bbox.y + bbox.height * 0.8,
-                        canvasTranslateYSignal.read(),
-                        canvasScaleSignal.read(),
-                    ),
-                );
-            }
-            return uniq([...prev, note]);
-        });
-    }, []);
+    const handleNoteDown = React.useCallback(
+        (note: number) => {
+            setNotesDown((prev) => {
+                if (prev.includes(note)) {
+                    return prev;
+                }
+                const keyEl = noteRefs.current.get(note);
+                if (keyEl) {
+                    const bbox = keyEl.getBoundingClientRect();
+                    onNoteDown(
+                        note,
+                        screenToScene(
+                            bbox.x + bbox.width / 2,
+                            canvasTranslateXSignal.read(),
+                            canvasScaleSignal.read(),
+                        ),
+                        screenToScene(
+                            bbox.y + bbox.height * 0.8,
+                            canvasTranslateYSignal.read(),
+                            canvasScaleSignal.read(),
+                        ),
+                    );
+                }
+                return uniq([...prev, note]);
+            });
+        },
+        [canvasScaleSignal, canvasTranslateXSignal, canvasTranslateYSignal, onNoteDown],
+    );
 
-    const handleNoteUp = React.useCallback((note: number) => {
-        setNotesDown((prev) => {
-            if (!prev.includes(note)) {
-                return prev;
-            }
-            onNoteUp(note);
-            return prev.filter((n) => n !== note);
-        });
-    }, []);
+    const handleNoteUp = React.useCallback(
+        (note: number) => {
+            setNotesDown((prev) => {
+                if (!prev.includes(note)) {
+                    return prev;
+                }
+                onNoteUp(note);
+                return prev.filter((n) => n !== note);
+            });
+        },
+        [onNoteUp],
+    );
 
     React.useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -559,7 +565,7 @@ function OctopusUi({
             window.removeEventListener("keydown", onKeyDown);
             window.removeEventListener("keyup", onKeyUp);
         };
-    }, []);
+    }, [handleNoteDown, handleNoteUp]);
 
     return (
         <>

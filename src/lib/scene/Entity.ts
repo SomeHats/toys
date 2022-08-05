@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import SceneObject from "./SceneObject";
 import Component from "./Component";
 import { assert } from "../assert";
@@ -43,7 +44,7 @@ export default class Entity extends SceneObject {
         return instance;
     }
 
-    draw(ctx: CanvasRenderingContext2D, elapsedTime: number): void {
+    override draw(ctx: CanvasRenderingContext2D, elapsedTime: number): void {
         for (const component of this.componentInstances.values()) {
             component.beforeDraw(ctx, elapsedTime);
         }
@@ -54,7 +55,7 @@ export default class Entity extends SceneObject {
             component.afterDraw(ctx, elapsedTime);
         }
     }
-    update(delta: number): void {
+    override update(delta: number): void {
         for (const component of this.componentInstances.values()) {
             component.beforeUpdate(delta);
         }
@@ -66,14 +67,14 @@ export default class Entity extends SceneObject {
         }
     }
 
-    onAddedToScene(scene: Scene) {
+    override onAddedToScene(scene: Scene) {
         super.onAddedToScene(scene);
         for (const component of this.componentInstances.values()) {
             component.onAddedToScene(scene);
         }
     }
 
-    onRemovedFromScene() {
+    override onRemovedFromScene() {
         const scene = this.getScene();
         super.onRemovedFromScene();
         for (const component of this.componentInstances.values()) {
@@ -81,7 +82,7 @@ export default class Entity extends SceneObject {
         }
     }
 
-    getSortOrder() {
+    override getSortOrder() {
         if (this.hasComponent(SortOrderProvider)) {
             return this.getComponent(SortOrderProvider).getSortOrder();
         } else {

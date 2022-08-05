@@ -18,7 +18,7 @@ const roots = glob
 export default defineConfig(async () => {
     const glsl = await import("vite-plugin-glsl");
     return {
-        plugins: [react(), glsl.default(), wasmPack(["./slomojs"])],
+        plugins: [react(), glsl.default()],
         base: "./",
         root: path.resolve(__dirname, "src"),
         publicDir: false,

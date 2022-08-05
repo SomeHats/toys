@@ -1,7 +1,7 @@
 import "regenerator-runtime/runtime";
 import { assertExists } from "../lib/assert";
 import { has } from "../lib/utils";
-import * as slomojs from "slomojs";
+import initSlomojs, * as slomojs from "../../slomojs/pkg/slomojs";
 
 // Chrome does not seem to expose the Animation constructor globally
 if (typeof Animation === "undefined") {
@@ -39,8 +39,7 @@ __debugScope();
 log(__debugScope);
 `.trim();
 
-slomojs
-    .default(new URL("slomojs/slomojs_bg.wasm", import.meta.url))
+initSlomojs(new URL("../../slomojs/pkg/slomojs_bg.wasm", import.meta.url))
     .then(() => slomojs.start(source, assertExists(document.getElementById("root"))))
     .then((result: unknown) => console.log("success", result))
     .catch((err: unknown) => console.log("error", err));

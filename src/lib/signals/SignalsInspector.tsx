@@ -209,7 +209,7 @@ function SignalControl({
                 </div>
             )}
             <div
-                className="cursor-move pr-2 pl-1 py-1"
+                className="cursor-move py-1 pr-2 pl-1"
                 style={{ cursor: "ns-resize" }}
                 onMouseDown={onMouseDown}
             >
@@ -239,9 +239,9 @@ const SignalInspector = React.memo(function _SignalInspector({
     );
 
     return (
-        <div className="text-xs border-t border-gray-700">
+        <div className="border-t border-gray-700 text-xs">
             <div
-                className="flex hover:bg-gray-800 cursor-pointer"
+                className="flex cursor-pointer hover:bg-gray-800"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex-auto whitespace-pre px-2 py-1">{displayName}</div>
@@ -273,9 +273,9 @@ function SignalInspectorGroup({
 }) {
     const [isExpanded, setIsExpanded] = useLocalStorage(`group.${groupName}`, false);
     return (
-        <div className="text-xs border-t border-gray-700">
+        <div className="border-t border-gray-700 text-xs">
             <div
-                className="flex hover:bg-gray-800 cursor-pointer px-2 py-1"
+                className="flex cursor-pointer px-2 py-1 hover:bg-gray-800"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex-auto">{groupName}</div>
@@ -335,7 +335,7 @@ const SignalsInspector = React.memo(function _SignalsInspector({
 
     return (
         <div
-            className="absolute right-0 top-0 bottom-0 border-l border-gray-600 text-sm h-full overflow-auto"
+            className="absolute right-0 top-0 bottom-0 h-full overflow-auto border-l border-gray-600 text-sm"
             style={{ width }}
         >
             <div className="py-1 px-2">signals</div>

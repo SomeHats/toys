@@ -571,7 +571,7 @@ function OctopusUi({
         <>
             <div
                 style={{ background: "#7F95D1" }}
-                className="absolute top-0 left-0 w-full h-full"
+                className="absolute top-0 left-0 h-full w-full"
             />
             <PianoKeyboard
                 lowestNote={LOWEST_NOTE_TO_RENDER}

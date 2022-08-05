@@ -5,7 +5,7 @@ name: build
 on:
     push:
         branches:
-            - master
+            - main
 
 jobs:
     build:
@@ -31,12 +31,12 @@ jobs:
 
             - name: Install dependencies
               run: yarn --immutable
-            - name: Test
-              run: yarn run test
             - name: Build rust
               run: yarn build:rust:slomojs --release
             - name: Build web
               run: yarn build
+            - name: Test
+              run: yarn run test
             - name: Upload artifact
               uses: actions/upload-artifact@v3
               with:

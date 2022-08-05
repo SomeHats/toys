@@ -9,7 +9,7 @@ export const assets = new AssetBundle()
     )
     .add("beeOutlined", (dependency) =>
         AnimatedSpriteStackSheet.load({
-            geometry: new URL("raw:./bee-outline.json", import.meta.url),
+            geometry: new URL("./bee-outline.json", import.meta.url),
             baseTexture: dependency("beeOutlineBaseTexture"),
             resolution: 0.3,
             framesPerSecond: 12,
@@ -23,7 +23,7 @@ export const assets = new AssetBundle()
     )
     .add("beeFly", (dependency) =>
         AnimatedSpriteStackSheet.load({
-            geometry: new URL("raw:./bee-fly.json", import.meta.url),
+            geometry: new URL("./bee-fly.json", import.meta.url),
             baseTexture: dependency("beeFlyBaseTexture"),
             resolution: 0.3,
             framesPerSecond: 12,
@@ -37,7 +37,7 @@ export const assets = new AssetBundle()
     )
     .add("beeFlat", (dependency) =>
         AnimatedSpriteStackSheet.load({
-            geometry: new URL("raw:./bee-flat.json", import.meta.url),
+            geometry: new URL("./bee-flat.json", import.meta.url),
             baseTexture: dependency("beeFlatBaseTexture"),
             resolution: 0.3,
             framesPerSecond: 12,

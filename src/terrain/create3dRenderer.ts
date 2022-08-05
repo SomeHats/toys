@@ -14,11 +14,11 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     document.body.appendChild(renderer.domElement);
-    Object.assign(renderer.domElement.style, {
-        position: "absolute",
-        top: 0,
-        left: 0,
-    });
+    // Object.assign(renderer.domElement.style, {
+    //     position: "absolute",
+    //     top: 0,
+    //     left: 0,
+    // });
 
     const geometry = new T.BufferGeometry();
 

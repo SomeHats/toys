@@ -1,7 +1,7 @@
 import "regenerator-runtime/runtime";
 import { assertExists } from "../lib/assert";
 import { has } from "../lib/utils";
-// import * as slomo from './Cargo.toml';
+import * as slomojs from "slomojs";
 
 // Chrome does not seem to expose the Animation constructor globally
 if (typeof Animation === "undefined") {
@@ -27,20 +27,20 @@ if (!has(Animation.prototype, "finished")) {
     });
 }
 
-import("./Cargo.toml").then((slomo) => {
-    // slomo.tester(document.getElementById('root')!);
+const source = `
+let a = 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10;
+let b = "hello" + " " + "world";
+let x = 1 + 2000 + 3 + "hiii", a = 1, b = 2, c;
+let y = "hello" + x;
+log(y, x, a, b + b + a, log);
+let str = "hello, world";
+log(str);
+__debugScope();
+log(__debugScope);
+`.trim();
 
-    const source = `
-    let str = "hello, world";
-    log(str);
-    let x = 1 + 2000 + 3 + "hiii", a = 1, b = 2, c;
-    let y = "hello" + x;
-    log(y, x, a, b + b + a, log);
-    __debugScope();
-    log(__debugScope);
-    `.trim();
-    slomo
-        .start(source, assertExists(document.getElementById("root")))
-        .then((result) => console.log("success", result))
-        .catch((err) => console.log("error", err));
-});
+slomojs
+    .default(new URL("slomojs/slomojs_bg.wasm", import.meta.url))
+    .then(() => slomojs.start(source, assertExists(document.getElementById("root"))))
+    .then((result: unknown) => console.log("success", result))
+    .catch((err: unknown) => console.log("error", err));

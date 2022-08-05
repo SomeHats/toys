@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { glob } from "glob";
-import wasmPack from "vite-plugin-wasm-pack";
 
 const mainIndex = path.resolve(__dirname, "src/index.html");
 const roots = glob

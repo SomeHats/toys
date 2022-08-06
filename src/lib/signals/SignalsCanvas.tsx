@@ -2,7 +2,7 @@ import * as React from "react";
 import SignalsInspector from "./SignalsInspector";
 import { frameLoop } from "../utils";
 import DragCover from "../DragCover";
-import ResizeObserver from "resize-observer-polyfill";
+import ResizeObserver from "@juggle/resize-observer";
 import { assert } from "../assert";
 import { Signal, SignalManager } from "./Signals";
 import { ListenToMidiInputFn } from "../midi";

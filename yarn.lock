@@ -4480,13 +4480,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resize-observer-polyfill@npm:^1.5.1":
-  version: 1.5.1
-  resolution: "resize-observer-polyfill@npm:1.5.1"
-  checksum: 57e7f79489867b00ba43c9c051524a5c8f162a61d5547e99333549afc23e15c44fd43f2f318ea0261ea98c0eb3158cca261e6f48d66e1ed1cd1f340a43977094
-  languageName: node
-  linkType: hard
-
 "resolve-from@npm:^4.0.0":
   version: 4.0.0
   resolution: "resolve-from@npm:4.0.0"
@@ -4911,6 +4904,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "terrain@workspace:."
   dependencies:
+    "@juggle/resize-observer": ^3.3.1
     "@types/classnames": ^2.3.0
     "@types/color": ^3.0.3
     "@types/d3-color": ^3.1.0
@@ -4950,7 +4944,6 @@ __metadata:
     react-dom: ^18.2.0
     rebound: ^0.1.0
     regenerator-runtime: ^0.13.9
-    resize-observer-polyfill: ^1.5.1
     tailwindcss: ^3.1.8
     three: ^0.132.2
     typescript: ^4.7.4

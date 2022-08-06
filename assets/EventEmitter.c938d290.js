@@ -1,0 +1,1 @@
+import{a as r}from"./index.9952ca67.js";class d{constructor(){this.handlers=new Set}listen(e){const t=s=>e(s);return this.handlers.add(t),()=>{this.handlers.delete(t)}}emit(...e){r.exports.unstable_batchedUpdates(()=>{for(const t of this.handlers)t(e[0])})}}export{d as E};

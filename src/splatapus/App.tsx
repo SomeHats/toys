@@ -1,7 +1,7 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { sizeFromEntry, useResizeObserver } from "@/lib/hooks/useResizeObserver";
 import { MouseEvent, useCallback, useMemo, useState } from "react";
-import { getStroke } from "./perfectFreehand";
+import { getStroke } from "@/splatapus/perfectFreehand";
 
 const lineSize = 20;
 const streamline = 0.5;

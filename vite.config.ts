@@ -31,6 +31,11 @@ export default defineConfig(async () => {
                     main: mainIndex,
                     ...Object.fromEntries(roots),
                 },
+                output: {
+                    assetFileNames: "assets/asset_[name].[hash].[ext]",
+                    chunkFileNames: "chunks/chunk_[name].[hash].js",
+                    entryFileNames: "[name]/[name].[hash].js",
+                },
             },
         },
     };

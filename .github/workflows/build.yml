@@ -64,7 +64,7 @@ jobs:
               run: yarn --immutable
 
             - name: Build rust
-              run: yarn build:rust:slomojs --release
+              run: yarn build:rust
 
             - name: Build web
               run: yarn build

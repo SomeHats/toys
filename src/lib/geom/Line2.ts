@@ -1,7 +1,7 @@
 // @flow
-import { assert } from "../assert";
-import { isWithin } from "../utils";
-import Vector2 from "./Vector2";
+import { assert } from "@/lib/assert";
+import { isWithin } from "@/lib/utils";
+import Vector2 from "@/lib/geom/Vector2";
 
 const isSlopeVertical = (slope: number) => slope === Infinity || slope === -Infinity;
 

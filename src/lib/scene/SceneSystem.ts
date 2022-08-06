@@ -1,6 +1,6 @@
 // @flow
-import { assert } from "../assert";
-import Scene from "./Scene";
+import { assert } from "@/lib/assert";
+import Scene from "@/lib/scene/Scene";
 
 const DEFAULT_NAME = "$$AbstractSceneSystem$$";
 

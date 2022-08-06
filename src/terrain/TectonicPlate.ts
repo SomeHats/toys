@@ -1,12 +1,12 @@
-import { random, mapRange, wait, lerp } from "../lib/utils";
-import Terrain from "./Terrain";
+import { random, mapRange, wait, lerp } from "@/lib/utils";
+import Terrain from "@/terrain/Terrain";
 import { interpolateRgbBasis } from "d3-interpolate";
-import Vector2 from "../lib/geom/Vector2";
-import { TerrainCell } from "./TerrainCell";
-import { makeFractalNoise2d } from "./fractalNoise";
-import * as config from "./config";
-import { canvas } from "./canvas";
-import { assertExists } from "../lib/assert";
+import Vector2 from "@/lib/geom/Vector2";
+import { TerrainCell } from "@/terrain/TerrainCell";
+import { makeFractalNoise2d } from "@/terrain/fractalNoise";
+import * as config from "@/terrain/config";
+import { canvas } from "@/terrain/canvas";
+import { assertExists } from "@/lib/assert";
 
 function findPlateEdges(
     currentPlateId: number,

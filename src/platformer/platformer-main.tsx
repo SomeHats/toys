@@ -1,13 +1,13 @@
-import { assertExists } from "../lib/assert";
-import { ButtonMapping } from "../lib/ButtonMapping";
-import { DebugDraw, StrokeAndFillOptions } from "../lib/DebugDraw";
-import AABB from "../lib/geom/AABB";
-import Vector2 from "../lib/geom/Vector2";
-import { KeyCode } from "../lib/KeyCode";
-import Component from "../lib/scene/Component";
-import Entity from "../lib/scene/Entity";
-import Scene from "../lib/scene/Scene";
-import SceneSystem from "../lib/scene/SceneSystem";
+import { assertExists } from "@/lib/assert";
+import { ButtonMapping } from "@/lib/ButtonMapping";
+import { DebugDraw, StrokeAndFillOptions } from "@/lib/DebugDraw";
+import AABB from "@/lib/geom/AABB";
+import Vector2 from "@/lib/geom/Vector2";
+import { KeyCode } from "@/lib/KeyCode";
+import Component from "@/lib/scene/Component";
+import Entity from "@/lib/scene/Entity";
+import Scene from "@/lib/scene/Scene";
+import SceneSystem from "@/lib/scene/SceneSystem";
 
 class DebugDrawSystem extends SceneSystem {
     static override systemName = "DebugDragSystem";

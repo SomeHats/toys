@@ -1,9 +1,9 @@
 import { Key } from "readline";
 import { AnimationActionLoopStyles } from "three";
-import { assert } from "./assert";
-import EventEmitter, { Unsubscribe } from "./EventEmitter";
-import { KeyCode } from "./KeyCode";
-import { entries } from "./utils";
+import { assert } from "@/lib/assert";
+import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
+import { KeyCode } from "@/lib/KeyCode";
+import { entries } from "@/lib/utils";
 
 type ActionInfo = {
     downEvent: EventEmitter<void>;

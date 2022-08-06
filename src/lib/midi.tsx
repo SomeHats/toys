@@ -1,7 +1,7 @@
 import { WebMidi } from "webmidi";
-import { assert, assertNumber } from "./assert";
-import EventEmitter, { Unsubscribe } from "./EventEmitter";
-import { mapRange } from "./utils";
+import { assert, assertNumber } from "@/lib/assert";
+import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
+import { mapRange } from "@/lib/utils";
 
 export async function enableMidi(): Promise<typeof WebMidi> {
     return await WebMidi.enable();

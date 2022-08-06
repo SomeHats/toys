@@ -1,7 +1,7 @@
 // @flow
-import Path from "./geom/Path";
-import StraightPathSegment from "./geom/StraightPathSegment";
-import CirclePathSegment from "./geom/CirclePathSegment";
+import Path from "@/lib/geom/Path";
+import StraightPathSegment from "@/lib/geom/StraightPathSegment";
+import CirclePathSegment from "@/lib/geom/CirclePathSegment";
 
 export function circle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
     ctx.arc(x, y, radius, 0, 2 * Math.PI, false);

@@ -1,6 +1,6 @@
 import { profile } from "console";
 import { NoToneMapping } from "three";
-import { noop } from "./utils";
+import { noop } from "@/lib/utils";
 
 export const fakeConsole: Console = {
     assert: noop,

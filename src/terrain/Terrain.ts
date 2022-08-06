@@ -1,12 +1,12 @@
-import { Delaunay } from "./Delaunay";
-import { TerrainCell } from "./TerrainCell";
-import Vector2 from "../lib/geom/Vector2";
-import { times, sample, removeFromArray, mapRange, shuffle } from "../lib/utils";
-import RandomQueue from "../lib/RandomQueue";
-import AABB from "../lib/geom/AABB";
-import { TectonicPlate } from "./TectonicPlate";
-import * as config from "./config";
-import { makeFractalNoise2d, mapNoise2d } from "./fractalNoise";
+import { Delaunay } from "@/terrain/Delaunay";
+import { TerrainCell } from "@/terrain/TerrainCell";
+import Vector2 from "@/lib/geom/Vector2";
+import { times, sample, removeFromArray, mapRange, shuffle } from "@/lib/utils";
+import RandomQueue from "@/lib/RandomQueue";
+import AABB from "@/lib/geom/AABB";
+import { TectonicPlate } from "@/terrain/TectonicPlate";
+import * as config from "@/terrain/config";
+import { makeFractalNoise2d, mapNoise2d } from "@/terrain/fractalNoise";
 import { quadtree, Quadtree } from "d3-quadtree";
 
 function assignPlates(plateCount: number, terrain: Terrain) {

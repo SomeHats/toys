@@ -1,4 +1,4 @@
-import Vector2 from "../lib/geom/Vector2";
+import Vector2 from "@/lib/geom/Vector2";
 import Delaunator from "delaunator";
 
 function nextHalfedge(edgeId: number) {

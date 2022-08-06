@@ -1,11 +1,11 @@
-import Vector2 from "../lib/geom/Vector2";
-import { DelaunayCell } from "./Delaunay";
-import Terrain from "./Terrain";
-import { fromEntries, compact, lerp, mapRange, clamp } from "../lib/utils";
-import { Noise2D } from "./fractalNoise";
-import { TectonicPlate } from "./TectonicPlate";
-import * as config from "./config";
-import makeInterpolateGradiant from "./makeInterpolateGradient";
+import Vector2 from "@/lib/geom/Vector2";
+import { DelaunayCell } from "@/terrain/Delaunay";
+import Terrain from "@/terrain/Terrain";
+import { fromEntries, compact, lerp, mapRange, clamp } from "@/lib/utils";
+import { Noise2D } from "@/terrain/fractalNoise";
+import { TectonicPlate } from "@/terrain/TectonicPlate";
+import * as config from "@/terrain/config";
+import makeInterpolateGradiant from "@/terrain/makeInterpolateGradient";
 
 const interpolateBiome = makeInterpolateGradiant([
     { color: "#1A237E", stop: 0 },

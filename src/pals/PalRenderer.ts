@@ -1,13 +1,13 @@
-import Component from "../lib/scene/Component";
-import { PalControlData } from "./PalController";
-import Entity from "../lib/scene/Entity";
-import PalGeom from "./PalGeom";
-import * as ShapeHelpers from "../lib/canvasShapeHelpers";
-import { normalizeAngle, constrain } from "../lib/utils";
-import Circle from "../lib/geom/Circle";
-import { PalConfig } from "./PalConfig";
-import PalLegGeom from "./PalLegGeom";
-import Vector2 from "../lib/geom/Vector2";
+import Component from "@/lib/scene/Component";
+import { PalControlData } from "@/pals/PalController";
+import Entity from "@/lib/scene/Entity";
+import PalGeom from "@/pals/PalGeom";
+import * as ShapeHelpers from "@/lib/canvasShapeHelpers";
+import { normalizeAngle, constrain } from "@/lib/utils";
+import Circle from "@/lib/geom/Circle";
+import { PalConfig } from "@/pals/PalConfig";
+import PalLegGeom from "@/pals/PalLegGeom";
+import Vector2 from "@/lib/geom/Vector2";
 
 const Y_SCALE = 0.3;
 const HALF_PI = Math.PI / 2;

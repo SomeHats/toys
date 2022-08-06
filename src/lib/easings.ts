@@ -1,4 +1,4 @@
-import { approxEq } from "./utils";
+import { approxEq } from "@/lib/utils";
 
 /** n should be between 0 and 1 */
 export type Easing = (n: number) => number;

@@ -1,5 +1,5 @@
-import Vector2 from "../lib/geom/Vector2";
-import { TerrainCell } from "./TerrainCell";
+import Vector2 from "@/lib/geom/Vector2";
+import { TerrainCell } from "@/terrain/TerrainCell";
 
 export class TerrainCellEdge {
     constructor(

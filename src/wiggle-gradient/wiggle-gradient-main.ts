@@ -1,8 +1,8 @@
-import { canvas, width, height } from "./canvas";
-import Vector2 from "../lib/geom/Vector2";
-import { sample, times, randomInt, frameLoop, uniq, random, lerp, mapRange } from "../lib/utils";
-import createTriangleGrid, { Triangle } from "../lib/createTriangleGrid";
-import { assert } from "../lib/assert";
+import { canvas, width, height } from "@/wiggle-gradient/canvas";
+import Vector2 from "@/lib/geom/Vector2";
+import { sample, times, randomInt, frameLoop, uniq, random, lerp, mapRange } from "@/lib/utils";
+import createTriangleGrid, { Triangle } from "@/lib/createTriangleGrid";
+import { assert } from "@/lib/assert";
 
 const TILE_SIZE = 5;
 const ARC_LENGTH = (Math.PI * TILE_SIZE) / 6;

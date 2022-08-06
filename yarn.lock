@@ -2659,6 +2659,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-plugin-no-relative-import-paths@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "eslint-plugin-no-relative-import-paths@npm:1.4.0"
+  checksum: 688ecb019467b2ff5622ad1e2013f1c885d092e0ba7131f244e6341b1b2ffd38b30cc72a2581237314d046695fda7d21ae5f97b6939d13a699a412aed3317b60
+  languageName: node
+  linkType: hard
+
 "eslint-plugin-react-hooks@npm:^4.6.0":
   version: 4.6.0
   resolution: "eslint-plugin-react-hooks@npm:4.6.0"
@@ -4932,6 +4939,7 @@ __metadata:
     d3-scale-chromatic: ^3.0.0
     delaunator: ^5.0.0
     eslint: ^8.21.0
+    eslint-plugin-no-relative-import-paths: ^1.4.0
     eslint-plugin-react: ^7.30.1
     eslint-plugin-react-hooks: ^4.6.0
     glob: ^8.0.3

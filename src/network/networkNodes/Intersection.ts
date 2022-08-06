@@ -1,13 +1,13 @@
 // @flow
-import { assert } from "../../lib/assert";
-import Vector2 from "../../lib/geom/Vector2";
-import { uniq, flatten } from "../../lib/utils";
-import ConnectionSet from "../ConnectionSet";
-import ConnectionDirection from "../ConnectionDirection";
-import PathFinder from "../PathFinder";
-import Road from "../Road";
-import Traveller from "../Traveller";
-import { NetworkNode } from "./NetworkNode";
+import { assert } from "@/lib/assert";
+import Vector2 from "@/lib/geom/Vector2";
+import { uniq, flatten } from "@/lib/utils";
+import ConnectionSet from "@/network/ConnectionSet";
+import ConnectionDirection from "@/network/ConnectionDirection";
+import PathFinder from "@/network/PathFinder";
+import Road from "@/network/Road";
+import Traveller from "@/network/Traveller";
+import { NetworkNode } from "@/network/networkNodes/NetworkNode";
 
 export default class Intersection implements NetworkNode {
     isDestination = false;

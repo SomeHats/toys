@@ -1,7 +1,7 @@
 // @flow
-import { assert } from "../lib/assert";
-import Road from "./Road";
-import { NetworkNode } from "./networkNodes/NetworkNode";
+import { assert } from "@/lib/assert";
+import Road from "@/network/Road";
+import { NetworkNode } from "@/network/networkNodes/NetworkNode";
 
 const PathFinder = {
     getNextRoad(initialNode: NetworkNode, destinationNode: NetworkNode): Road {

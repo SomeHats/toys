@@ -1,8 +1,8 @@
 import { BaseTexture, Rectangle, Texture } from "pixi.js";
-import { assert } from "../lib/assert";
-import { loadAndParseJson } from "../lib/load";
-import { createArrayParser, createShapeParser, parseNumber, ParserType } from "../lib/objectParser";
-import { mapRange, normalizeAngle } from "../lib/utils";
+import { assert } from "@/lib/assert";
+import { loadAndParseJson } from "@/lib/load";
+import { createArrayParser, createShapeParser, parseNumber, ParserType } from "@/lib/objectParser";
+import { mapRange, normalizeAngle } from "@/lib/utils";
 
 const parseAnimatedSpriteStackGeometry = createShapeParser({
     width: parseNumber,

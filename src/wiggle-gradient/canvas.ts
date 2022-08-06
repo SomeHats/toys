@@ -1,5 +1,5 @@
-import { assertExists } from "../lib/assert";
-import { DebugDraw } from "../lib/DebugDraw";
+import { assertExists } from "@/lib/assert";
+import { DebugDraw } from "@/lib/DebugDraw";
 
 export const canvasEl = document.createElement("canvas");
 export const ctx = assertExists(canvasEl.getContext("2d"));

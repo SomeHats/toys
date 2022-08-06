@@ -1,10 +1,10 @@
 import * as T from "three";
-import { frame, mapRange } from "../lib/utils";
-import Terrain from "./Terrain";
-import { POINT_SPACING, SIZE } from "./config";
-import { Delaunay } from "./Delaunay";
-import { canvasEl } from "./canvas";
-import Vector2 from "../lib/geom/Vector2";
+import { frame, mapRange } from "@/lib/utils";
+import Terrain from "@/terrain/Terrain";
+import { POINT_SPACING, SIZE } from "@/terrain/config";
+import { Delaunay } from "@/terrain/Delaunay";
+import { canvasEl } from "@/terrain/canvas";
+import Vector2 from "@/lib/geom/Vector2";
 
 function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
     const scene = new T.Scene();

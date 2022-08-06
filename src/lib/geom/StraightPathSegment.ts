@@ -1,8 +1,8 @@
 // @flow
-import { constrain } from "../utils";
-import Vector2 from "./Vector2";
-import { PathSegment } from "./Path";
-import Line2 from "./Line2";
+import { constrain } from "@/lib/utils";
+import Vector2 from "@/lib/geom/Vector2";
+import { PathSegment } from "@/lib/geom/Path";
+import Line2 from "@/lib/geom/Line2";
 
 export default class StraightPathSegment implements PathSegment {
     readonly line: Line2;

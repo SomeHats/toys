@@ -1,12 +1,12 @@
-import Scene from "../lib/scene/Scene";
-import { assert } from "../lib/assert";
-import Vector2 from "../lib/geom/Vector2";
-import Entity from "../lib/scene/Entity";
-import { PalTargetController } from "./PalController";
-import PalGeom from "./PalGeom";
-import PalRenderer from "./PalRenderer";
-import PalWalkAnimationController from "./PalWalkAnimationController";
-import { generateRandomPalConfig } from "./PalConfig";
+import Scene from "@/lib/scene/Scene";
+import { assert } from "@/lib/assert";
+import Vector2 from "@/lib/geom/Vector2";
+import Entity from "@/lib/scene/Entity";
+import { PalTargetController } from "@/pals/PalController";
+import PalGeom from "@/pals/PalGeom";
+import PalRenderer from "@/pals/PalRenderer";
+import PalWalkAnimationController from "@/pals/PalWalkAnimationController";
+import { generateRandomPalConfig } from "@/pals/PalConfig";
 
 const root = document.getElementById("root");
 assert(root);

@@ -1,5 +1,5 @@
-import Component from "./Component";
-import Entity from "./Entity";
+import Component from "@/lib/scene/Component";
+import Entity from "@/lib/scene/Entity";
 
 export default class SortOrderProvider extends Component {
     constructor(entity: Entity, private getSortOrderFn: (entity: Entity) => number) {

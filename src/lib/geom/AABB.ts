@@ -1,4 +1,4 @@
-import Vector2 from "./Vector2";
+import Vector2 from "@/lib/geom/Vector2";
 
 export default class AABB {
     static fromLeftTopRightBottom(left: number, top: number, right: number, bottom: number): AABB {

@@ -1,5 +1,5 @@
 import { makeNoise2D } from "open-simplex-noise";
-import { times, mapRange } from "../lib/utils";
+import { times, mapRange } from "@/lib/utils";
 
 export type Noise2D = (x: number, y: number) => number;
 

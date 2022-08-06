@@ -1,6 +1,6 @@
-import { assert } from "../assert";
-import SceneObject from "./SceneObject";
-import SceneSystem from "./SceneSystem";
+import { assert } from "@/lib/assert";
+import SceneObject from "@/lib/scene/SceneObject";
+import SceneSystem from "@/lib/scene/SceneSystem";
 
 const speed = 1;
 const scale = 1;

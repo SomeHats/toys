@@ -1,10 +1,10 @@
 // @flow
-import Scene from "../lib/scene/Scene";
-import SceneSystem from "../lib/scene/SceneSystem";
-import QuadTree from "../lib/QuadTree";
-import Circle from "../lib/geom/Circle";
-import AABB from "../lib/geom/AABB";
-import Traveller from "./Traveller";
+import Scene from "@/lib/scene/Scene";
+import SceneSystem from "@/lib/scene/SceneSystem";
+import QuadTree from "@/lib/QuadTree";
+import Circle from "@/lib/geom/Circle";
+import AABB from "@/lib/geom/AABB";
+import Traveller from "@/network/Traveller";
 
 export default class TravellerFinder extends SceneSystem {
     static override systemName = "TravellerFinder";

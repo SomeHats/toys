@@ -1,17 +1,17 @@
 // @flow
-import SceneObject from "../../lib/scene/SceneObject";
-import Circle from "../../lib/geom/Circle";
-import Vector2 from "../../lib/geom/Vector2";
-import * as ShapeHelpers from "../../lib/canvasShapeHelpers";
-import { outSine } from "../../lib/easings";
-import { mapRange, constrain, flatten, uniq } from "../../lib/utils";
-import Pulse from "../effects/Pulse";
-import { TEAL } from "../colors";
-import ConnectionSet from "../ConnectionSet";
-import ConnectionDirection from "../ConnectionDirection";
-import Traveller from "../Traveller";
-import Road from "../Road";
-import { NetworkNode } from "./NetworkNode";
+import SceneObject from "@/lib/scene/SceneObject";
+import Circle from "@/lib/geom/Circle";
+import Vector2 from "@/lib/geom/Vector2";
+import * as ShapeHelpers from "@/lib/canvasShapeHelpers";
+import { outSine } from "@/lib/easings";
+import { mapRange, constrain, flatten, uniq } from "@/lib/utils";
+import Pulse from "@/network/effects/Pulse";
+import { TEAL } from "@/network/colors";
+import ConnectionSet from "@/network/ConnectionSet";
+import ConnectionDirection from "@/network/ConnectionDirection";
+import Traveller from "@/network/Traveller";
+import Road from "@/network/Road";
+import { NetworkNode } from "@/network/networkNodes/NetworkNode";
 
 const DEFAULT_COOLDOWN = 500;
 

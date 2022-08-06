@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { setLocalStorageItem, getLocalStorageItem } from "../utils";
+import { setLocalStorageItem, getLocalStorageItem } from "@/lib/utils";
 
 export default function useLocalStorage<T>(
     key: string,

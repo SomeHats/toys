@@ -1,5 +1,5 @@
-import { Result } from "./Result";
-import { entries, get, has, keys } from "./utils";
+import { Result } from "@/lib/Result";
+import { entries, get, has, keys } from "@/lib/utils";
 
 class ParserError {
     constructor(

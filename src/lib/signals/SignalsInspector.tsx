@@ -1,13 +1,13 @@
-import { Signal, SignalManager, ControllableSignal } from "./Signals";
+import { Signal, SignalManager, ControllableSignal } from "@/lib/signals/Signals";
 import * as React from "react";
 import { useSubscription } from "use-subscription";
-import { groupBy, sortBy, partition, mapRange } from "../utils";
-import { assert } from "../assert";
-import useLocalStorage from "../hooks/useLocalStorageState";
-import DragCover from "../DragCover";
+import { groupBy, sortBy, partition, mapRange } from "@/lib/utils";
+import { assert } from "@/lib/assert";
+import useLocalStorage from "@/lib/hooks/useLocalStorageState";
+import DragCover from "@/lib/DragCover";
 import cx from "classnames";
-import { ListenToMidiInputFn } from "../midi";
-import useSignal from "./useSignal";
+import { ListenToMidiInputFn } from "@/lib/midi";
+import useSignal from "@/lib/signals/useSignal";
 
 const format = (value: number, significantFigures: number): string => {
     const valueParts = value.toString().split(".");

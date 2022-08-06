@@ -1,5 +1,5 @@
-import { assert } from "./assert";
-import { random } from "./utils";
+import { assert } from "@/lib/assert";
+import { random } from "@/lib/utils";
 
 export default class RandomQueue<T> {
     private items: Array<T> = [];

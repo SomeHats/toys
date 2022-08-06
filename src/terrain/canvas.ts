@@ -1,6 +1,6 @@
-import { assertExists } from "../lib/assert";
-import { DebugDraw } from "../lib/DebugDraw";
-import * as config from "./config";
+import { assertExists } from "@/lib/assert";
+import { DebugDraw } from "@/lib/DebugDraw";
+import * as config from "@/terrain/config";
 
 export const canvasEl = document.createElement("canvas");
 export const ctx = assertExists(canvasEl.getContext("2d"));

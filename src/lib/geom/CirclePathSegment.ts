@@ -1,8 +1,8 @@
 // @flow
-import { constrain, mapRange } from "../utils";
-import Vector2 from "./Vector2";
-import Circle from "./Circle";
-import { PathSegment } from "./Path";
+import { constrain, mapRange } from "@/lib/utils";
+import Vector2 from "@/lib/geom/Vector2";
+import Circle from "@/lib/geom/Circle";
+import { PathSegment } from "@/lib/geom/Path";
 
 export default class CirclePathSegment implements PathSegment {
     readonly circle: Circle;

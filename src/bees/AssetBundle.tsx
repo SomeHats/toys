@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseTexture } from "pixi.js";
-import { assert, assertExists } from "../lib/assert";
-import { loadImage } from "../lib/load";
-import { has, keys } from "../lib/utils";
+import { assert, assertExists } from "@/lib/assert";
+import { loadImage } from "@/lib/load";
+import { has, keys } from "@/lib/utils";
 
 type Id<T> = T extends infer U ? { [K in keyof U]: U[K] } : never;
 

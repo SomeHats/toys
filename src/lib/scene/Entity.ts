@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import SceneObject from "./SceneObject";
-import Component from "./Component";
-import { assert } from "../assert";
-import SortOrderProvider from "./SortOrderProvider";
-import Scene from "./Scene";
+import SceneObject from "@/lib/scene/SceneObject";
+import Component from "@/lib/scene/Component";
+import { assert } from "@/lib/assert";
+import SortOrderProvider from "@/lib/scene/SortOrderProvider";
+import Scene from "@/lib/scene/Scene";
 
 type ComponentClass<T extends Component, Args extends unknown[]> = {
     name: string;

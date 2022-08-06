@@ -1,13 +1,13 @@
 // @flow
-import { assert } from "../lib/assert";
-import Scene from "../lib/scene/Scene";
-import Consumer from "./networkNodes/Consumer";
-import Producer from "./networkNodes/Producer";
-import Road from "./Road";
-import Junction from "./Junction";
+import { assert } from "@/lib/assert";
+import Scene from "@/lib/scene/Scene";
+import Consumer from "@/network/networkNodes/Consumer";
+import Producer from "@/network/networkNodes/Producer";
+import Road from "@/network/Road";
+import Junction from "@/network/Junction";
 // import DebugOverlay from "./systems/DebugOverlay";
-import TravellerFinder from "./TravellerFinder";
-import Vector2 from "../lib/geom/Vector2";
+import TravellerFinder from "@/network/TravellerFinder";
+import Vector2 from "@/lib/geom/Vector2";
 
 const ROUND = 50;
 

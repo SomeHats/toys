@@ -1,7 +1,7 @@
 import * as React from "react";
 import useResizeObserver from "use-resize-observer";
-import { assert } from "../assert";
-import { DebugDraw } from "../DebugDraw";
+import { assert } from "@/lib/assert";
+import { DebugDraw } from "@/lib/DebugDraw";
 
 type DrawFn = (canvas: DebugDraw) => void;
 

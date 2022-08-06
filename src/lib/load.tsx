@@ -1,7 +1,7 @@
-import { assert } from "./assert";
-import { Parser } from "./objectParser";
-import { Result } from "./Result";
-import { promiseFromEvents } from "./utils";
+import { assert } from "@/lib/assert";
+import { Parser } from "@/lib/objectParser";
+import { Result } from "@/lib/Result";
+import { promiseFromEvents } from "@/lib/utils";
 
 export async function loadImage(src: URL): Promise<HTMLImageElement> {
     const image = new Image();

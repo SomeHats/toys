@@ -1,14 +1,14 @@
-import { assert } from "../lib/assert";
-import { generatePoisson } from "./generatePoisson";
-import AABB from "../lib/geom/AABB";
-import Vector2 from "../lib/geom/Vector2";
-import { Delaunay } from "./Delaunay";
-import { random } from "../lib/utils";
-import Terrain from "./Terrain";
-import { width, height, canvas, ctx } from "./canvas";
-import * as config from "./config";
+import { assert } from "@/lib/assert";
+import { generatePoisson } from "@/terrain/generatePoisson";
+import AABB from "@/lib/geom/AABB";
+import Vector2 from "@/lib/geom/Vector2";
+import { Delaunay } from "@/terrain/Delaunay";
+import { random } from "@/lib/utils";
+import Terrain from "@/terrain/Terrain";
+import { width, height, canvas, ctx } from "@/terrain/canvas";
+import * as config from "@/terrain/config";
 import { interpolateMagma } from "d3-scale-chromatic";
-import create3dRenderer from "./create3dRenderer";
+import create3dRenderer from "@/terrain/create3dRenderer";
 
 const spaceVec = new Vector2(config.POINT_SPACING, config.POINT_SPACING);
 const sizeVec = new Vector2(config.SIZE, config.SIZE);

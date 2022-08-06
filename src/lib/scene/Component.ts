@@ -1,5 +1,5 @@
-import Entity from "./Entity";
-import Scene from "./Scene";
+import Entity from "@/lib/scene/Entity";
+import Scene from "@/lib/scene/Scene";
 
 export default abstract class Component {
     readonly entity: Entity;

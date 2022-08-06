@@ -1,4 +1,4 @@
-import { Signal } from "./Signals";
+import { Signal } from "@/lib/signals/Signals";
 import { useSubscription } from "use-subscription";
 import { useMemo } from "react";
 

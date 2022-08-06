@@ -1,9 +1,9 @@
-import { assert } from "../lib/assert";
-import testVert from "./test.vert";
-import testFrag from "./test.frag";
-import AABB from "../lib/geom/AABB";
-import { times, random } from "../lib/utils";
-import Vector2 from "../lib/geom/Vector2";
+import { assert } from "@/lib/assert";
+import testVert from "@/webgl/test.vert";
+import testFrag from "@/webgl/test.frag";
+import AABB from "@/lib/geom/AABB";
+import { times, random } from "@/lib/utils";
+import Vector2 from "@/lib/geom/Vector2";
 import { Triangle } from "three";
 
 const canvas = document.createElement("canvas");

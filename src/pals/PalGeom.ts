@@ -1,11 +1,11 @@
-import Component from "../lib/scene/Component";
-import Entity from "../lib/scene/Entity";
-import Circle from "../lib/geom/Circle";
-import { PalControlData } from "./PalController";
-import { shuffle, flatten, times, lerp } from "../lib/utils";
-import { PalConfig } from "./PalConfig";
-import PalLegGeom, { PalLegGeomUpdate } from "./PalLegGeom";
-import { assert } from "../lib/assert";
+import Component from "@/lib/scene/Component";
+import Entity from "@/lib/scene/Entity";
+import Circle from "@/lib/geom/Circle";
+import { PalControlData } from "@/pals/PalController";
+import { shuffle, flatten, times, lerp } from "@/lib/utils";
+import { PalConfig } from "@/pals/PalConfig";
+import PalLegGeom, { PalLegGeomUpdate } from "@/pals/PalLegGeom";
+import { assert } from "@/lib/assert";
 
 const HALF_PI = Math.PI / 2;
 

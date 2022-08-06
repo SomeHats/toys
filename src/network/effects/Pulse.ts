@@ -1,9 +1,9 @@
 import Color from "color";
-import SceneObject from "../../lib/scene/SceneObject";
-import * as ShapeHelpers from "../../lib/canvasShapeHelpers";
-import Circle from "../../lib/geom/Circle";
-import { linear, Easing } from "../../lib/easings";
-import { lerp } from "../../lib/utils";
+import SceneObject from "@/lib/scene/SceneObject";
+import * as ShapeHelpers from "@/lib/canvasShapeHelpers";
+import Circle from "@/lib/geom/Circle";
+import { linear, Easing } from "@/lib/easings";
+import { lerp } from "@/lib/utils";
 
 type PulseOptions = {
     x: number;

@@ -1,4 +1,4 @@
-import { times } from "./utils";
+import { times } from "@/lib/utils";
 
 export default class RingBuffer<T> {
     private start = 0;

@@ -21,6 +21,9 @@ export default defineConfig(async () => {
         base: "./",
         root: path.resolve(__dirname, "src"),
         publicDir: false,
+        resolve: {
+            alias: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
+        },
         build: {
             outDir: path.resolve(__dirname, "dist"),
             rollupOptions: {

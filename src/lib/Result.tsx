@@ -1,7 +1,7 @@
 // import { assert } from './assert';
 // import { has } from './utils';
 
-import { fail } from "./assert";
+import { fail } from "@/lib/assert";
 
 export abstract class Result<T, E> {
     static ok<T>(value: T): OkResult<T, never> {

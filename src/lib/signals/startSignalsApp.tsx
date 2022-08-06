@@ -1,9 +1,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { getListenToMidiInput } from "../midi";
-import { SignalManager } from "./Signals";
-import { assert } from "../assert";
-import SignalsCanvas, { SignalsCanvasScene } from "./SignalsCanvas";
+import { getListenToMidiInput } from "@/lib/midi";
+import { SignalManager } from "@/lib/signals/Signals";
+import { assert } from "@/lib/assert";
+import SignalsCanvas, { SignalsCanvasScene } from "@/lib/signals/SignalsCanvas";
 
 export default async function startSignalsApp(scene: SignalsCanvasScene, debuggerEnabled: boolean) {
     const listenToMidi = await getListenToMidiInput();

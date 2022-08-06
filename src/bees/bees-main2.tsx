@@ -7,12 +7,12 @@ import {
     Sprite,
     Texture,
 } from "pixi.js";
-import Vector2 from "../lib/geom/Vector2";
-import { lerp, random, times } from "../lib/utils";
-import { AnimatedSpriteStack } from "./AnimatedSpriteStack";
-import { assets } from "./assets/assets";
-import { BG_COLOR } from "./constants";
-import { driver } from "./driver";
+import Vector2 from "@/lib/geom/Vector2";
+import { lerp, random, times } from "@/lib/utils";
+import { AnimatedSpriteStack } from "@/bees/AnimatedSpriteStack";
+import { assets } from "@/bees/assets/assets";
+import { BG_COLOR } from "@/bees/constants";
+import { driver } from "@/bees/driver";
 
 Renderer.registerPlugin("interaction", InteractionManager);
 console.log({ Renderer, InteractionManager });

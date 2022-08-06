@@ -1,4 +1,4 @@
-import { normalizeAngle, lerp } from "../utils";
+import { normalizeAngle, lerp } from "@/lib/utils";
 
 export default class Vector2 {
     static readonly ZERO = new Vector2(0, 0);

@@ -1,9 +1,9 @@
-import { canvas, width, height } from "./canvas";
-import createTriangleGrid, { Triangle } from "../lib/createTriangleGrid";
-import QuadTree from "../lib/QuadTree";
-import AABB from "../lib/geom/AABB";
-import Vector2 from "../lib/geom/Vector2";
-import Circle from "../lib/geom/Circle";
+import { canvas, width, height } from "@/resources/canvas";
+import createTriangleGrid, { Triangle } from "@/lib/createTriangleGrid";
+import QuadTree from "@/lib/QuadTree";
+import AABB from "@/lib/geom/AABB";
+import Vector2 from "@/lib/geom/Vector2";
+import Circle from "@/lib/geom/Circle";
 
 const TILE_SIZE = 30;
 

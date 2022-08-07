@@ -317,4 +317,20 @@ export function* indexed<T>(iterable: Iterable<T>): Generator<[number, T], void>
     }
 }
 
+export function copyArrayAndInsert<T>(
+    array: ReadonlyArray<T>,
+    item: T,
+    index = array.length,
+): Array<T> {
+    const copied = array.slice();
+    copied.splice(index, 0, item);
+    return copied;
+}
+
+export function copyArrayAndReplace<T>(array: ReadonlyArray<T>, index: number, item: T): Array<T> {
+    const copied = array.slice();
+    copied[index] = item;
+    return copied;
+}
+
 export function noop() {}

@@ -334,3 +334,5 @@ export function copyArrayAndReplace<T>(array: ReadonlyArray<T>, index: number, i
 }
 
 export function noop() {}
+
+export const IS_MAC = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);

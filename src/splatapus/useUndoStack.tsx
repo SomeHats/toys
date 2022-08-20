@@ -1,6 +1,8 @@
 import { assert, assertExists } from "@/lib/assert";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { useCallback, useMemo, useReducer, useState } from "react";
+import { UNDO_ACTIONS } from "@/splatapus/constants";
+import { deepEqual } from "@/lib/utils";
 
 type UndoEntry<Doc, Location> = {
     doc: Doc;
@@ -88,13 +90,17 @@ export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Loc
         console.log("COMMIT");
         setState((state) => {
             assert(state.pendingOp?.id === id, "Pending op mismatch");
+            const undoStates = [
+                { doc: state.pendingOp.initialState, location: state.current.location },
+                ...state.undoStates,
+            ];
+            while (undoStates.length > UNDO_ACTIONS) {
+                undoStates.pop();
+            }
             return {
                 ...state,
                 pendingOp: null,
-                undoStates: [
-                    { doc: state.pendingOp.initialState, location: state.current.location },
-                    ...state.undoStates,
-                ],
+                undoStates: undoStates,
                 redoStates: null,
             };
         });
@@ -114,11 +120,18 @@ export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Loc
                 return state;
             }
 
-            const [current, ...undoStates] = state.undoStates;
+            const [targetState, ...undoStates] = state.undoStates;
+            if (!deepEqual(targetState.location, state.current.location)) {
+                return {
+                    ...state,
+                    current: { location: targetState.location, doc: state.current.doc },
+                };
+            }
+
             const redoStates = [state.current, ...(state.redoStates ?? [])];
             return {
                 ...state,
-                current,
+                current: targetState,
                 undoStates,
                 redoStates,
             };
@@ -133,11 +146,18 @@ export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Loc
                 return state;
             }
 
-            const [current, ...redoStates] = state.redoStates;
+            const [targetState, ...redoStates] = state.redoStates;
+            if (!deepEqual(targetState.location, state.current.location)) {
+                return {
+                    ...state,
+                    current: { location: targetState.location, doc: state.current.doc },
+                };
+            }
+
             const undoStates = [state.current, ...state.undoStates];
             return {
                 ...state,
-                current,
+                current: targetState,
                 undoStates,
                 redoStates: redoStates.length === 0 ? null : redoStates,
             };

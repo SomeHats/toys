@@ -16,7 +16,9 @@ rather focus my limited free time on actually making things with the tools.
 ## wip notes & todos
 
 -   splatapus
-    -   [ ] go to undo/redo location first
+    -   [ ] localstorage state
+    -   [ ] reset document
+    -   [x] go to undo/redo location first
     -   [ ] pan/zoom
     -   [ ] multi-dimensional
     -   [ ] more shapes

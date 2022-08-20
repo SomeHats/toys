@@ -1,16 +1,14 @@
-// import { assert } from './assert';
-// import { has } from './utils';
-
 import { fail } from "@/lib/assert";
 
-export abstract class Result<T, E> {
-    static ok<T>(value: T): OkResult<T, never> {
+export type Result<T, E> = OkResult<T, E> | ErrorResult<T, E>;
+export const Result = {
+    ok<T>(value: T): OkResult<T, never> {
         return new OkResult(value);
-    }
-    static error<E>(error: E): ErrorResult<never, E> {
+    },
+    error<E>(error: E): ErrorResult<never, E> {
         return new ErrorResult(error);
-    }
-    static collect<T, E>(results: Array<Result<T, E>>): Result<Array<T>, E> {
+    },
+    collect<T, E>(results: Array<Result<T, E>>): Result<Array<T>, E> {
         const arr: Array<T> = [];
         for (const result of results) {
             if (result.isOk()) {
@@ -21,8 +19,10 @@ export abstract class Result<T, E> {
             }
         }
         return Result.ok(arr);
-    }
+    },
+};
 
+export abstract class AbstractResult<T, E> {
     constructor() {}
 
     abstract isOk(): this is OkResult<T, E>;
@@ -30,17 +30,18 @@ export abstract class Result<T, E> {
     abstract unwrap(message: string): T;
     abstract map<T2>(map: (value: T) => T2): Result<T2, E>;
     abstract mapErr<E2>(map: (err: E) => E2): Result<T, E2>;
+    abstract andThen<T2>(map: (value: T) => Result<T2, E>): Result<T2, E>;
 }
 
-export class OkResult<T, E> extends Result<T, E> {
+export class OkResult<T, E> extends AbstractResult<T, E> {
     constructor(public readonly value: T) {
         super();
     }
 
-    isOk() {
+    isOk(): this is OkResult<T, E> {
         return true;
     }
-    isError() {
+    isError(): this is ErrorResult<T, E> {
         return false;
     }
     unwrap() {
@@ -53,17 +54,20 @@ export class OkResult<T, E> extends Result<T, E> {
         // @ts-expect-error error type matches
         return this;
     }
+    andThen<T2>(map: (value: T) => Result<T2, E>): Result<T2, E> {
+        return map(this.value);
+    }
 }
 
-export class ErrorResult<T, E> extends Result<T, E> {
+export class ErrorResult<T, E> extends AbstractResult<T, E> {
     constructor(public readonly error: E) {
         super();
     }
 
-    isOk() {
+    isOk(): this is OkResult<T, E> {
         return false;
     }
-    isError() {
+    isError(): this is ErrorResult<T, E> {
         return true;
     }
     unwrap(message: string): never {
@@ -75,6 +79,10 @@ export class ErrorResult<T, E> extends Result<T, E> {
     }
     mapErr<E2>(map: (err: E) => E2): Result<T, E2> {
         return Result.error(map(this.error));
+    }
+    andThen<T2>(map: (value: T) => Result<T2, E>): Result<T2, E> {
+        // @ts-expect-error error type matches
+        return this;
     }
 }
 

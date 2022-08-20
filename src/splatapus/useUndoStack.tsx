@@ -2,19 +2,19 @@ import { assert, assertExists } from "@/lib/assert";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { useCallback, useMemo, useReducer, useState } from "react";
 
-type UndoEntry<State, Location> = {
-    state: State;
+type UndoEntry<Doc, Location> = {
+    doc: Doc;
     location: Location;
 };
 
-type UndoStackState<State, Location> = {
-    undoStates: ReadonlyArray<UndoEntry<State, Location>>;
-    redoStates: ReadonlyArray<UndoEntry<State, Location>> | null;
+type UndoStackState<Doc, Location> = {
+    undoStates: ReadonlyArray<UndoEntry<Doc, Location>>;
+    redoStates: ReadonlyArray<UndoEntry<Doc, Location>> | null;
     pendingOp: null | {
         id: number;
-        initialState: State;
+        initialState: Doc;
     };
-    current: UndoEntry<State, Location>;
+    current: UndoEntry<Doc, Location>;
 };
 
 export type UpdateAction<T> = ((state: T) => T) | T;
@@ -26,15 +26,15 @@ function applyUpdate<T>(prev: T, action: UpdateAction<T>): T {
     }
 }
 
-export function useUndoStack<State, Location>(
-    initialState: () => State,
+export function useUndoStack<Doc, Location>(
+    initialDocument: () => Doc,
     initialLocation: () => Location,
 ) {
-    const [state, setState] = useState<UndoStackState<State, Location>>(() => ({
+    const [state, setState] = useState<UndoStackState<Doc, Location>>(() => ({
         undoStates: [],
         redoStates: null,
         pendingOp: null,
-        current: { state: initialState(), location: initialLocation() },
+        current: { doc: initialDocument(), location: initialLocation() },
     }));
 
     const beginOperation = useEvent(() => {
@@ -46,26 +46,26 @@ export function useUndoStack<State, Location>(
                 ...state,
                 pendingOp: {
                     id,
-                    initialState: state.current.state,
+                    initialState: state.current.doc,
                 },
             };
         });
 
         return {
-            update: (action: UpdateAction<State>) => updateOperation(id, action),
+            update: (action: UpdateAction<Doc>) => updateOperation(id, action),
             revert: () => revertOperation(id),
             commit: () => commitOperation(id),
         };
     });
 
-    const updateOperation = useCallback((id: number, action: UpdateAction<State>) => {
+    const updateOperation = useCallback((id: number, action: UpdateAction<Doc>) => {
         setState((state) => {
             console.log("UPDATE");
             assert(state.pendingOp?.id === id, "Pending op mismatch");
             return {
                 ...state,
                 current: {
-                    state: applyUpdate(state.current.state, action),
+                    doc: applyUpdate(state.current.doc, action),
                     location: state.current.location,
                 },
             };
@@ -80,7 +80,7 @@ export function useUndoStack<State, Location>(
                 ...state,
                 pendingOp: null,
                 current: {
-                    state: state.pendingOp.initialState,
+                    doc: state.pendingOp.initialState,
                     location: state.current.location,
                 },
             };
@@ -95,7 +95,7 @@ export function useUndoStack<State, Location>(
                 ...state,
                 pendingOp: null,
                 undoStates: [
-                    { state: state.pendingOp.initialState, location: state.current.location },
+                    { doc: state.pendingOp.initialState, location: state.current.location },
                     ...state.undoStates,
                 ],
                 redoStates: null,
@@ -103,7 +103,7 @@ export function useUndoStack<State, Location>(
         });
     }, []);
 
-    const change = useEvent((action: UpdateAction<State>) => {
+    const updateDocument = useEvent((action: UpdateAction<Doc>) => {
         const operation = beginOperation();
         operation.update(action);
         operation.commit();
@@ -147,7 +147,7 @@ export function useUndoStack<State, Location>(
         });
     }, []);
 
-    const changeLocation = useCallback((action: UpdateAction<Location>) => {
+    const updateLocation = useCallback((action: UpdateAction<Location>) => {
         setState((state) => {
             return {
                 ...state,
@@ -165,14 +165,14 @@ export function useUndoStack<State, Location>(
 
     return useMemo(
         () => ({
-            state: state.current.state,
+            document: state.current.doc,
             location: state.current.location,
             beginOperation,
-            change,
-            changeLocation,
+            updateDocument,
+            updateLocation,
             undo,
             redo,
         }),
-        [beginOperation, change, changeLocation, redo, state, undo],
+        [beginOperation, updateDocument, updateLocation, redo, state, undo],
     );
 }

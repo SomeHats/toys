@@ -5,6 +5,14 @@ export type ReadonlyRecord<K extends PropertyKey, T> = {
     readonly [P in K]: T;
 };
 
+export type ObjectMap<K extends PropertyKey, T> = {
+    [P in K]?: T;
+};
+
+export type ReadonlyObjectMap<K extends PropertyKey, T> = {
+    readonly [P in K]?: T;
+};
+
 export function times<T>(n: number, fn: (idx: number) => T): Array<T> {
     const result = [];
     for (let i = 0; i < n; i++) {
@@ -330,6 +338,12 @@ export function copyArrayAndInsert<T>(
 export function copyArrayAndReplace<T>(array: ReadonlyArray<T>, index: number, item: T): Array<T> {
     const copied = array.slice();
     copied[index] = item;
+    return copied;
+}
+
+export function copyAndRemove<T>(array: ReadonlyArray<T>, index: number): Array<T> {
+    const copied = array.slice();
+    copied.splice(index, 1);
     return copied;
 }
 

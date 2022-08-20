@@ -15,6 +15,7 @@ import { pathFromCenterPoints } from "@/splatapus/pathFromCenterPoints";
 import * as easings from "@/lib/easings";
 import { useUndoStack } from "@/splatapus/useUndoStack";
 import { useKeyPress } from "@/lib/hooks/useKeyPress";
+import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 
 const perfectFreehandOpts: Required<StrokeOptions> = {
     size: 16,
@@ -71,14 +72,10 @@ type LocationState = {
 
 function Splatapus({ size }: { size: Vector2 }) {
     const [action, setAction] = useState<ActionState>({ type: "idle" });
-    const {
-        state: document,
-        location,
-        change: setDocument,
-        changeLocation: setLocation,
-        undo,
-        redo,
-    } = useUndoStack<DocumentState, LocationState>(
+    const { document, location, updateDocument, updateLocation, undo, redo } = useUndoStack<
+        DocumentState,
+        LocationState
+    >(
         () => ({ frames: calculateFramesStateFromRawPoints([[]]) }),
         () => ({ frameIdx: 0 }),
     );
@@ -164,7 +161,7 @@ function Splatapus({ size }: { size: Vector2 }) {
                     case "lerp":
                         return action;
                     case "drawing":
-                        setDocument((document) => {
+                        updateDocument((document) => {
                             const rawPoints = document.frames.map((frame) => frame.rawPoints);
                             rawPoints[location.frameIdx] = action.points;
                             return {
@@ -178,7 +175,7 @@ function Splatapus({ size }: { size: Vector2 }) {
                 }
             });
         },
-        [location.frameIdx, setDocument],
+        [location.frameIdx, updateDocument],
     );
 
     const centerPoints = useMemo(() => {
@@ -243,7 +240,7 @@ function Splatapus({ size }: { size: Vector2 }) {
                                 : "text-stone-400",
                         )}
                         onClick={() => {
-                            setLocation((location) => ({ frameIdx: i }));
+                            updateLocation((location) => ({ frameIdx: i }));
                             setAction({
                                 type: "lerp",
                                 from: location.frameIdx,
@@ -263,8 +260,8 @@ function Splatapus({ size }: { size: Vector2 }) {
                     onClick={() => {
                         const rawPoints = document.frames.map((frame) => frame.rawPoints);
                         rawPoints.push([]);
-                        setDocument({ frames: calculateFramesStateFromRawPoints(rawPoints) });
-                        setLocation({ frameIdx: document.frames.length });
+                        updateDocument({ frames: calculateFramesStateFromRawPoints(rawPoints) });
+                        updateLocation({ frameIdx: document.frames.length });
                     }}
                 >
                     +

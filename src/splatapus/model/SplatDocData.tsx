@@ -1,22 +1,34 @@
-import { Table } from "@/splatapus/model/Table";
-import { SplatKeypoint, SplatShape, SplatDocId } from "@/splatapus/model/SplatDoc";
+import { OneToOneIndex, Table } from "@/splatapus/model/Table";
+import {
+    SplatKeypoint,
+    SplatDocId,
+    SplatShapeVersion,
+    SplatKeypointId,
+    SplatShapeVersionId,
+} from "@/splatapus/model/SplatDoc";
 
 export class SplatDocData {
     constructor(
         readonly id: SplatDocId,
-        readonly keyframes: Table<SplatKeypoint>,
-        readonly shapes: Table<SplatShape>,
+        readonly keyPoints: Table<SplatKeypoint>,
+        // readonly shapes: Table<SplatShape>,
+        readonly shapeVersions: Table<SplatShapeVersion>,
+        readonly keyPointIdByShapeVersion: OneToOneIndex<SplatShapeVersionId, SplatKeypointId>,
     ) {}
 
     private with(changes: {
         id?: SplatDocId;
-        keyframes?: Table<SplatKeypoint>;
-        shapes?: Table<SplatShape>;
+        keyPoints?: Table<SplatKeypoint>;
+        // shapes?: Table<SplatShape>;
+        shapeVersions?: Table<SplatShapeVersion>;
+        keyPointIdByShapeVersion?: OneToOneIndex<SplatShapeVersionId, SplatKeypointId>;
     }): SplatDocData {
         return new SplatDocData(
             changes.id ?? this.id,
-            changes.keyframes ?? this.keyframes,
-            changes.shapes ?? this.shapes,
+            changes.keyPoints ?? this.keyPoints,
+            // changes.shapes ?? this.shapes,
+            changes.shapeVersions ?? this.shapeVersions,
+            changes.keyPointIdByShapeVersion ?? this.keyPointIdByShapeVersion,
         );
     }
 }

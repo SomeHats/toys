@@ -1,4 +1,6 @@
 import { normalizeAngle, lerp } from "@/lib/utils";
+import { composeParsers, createShapeParser, parseNumber } from "@/lib/objectParser";
+import { Result } from "@/lib/Result";
 
 export type Vector2Ish = { readonly x: number; readonly y: number };
 
@@ -24,6 +26,11 @@ export default class Vector2 {
     static fromEvent({ clientX, clientY }: { clientX: number; clientY: number }): Vector2 {
         return new Vector2(clientX, clientY);
     }
+
+    static parse = composeParsers(
+        createShapeParser({ x: parseNumber, y: parseNumber }),
+        ({ x, y }) => Result.ok(new Vector2(x, y)),
+    );
 
     constructor(public readonly x: number, public readonly y: number) {}
 

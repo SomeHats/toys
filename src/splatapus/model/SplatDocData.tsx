@@ -6,6 +6,9 @@ import {
     SplatKeypointId,
     SplatShapeVersionId,
 } from "@/splatapus/model/SplatDoc";
+import { ReadonlyObjectMap } from "@/lib/utils";
+import { StrokeCenterPoint } from "@/splatapus/perfectFreehand";
+import { NormalizedShapeVersionState } from "@/splatapus/model/normalizedShape";
 
 export class SplatDocData {
     constructor(
@@ -14,14 +17,16 @@ export class SplatDocData {
         // readonly shapes: Table<SplatShape>,
         readonly shapeVersions: Table<SplatShapeVersion>,
         readonly keyPointIdByShapeVersion: OneToOneIndex<SplatShapeVersionId, SplatKeypointId>,
+        readonly normalizedShapeVersions: Table<NormalizedShapeVersionState>,
     ) {}
 
-    private with(changes: {
+    with(changes: {
         id?: SplatDocId;
         keyPoints?: Table<SplatKeypoint>;
         // shapes?: Table<SplatShape>;
         shapeVersions?: Table<SplatShapeVersion>;
         keyPointIdByShapeVersion?: OneToOneIndex<SplatShapeVersionId, SplatKeypointId>;
+        normalizedCenterPointsByShapeVersion?: Table<NormalizedShapeVersionState>;
     }): SplatDocData {
         return new SplatDocData(
             changes.id ?? this.id,
@@ -29,6 +34,7 @@ export class SplatDocData {
             // changes.shapes ?? this.shapes,
             changes.shapeVersions ?? this.shapeVersions,
             changes.keyPointIdByShapeVersion ?? this.keyPointIdByShapeVersion,
+            changes.normalizedCenterPointsByShapeVersion ?? this.normalizedShapeVersions,
         );
     }
 }

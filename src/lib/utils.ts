@@ -1,3 +1,5 @@
+export { default as deepEqual } from "fast-deep-equal";
+
 export type TimeoutId = ReturnType<typeof setTimeout>;
 export type IntervalId = ReturnType<typeof setInterval>;
 

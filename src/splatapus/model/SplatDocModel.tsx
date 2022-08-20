@@ -3,10 +3,15 @@ import {
     createSplatDoc,
     SplatDoc,
     SplatKeypoint,
+    SplatKeypointId,
     SplatShapeVersion,
+    SplatShapeVersionId,
 } from "@/splatapus/model/SplatDoc";
 import { OneToOneIndex, Table } from "@/splatapus/model/Table";
-import { deepEqual as assertDeepEqual } from "assert";
+import { calculateNormalizedShapePointsFromVersions } from "@/splatapus/model/normalizedShape";
+import Vector2 from "@/lib/geom/Vector2";
+import { deepEqual } from "@/lib/utils";
+import { fail } from "@/lib/assert";
 
 export class SplatDocModel {
     static create(): SplatDocModel {
@@ -22,6 +27,7 @@ export class SplatDocModel {
                 // new Table(data.shapes),
                 shapeVersions,
                 OneToOneIndex.build("keyPointId", shapeVersions),
+                calculateNormalizedShapePointsFromVersions(Array.from(shapeVersions)).versions,
             ),
             false,
         );
@@ -34,7 +40,19 @@ export class SplatDocModel {
 
         const serialized = this.serialize();
         const deserialized = SplatDocModel.deserialize(serialized);
-        assertDeepEqual(this, deserialized);
+        if (!deepEqual(this, deserialized)) {
+            fail(
+                `Mismatch after update:\nActual:\n${JSON.stringify(
+                    this,
+                    null,
+                    2,
+                )}\n\nExpected:\n${JSON.stringify(deserialized, null, 2)}`,
+            );
+        }
+    }
+
+    private with(...params: Parameters<SplatDocData["with"]>): SplatDocModel {
+        return new SplatDocModel(this.data.with(...params));
     }
 
     serialize(): SplatDoc {
@@ -52,5 +70,50 @@ export class SplatDocModel {
 
     get shapeVersions(): Table<SplatShapeVersion> {
         return this.data.shapeVersions;
+    }
+
+    getShapeVersionForKeyPoint(keyPointId: SplatKeypointId): SplatShapeVersion {
+        return this.shapeVersions.get(this.data.keyPointIdByShapeVersion.lookupInverse(keyPointId));
+    }
+
+    addKeyPoint(keyPointId: SplatKeypointId): SplatDocModel {
+        const shapeVersionId = SplatShapeVersionId.generate();
+        const keyPoints = this.keyPoints.insert({
+            id: keyPointId,
+            position: Vector2.UNIT,
+        });
+        const shapeVersions = this.shapeVersions.insert({
+            id: shapeVersionId,
+            keyPointId,
+            rawPoints: [],
+        });
+
+        return this.with({
+            keyPoints,
+            shapeVersions,
+            keyPointIdByShapeVersion: this.data.keyPointIdByShapeVersion.add(
+                shapeVersionId,
+                keyPointId,
+            ),
+            normalizedCenterPointsByShapeVersion: calculateNormalizedShapePointsFromVersions(
+                Array.from(shapeVersions),
+            ).versions,
+        });
+    }
+
+    replaceShapeVersionPoints(
+        shapeVersionId: SplatShapeVersionId,
+        rawPoints: Vector2[],
+    ): SplatDocModel {
+        const shapeVersions = this.shapeVersions.insert({
+            ...this.shapeVersions.get(shapeVersionId),
+            rawPoints,
+        });
+        return this.with({
+            shapeVersions,
+            normalizedCenterPointsByShapeVersion: calculateNormalizedShapePointsFromVersions(
+                Array.from(shapeVersions),
+            ).versions,
+        });
     }
 }

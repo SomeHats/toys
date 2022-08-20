@@ -693,7 +693,7 @@ export function getStrokeCenterPoints(
  * @param options.last Whether to handle the points as a completed stroke.
  */
 export function getStrokePoints(
-    points: { x: number; y: number; pressure?: number }[],
+    points: ReadonlyArray<{ x: number; y: number; pressure?: number }>,
     options = {} as StrokeOptions,
 ): StrokePoint[] {
     const { streamline = 0.5, size = 16, last: isComplete = false } = options;

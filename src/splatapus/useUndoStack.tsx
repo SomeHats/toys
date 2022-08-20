@@ -26,15 +26,12 @@ function applyUpdate<T>(prev: T, action: UpdateAction<T>): T {
     }
 }
 
-export function useUndoStack<Doc, Location>(
-    initialDocument: () => Doc,
-    initialLocation: () => Location,
-) {
+export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Location>) {
     const [state, setState] = useState<UndoStackState<Doc, Location>>(() => ({
         undoStates: [],
         redoStates: null,
         pendingOp: null,
-        current: { doc: initialDocument(), location: initialLocation() },
+        current: initialize(),
     }));
 
     const beginOperation = useEvent(() => {

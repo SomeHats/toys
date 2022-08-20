@@ -6,7 +6,6 @@ import {
     getStrokePoints,
     getSvgPathFromStroke,
     StrokeCenterPoint,
-    StrokeOptions,
 } from "@/splatapus/perfectFreehand";
 import { exhaustiveSwitchError, frameLoop, invLerp, lerp, times } from "@/lib/utils";
 import classNames from "classnames";
@@ -16,25 +15,15 @@ import * as easings from "@/lib/easings";
 import { useUndoStack } from "@/splatapus/useUndoStack";
 import { useKeyPress } from "@/lib/hooks/useKeyPress";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-
-const perfectFreehandOpts: Required<StrokeOptions> = {
-    size: 16,
-    streamline: 0.5,
-    smoothing: 0.5,
-    thinning: 0.5,
-    simulatePressure: true,
-    easing: (t) => t,
-    start: {},
-    end: {},
-    last: false,
-};
+import { SplatKeypointId, SplatShapeVersionId } from "@/splatapus/model/SplatDoc";
+import { perfectFreehandOpts } from "@/splatapus/constants";
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
     const size = useResizeObserver(container, sizeFromEntry);
 
     return (
-        <div ref={setContainer} className="absolute inset-0">
+        <div ref={setContainer} className="absolute inset-0 touch-none">
             {size && <Splatapus size={size} />}
         </div>
     );
@@ -52,8 +41,8 @@ type ActionState =
     | {
           type: "lerp";
           startedAtMs: number;
-          from: number;
-          to: number;
+          from: SplatKeypointId;
+          to: SplatKeypointId;
           progress: number;
       };
 
@@ -63,22 +52,22 @@ type FramesState = {
     normalizedCenterPoints: StrokeCenterPoint[];
 };
 
-type DocumentState = {
-    frames: FramesState[];
-};
+// type DocumentState = {
+//     frames: FramesState[];
+// };
 type LocationState = {
-    frameIdx: number;
+    keyPointId: SplatKeypointId;
 };
 
 function Splatapus({ size }: { size: Vector2 }) {
     const [action, setAction] = useState<ActionState>({ type: "idle" });
     const { document, location, updateDocument, updateLocation, undo, redo } = useUndoStack<
-        DocumentState,
+        SplatDocModel,
         LocationState
-    >(
-        () => ({ frames: calculateFramesStateFromRawPoints([[]]) }),
-        () => ({ frameIdx: 0 }),
-    );
+    >(() => {
+        const keyPointId = SplatKeypointId.generate();
+        return { doc: SplatDocModel.create().addKeyPoint(keyPointId), location: { keyPointId } };
+    });
 
     useKeyPress({ key: "z", command: true }, undo);
     useKeyPress({ key: "z", command: true, shift: true }, redo);
@@ -160,28 +149,29 @@ function Splatapus({ size }: { size: Vector2 }) {
                     case "idle":
                     case "lerp":
                         return action;
-                    case "drawing":
+                    case "drawing": {
                         updateDocument((document) => {
-                            const rawPoints = document.frames.map((frame) => frame.rawPoints);
-                            rawPoints[location.frameIdx] = action.points;
-                            return {
-                                ...document,
-                                frames: calculateFramesStateFromRawPoints(rawPoints),
-                            };
+                            return document.replaceShapeVersionPoints(
+                                document.getShapeVersionForKeyPoint(location.keyPointId).id,
+                                action.points,
+                            );
                         });
                         return { type: "idle" };
+                    }
                     default:
                         exhaustiveSwitchError(action);
                 }
             });
         },
-        [location.frameIdx, updateDocument],
+        [location.keyPointId, updateDocument],
     );
 
     const centerPoints = useMemo(() => {
         switch (action.type) {
             case "idle":
-                return document.frames[location.frameIdx].normalizedCenterPoints;
+                return document.data.normalizedShapeVersions.get(
+                    document.getShapeVersionForKeyPoint(location.keyPointId).id,
+                ).normalizedCenterPoints;
             case "drawing":
                 return normalizeCenterPointIntervalsQuadratic(
                     getStrokeCenterPoints(
@@ -191,23 +181,31 @@ function Splatapus({ size }: { size: Vector2 }) {
                     perfectFreehandOpts.size,
                 );
             case "lerp": {
-                const from = document.frames[action.from].normalizedCenterPoints;
-                const to = document.frames[action.to].normalizedCenterPoints;
+                const fromVersion = document.getShapeVersionForKeyPoint(action.from);
+                const toVersion = document.getShapeVersionForKeyPoint(action.to);
+                const fromPoints = document.data.normalizedShapeVersions.get(
+                    fromVersion.id,
+                ).normalizedCenterPoints;
+                const toPoints = document.data.normalizedShapeVersions.get(
+                    toVersion.id,
+                ).normalizedCenterPoints;
                 const progress = easings.inOutSine(action.progress);
-                return times(Math.max(from.length, to.length), (idx): StrokeCenterPoint => {
-                    const p1 = from[Math.min(idx, from.length - 1)];
-                    const p2 = to[Math.min(idx, to.length - 1)];
-                    console.log({ idx, p1, p2 });
-                    return {
-                        center: p1.center.lerp(p2.center, progress),
-                        radius: lerp(p1.radius, p2.radius, progress),
-                    };
-                });
+                return times(
+                    Math.max(fromPoints.length, toPoints.length),
+                    (idx): StrokeCenterPoint => {
+                        const p1 = fromPoints[Math.min(idx, fromPoints.length - 1)];
+                        const p2 = toPoints[Math.min(idx, toPoints.length - 1)];
+                        return {
+                            center: p1.center.lerp(p2.center, progress),
+                            radius: lerp(p1.radius, p2.radius, progress),
+                        };
+                    },
+                );
             }
             default:
                 exhaustiveSwitchError(action);
         }
-    }, [action, document.frames, location.frameIdx]);
+    }, [action, document, location.keyPointId]);
 
     return (
         <>
@@ -230,21 +228,21 @@ function Splatapus({ size }: { size: Vector2 }) {
                 ))} */}
             </svg>
             <div className="absolute bottom-0 left-0 flex w-full items-center justify-center gap-3 p-3">
-                {document.frames.map((frame, i) => (
+                {Array.from(document.keyPoints, (keyPoint, i) => (
                     <button
-                        key={i}
+                        key={keyPoint.id}
                         className={classNames(
                             "flex h-10 w-10 items-center justify-center rounded border border-stone-200 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
-                            i === location.frameIdx
+                            keyPoint.id === location.keyPointId
                                 ? " text-stone-500 ring-2 ring-inset ring-purple-400"
                                 : "text-stone-400",
                         )}
                         onClick={() => {
-                            updateLocation((location) => ({ frameIdx: i }));
+                            updateLocation({ keyPointId: keyPoint.id });
                             setAction({
                                 type: "lerp",
-                                from: location.frameIdx,
-                                to: i,
+                                from: location.keyPointId,
+                                to: keyPoint.id,
                                 startedAtMs: performance.now(),
                                 progress: 0,
                             });
@@ -258,10 +256,9 @@ function Splatapus({ size }: { size: Vector2 }) {
                         "flex h-10 w-10 items-center justify-center rounded border border-stone-200 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
                     )}
                     onClick={() => {
-                        const rawPoints = document.frames.map((frame) => frame.rawPoints);
-                        rawPoints.push([]);
-                        updateDocument({ frames: calculateFramesStateFromRawPoints(rawPoints) });
-                        updateLocation({ frameIdx: document.frames.length });
+                        const keyPointId = SplatKeypointId.generate();
+                        updateDocument((document) => document.addKeyPoint(keyPointId));
+                        updateLocation({ keyPointId });
                     }}
                 >
                     +

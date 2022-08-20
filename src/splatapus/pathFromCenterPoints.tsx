@@ -1,7 +1,7 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { StrokeCenterPoint } from "@/splatapus/perfectFreehand";
 
-export function pathFromCenterPoints(path: StrokeCenterPoint[]): Vector2[] {
+export function pathFromCenterPoints(path: ReadonlyArray<StrokeCenterPoint>): Vector2[] {
     const leftPoints: Vector2[] = [];
     const rightPoints: Vector2[] = [];
 

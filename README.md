@@ -16,15 +16,18 @@ rather focus my limited free time on actually making things with the tools.
 ## wip notes & todos
 
 -   splatapus
-    -   [ ] localstorage state
-    -   [ ] reset document
+    -   [x] localstorage state
+    -   [x] reset document
     -   [x] go to undo/redo location first
-    -   [ ] pan/zoom
+    -   [x] pan
+    -   [ ] zoom
+    -   [ ] fix zoom gesture zooming browser
     -   [ ] multi-dimensional
     -   [ ] more shapes
     -   [ ] colors
     -   [ ] fills
     -   [ ] line fixed points
+    -   [ ] design overhaul
     -   [ ] login/share????
 -   octopus
     -   [x] disable signals inspector in prod

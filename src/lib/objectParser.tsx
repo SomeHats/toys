@@ -92,7 +92,7 @@ export function createDictParser<K extends string, V>(
         return Result.collect(
             keys(input).map((key) =>
                 parseKey(key)
-                    .map((key) => [key, parseValue(get(input, key))])
+                    .andThen((key) => parseValue(get(input, key)).map((value) => [key, value]))
                     .mapErr((err) => prefixError(err, key)),
             ),
         ).map((parsedEntries) => Object.fromEntries(parsedEntries));

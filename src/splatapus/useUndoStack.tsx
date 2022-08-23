@@ -2,11 +2,16 @@ import { assert, assertExists } from "@/lib/assert";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { useCallback, useMemo, useReducer, useState } from "react";
 import { UNDO_ACTIONS } from "@/splatapus/constants";
-import { deepEqual } from "@/lib/utils";
+import { deepEqual, UpdateAction, applyUpdate } from "@/lib/utils";
+
+export type OpOptions<Location> = {
+    lockstepLocation?: UpdateAction<Location>;
+};
 
 type UndoEntry<Doc, Location> = {
     doc: Doc;
     location: Location;
+    options: OpOptions<Location>;
 };
 
 type UndoStackState<Doc, Location> = {
@@ -14,26 +19,20 @@ type UndoStackState<Doc, Location> = {
     redoStates: ReadonlyArray<UndoEntry<Doc, Location>> | null;
     pendingOp: null | {
         id: number;
-        initialState: Doc;
+        initialDoc: Doc;
+        initialOptions: OpOptions<Location>;
     };
     current: UndoEntry<Doc, Location>;
 };
 
-export type UpdateAction<T> = ((state: T) => T) | T;
-function applyUpdate<T>(prev: T, action: UpdateAction<T>): T {
-    if (typeof action == "function") {
-        return (action as (state: T) => T)(prev);
-    } else {
-        return action;
-    }
-}
-
-export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Location>) {
+export function useUndoStack<Doc, Location>(
+    initialize: () => Omit<UndoEntry<Doc, Location>, "options">,
+) {
     const [state, setState] = useState<UndoStackState<Doc, Location>>(() => ({
         undoStates: [],
         redoStates: null,
         pendingOp: null,
-        current: initialize(),
+        current: { ...initialize(), options: {} },
     }));
 
     const beginOperation = useEvent(() => {
@@ -45,7 +44,12 @@ export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Loc
                 ...state,
                 pendingOp: {
                     id,
-                    initialState: state.current.doc,
+                    initialDoc: state.current.doc,
+                    initialOptions: state.current.options,
+                },
+                current: {
+                    ...state.current,
+                    options: {},
                 },
             };
         });
@@ -53,7 +57,7 @@ export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Loc
         return {
             update: (action: UpdateAction<Doc>) => updateOperation(id, action),
             revert: () => revertOperation(id),
-            commit: () => commitOperation(id),
+            commit: (options: OpOptions<Location> = {}) => commitOperation(id, options),
         };
     });
 
@@ -64,8 +68,8 @@ export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Loc
             return {
                 ...state,
                 current: {
+                    ...state.current,
                     doc: applyUpdate(state.current.doc, action),
-                    location: state.current.location,
                 },
             };
         });
@@ -79,26 +83,36 @@ export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Loc
                 ...state,
                 pendingOp: null,
                 current: {
-                    doc: state.pendingOp.initialState,
+                    doc: state.pendingOp.initialDoc,
                     location: state.current.location,
+                    options: state.pendingOp.initialOptions,
                 },
             };
         });
     }, []);
 
-    const commitOperation = useCallback((id: number) => {
+    const commitOperation = useCallback((id: number, options: OpOptions<Location>) => {
         console.log("COMMIT");
         setState((state) => {
             assert(state.pendingOp?.id === id, "Pending op mismatch");
             const undoStates = [
-                { doc: state.pendingOp.initialState, location: state.current.location },
+                {
+                    doc: state.pendingOp.initialDoc,
+                    location: state.current.location,
+                    options: state.pendingOp.initialOptions,
+                },
                 ...state.undoStates,
             ];
             while (undoStates.length > UNDO_ACTIONS) {
                 undoStates.pop();
             }
+            const current = { ...state.current, options };
+            if (options.lockstepLocation) {
+                current.location = applyUpdate(current.location, options.lockstepLocation);
+            }
             return {
                 ...state,
+                current,
                 pendingOp: null,
                 undoStates: undoStates,
                 redoStates: null,
@@ -106,11 +120,13 @@ export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Loc
         });
     }, []);
 
-    const updateDocument = useEvent((action: UpdateAction<Doc>) => {
-        const operation = beginOperation();
-        operation.update(action);
-        operation.commit();
-    });
+    const updateDocument = useEvent(
+        (action: UpdateAction<Doc>, options: OpOptions<Location> = {}) => {
+            const operation = beginOperation();
+            operation.update(action);
+            operation.commit(options);
+        },
+    );
 
     const undo = useCallback(() => {
         console.log("UNDO");
@@ -121,10 +137,16 @@ export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Loc
             }
 
             const [targetState, ...undoStates] = state.undoStates;
-            if (!deepEqual(targetState.location, state.current.location)) {
+            if (
+                !deepEqual(targetState.location, state.current.location) &&
+                !state.current.options.lockstepLocation
+            ) {
                 return {
                     ...state,
-                    current: { location: targetState.location, doc: state.current.doc },
+                    current: {
+                        ...state.current,
+                        location: targetState.location,
+                    },
                 };
             }
 
@@ -147,17 +169,31 @@ export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Loc
             }
 
             const [targetState, ...redoStates] = state.redoStates;
-            if (!deepEqual(targetState.location, state.current.location)) {
+            if (
+                !deepEqual(targetState.location, state.current.location) &&
+                !targetState.options.lockstepLocation
+            ) {
                 return {
                     ...state,
-                    current: { location: targetState.location, doc: state.current.doc },
+                    current: {
+                        ...state.current,
+                        location: targetState.location,
+                    },
                 };
             }
 
             const undoStates = [state.current, ...state.undoStates];
             return {
                 ...state,
-                current: targetState,
+                current: targetState.options.lockstepLocation
+                    ? {
+                          ...targetState,
+                          location: applyUpdate(
+                              state.current.location,
+                              targetState.options.lockstepLocation,
+                          ),
+                      }
+                    : targetState,
                 undoStates,
                 redoStates: redoStates.length === 0 ? null : redoStates,
             };
@@ -177,7 +213,7 @@ export function useUndoStack<Doc, Location>(initialize: () => UndoEntry<Doc, Loc
     }, []);
 
     useMemo(() => {
-        console.log("RENDER CHANGED", state);
+        console.log("UNDO STATE CHANGED", state);
     }, [state]);
 
     return useMemo(

@@ -1,5 +1,3 @@
-import { profile } from "console";
-import { NoToneMapping } from "three";
 import { noop } from "@/lib/utils";
 
 export const fakeConsole: Console = {

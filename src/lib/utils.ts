@@ -352,3 +352,17 @@ export function copyAndRemove<T>(array: ReadonlyArray<T>, index: number): Array<
 export function noop() {}
 
 export const IS_MAC = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
+
+export type UpdateAction<T> = ((state: T) => T) | T;
+
+/**
+ * Updates a `T` by either replacing it directly with a new `T` or calling a
+ * function with the old value to return a new one.
+ */
+export function applyUpdate<T>(prev: T, action: UpdateAction<T>): T {
+    if (typeof action == "function") {
+        return (action as (state: T) => T)(prev);
+    } else {
+        return action;
+    }
+}

@@ -18,7 +18,7 @@ export class SplatDocModel {
         return SplatDocModel.deserialize(createSplatDoc());
     }
 
-    static deserialize(data: SplatDoc): SplatDocModel {
+    static deserialize(data: SplatDoc, version = 0): SplatDocModel {
         const shapeVersions = new Table<SplatShapeVersion>(data.shapeVersions);
         return new SplatDocModel(
             new SplatDocData(
@@ -29,17 +29,22 @@ export class SplatDocModel {
                 OneToOneIndex.build("keyPointId", shapeVersions),
                 calculateNormalizedShapePointsFromVersions(Array.from(shapeVersions)).versions,
             ),
+            version,
             false,
         );
     }
 
-    private constructor(readonly data: SplatDocData, shouldRunDebugChecks = true) {
+    private constructor(
+        readonly data: SplatDocData,
+        readonly version = 0,
+        shouldRunDebugChecks = true,
+    ) {
         if (!shouldRunDebugChecks) {
             return;
         }
 
         const serialized = this.serialize();
-        const deserialized = SplatDocModel.deserialize(serialized);
+        const deserialized = SplatDocModel.deserialize(serialized, this.version);
         if (!deepEqual(this, deserialized)) {
             fail(
                 `Mismatch after update:\nActual:\n${JSON.stringify(
@@ -52,7 +57,7 @@ export class SplatDocModel {
     }
 
     private with(...params: Parameters<SplatDocData["with"]>): SplatDocModel {
-        return new SplatDocModel(this.data.with(...params));
+        return new SplatDocModel(this.data.with(...params), this.version + 1);
     }
 
     serialize(): SplatDoc {
@@ -77,6 +82,7 @@ export class SplatDocModel {
     }
 
     addKeyPoint(keyPointId: SplatKeypointId): SplatDocModel {
+        console.log("doc.addKeyPoint", keyPointId);
         const shapeVersionId = SplatShapeVersionId.generate();
         const keyPoints = this.keyPoints.insert({
             id: keyPointId,
@@ -105,6 +111,7 @@ export class SplatDocModel {
         shapeVersionId: SplatShapeVersionId,
         rawPoints: Vector2[],
     ): SplatDocModel {
+        console.log("doc.replaceShapeVersionPoints", shapeVersionId);
         const shapeVersions = this.shapeVersions.insert({
             ...this.shapeVersions.get(shapeVersionId),
             rawPoints,

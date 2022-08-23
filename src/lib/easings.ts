@@ -94,15 +94,6 @@ export const cubicBezier = (x1: number, y1: number, x2: number, y2: number): Eas
     return (x) => bezier.solve(x);
 };
 
-/**
- * P(t) = (1-t)^3*P0 + 3*t*(1-t)^2*P1 + 3*t^2*(1-t)*P2 + t^3*P3
- * x = 3*t*(1-t)^2*p1x + 3*t^2*(1-t)*p2x + t^3
- * y(t) = 3*t*(1-t)^2*p1y + 3*t^2*(1-t)*p2y + t^3
- *
- *
- * y = 3*u1*(1-x)^2*x + 3*u2*(1-x)*x^2 + x^3
- */
-
 // https://gist.github.com/rezoner/713615dabedb59a15470
 // http://gsgd.co.uk/sandbox/jquery/easing/
 export const reverse =

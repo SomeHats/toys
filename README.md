@@ -22,10 +22,12 @@ rather focus my limited free time on actually making things with the tools.
     -   [x] pan
     -   [ ] zoom
     -   [ ] fix zoom gesture zooming browser
+    -   [ ] mobile pan/zoom support
     -   [ ] multi-dimensional
     -   [ ] more shapes
     -   [ ] colors
     -   [ ] fills
+    -   [ ] density based point allocation instead of distance based
     -   [ ] line fixed points
     -   [ ] design overhaul
     -   [ ] login/share????

@@ -109,7 +109,7 @@ export class SplatDocModel {
 
     replaceShapeVersionPoints(
         shapeVersionId: SplatShapeVersionId,
-        rawPoints: Vector2[],
+        rawPoints: ReadonlyArray<Vector2>,
     ): SplatDocModel {
         console.log("doc.replaceShapeVersionPoints", shapeVersionId);
         const shapeVersions = this.shapeVersions.insert({

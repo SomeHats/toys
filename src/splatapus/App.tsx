@@ -29,6 +29,10 @@ import { loadSaved, makeEmptySaveState, writeSavedDebounced } from "@/splatapus/
 import { SplatLocation } from "@/splatapus/SplatLocation";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { Viewport, ViewportState } from "@/splatapus/Viewport";
+import { Toolbar } from "@/splatapus/Toolbar";
+import { useTool } from "@/splatapus/tools/Tool";
+import { EventContext } from "@/splatapus/tools/lib";
+import { DrawTool } from "@/splatapus/tools/DrawTool";
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
@@ -66,7 +70,7 @@ type FramesState = {
 
 function Splatapus({ size }: { size: Vector2 }) {
     const [svgElement, setSvgElement] = useState<SVGSVGElement | null>(null);
-    const [action, setAction] = useState<ActionState>({ type: "idle" });
+    // const [action, setAction] = useState<ActionState>({ type: "idle" });
     const { document, location, updateDocument, updateLocation, undo, redo } = useUndoStack<
         SplatDocModel,
         SplatLocation
@@ -81,6 +85,10 @@ function Splatapus({ size }: { size: Vector2 }) {
 
         return makeEmptySaveState();
     });
+    useEffect(() => {
+        writeSavedDebounced("autosave", { doc: document, location });
+    }, [document, location]);
+
     const updateViewport = useCallback(
         (update: UpdateAction<ViewportState>) =>
             updateLocation((location) =>
@@ -93,106 +101,115 @@ function Splatapus({ size }: { size: Vector2 }) {
         [location.viewportState, size, updateViewport],
     );
 
-    useEffect(() => {
-        writeSavedDebounced("autosave", { doc: document, location });
-    }, [document, location]);
+    const { tool, events } = useTool(
+        () => new DrawTool({ type: "idle" }),
+        (event) => ({
+            event,
+            viewport,
+            document,
+            location,
+            updateDocument,
+            updateLocation,
+            updateViewport,
+        }),
+    );
 
     useKeyPress({ key: "z", command: true }, undo);
     useKeyPress({ key: "z", command: true, shift: true }, redo);
 
-    useEffect(() => {
-        let isCancelled = false;
-        frameLoop((t, cancel) => {
-            if (isCancelled) {
-                cancel();
-                return;
-            }
+    // useEffect(() => {
+    //     let isCancelled = false;
+    //     frameLoop((t, cancel) => {
+    //         if (isCancelled) {
+    //             cancel();
+    //             return;
+    //         }
 
-            setAction((action) => {
-                switch (action.type) {
-                    case "idle":
-                    case "drawing":
-                        return action;
-                    case "lerp": {
-                        const progress = invLerp(
-                            action.startedAtMs,
-                            action.startedAtMs + LERP_DURATION_MS,
-                            t,
-                        );
-                        if (progress > 1) {
-                            return { type: "idle" };
-                        }
-                        return {
-                            ...action,
-                            progress,
-                        };
-                    }
-                    default:
-                        exhaustiveSwitchError(action);
-                }
-            });
-        });
-        return () => {
-            isCancelled = true;
-        };
-    });
+    //         setAction((action) => {
+    //             switch (action.type) {
+    //                 case "idle":
+    //                 case "drawing":
+    //                     return action;
+    //                 case "lerp": {
+    //                     const progress = invLerp(
+    //                         action.startedAtMs,
+    //                         action.startedAtMs + LERP_DURATION_MS,
+    //                         t,
+    //                     );
+    //                     if (progress > 1) {
+    //                         return { type: "idle" };
+    //                     }
+    //                     return {
+    //                         ...action,
+    //                         progress,
+    //                     };
+    //                 }
+    //                 default:
+    //                     exhaustiveSwitchError(action);
+    //             }
+    //         });
+    //     });
+    //     return () => {
+    //         isCancelled = true;
+    //     };
+    // });
 
-    const onPointerDown = useEvent((e: MouseEvent) => {
-        e.preventDefault();
-        setAction((action) => {
-            switch (action.type) {
-                case "lerp":
-                    return action;
-                case "idle":
-                    return {
-                        type: "drawing",
-                        points: [viewport.screenToScene(Vector2.fromEvent(e))],
-                    };
-                case "drawing":
-                    return action;
-                default:
-                    exhaustiveSwitchError(action);
-            }
-        });
-    });
-    const onPointerMove = useEvent((e: MouseEvent) => {
-        e.preventDefault();
-        setAction((action) => {
-            switch (action.type) {
-                case "idle":
-                case "lerp":
-                    return action;
-                case "drawing":
-                    return {
-                        ...action,
-                        points: [...action.points, viewport.screenToScene(Vector2.fromEvent(e))],
-                    };
-                default:
-                    exhaustiveSwitchError(action);
-            }
-        });
-    });
-    const onPointerUp = useEvent((e: MouseEvent) => {
-        e.preventDefault();
-        setAction((action) => {
-            switch (action.type) {
-                case "idle":
-                case "lerp":
-                    return action;
-                case "drawing": {
-                    updateDocument((document) => {
-                        return document.replaceShapeVersionPoints(
-                            document.getShapeVersionForKeyPoint(location.keyPointId).id,
-                            action.points,
-                        );
-                    });
-                    return { type: "idle" };
-                }
-                default:
-                    exhaustiveSwitchError(action);
-            }
-        });
-    });
+    // const onPointerDown = useEvent((e: MouseEvent) => {
+    //     e.preventDefault();
+    //     setAction((action) => {
+    //         switch (action.type) {
+    //             case "lerp":
+    //                 return action;
+    //             case "idle":
+    //                 return {
+    //                     r: "drawing",
+    //                     points: [viewport.screenToScene(Vector2.fromEvent(e))],
+    //                 };
+    //             case "drawing":
+    //                 return action;
+    //             default:
+    //                 exhaustiveSwitchError(action);
+    //         }
+    //     });
+    // });
+    // const onPointerMove = useEvent((e: MouseEvent) => {
+    //     e.preventDefault();
+    //     setAction((action) => {
+    //         switch (action.type) {
+    //             case "idle":
+    //             case "lerp":
+    //                 return action;
+    //             case "drawing":
+    //                 return {
+    //                     ...action,
+    //                     points: [...action.points, viewport.screenToScene(Vector2.fromEvent(e))],
+    //                 };
+    //             default:
+    //                 exhaustiveSwitchError(action);
+    //         }
+    //     });
+    // });
+    // const onPointerUp = useEvent((e: MouseEvent) => {
+    //     e.preventDefault();
+    //     setAction((action) => {
+    //         switch (action.type) {
+    //             case "idle":
+    //             case "lerp":
+    //                 return action;
+    //             case "drawing": {
+    //                 updateDocument((document) => {
+    //                     return document.replaceShapeVersionPoints(
+    //                         document.getShapeVersionForKeyPoint(location.keyPointId).id,
+    //                         action.points,
+    //                     );
+    //                 });
+    //                 return { type: "idle" };
+    //             }
+    //             default:
+    //                 exhaustiveSwitchError(action);
+    //         }
+    //     });
+    // });
     const onWheel = useEvent((event: WheelEvent) => viewport.handleWheelEvent(event));
 
     useEffect(() => {
@@ -201,61 +218,84 @@ function Splatapus({ size }: { size: Vector2 }) {
         }
 
         window.addEventListener("wheel", onWheel, { passive: false });
+        window.addEventListener("keydown", events.onKeyDown);
+        window.addEventListener("keyup", events.onKeyUp);
         return () => {
             window.removeEventListener("wheel", onWheel);
+            window.removeEventListener("keydown", events.onKeyDown);
+            window.removeEventListener("keyup", events.onKeyUp);
         };
-    });
+    }, [onWheel, svgElement, events]);
 
     const centerPoints = useMemo(() => {
-        switch (action.type) {
-            case "idle":
+        switch (tool.name) {
+            case "quickPan":
                 return document.data.normalizedShapeVersions.get(
                     document.getShapeVersionForKeyPoint(location.keyPointId).id,
                 ).normalizedCenterPoints;
-            case "drawing":
-                return normalizeCenterPointIntervalsQuadratic(
-                    getStrokeCenterPoints(
-                        getStrokePoints(action.points, perfectFreehandOpts),
-                        perfectFreehandOpts,
-                    ),
-                    perfectFreehandOpts.size,
-                );
-            case "lerp": {
-                const fromVersion = document.getShapeVersionForKeyPoint(action.from);
-                const toVersion = document.getShapeVersionForKeyPoint(action.to);
-                const fromPoints = document.data.normalizedShapeVersions.get(
-                    fromVersion.id,
-                ).normalizedCenterPoints;
-                const toPoints = document.data.normalizedShapeVersions.get(
-                    toVersion.id,
-                ).normalizedCenterPoints;
-                const progress = easings.inOutSine(action.progress);
-                return times(
-                    Math.max(fromPoints.length, toPoints.length),
-                    (idx): StrokeCenterPoint => {
-                        const p1 = fromPoints[Math.min(idx, fromPoints.length - 1)];
-                        const p2 = toPoints[Math.min(idx, toPoints.length - 1)];
-                        return {
-                            center: p1.center.lerp(p2.center, progress),
-                            radius: lerp(p1.radius, p2.radius, progress),
-                        };
-                    },
-                );
-            }
+            case "draw":
+                switch (tool.state.type) {
+                    case "idle":
+                        return document.data.normalizedShapeVersions.get(
+                            document.getShapeVersionForKeyPoint(location.keyPointId).id,
+                        ).normalizedCenterPoints;
+                    case "drawing":
+                        return normalizeCenterPointIntervalsQuadratic(
+                            getStrokeCenterPoints(
+                                getStrokePoints(tool.state.points, perfectFreehandOpts),
+                                perfectFreehandOpts,
+                            ),
+                            perfectFreehandOpts.size,
+                        );
+                    default:
+                        return exhaustiveSwitchError(tool.state);
+                }
             default:
-                exhaustiveSwitchError(action);
+                exhaustiveSwitchError(tool);
+            // case "idle":
+            //     return document.data.normalizedShapeVersions.get(
+            //         document.getShapeVersionForKeyPoint(location.keyPointId).id,
+            //     ).normalizedCenterPoints;
+            // case "drawing":
+
+            // case "lerp": {
+            //     const fromVersion = document.getShapeVersionForKeyPoint(action.from);
+            //     const toVersion = document.getShapeVersionForKeyPoint(action.to);
+            //     const fromPoints = document.data.normalizedShapeVersions.get(
+            //         fromVersion.id,
+            //     ).normalizedCenterPoints;
+            //     const toPoints = document.data.normalizedShapeVersions.get(
+            //         toVersion.id,
+            //     ).normalizedCenterPoints;
+            //     const progress = easings.inOutSine(action.progress);
+            //     return times(
+            //         Math.max(fromPoints.length, toPoints.length),
+            //         (idx): StrokeCenterPoint => {
+            //             const p1 = fromPoints[Math.min(idx, fromPoints.length - 1)];
+            //             const p2 = toPoints[Math.min(idx, toPoints.length - 1)];
+            //             return {
+            //                 center: p1.center.lerp(p2.center, progress),
+            //                 radius: lerp(p1.radius, p2.radius, progress),
+            //             };
+            //         },
+            //     );
+            // }
+            // default:
+            //     exhaustiveSwitchError(action);
         }
-    }, [action, document, location.keyPointId]);
+    }, [document, location.keyPointId, tool]);
 
     return (
         <>
-            <div className="pointer-events-none absolute top-0">{actionToString(action)}</div>
+            <Toolbar />
+            <div className="pointer-events-none absolute top-0">{tool.toDebugString()}</div>
             <svg
                 ref={setSvgElement}
                 viewBox={`0 0 ${size.x} ${size.y}`}
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-                onPointerUp={onPointerUp}
+                onPointerDown={events.onPointerDown}
+                onPointerMove={events.onPointerMove}
+                onPointerUp={events.onPointerUp}
+                className={tool.canvasClassName()}
             >
                 <g transform={`translate(${-viewport.pan.x}, ${-viewport.pan.y})`}>
                     <path d={getSvgPathFromStroke(pathFromCenterPoints(centerPoints))} />
@@ -276,13 +316,13 @@ function Splatapus({ size }: { size: Vector2 }) {
                                 updateLocation((location) =>
                                     location.with({ keyPointId: keyPoint.id }),
                                 );
-                                setAction({
-                                    type: "lerp",
-                                    from: location.keyPointId,
-                                    to: keyPoint.id,
-                                    startedAtMs: performance.now(),
-                                    progress: 0,
-                                });
+                                // setAction({
+                                //     type: "lerp",
+                                //     from: location.keyPointId,
+                                //     to: keyPoint.id,
+                                //     startedAtMs: performance.now(),
+                                //     progress: 0,
+                                // });
                             }}
                         >
                             {i + 1}

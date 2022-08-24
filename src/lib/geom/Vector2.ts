@@ -34,8 +34,10 @@ export default class Vector2 {
 
     constructor(public readonly x: number, public readonly y: number) {}
 
-    toString(): string {
-        return `Vector2(${this.x}, ${this.y})`;
+    toString(fixedAmt?: number): string {
+        return `Vector2(${fixedAmt == null ? this.x : this.x.toFixed(fixedAmt)}, ${
+            fixedAmt == null ? this.y : this.y.toFixed(fixedAmt)
+        })`;
     }
 
     get magnitudeSquared(): number {

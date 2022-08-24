@@ -18,6 +18,10 @@ export type QuickPanToolState =
 export class QuickPanTool extends createTool<"quickPan", QuickPanToolState>("quickPan") {
     static toolName = "quickPan" as const;
 
+    getSelected() {
+        return this.state.previousTool;
+    }
+
     isIdle(): boolean {
         return true;
     }

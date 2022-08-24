@@ -4,7 +4,7 @@ import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { SplatLocation } from "@/splatapus/SplatLocation";
 import { OpOptions } from "@/splatapus/useUndoStack";
 import { PointerEvent } from "react";
-import { Tool } from "@/splatapus/tools/Tool";
+import { StandardTool, Tool } from "@/splatapus/tools/Tool";
 import { assert } from "@/lib/assert";
 import { Class } from "utility-types";
 
@@ -19,10 +19,14 @@ export interface EventContext<Event> {
         options?: OpOptions<SplatLocation>,
     ) => void;
     readonly updateLocation: (action: UpdateAction<SplatLocation>) => void;
+    readonly undo: () => void;
+    readonly redo: () => void;
 }
 
 export abstract class AbstractTool<Name extends string, State> {
     constructor(readonly name: Name, readonly state: State) {}
+
+    abstract getSelected(): StandardTool;
 
     abstract isIdle(): boolean;
     abstract canvasClassName(): string;

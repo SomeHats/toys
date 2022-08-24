@@ -1,12 +1,14 @@
+import Vector2 from "@/lib/geom/Vector2";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { matchesKey, matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { has } from "@/lib/utils";
 import { DrawTool } from "@/splatapus/tools/DrawTool";
+import { KeypointTool } from "@/splatapus/tools/KeypointTool";
 import { EventContext, makeToolsByName } from "@/splatapus/tools/lib";
 import { QuickPanTool } from "@/splatapus/tools/QuickPanTool";
 import { PointerEvent, useMemo, useState } from "react";
 
-const StandardTools = [DrawTool] as const;
+const StandardTools = [DrawTool, KeypointTool] as const;
 export type StandardTool = InstanceType<typeof StandardTools[number]>;
 
 const standardToolsByName = makeToolsByName(StandardTools);
@@ -37,16 +39,31 @@ export function useTool(
         () => ({
             onKeyDown: (event: KeyboardEvent) =>
                 setTool((tool) => {
-                    console.log(event.key);
-                    if (
-                        matchesKeyDown(event, { key: " " }) &&
-                        isStandardTool(tool) &&
-                        tool.isIdle()
-                    ) {
-                        return new QuickPanTool({ type: "idle", previousTool: tool });
+                    const context = makeEventContext(event);
+                    if (isStandardTool(tool) && tool.isIdle()) {
+                        if (matchesKeyDown(event, " ")) {
+                            return new QuickPanTool({ type: "idle", previousTool: tool });
+                        }
+                        if (matchesKeyDown(event, "d")) {
+                            return new DrawTool({ type: "idle" });
+                        }
+                        if (matchesKeyDown(event, "k")) {
+                            return new KeypointTool({ type: "idle" });
+                        }
+                        if (matchesKeyDown(event, { key: "z", command: true })) {
+                            context.undo();
+                            return tool;
+                        }
+                        if (matchesKeyDown(event, { key: "z", command: true, shift: true })) {
+                            context.redo();
+                        }
+                    }
+                    if (matchesKey(event, { key: "0", command: true })) {
+                        context.updateViewport({ pan: Vector2.ZERO, zoom: 1 });
+                        return tool;
                     }
 
-                    return tool.onKeyDown();
+                    return tool.onKeyDown(context);
                 }),
             onKeyUp: (event: KeyboardEvent) =>
                 setTool((tool) => {
@@ -55,7 +72,7 @@ export function useTool(
                         return tool.state.previousTool;
                     }
 
-                    return tool.onKeyUp();
+                    return tool.onKeyUp(makeEventContext(event));
                 }),
             onPointerDown: (event: PointerEvent) =>
                 setTool((tool) => tool.onPointerDown(makeEventContext(event))),
@@ -63,6 +80,13 @@ export function useTool(
                 setTool((tool) => tool.onPointerMove(makeEventContext(event))),
             onPointerUp: (event: PointerEvent) =>
                 setTool((tool) => tool.onPointerUp(makeEventContext(event))),
+            onSelectTool: (selectedTool: StandardTool) =>
+                setTool((tool) => {
+                    if (tool.isIdle()) {
+                        return selectedTool;
+                    }
+                    return tool;
+                }),
         }),
         [makeEventContext],
     );

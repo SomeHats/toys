@@ -101,7 +101,7 @@ function Splatapus({ size }: { size: Vector2 }) {
         [location.viewportState, size, updateViewport],
     );
 
-    const { tool, events } = useTool(
+    const { tool, events: toolEvents } = useTool(
         () => new DrawTool({ type: "idle" }),
         (event) => ({
             event,
@@ -111,11 +111,10 @@ function Splatapus({ size }: { size: Vector2 }) {
             updateDocument,
             updateLocation,
             updateViewport,
+            undo,
+            redo,
         }),
     );
-
-    useKeyPress({ key: "z", command: true }, undo);
-    useKeyPress({ key: "z", command: true, shift: true }, redo);
 
     // useEffect(() => {
     //     let isCancelled = false;
@@ -218,18 +217,19 @@ function Splatapus({ size }: { size: Vector2 }) {
         }
 
         window.addEventListener("wheel", onWheel, { passive: false });
-        window.addEventListener("keydown", events.onKeyDown);
-        window.addEventListener("keyup", events.onKeyUp);
+        window.addEventListener("keydown", toolEvents.onKeyDown);
+        window.addEventListener("keyup", toolEvents.onKeyUp);
         return () => {
             window.removeEventListener("wheel", onWheel);
-            window.removeEventListener("keydown", events.onKeyDown);
-            window.removeEventListener("keyup", events.onKeyUp);
+            window.removeEventListener("keydown", toolEvents.onKeyDown);
+            window.removeEventListener("keyup", toolEvents.onKeyUp);
         };
-    }, [onWheel, svgElement, events]);
+    }, [onWheel, svgElement, toolEvents]);
 
     const centerPoints = useMemo(() => {
         switch (tool.name) {
             case "quickPan":
+            case "keypoint":
                 return document.data.normalizedShapeVersions.get(
                     document.getShapeVersionForKeyPoint(location.keyPointId).id,
                 ).normalizedCenterPoints;
@@ -287,17 +287,17 @@ function Splatapus({ size }: { size: Vector2 }) {
 
     return (
         <>
-            <Toolbar />
+            <Toolbar tool={tool} onSelectTool={toolEvents.onSelectTool} />
             <div className="pointer-events-none absolute top-0">{tool.toDebugString()}</div>
             <svg
                 ref={setSvgElement}
                 viewBox={`0 0 ${size.x} ${size.y}`}
-                onPointerDown={events.onPointerDown}
-                onPointerMove={events.onPointerMove}
-                onPointerUp={events.onPointerUp}
+                onPointerDown={toolEvents.onPointerDown}
+                onPointerMove={toolEvents.onPointerMove}
+                onPointerUp={toolEvents.onPointerUp}
                 className={tool.canvasClassName()}
             >
-                <g transform={`translate(${-viewport.pan.x}, ${-viewport.pan.y})`}>
+                <g transform={viewport.getSceneTransform()}>
                     <path d={getSvgPathFromStroke(pathFromCenterPoints(centerPoints))} />
                 </g>
             </svg>

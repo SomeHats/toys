@@ -18,6 +18,9 @@ export class DrawTool extends createTool<"draw", DrawToolState>("draw") {
     isIdle(): boolean {
         return this.state.type === "idle";
     }
+    getSelected() {
+        return this;
+    }
     canvasClassName(): string {
         return "";
     }

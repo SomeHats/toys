@@ -30,11 +30,20 @@ export class Viewport {
         this.update(({ pan, zoom }) => ({ pan: pan.add(new Vector2(deltaX, deltaY)), zoom }));
     }
 
+    centerPan(): Vector2 {
+        return this.pan.sub(this.screenSize.scale(0.5));
+    }
+
     screenToScene(screenCoords: Vector2): Vector2 {
-        return screenCoords.add(this.pan);
+        return screenCoords.add(this.centerPan());
     }
 
     sceneToScreen(sceneCoords: Vector2): Vector2 {
-        return sceneCoords.sub(this.pan);
+        return sceneCoords.sub(this.centerPan());
+    }
+
+    getSceneTransform(): string {
+        const pan = this.centerPan();
+        return `translate(${-pan.x}, ${-pan.y})`;
     }
 }

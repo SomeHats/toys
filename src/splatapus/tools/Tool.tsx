@@ -8,26 +8,6 @@ import { EventContext, makeToolsByName } from "@/splatapus/tools/lib";
 import { QuickPanTool } from "@/splatapus/tools/QuickPanTool";
 import { PointerEvent, useMemo, useState } from "react";
 
-const StandardTools = [DrawTool, KeypointTool] as const;
-export type StandardTool = InstanceType<typeof StandardTools[number]>;
-
-const standardToolsByName = makeToolsByName(StandardTools);
-export function isStandardTool(tool: Tool): tool is StandardTool {
-    return has(standardToolsByName, tool.name);
-}
-
-export const QuickTools = [QuickPanTool] as const;
-export type QuickTool = InstanceType<typeof QuickTools[number]>;
-
-const quickToolsByName = makeToolsByName(QuickTools);
-export function isQuickTool(tool: Tool): tool is QuickTool {
-    return has(quickToolsByName, tool.name);
-}
-
-export type Tool = StandardTool | QuickTool;
-// make sure tool names are unique
-makeToolsByName([...StandardTools, ...QuickTools]);
-
 export function useTool(
     initialize: () => StandardTool,
     _makeEventContext: <Event>(event: Event) => EventContext<Event>,
@@ -68,7 +48,6 @@ export function useTool(
             onKeyUp: (event: KeyboardEvent) =>
                 setTool((tool) => {
                     if (tool instanceof QuickPanTool && matchesKey(event, { key: " " })) {
-                        console.log("UP", event);
                         return tool.state.previousTool;
                     }
 
@@ -93,3 +72,23 @@ export function useTool(
 
     return { events, tool };
 }
+
+const StandardTools = [DrawTool, KeypointTool] as const;
+export type StandardTool = InstanceType<typeof StandardTools[number]>;
+
+const standardToolsByName = makeToolsByName(StandardTools);
+export function isStandardTool(tool: Tool): tool is StandardTool {
+    return has(standardToolsByName, tool.name);
+}
+
+export const QuickTools = [QuickPanTool] as const;
+export type QuickTool = InstanceType<typeof QuickTools[number]>;
+
+const quickToolsByName = makeToolsByName(QuickTools);
+export function isQuickTool(tool: Tool): tool is QuickTool {
+    return has(quickToolsByName, tool.name);
+}
+
+export type Tool = StandardTool | QuickTool;
+// make sure tool names are unique
+makeToolsByName([...StandardTools, ...QuickTools]);

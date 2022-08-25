@@ -7,6 +7,8 @@ import { PointerEvent } from "react";
 import { StandardTool, Tool } from "@/splatapus/tools/Tool";
 import { assert } from "@/lib/assert";
 import { Class } from "utility-types";
+import { SplatShapeVersion } from "@/splatapus/model/SplatDoc";
+import { StrokeCenterPoint } from "@/splatapus/perfectFreehand";
 
 export interface EventContext<Event> {
     readonly event: Event;
@@ -36,6 +38,13 @@ export abstract class AbstractTool<Name extends string, State> {
     abstract onPointerDown(ctx: EventContext<PointerEvent>): Tool;
     abstract onPointerMove(ctx: EventContext<PointerEvent>): Tool;
     abstract onPointerUp(ctx: EventContext<PointerEvent>): Tool;
+
+    getPointsForShapeVersion(
+        document: SplatDocModel,
+        shapeVersion: SplatShapeVersion,
+    ): ReadonlyArray<StrokeCenterPoint> {
+        return document.data.normalizedShapeVersions.get(shapeVersion.id).normalizedCenterPoints;
+    }
 
     abstract debugProperties(): Record<string, string>;
     toDebugString(): string {

@@ -1,5 +1,14 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
+import { perfectFreehandOpts } from "@/splatapus/constants";
+import { SplatShapeVersion } from "@/splatapus/model/SplatDoc";
+import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
+import { normalizeCenterPointIntervalsQuadratic } from "@/splatapus/normalizeCenterPointIntervals";
+import {
+    getStrokeCenterPoints,
+    getStrokePoints,
+    StrokeCenterPoint,
+} from "@/splatapus/perfectFreehand";
 import { createTool, EventContext } from "@/splatapus/tools/lib";
 import { PointerEvent } from "react";
 
@@ -72,6 +81,26 @@ export class DrawTool extends createTool<"draw", DrawToolState>("draw") {
                 return new DrawTool({ type: "idle" });
             default:
                 exhaustiveSwitchError(state);
+        }
+    }
+    override getPointsForShapeVersion(
+        document: SplatDocModel,
+        shapeVersion: SplatShapeVersion,
+    ): ReadonlyArray<StrokeCenterPoint> {
+        switch (this.state.type) {
+            case "idle":
+                return super.getPointsForShapeVersion(document, shapeVersion);
+            case "drawing":
+                // render currently drawing line:
+                return normalizeCenterPointIntervalsQuadratic(
+                    getStrokeCenterPoints(
+                        getStrokePoints(this.state.points, perfectFreehandOpts),
+                        perfectFreehandOpts,
+                    ),
+                    perfectFreehandOpts.size,
+                );
+            default:
+                exhaustiveSwitchError(this.state);
         }
     }
     debugProperties(): Record<string, string> {

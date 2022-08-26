@@ -19,16 +19,35 @@ rather focus my limited free time on actually making things with the tools.
     -   [x] localstorage state
     -   [x] reset document
     -   [x] go to undo/redo location first
-    -   [x] pan
-    -   [ ] zoom
-    -   [ ] fix zoom gesture zooming browser
-    -   [ ] mobile pan/zoom support
+    -   [ ] pan/zoom
+        -   [x] basic pan
+        -   [x] reset pan/zoom
+        -   [ ] basic zoom
+        -   [ ] zoom at cursor location
+        -   [ ] fix zoom gesture zooming browser
+        -   [ ] mobile pan/zoom support
     -   [ ] multi-dimensional
-    -   [ ] more shapes
-    -   [ ] colors
-    -   [ ] fills
-    -   [ ] density based point allocation instead of distance based
-    -   [ ] line fixed points
+        -   [ ] keypoint tool
+            -   [x] tool boilerplate
+            -   [x] tap vs drag gesture detection
+            -   [ ] select key points
+            -   [ ] move key points
+            -   [ ] add key points
+        -   [ ] md-interpolation
+            -   [ ] preview mode?
+            -   [ ] quick preview tool
+            -   [ ] TPS interpolation
+    -   [ ] a r t
+        -   [ ] more shapes
+        -   [ ] colors
+        -   [ ] fills
+    -   [ ] fun
+        -   [ ] spring-interpolation
+        -   [ ] paint spring params on lines
+    -   [ ] animation
+        -   [ ] try density based point allocation instead of distance based
+        -   [ ] "pin" points on the line for animation consistency
+        -   [ ] turn around?
     -   [ ] design overhaul
     -   [ ] login/share????
 -   octopus

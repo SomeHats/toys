@@ -1,7 +1,8 @@
+import { assert } from "@/lib/assert";
 import Vector2 from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
-import { createTool, EventContext } from "@/splatapus/tools/lib";
-import { StandardTool, Tool } from "@/splatapus/tools/Tool";
+import { createTool, EventContext, ToolDragGesture } from "@/splatapus/tools/AbstractTool";
+import { StandardTool } from "@/splatapus/tools/Tool";
 import { PointerEvent } from "react";
 
 export type QuickPanToolState =
@@ -12,70 +13,55 @@ export type QuickPanToolState =
     | {
           readonly type: "dragging";
           readonly previousTool: StandardTool;
+          readonly initialPan: Vector2;
           readonly previousScreenPoint: Vector2;
       };
 
 export class QuickPanTool extends createTool<"quickPan", QuickPanToolState>("quickPan") {
     static toolName = "quickPan" as const;
-
     getSelected() {
         return this.state.previousTool;
     }
-
     isIdle(): boolean {
         return true;
     }
-    canvasClassName(): string {
+    override canvasClassName(): string {
         return "cursor-grab";
     }
-    onKeyDown() {
-        return this;
-    }
-    onKeyUp() {
-        return this;
-    }
-    onPointerDown({ viewport, event }: EventContext<PointerEvent>) {
-        const state = this.state;
-        switch (state.type) {
-            case "idle":
-                return new QuickPanTool({
-                    type: "dragging",
-                    previousScreenPoint: Vector2.fromEvent(event),
-                    previousTool: state.previousTool,
-                });
-            case "dragging":
-                return this;
-            default:
-                exhaustiveSwitchError(state);
-        }
-    }
-    onPointerMove({ viewport, event, updateViewport }: EventContext<PointerEvent>) {
-        const state = this.state;
-        switch (state.type) {
-            case "idle":
-                return this;
-            case "dragging": {
-                const screenPoint = Vector2.fromEvent(event);
-                updateViewport(({ pan, zoom }) => ({
-                    pan: pan.add(state.previousScreenPoint.sub(screenPoint).scale(zoom)),
-                    zoom,
-                }));
-                return new QuickPanTool({ ...state, previousScreenPoint: screenPoint });
-            }
-            default:
-                exhaustiveSwitchError(state);
-        }
-    }
-    onPointerUp() {
-        const state = this.state;
-        switch (state.type) {
-            case "idle":
-                return this;
-            case "dragging":
-                return new QuickPanTool({ type: "idle", previousTool: state.previousTool });
-            default:
-                exhaustiveSwitchError(state);
-        }
+    override onDragStart({
+        event,
+        location,
+    }: EventContext<PointerEvent<Element>>): ToolDragGesture<QuickPanToolState> {
+        assert(this.state.type === "idle");
+        return {
+            state: {
+                type: "dragging",
+                previousTool: this.state.previousTool,
+                initialPan: location.viewportState.pan,
+                previousScreenPoint: Vector2.fromEvent(event),
+            },
+            gesture: {
+                couldBeTap: false,
+                onMove(state, { updateViewport, event }) {
+                    assert(state.type === "dragging");
+                    const screenPoint = Vector2.fromEvent(event);
+                    updateViewport(({ pan, zoom }) => ({
+                        pan: pan.add(state.previousScreenPoint.sub(screenPoint).scale(zoom)),
+                        zoom,
+                    }));
+                    return { ...state, previousScreenPoint: screenPoint };
+                },
+                onEnd(state) {
+                    assert(state.type === "dragging");
+                    return { type: "idle", previousTool: state.previousTool };
+                },
+                onCancel(state, { updateViewport }) {
+                    assert(state.type === "dragging");
+                    updateViewport(({ zoom }) => ({ zoom, pan: state.initialPan }));
+                    return { type: "idle", previousTool: state.previousTool };
+                },
+            },
+        };
     }
     debugProperties(): Record<string, string> {
         switch (this.state.type) {

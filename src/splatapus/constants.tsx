@@ -5,6 +5,8 @@ export const UNDO_ACTIONS = 30;
 export const AUTOSAVE_DEBOUNCE_TIME_MS = 500;
 export const USE_REACT_STRICT_MODE = true;
 
+export const MIN_DRAG_GESTURE_DISTANCE_PX = 10;
+
 export const perfectFreehandOpts: Required<StrokeOptions> = {
     size: 16,
     streamline: 0.5,

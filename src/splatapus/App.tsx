@@ -28,7 +28,6 @@ export function App() {
 }
 
 function Splatapus({ size }: { size: Vector2 }) {
-    const [svgElement, setSvgElement] = useState<SVGSVGElement | null>(null);
     const { document, location, updateDocument, updateLocation, undo, redo } = useUndoStack<
         SplatDocModel,
         SplatLocation
@@ -59,7 +58,11 @@ function Splatapus({ size }: { size: Vector2 }) {
         [location.viewportState, size, updateViewport],
     );
 
-    const { tool, events: toolEvents } = useTool(
+    const {
+        tool,
+        events: toolEvents,
+        updateTool,
+    } = useTool(
         () => new DrawTool({ type: "idle" }),
         (event) => ({
             event,
@@ -77,10 +80,6 @@ function Splatapus({ size }: { size: Vector2 }) {
     const onWheel = useEvent((event: WheelEvent) => viewport.handleWheelEvent(event));
 
     useEffect(() => {
-        if (!svgElement) {
-            return;
-        }
-
         window.addEventListener("wheel", onWheel, { passive: false });
         window.addEventListener("keydown", toolEvents.onKeyDown);
         window.addEventListener("keyup", toolEvents.onKeyUp);
@@ -89,19 +88,19 @@ function Splatapus({ size }: { size: Vector2 }) {
             window.removeEventListener("keydown", toolEvents.onKeyDown);
             window.removeEventListener("keyup", toolEvents.onKeyUp);
         };
-    }, [onWheel, svgElement, toolEvents]);
+    }, [onWheel, toolEvents]);
+
+    const toolRenderProps = { viewport, document, location, updateTool };
+    const ToolSceneSvgComponent = tool.getSceneSvgComponent();
+    const ToolScreenSvgComponent = tool.getScreenSvgComponent();
+    const ToolScreenHtmlComponent = tool.getScreenHtmlComponent();
 
     return (
         <>
-            <Toolbar tool={tool} onSelectTool={toolEvents.onSelectTool} />
             <div className="pointer-events-none absolute top-0">{tool.toDebugString()}</div>
             <svg
-                ref={setSvgElement}
                 viewBox={`0 0 ${size.x} ${size.y}`}
-                onPointerDown={toolEvents.onPointerDown}
-                onPointerMove={toolEvents.onPointerMove}
-                onPointerUp={toolEvents.onPointerUp}
-                className={tool.canvasClassName()}
+                className={classNames("absolute top-0 left-0", tool.canvasClassName())}
             >
                 <g transform={viewport.getSceneTransform()}>
                     <DocumentRenderer
@@ -111,6 +110,21 @@ function Splatapus({ size }: { size: Vector2 }) {
                     />
                 </g>
             </svg>
+            <svg viewBox={`0 0 ${size.x} ${size.y}`} className="absolute top-0 left-0">
+                <g transform={viewport.getSceneTransform()}>
+                    {<ToolSceneSvgComponent {...toolRenderProps} />}
+                </g>
+                {<ToolScreenSvgComponent {...toolRenderProps} />}
+            </svg>
+            <div
+                className={classNames("absolute inset-0", tool.canvasClassName())}
+                onPointerDown={toolEvents.onPointerDown}
+                onPointerMove={toolEvents.onPointerMove}
+                onPointerUp={toolEvents.onPointerUp}
+            >
+                {<ToolScreenHtmlComponent {...toolRenderProps} />}
+            </div>
+            <Toolbar tool={tool} onSelectTool={toolEvents.onSelectTool} />
             <div className="absolute bottom-0 left-0 flex w-full items-center justify-center gap-3 p-3">
                 <div className="flex min-w-0 flex-auto items-center justify-center gap-3">
                     {Array.from(document.keyPoints, (keyPoint, i) => (
@@ -147,7 +161,7 @@ function Splatapus({ size }: { size: Vector2 }) {
                 </div>
                 <button
                     className={classNames(
-                        "flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-3 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
+                        "absolute right-3 flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-3 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
                     )}
                     onClick={() => {
                         const { doc, location } = makeEmptySaveState();

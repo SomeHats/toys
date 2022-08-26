@@ -40,7 +40,7 @@ function ToolbarButton({
     return (
         <button
             className={classNames(
-                "pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 shadow-md",
+                "pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 bg-white shadow-md",
                 isSelected ? "text-stone-500 ring-2 ring-inset ring-purple-400" : "text-stone-400",
             )}
             onClick={onClick}

@@ -1,3 +1,4 @@
+import { assert } from "@/lib/assert";
 import Vector2 from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { perfectFreehandOpts } from "@/splatapus/constants";
@@ -9,7 +10,8 @@ import {
     getStrokePoints,
     StrokeCenterPoint,
 } from "@/splatapus/perfectFreehand";
-import { createTool, EventContext } from "@/splatapus/tools/lib";
+import { createTool, EventContext, ToolDragGesture } from "@/splatapus/tools/AbstractTool";
+import { Tool } from "@/splatapus/tools/Tool";
 import { PointerEvent } from "react";
 
 export type DrawToolState =
@@ -30,58 +32,39 @@ export class DrawTool extends createTool<"draw", DrawToolState>("draw") {
     getSelected() {
         return this;
     }
-    canvasClassName(): string {
-        return "";
-    }
-    onKeyDown() {
-        return this;
-    }
-    onKeyUp() {
-        return this;
-    }
-    onPointerDown({ event, viewport }: EventContext<PointerEvent>) {
-        switch (this.state.type) {
-            case "idle":
-                return new DrawTool({
-                    type: "drawing",
-                    points: [viewport.screenToScene(Vector2.fromEvent(event))],
-                });
-            case "drawing":
-                return this;
-            default:
-                exhaustiveSwitchError(this.state);
-        }
-    }
-    onPointerMove({ event, viewport }: EventContext<PointerEvent<Element>>) {
-        const state = this.state;
-        switch (state.type) {
-            case "idle":
-                return this;
-            case "drawing":
-                return new DrawTool({
-                    type: "drawing",
-                    points: [...state.points, viewport.screenToScene(Vector2.fromEvent(event))],
-                });
-            default:
-                exhaustiveSwitchError(state);
-        }
-    }
-    onPointerUp({ updateDocument, location }: EventContext<PointerEvent<Element>>) {
-        const state = this.state;
-        switch (state.type) {
-            case "idle":
-                return this;
-            case "drawing":
-                updateDocument((document) => {
-                    return document.replaceShapeVersionPoints(
-                        document.getShapeVersionForKeyPoint(location.keyPointId).id,
-                        state.points,
-                    );
-                });
-                return new DrawTool({ type: "idle" });
-            default:
-                exhaustiveSwitchError(state);
-        }
+    override onDragStart({
+        viewport,
+        event,
+    }: EventContext<PointerEvent<Element>>): ToolDragGesture<DrawToolState> {
+        return {
+            state: {
+                type: "drawing",
+                points: [viewport.screenToScene(Vector2.fromEvent(event))],
+            },
+            gesture: {
+                couldBeTap: false,
+                onMove(state, { event, viewport }) {
+                    assert(state.type === "drawing");
+                    return {
+                        type: "drawing",
+                        points: [...state.points, viewport.screenToScene(Vector2.fromEvent(event))],
+                    };
+                },
+                onEnd(state, { updateDocument, location }) {
+                    assert(state.type === "drawing");
+                    updateDocument((document) => {
+                        return document.replaceShapeVersionPoints(
+                            document.getShapeVersionForKeyPoint(location.keyPointId).id,
+                            state.points,
+                        );
+                    });
+                    return { type: "idle" };
+                },
+                onCancel() {
+                    return { type: "idle" };
+                },
+            },
+        };
     }
     override getPointsForShapeVersion(
         document: SplatDocModel,

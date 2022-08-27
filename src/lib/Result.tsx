@@ -27,7 +27,7 @@ export abstract class AbstractResult<T, E> {
 
     abstract isOk(): this is OkResult<T, E>;
     abstract isError(): this is ErrorResult<T, E>;
-    abstract unwrap(message: string): T;
+    abstract unwrap(message?: string): T;
     abstract map<T2>(map: (value: T) => T2): Result<T2, E>;
     abstract mapErr<E2>(map: (err: E) => E2): Result<T, E2>;
     abstract andThen<T2>(map: (value: T) => Result<T2, E>): Result<T2, E>;
@@ -70,8 +70,8 @@ export class ErrorResult<T, E> extends AbstractResult<T, E> {
     isError(): this is ErrorResult<T, E> {
         return true;
     }
-    unwrap(message: string): never {
-        fail(`${message}: ${String(this.error)}`);
+    unwrap(message?: string): never {
+        fail(`${message ?? "expected value"}: ${String(this.error)}`);
     }
     map<T2>(map: (value: T) => T2): Result<T2, E> {
         // @ts-expect-error error type matches

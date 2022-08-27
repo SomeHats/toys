@@ -10,8 +10,9 @@ import {
 import { OneToOneIndex, Table } from "@/splatapus/model/Table";
 import { calculateNormalizedShapePointsFromVersions } from "@/splatapus/model/normalizedShape";
 import Vector2 from "@/lib/geom/Vector2";
-import { deepEqual } from "@/lib/utils";
+import { deepEqual, UpdateAction } from "@/lib/utils";
 import { fail } from "@/lib/assert";
+import { diffJson, diffLines } from "diff";
 
 export class SplatDocModel {
     static create(): SplatDocModel {
@@ -46,6 +47,10 @@ export class SplatDocModel {
         const serialized = this.serialize();
         const deserialized = SplatDocModel.deserialize(serialized, this.version);
         if (!deepEqual(this, deserialized)) {
+            const actual = JSON.stringify(this, null, 2);
+            const expected = JSON.stringify(deserialized, null, 2);
+            const changes = diffLines(actual, expected);
+            console.log(changes);
             fail(
                 `Mismatch after update:\nActual:\n${JSON.stringify(
                     this,
@@ -104,6 +109,15 @@ export class SplatDocModel {
             normalizedCenterPointsByShapeVersion: calculateNormalizedShapePointsFromVersions(
                 Array.from(shapeVersions),
             ).versions,
+        });
+    }
+
+    updateKeypoint(
+        keyPointId: SplatKeypointId,
+        update: UpdateAction<SplatKeypoint>,
+    ): SplatDocModel {
+        return this.with({
+            keyPoints: this.keyPoints.update(keyPointId, update),
         });
     }
 

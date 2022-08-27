@@ -12,9 +12,10 @@ import { SplatLocation } from "@/splatapus/SplatLocation";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { Viewport, ViewportState } from "@/splatapus/Viewport";
 import { Toolbar } from "@/splatapus/Toolbar";
-import { useTool } from "@/splatapus/tools/Tool";
+import { Tool, useTool } from "@/splatapus/tools/Tool";
 import { DrawTool } from "@/splatapus/tools/DrawTool";
 import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
+import { ToolRenderComponent, ToolRenderProps } from "@/splatapus/tools/AbstractTool";
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
@@ -90,39 +91,52 @@ function Splatapus({ size }: { size: Vector2 }) {
         };
     }, [onWheel, toolEvents]);
 
-    const toolRenderProps = { viewport, document, location, updateTool };
-    const ToolSceneSvgComponent = tool.getSceneSvgComponent();
-    const ToolScreenSvgComponent = tool.getScreenSvgComponent();
-    const ToolScreenHtmlComponent = tool.getScreenHtmlComponent();
+    const toolRenderProps: ToolRenderProps<Tool["state"]> = {
+        viewport,
+        document,
+        location,
+        updateTool,
+        state: tool.state,
+    };
+    const ToolSceneSvgComponent = tool.getSceneSvgComponent() as ToolRenderComponent<Tool["state"]>;
+    const ToolScreenSvgComponent = tool.getScreenSvgComponent() as ToolRenderComponent<
+        Tool["state"]
+    >;
+    const ToolScreenHtmlComponent = tool.getScreenHtmlComponent() as ToolRenderComponent<
+        Tool["state"]
+    >;
 
     return (
         <>
             <div className="pointer-events-none absolute top-0">{tool.toDebugString()}</div>
-            <svg
-                viewBox={`0 0 ${size.x} ${size.y}`}
-                className={classNames("absolute top-0 left-0", tool.canvasClassName())}
-            >
-                <g transform={viewport.getSceneTransform()}>
-                    <DocumentRenderer
-                        document={document}
-                        keyPointId={location.keyPointId}
-                        tool={tool}
-                    />
-                </g>
-            </svg>
-            <svg viewBox={`0 0 ${size.x} ${size.y}`} className="absolute top-0 left-0">
-                <g transform={viewport.getSceneTransform()}>
-                    {<ToolSceneSvgComponent {...toolRenderProps} />}
-                </g>
-                {<ToolScreenSvgComponent {...toolRenderProps} />}
-            </svg>
             <div
-                className={classNames("absolute inset-0", tool.canvasClassName())}
+                className="absolute inset-0"
                 onPointerDown={toolEvents.onPointerDown}
                 onPointerMove={toolEvents.onPointerMove}
                 onPointerUp={toolEvents.onPointerUp}
+                onPointerCancel={toolEvents.onPointerCancel}
             >
-                {<ToolScreenHtmlComponent {...toolRenderProps} />}
+                <svg
+                    viewBox={`0 0 ${size.x} ${size.y}`}
+                    className={classNames("absolute top-0 left-0", tool.canvasClassName())}
+                >
+                    <g transform={viewport.getSceneTransform()}>
+                        <DocumentRenderer
+                            document={document}
+                            keyPointId={location.keyPointId}
+                            tool={tool}
+                        />
+                    </g>
+                </svg>
+                <svg viewBox={`0 0 ${size.x} ${size.y}`} className="absolute top-0 left-0">
+                    <g transform={viewport.getSceneTransform()}>
+                        {<ToolSceneSvgComponent {...toolRenderProps} />}
+                    </g>
+                    {<ToolScreenSvgComponent {...toolRenderProps} />}
+                </svg>
+                <div className={classNames("absolute inset-0", tool.canvasClassName())}>
+                    {<ToolScreenHtmlComponent {...toolRenderProps} />}
+                </div>
             </div>
             <Toolbar tool={tool} onSelectTool={toolEvents.onSelectTool} />
             <div className="absolute bottom-0 left-0 flex w-full items-center justify-center gap-3 p-3">

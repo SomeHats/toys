@@ -3,7 +3,7 @@ import Vector2 from "@/lib/geom/Vector2";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { useGestureDetector } from "@/lib/hooks/useGestureDetector";
 import { matchesKey, matchesKeyDown } from "@/lib/hooks/useKeyPress";
-import { has, ObjectMap } from "@/lib/utils";
+import { has, noop, ObjectMap } from "@/lib/utils";
 import { EventContext, ToolDragGesture } from "@/splatapus/tools/AbstractTool";
 import { DrawTool } from "@/splatapus/tools/DrawTool";
 import { KeypointTool } from "@/splatapus/tools/KeypointTool";
@@ -23,7 +23,10 @@ export function useTool(
             const initialTool = tool;
             const handler = tool.onDragStart(makeEventContext(event)) as ToolDragGesture<
                 Tool["state"]
-            >;
+            > | null;
+            if (!handler) {
+                return { couldBeTap: true, onMove: noop, onEnd: noop, onCancel: noop };
+            }
             // @ts-expect-error state should match due to constraints on onDragStart
             setTool(initialTool.with(handler.state));
             return {

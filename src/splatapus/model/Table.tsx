@@ -1,6 +1,7 @@
 import { assert, assertExists, assertNumber, fail } from "@/lib/assert";
 import { createDictParser, createShapeParser, Parser } from "@/lib/objectParser";
 import {
+    applyUpdate,
     copyAndRemove,
     fromEntries,
     get,
@@ -8,6 +9,7 @@ import {
     ObjectMap,
     ReadonlyObjectMap,
     ReadonlyRecord,
+    UpdateAction,
 } from "@/lib/utils";
 
 export type UnknownTableEntry = { readonly id: string };
@@ -46,6 +48,13 @@ export class Table<T extends UnknownTableEntry> implements Iterable<T> {
 
     insert(item: T): Table<T> {
         return new Table({ ...this.data, [item.id]: item });
+    }
+
+    update(id: T["id"], update: UpdateAction<T>): Table<T> {
+        const before = this.get(id);
+        const after = applyUpdate(before, update);
+        assert(before.id === after.id);
+        return this.insert(after);
     }
 
     delete(id: T["id"]): Table<T> {

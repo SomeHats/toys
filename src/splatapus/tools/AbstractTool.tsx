@@ -34,13 +34,14 @@ export function createTool<Name extends string, State>(name: Name) {
     return AbstractTool_;
 }
 
-export type ToolRenderProps = {
+export type ToolRenderProps<State> = {
     viewport: Viewport;
     location: SplatLocation;
     document: SplatDocModel;
     updateTool: (update: UpdateAction<Tool>) => void;
+    state: State;
 };
-export type ToolRenderComponent = ComponentType<ToolRenderProps>;
+export type ToolRenderComponent<State> = ComponentType<ToolRenderProps<State>>;
 function DefaultToolRenderComponent() {
     return null;
 }
@@ -79,7 +80,7 @@ export abstract class AbstractTool<Name extends string, State> {
     onTap(this: Tool, ctx: EventContext<PointerEvent>): Tool {
         return this;
     }
-    onDragStart(ctx: EventContext<PointerEvent>): ToolDragGesture<State> {
+    onDragStart(ctx: EventContext<PointerEvent>): ToolDragGesture<State> | null {
         return {
             state: this.state,
             gesture: {
@@ -97,13 +98,13 @@ export abstract class AbstractTool<Name extends string, State> {
         return document.data.normalizedShapeVersions.get(shapeVersion.id).normalizedCenterPoints;
     }
 
-    getSceneSvgComponent(): ToolRenderComponent {
+    getSceneSvgComponent(): ToolRenderComponent<State> {
         return DefaultToolRenderComponent;
     }
-    getScreenSvgComponent(): ToolRenderComponent {
+    getScreenSvgComponent(): ToolRenderComponent<State> {
         return DefaultToolRenderComponent;
     }
-    getScreenHtmlComponent(): ToolRenderComponent {
+    getScreenHtmlComponent(): ToolRenderComponent<State> {
         return DefaultToolRenderComponent;
     }
 

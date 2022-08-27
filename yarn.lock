@@ -1375,6 +1375,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/diff@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "@types/diff@npm:5.0.2"
+  checksum: 8fbc419b5aca33f494026bf5f70e026f76367689677ef114f9c078ac738d7dbe96e6dda3fd8290e4a7c35281e2b60b034e3d7e3c968b850cf06a21279e7ddcbe
+  languageName: node
+  linkType: hard
+
 "@types/earcut@npm:^2.1.0":
   version: 2.1.1
   resolution: "@types/earcut@npm:2.1.1"
@@ -2276,6 +2283,13 @@ __metadata:
   version: 1.2.2
   resolution: "didyoumean@npm:1.2.2"
   checksum: d5d98719d58b3c2fa59663c4c42ba9716f1fd01245c31d5fce31915bd3aa26e6aac149788e007358f778ebbd68a2256eb5973e8ca6f221df221ba060115acf2e
+  languageName: node
+  linkType: hard
+
+"diff@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "diff@npm:5.1.0"
+  checksum: c7bf0df7c9bfbe1cf8a678fd1b2137c4fb11be117a67bc18a0e03ae75105e8533dbfb1cda6b46beb3586ef5aed22143ef9d70713977d5fb1f9114e21455fba90
   languageName: node
   linkType: hard
 
@@ -4919,6 +4933,7 @@ __metadata:
     "@types/d3-quadtree": ^3.0.2
     "@types/d3-scale-chromatic": ^3.0.0
     "@types/delaunator": ^5.0.0
+    "@types/diff": ^5.0.2
     "@types/glob": ^7.2.0
     "@types/node": ^16.x.x
     "@types/pixi.js": ^5.0.0
@@ -4938,6 +4953,7 @@ __metadata:
     d3-scale: ^4.0.2
     d3-scale-chromatic: ^3.0.0
     delaunator: ^5.0.0
+    diff: ^5.1.0
     eslint: ^8.21.0
     eslint-plugin-no-relative-import-paths: ^1.4.0
     eslint-plugin-react: ^7.30.1

@@ -1,6 +1,7 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { exhaustiveSwitchError, noop } from "@/lib/utils";
+import { throws } from "assert";
 import { PointerEvent, useMemo, useState } from "react";
 
 const MIN_DRAG_GESTURE_DISTANCE_PX = 10;
@@ -40,7 +41,108 @@ type State =
           readonly dragHandler: DragGestureHandler;
       };
 
-const defaultState: State = { type: "idle" };
+export class GestureDetector {
+    private state: State = { type: "idle" };
+
+    constructor(
+        private readonly onTap = defaultTapGestureHandler,
+        private readonly onDragStart = defaultDragGestureHandler,
+    ) {}
+
+    isGestureInProgress() {
+        return this.state.type !== "idle";
+    }
+
+    onPointerDown(event: PointerEvent) {
+        switch (this.state.type) {
+            case "idle": {
+                const dragHandler = this.onDragStart(event);
+                if (dragHandler.couldBeTap ?? true) {
+                    this.state = {
+                        type: "dragUnconfirmed",
+                        pointerId: event.pointerId,
+                        startPosition: Vector2.fromEvent(event),
+                        dragHandler,
+                    };
+                } else {
+                    this.state = {
+                        type: "dragConfirmed",
+                        pointerId: event.pointerId,
+                        dragHandler,
+                    };
+                }
+                return;
+            }
+            case "dragUnconfirmed":
+            case "dragConfirmed":
+                return;
+            default:
+                exhaustiveSwitchError(this.state);
+        }
+    }
+
+    onPointerMove(event: PointerEvent) {
+        switch (this.state.type) {
+            case "idle":
+                return;
+            case "dragUnconfirmed":
+                if (this.state.pointerId !== event.pointerId) return;
+                this.state.dragHandler.onMove(event);
+                if (
+                    this.state.startPosition.distanceTo(Vector2.fromEvent(event)) >=
+                    MIN_DRAG_GESTURE_DISTANCE_PX
+                ) {
+                    this.state = {
+                        type: "dragConfirmed",
+                        pointerId: this.state.pointerId,
+                        dragHandler: this.state.dragHandler,
+                    };
+                }
+                return;
+            case "dragConfirmed":
+                if (this.state.pointerId !== event.pointerId) return;
+                this.state.dragHandler.onMove(event);
+                return;
+            default:
+                exhaustiveSwitchError(this.state);
+        }
+    }
+
+    onPointerUp(event: PointerEvent) {
+        switch (this.state.type) {
+            case "idle":
+                return;
+            case "dragUnconfirmed":
+                if (this.state.pointerId !== event.pointerId) return;
+                this.state.dragHandler.onCancel(event);
+                this.onTap(event);
+                this.state = { type: "idle" };
+                return;
+            case "dragConfirmed":
+                if (this.state.pointerId !== event.pointerId) return;
+                this.state.dragHandler.onEnd(event);
+                this.state = { type: "idle" };
+                return;
+            default:
+                exhaustiveSwitchError(this.state);
+        }
+    }
+
+    onPointerCancel(event: PointerEvent) {
+        switch (this.state.type) {
+            case "idle":
+                return;
+            case "dragUnconfirmed":
+            case "dragConfirmed":
+                if (this.state.pointerId !== event.pointerId) return;
+                this.state.dragHandler.onCancel(event);
+                this.state = { type: "idle" };
+                return;
+            default:
+                exhaustiveSwitchError(this.state);
+        }
+    }
+}
 
 export function useGestureDetector(handlers: {
     onTap?: TapGestureHandler;
@@ -49,103 +151,31 @@ export function useGestureDetector(handlers: {
     const onTap = useEvent(handlers.onTap ?? defaultTapGestureHandler);
     const onDragStart = useEvent(handlers.onDragStart ?? defaultDragGestureHandler);
 
-    const [state, setState] = useState(defaultState);
+    const [detector] = useState(() => new GestureDetector(onTap, onDragStart));
+    const [isGestureInProgress, setIsGestureInProgress] = useState(false);
 
     return {
-        isGestureInProgress: state.type !== "idle",
+        isGestureInProgress,
         events: useMemo(
             () => ({
                 onPointerDown: (event: PointerEvent) => {
-                    setState((state) => {
-                        switch (state.type) {
-                            case "idle": {
-                                const dragHandler = onDragStart(event);
-                                if (dragHandler.couldBeTap ?? true) {
-                                    return {
-                                        type: "dragUnconfirmed",
-                                        pointerId: event.pointerId,
-                                        startPosition: Vector2.fromEvent(event),
-                                        dragHandler,
-                                    };
-                                }
-                                return {
-                                    type: "dragConfirmed",
-                                    pointerId: event.pointerId,
-                                    dragHandler,
-                                };
-                            }
-                            case "dragUnconfirmed":
-                            case "dragConfirmed":
-                                return state;
-                            default:
-                                exhaustiveSwitchError(state);
-                        }
-                    });
+                    detector.onPointerDown(event);
+                    setIsGestureInProgress(detector.isGestureInProgress());
                 },
                 onPointerMove: (event: PointerEvent) => {
-                    setState((state) => {
-                        switch (state.type) {
-                            case "idle":
-                                return state;
-                            case "dragUnconfirmed":
-                                if (state.pointerId !== event.pointerId) return state;
-                                state.dragHandler.onMove(event);
-                                if (
-                                    state.startPosition.distanceTo(Vector2.fromEvent(event)) >=
-                                    MIN_DRAG_GESTURE_DISTANCE_PX
-                                ) {
-                                    return {
-                                        type: "dragConfirmed",
-                                        pointerId: state.pointerId,
-                                        dragHandler: state.dragHandler,
-                                    };
-                                }
-                                return state;
-                            case "dragConfirmed":
-                                if (state.pointerId !== event.pointerId) return state;
-                                state.dragHandler.onMove(event);
-                                return state;
-                            default:
-                                exhaustiveSwitchError(state);
-                        }
-                    });
+                    detector.onPointerMove(event);
+                    setIsGestureInProgress(detector.isGestureInProgress());
                 },
                 onPointerUp: (event: PointerEvent) => {
-                    setState((state) => {
-                        switch (state.type) {
-                            case "idle":
-                                return state;
-                            case "dragUnconfirmed":
-                                if (state.pointerId !== event.pointerId) return state;
-                                state.dragHandler.onCancel(event);
-                                onTap(event);
-                                return { type: "idle" };
-                            case "dragConfirmed":
-                                if (state.pointerId !== event.pointerId) return state;
-                                state.dragHandler.onEnd(event);
-                                return { type: "idle" };
-                            default:
-                                exhaustiveSwitchError(state);
-                        }
-                    });
+                    detector.onPointerUp(event);
+                    setIsGestureInProgress(detector.isGestureInProgress());
                 },
                 onPointerCancel: (event: PointerEvent) => {
-                    setState((state) => {
-                        switch (state.type) {
-                            case "idle":
-                                return state;
-                            case "dragUnconfirmed":
-                            case "dragConfirmed":
-                                if (state.pointerId !== event.pointerId) return state;
-                                state.dragHandler.onCancel(event);
-                                return { type: "idle" };
-                            default:
-                                exhaustiveSwitchError(state);
-                        }
-                    });
+                    detector.onPointerCancel(event);
+                    setIsGestureInProgress(detector.isGestureInProgress());
                 },
             }),
-            [onDragStart, onTap],
+            [detector],
         ),
     };
 }

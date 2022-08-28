@@ -69,8 +69,8 @@ jobs:
             - name: Build web
               run: yarn build
 
-            - name: Test
-              run: yarn run test
+            - name: Checl
+              run: yarn run check
 
             - name: Upload artifact
               uses: actions/upload-artifact@v3

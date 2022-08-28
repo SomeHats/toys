@@ -1,5 +1,5 @@
 import { ResizeObserver, ResizeObserverEntry, ResizeObserverSize } from "@juggle/resize-observer";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { assert, assertExists } from "@/lib/assert";
 import Vector2 from "@/lib/geom/Vector2";
 
@@ -7,9 +7,11 @@ export { ResizeObserverEntry, ResizeObserverSize };
 
 let cachedObserver: ResizeObserver | undefined;
 const callbacksByElement = new Map<Element, Set<(entry: ResizeObserverEntry) => void>>();
+const lastEntryByElement = new WeakMap<Element, ResizeObserverEntry>();
 
 function handleResize(entries: ResizeObserverEntry[]) {
     for (const entry of entries) {
+        lastEntryByElement.set(entry.target, entry);
         for (const callback of assertExists(
             callbacksByElement.get(entry.target),
             "callback does not exist for tracked entry",
@@ -33,6 +35,11 @@ function addCallbackForElement(element: Element, callback: (entry: ResizeObserve
         callbacksForElement = new Set();
         callbacksByElement.set(element, callbacksForElement);
         getObserver().observe(element);
+    }
+
+    const lastEntry = lastEntryByElement.get(element);
+    if (lastEntry) {
+        callback(lastEntry);
     }
 
     callbacksForElement.add(callback);
@@ -60,12 +67,13 @@ export function useResizeObserver<T>(
 ): T | null {
     const [value, setValue] = useState<T | null>(null);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!target) {
             return undefined;
         }
 
         const handler = (entry: ResizeObserverEntry) => {
+            console.log({ entry });
             setValue(callback(entry));
         };
 

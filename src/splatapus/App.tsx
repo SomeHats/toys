@@ -13,13 +13,15 @@ import { useEvent } from "@/lib/hooks/useEvent";
 import { Viewport, ViewportState } from "@/splatapus/Viewport";
 import { Toolbar } from "@/splatapus/Toolbar";
 import { Tool, useTool } from "@/splatapus/tools/Tool";
-import { DrawTool } from "@/splatapus/tools/DrawTool";
 import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
 import { ToolRenderComponent, ToolRenderProps } from "@/splatapus/tools/AbstractTool";
+
+import.meta.hot?.accept(() => window.location.reload());
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
     const size = useResizeObserver(container, sizeFromEntry);
+    console.log(size);
 
     return (
         <div ref={setContainer} className="absolute inset-0 touch-none">
@@ -29,6 +31,7 @@ export function App() {
 }
 
 function Splatapus({ size }: { size: Vector2 }) {
+    console.log("rrr");
     const { document, location, updateDocument, updateLocation, undo, redo } = useUndoStack<
         SplatDocModel,
         SplatLocation
@@ -63,20 +66,26 @@ function Splatapus({ size }: { size: Vector2 }) {
         tool,
         events: toolEvents,
         updateTool,
-    } = useTool(
-        () => new DrawTool({ type: "idle" }),
-        (event) => ({
-            event,
-            viewport,
-            document,
-            location,
-            updateDocument,
-            updateLocation,
-            updateViewport,
-            undo,
-            redo,
-        }),
-    );
+    } = useTool(location.tool, (event) => ({
+        event,
+        viewport,
+        document,
+        location,
+        updateDocument,
+        updateLocation,
+        updateViewport,
+        undo,
+        redo,
+    }));
+    useEffect(() => {
+        const toolName = tool.getSelected().name;
+        updateLocation((location) => {
+            if (location.tool !== toolName) {
+                return location.with({ tool: toolName });
+            }
+            return location;
+        });
+    }, [tool, updateLocation]);
 
     const onWheel = useEvent((event: WheelEvent) => viewport.handleWheelEvent(event));
 

@@ -4,6 +4,10 @@ export function fail(message: string): never {
 
 export function assert(value: unknown, message?: string): asserts value {
     if (!value) {
+        if (process.env.NODE_ENV !== "production" && !import.meta.vitest) {
+            // eslint-disable-next-line no-debugger
+            debugger;
+        }
         fail(message || "Assertion Error");
     }
 }

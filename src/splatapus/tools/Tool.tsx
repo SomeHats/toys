@@ -3,20 +3,31 @@ import Vector2 from "@/lib/geom/Vector2";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { useGestureDetector } from "@/lib/hooks/useGestureDetector";
 import { matchesKey, matchesKeyDown } from "@/lib/hooks/useKeyPress";
-import { has, noop, ObjectMap } from "@/lib/utils";
+import { createEnumParser } from "@/lib/objectParser";
+import { exhaustiveSwitchError, has, noop, ObjectMap } from "@/lib/utils";
 import { EventContext, ToolDragGesture } from "@/splatapus/tools/AbstractTool";
 import { DrawTool } from "@/splatapus/tools/DrawTool";
 import { KeypointTool } from "@/splatapus/tools/KeypointTool";
 import { QuickPanTool } from "@/splatapus/tools/QuickPanTool";
+import { ToolName } from "@/splatapus/tools/ToolName";
 import { PointerEvent, useState } from "react";
 import { Class } from "utility-types";
 
 export function useTool(
-    initialize: () => StandardTool,
+    initialToolName: ToolName,
     _makeEventContext: <Event>(event: Event) => EventContext<Event>,
 ) {
     const makeEventContext = useEvent(_makeEventContext);
-    const [tool, setTool] = useState<Tool>(initialize);
+    const [tool, setTool] = useState<Tool>(() => {
+        switch (initialToolName) {
+            case ToolName.Draw:
+                return new DrawTool({ type: "idle" });
+            case ToolName.KeyPoint:
+                return new KeypointTool({ type: "idle" });
+            default:
+                exhaustiveSwitchError(initialToolName);
+        }
+    });
     const gesture = useGestureDetector({
         onTap: (event) => setTool((tool) => tool.onTap(makeEventContext(event))),
         onDragStart: (event) => {

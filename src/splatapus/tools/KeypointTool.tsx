@@ -9,6 +9,7 @@ import {
     ToolRenderComponent,
     ToolRenderProps,
 } from "@/splatapus/tools/AbstractTool";
+import { ToolName } from "@/splatapus/tools/ToolName";
 import classNames from "classnames";
 import { PointerEvent } from "react";
 
@@ -22,8 +23,10 @@ export type KeypointToolState =
           readonly delta: Vector2;
       };
 
-export class KeypointTool extends createTool<"keypoint", KeypointToolState>("keypoint") {
-    static readonly toolName = "keypoint" as const;
+export class KeypointTool extends createTool<ToolName.KeyPoint, KeypointToolState>(
+    ToolName.KeyPoint,
+) {
+    static readonly toolName = ToolName.KeyPoint;
     getSelected() {
         return this;
     }
@@ -45,7 +48,10 @@ export class KeypointTool extends createTool<"keypoint", KeypointToolState>("key
         viewport,
         updateLocation,
     }: EventContext<PointerEvent<Element>>): ToolDragGesture<KeypointToolState> | null {
-        const target = findDataElementParent(event.target, { keyPointId: SplatKeypointId.parse });
+        const target = findDataElementParent(event.target, {
+            type: "onCanvasKeyPoint",
+            keyPointId: SplatKeypointId.parse,
+        });
         if (!target) {
             return null;
         }
@@ -120,6 +126,7 @@ function KeyPointToolOverlay({
                                 ? "text-stone-500 ring-2 ring-inset ring-purple-400"
                                 : "text-stone-400",
                         )}
+                        data-type="onCanvasKeyPoint"
                         data-key-point-id={keyPoint.id}
                     >
                         {i + 1}

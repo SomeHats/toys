@@ -11,7 +11,7 @@ import {
     StrokeCenterPoint,
 } from "@/splatapus/perfectFreehand";
 import { createTool, EventContext, ToolDragGesture } from "@/splatapus/tools/AbstractTool";
-import { Tool } from "@/splatapus/tools/Tool";
+import { ToolName } from "@/splatapus/tools/ToolName";
 import { PointerEvent } from "react";
 
 export type DrawToolState =
@@ -23,8 +23,8 @@ export type DrawToolState =
           readonly points: ReadonlyArray<Vector2>;
       };
 
-export class DrawTool extends createTool<"draw", DrawToolState>("draw") {
-    static toolName: "draw" = "draw";
+export class DrawTool extends createTool<ToolName.Draw, DrawToolState>(ToolName.Draw) {
+    static toolName = ToolName.Draw;
 
     isIdle(): boolean {
         return this.state.type === "idle";
@@ -44,6 +44,7 @@ export class DrawTool extends createTool<"draw", DrawToolState>("draw") {
             gesture: {
                 couldBeTap: false,
                 onMove(state, { event, viewport }) {
+                    console.log("draw.onMove", state);
                     assert(state.type === "drawing");
                     return {
                         type: "drawing",
@@ -51,6 +52,7 @@ export class DrawTool extends createTool<"draw", DrawToolState>("draw") {
                     };
                 },
                 onEnd(state, { updateDocument, location }) {
+                    console.log("draw.onEnd", state);
                     assert(state.type === "drawing");
                     updateDocument((document) => {
                         return document.replaceShapeVersionPoints(
@@ -60,7 +62,8 @@ export class DrawTool extends createTool<"draw", DrawToolState>("draw") {
                     });
                     return { type: "idle" };
                 },
-                onCancel() {
+                onCancel(state) {
+                    console.log("draw.onCancel", state);
                     return { type: "idle" };
                 },
             },

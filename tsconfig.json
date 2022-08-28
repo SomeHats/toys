@@ -15,7 +15,8 @@
         "target": "es2019",
         "paths": {
             "@/*": ["./src/*"]
-        }
+        },
+        "types": ["vitest/importMeta"]
     },
     "include": ["src/**/*", "types/**/*"],
     "references": [{ "path": "./tsconfig.node.json" }]

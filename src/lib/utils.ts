@@ -351,7 +351,7 @@ export function copyAndRemove<T>(array: ReadonlyArray<T>, index: number): Array<
 
 export function noop() {}
 
-export const IS_MAC = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
+export const IS_MAC = /(Mac|iPhone|iPod|iPad)/i.test(globalThis.navigator?.platform ?? "");
 
 export type UpdateAction<T> = ((state: T) => T) | T;
 

@@ -1,5 +1,5 @@
 import { WebMidi } from "webmidi";
-import { assert, assertNumber } from "@/lib/assert";
+import { assertNumber } from "@/lib/assert";
 import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
 import { mapRange } from "@/lib/utils";
 

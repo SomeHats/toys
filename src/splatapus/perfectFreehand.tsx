@@ -19,8 +19,7 @@ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import Vector2, { Vector2Ish } from "@/lib/geom/Vector2";
-import { off } from "process";
+import Vector2 from "@/lib/geom/Vector2";
 
 const { min, PI } = Math;
 
@@ -188,7 +187,7 @@ export function getStrokeOutlinePoints(
     let firstRadius: number | undefined = undefined;
 
     // Previous vector
-    let prevVector = points[0].vector;
+    // let prevVector = points[0].vector;
 
     // Previous left and right points
     let pl = points[0].point;
@@ -325,7 +324,7 @@ export function getStrokeOutlinePoints(
 
         // Set variables for next iteration
         prevPressure = pressure;
-        prevVector = vector;
+        // prevVector = vector;
     }
 
     /*
@@ -461,12 +460,18 @@ export function getStrokeCenterPoints(
         easing = (t) => t,
         start = {},
         end = {},
-        last: isComplete = false,
+        // last: isComplete = false,
     } = options;
 
-    const { cap: capStart = true, easing: taperStartEase = (t) => t * (2 - t) } = start;
+    const {
+        // cap: capStart = true,
+        easing: taperStartEase = (t) => t * (2 - t),
+    } = start;
 
-    const { cap: capEnd = true, easing: taperEndEase = (t) => --t * t * t + 1 } = end;
+    const {
+        // cap: capEnd = true,
+        easing: taperEndEase = (t) => --t * t * t + 1,
+    } = end;
 
     // We can't do anything with an empty array or a stroke with negative size.
     if (points.length === 0 || size <= 0) {
@@ -523,7 +528,7 @@ export function getStrokeCenterPoints(
     let firstRadius: number | undefined = undefined;
 
     // Previous vector
-    let prevVector = points[0].vector;
+    // let prevVector = points[0].vector;
 
     // Previous left and right points
     // let pl = points[0].point;
@@ -547,7 +552,12 @@ export function getStrokeCenterPoints(
 
     for (let i = 0; i < points.length; i++) {
         let { pressure } = points[i];
-        const { point, vector, distance, runningLength } = points[i];
+        const {
+            point,
+            // vector,
+            distance,
+            runningLength,
+        } = points[i];
 
         // Removes noise from the end of the line
         if (i < points.length - 1 && totalLength - runningLength < 3) {
@@ -608,9 +618,9 @@ export function getStrokeCenterPoints(
             continue;
         }
 
-        const nextVector = points[i + 1].vector;
+        // const nextVector = points[i + 1].vector;
 
-        const nextDpr = vector.dot(nextVector);
+        // const nextDpr = vector.dot(nextVector);
 
         /*
             Handle sharp corners. Find the difference (dot product) between the
@@ -648,7 +658,7 @@ export function getStrokeCenterPoints(
             side's points array.
         */
 
-        const offset = nextVector.lerp(vector, nextDpr).perpendicular().scale(radius);
+        // const offset = nextVector.lerp(vector, nextDpr).perpendicular().scale(radius);
 
         tc = point;
         if (i <= 1 || pc.distanceToSq(tc) > minDistance) {
@@ -672,7 +682,7 @@ export function getStrokeCenterPoints(
 
         // Set variables for next iteration
         prevPressure = pressure;
-        prevVector = vector;
+        // prevVector = vector;
     }
 
     return centerPts;

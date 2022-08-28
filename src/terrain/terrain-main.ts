@@ -1,11 +1,9 @@
-import { assert } from "@/lib/assert";
 import { generatePoisson } from "@/terrain/generatePoisson";
 import AABB from "@/lib/geom/AABB";
 import Vector2 from "@/lib/geom/Vector2";
 import { Delaunay } from "@/terrain/Delaunay";
-import { random } from "@/lib/utils";
 import Terrain from "@/terrain/Terrain";
-import { width, height, canvas, ctx } from "@/terrain/canvas";
+import { canvas, ctx } from "@/terrain/canvas";
 import * as config from "@/terrain/config";
 import { interpolateMagma } from "d3-scale-chromatic";
 import create3dRenderer from "@/terrain/create3dRenderer";
@@ -14,7 +12,7 @@ const spaceVec = new Vector2(config.POINT_SPACING, config.POINT_SPACING);
 const sizeVec = new Vector2(config.SIZE, config.SIZE);
 const baseBounds = new AABB(Vector2.ZERO, sizeVec);
 const expandedBounds = new AABB(spaceVec.negate(), sizeVec.add(spaceVec).add(spaceVec));
-const contractedBounds = new AABB(spaceVec, sizeVec.sub(spaceVec).sub(spaceVec));
+const _contractedBounds = new AABB(spaceVec, sizeVec.sub(spaceVec).sub(spaceVec));
 const activeBounds = baseBounds;
 
 console.time("generatePoisson");
@@ -44,7 +42,7 @@ function drawDebugPolygons(color = "cyan") {
     canvas.debugStroke(color);
 }
 
-function drawDebugPoints(color = "magenta") {
+function drawDebugPoints(_color = "magenta") {
     for (const cellId of terrain.allCellIds) {
         canvas.debugPointX(terrain.cellsById[cellId].position, {
             label: String(cellId),
@@ -53,13 +51,13 @@ function drawDebugPoints(color = "magenta") {
     }
 }
 
-function drawDebug() {
+function _drawDebug() {
     drawDebugPolygons();
     drawDebugTriangles();
     drawDebugPoints();
 }
 
-function drawPolygons() {
+function _drawPolygons() {
     console.time("draw polygons");
     for (const pointId of terrain.allCellIds) {
         const { polygon } = terrain.cellsById[pointId];
@@ -87,7 +85,7 @@ function drawPlates(shouldIncludeDrift = true) {
         //   strokeWidth: 1
         // });
         for (const cellId of plate.edgeCellIds) {
-            const cell = terrain.cellsById[cellId];
+            const _cell = terrain.cellsById[cellId];
 
             // cell.propagateTectonicDrift();
             // canvas.debugVectorAtPoint(
@@ -138,7 +136,7 @@ drawPlates();
 // });
 
 let renderStage = 0;
-window.addEventListener("click", (e) => {
+window.addEventListener("click", () => {
     ctx.clearRect(0, 0, config.SIZE, config.SIZE);
 
     // const mousePosition = new Vector2(e.clientX, e.clientY);

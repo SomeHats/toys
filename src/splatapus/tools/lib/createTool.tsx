@@ -1,4 +1,4 @@
-import { ObjectMap, UpdateAction } from "@/lib/utils";
+import { ObjectMap } from "@/lib/utils";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { SplatLocation } from "@/splatapus/SplatLocation";
 import { CtxAction } from "@/splatapus/useEditorState";

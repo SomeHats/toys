@@ -4,7 +4,6 @@ import testFrag from "@/webgl/test.frag";
 import AABB from "@/lib/geom/AABB";
 import { times, random } from "@/lib/utils";
 import Vector2 from "@/lib/geom/Vector2";
-import { Triangle } from "three";
 
 const canvas = document.createElement("canvas");
 canvas.width = document.body.clientWidth * window.devicePixelRatio;
@@ -59,7 +58,7 @@ const fragmentShader = createShader(gl, ShaderType.Fragment, testFrag);
 const program = createProgram(gl, vertexShader, fragmentShader);
 
 const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-const colorAttributeLocation = gl.getAttribLocation(program, "a_color");
+const _colorAttributeLocation = gl.getAttribLocation(program, "a_color");
 const resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
 
 const positionBuffer = gl.createBuffer();

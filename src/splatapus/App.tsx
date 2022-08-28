@@ -1,6 +1,6 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { sizeFromEntry, useResizeObserver } from "@/lib/hooks/useResizeObserver";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { applyUpdate, UpdateAction } from "@/lib/utils";
 import classNames from "classnames";
 import { SplatKeypointId } from "@/splatapus/model/SplatDoc";

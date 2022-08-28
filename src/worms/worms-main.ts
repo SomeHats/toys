@@ -1,20 +1,9 @@
 import { canvas, width, height } from "@/worms/canvas";
 import Vector2 from "@/lib/geom/Vector2";
-import {
-    compact,
-    getId,
-    sample,
-    shuffle,
-    times,
-    randomInt,
-    frameLoop,
-    uniq,
-    random,
-} from "@/lib/utils";
+import { sample, times, randomInt, frameLoop, uniq, random } from "@/lib/utils";
 import createTriangleGrid, { Triangle } from "@/lib/createTriangleGrid";
 import { assert } from "@/lib/assert";
 import { SNAKES, BG } from "@/worms/colors";
-import { schemePaired } from "d3-scale-chromatic";
 
 const TILE_SIZE = 50;
 const ARC_LENGTH = (Math.PI * TILE_SIZE) / 6;

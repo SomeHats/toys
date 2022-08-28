@@ -1,7 +1,7 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { Viewport } from "@/splatapus/Viewport";
 import classNames from "classnames";
-import { ComponentProps, ReactNode } from "react";
+import { ComponentProps } from "react";
 
 interface PositionedDivProps extends ComponentProps<"div"> {
     position: Vector2;

@@ -1,7 +1,6 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { exhaustiveSwitchError, noop } from "@/lib/utils";
-import { throws } from "assert";
 import { PointerEvent, useMemo, useState } from "react";
 
 const MIN_DRAG_GESTURE_DISTANCE_PX = 10;

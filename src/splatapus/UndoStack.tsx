@@ -1,6 +1,4 @@
-import { assert, assertExists, assertNumber } from "@/lib/assert";
-import { useEvent } from "@/lib/hooks/useEvent";
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { assert } from "@/lib/assert";
 import { UNDO_ACTIONS } from "@/splatapus/constants";
 import { deepEqual, UpdateAction, applyUpdate } from "@/lib/utils";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";

@@ -1,14 +1,6 @@
-import {
-    Application,
-    InteractionManager,
-    Renderer,
-    SCALE_MODES,
-    settings,
-    Sprite,
-    Texture,
-} from "pixi.js";
+import { Application, InteractionManager, Renderer, SCALE_MODES, settings } from "pixi.js";
 import Vector2 from "@/lib/geom/Vector2";
-import { lerp, random, times } from "@/lib/utils";
+import { random, times } from "@/lib/utils";
 import { AnimatedSpriteStack } from "@/bees/AnimatedSpriteStack";
 import { assets } from "@/bees/assets/assets";
 import { BG_COLOR } from "@/bees/constants";

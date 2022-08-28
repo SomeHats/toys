@@ -1,7 +1,7 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { DelaunayCell } from "@/terrain/Delaunay";
 import Terrain from "@/terrain/Terrain";
-import { fromEntries, compact, lerp, mapRange, clamp } from "@/lib/utils";
+import { fromEntries, compact, mapRange, clamp } from "@/lib/utils";
 import { Noise2D } from "@/terrain/fractalNoise";
 import { TectonicPlate } from "@/terrain/TectonicPlate";
 import * as config from "@/terrain/config";

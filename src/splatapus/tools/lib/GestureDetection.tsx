@@ -24,7 +24,6 @@ type GestureDetectorState<IdleState, ActiveState, StartArg> =
           readonly startArg: StartArg | undefined;
       };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type GestureType<Gesture> = Gesture extends ReturnType<
     typeof createGestureDetector<infer IdleState, infer ActiveState, infer StartArg>
 >

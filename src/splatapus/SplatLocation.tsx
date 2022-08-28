@@ -1,5 +1,5 @@
 import Vector2 from "@/lib/geom/Vector2";
-import { composeParsers, createShapeParser, parseNumber, ParserType } from "@/lib/objectParser";
+import { composeParsers, createShapeParser, ParserType } from "@/lib/objectParser";
 import { Result } from "@/lib/Result";
 import { SplatKeypointId } from "@/splatapus/model/SplatDoc";
 import { parseToolType, ToolType } from "@/splatapus/tools/ToolType";

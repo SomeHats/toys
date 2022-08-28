@@ -1,4 +1,3 @@
-import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { getListenToMidiInput } from "@/lib/midi";
 import { SignalManager } from "@/lib/signals/Signals";

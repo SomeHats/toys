@@ -1,7 +1,5 @@
 import { AnimatedSpriteStackSheet } from "@/bees/AnimatedSpriteStackSheet";
 import { AssetBundle } from "@/bees/AssetBundle";
-import { Sprite } from "@/bees/Sprite";
-import { SpriteStack } from "@/bees/SpriteStack";
 
 export const assets = new AssetBundle()
     .add("beeOutlineBaseTexture", () =>

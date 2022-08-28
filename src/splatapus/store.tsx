@@ -1,12 +1,6 @@
-import {
-    composeParsers,
-    createShapeParser,
-    parseNumber,
-    ParserError,
-    ParserType,
-} from "@/lib/objectParser";
+import { composeParsers, createShapeParser, ParserType } from "@/lib/objectParser";
 import { Result } from "@/lib/Result";
-import { debounce, getLocalStorageItem, setLocalStorageItem, wait } from "@/lib/utils";
+import { debounce, getLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
 import { parseSplatDoc, SplatKeypointId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";

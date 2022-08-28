@@ -1,4 +1,3 @@
-import { fail } from "@/lib/assert";
 import { DebugDraw } from "@/lib/DebugDraw";
 import Vector2 from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
@@ -170,7 +169,7 @@ export class BlobTreeEditor {
     draw() {
         this.canvas.clear();
 
-        const selectedNode = this.getSelectedNode();
+        // const selectedNode = this.getSelectedNode();
         const hover = this.getHover();
 
         this.canvas.beginPath();

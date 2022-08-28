@@ -1,9 +1,7 @@
-import { random, mapRange, wait, lerp } from "@/lib/utils";
+import { random } from "@/lib/utils";
 import Terrain from "@/terrain/Terrain";
-import { interpolateRgbBasis } from "d3-interpolate";
 import Vector2 from "@/lib/geom/Vector2";
 import { TerrainCell } from "@/terrain/TerrainCell";
-import { makeFractalNoise2d } from "@/terrain/fractalNoise";
 import * as config from "@/terrain/config";
 import { canvas } from "@/terrain/canvas";
 import { assertExists } from "@/lib/assert";

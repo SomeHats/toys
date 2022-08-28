@@ -20,7 +20,6 @@ const THICKNESS = 46;
 const INNER_THICKNESS = THICKNESS - 12;
 
 const CENTER_X = WIDTH / 2;
-const CENTER_Y = HEIGHT / 2;
 
 const noteNumberByKeyCode: { [keyCode: string]: number | undefined } = {
     // O3:
@@ -80,7 +79,7 @@ type Tentacle = {
     points: Array<TentaclePoint>;
 };
 
-function signalsToVector(signals: [Signal, Signal]): Vector2 {
+function _signalsToVector(signals: [Signal, Signal]): Vector2 {
     return new Vector2(signals[0].read(), signals[1].read());
 }
 
@@ -111,12 +110,12 @@ function octopusScene(
     const canvasScale = s.computed(() => Math.min(width.read() / WIDTH, height.read() / HEIGHT));
     const canvasTranslateX = s.computed(() => (width.read() - canvasScale.read() * WIDTH) / 2);
     const canvasTranslateY = s.computed(() => (height.read() - canvasScale.read() * HEIGHT) / 2);
-    const mouseX = s.computed(() =>
-        screenToScene(rawMouseX.read(), canvasTranslateX.read(), canvasScale.read()),
-    );
-    const mouseY = s.computed(() =>
-        screenToScene(rawMouseY.read(), canvasTranslateY.read(), canvasScale.read()),
-    );
+    // const mouseX = s.computed(() =>
+    //     screenToScene(rawMouseX.read(), canvasTranslateX.read(), canvasScale.read()),
+    // );
+    // const mouseY = s.computed(() =>
+    //     screenToScene(rawMouseY.read(), canvasTranslateY.read(), canvasScale.read()),
+    // );
 
     const tentacleCount = 8;
     const segmentCount = 30;

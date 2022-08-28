@@ -23,7 +23,7 @@ scenario3();
 
 scene.start();
 
-function scenario1() {
+function _scenario1() {
     const producer1 = new Producer(100, 100, 500);
     // const producer2 = new Consumer(100, 300, 2500);
     const consumer1 = new Consumer(400, 200, 1500);
@@ -54,7 +54,7 @@ function scenario1() {
     // scene.addChild(road2);
 }
 
-function scenario2() {
+function _scenario2() {
     const producer = new Producer(100, 300, 500);
     const junction = new Junction(300, 300, ROUND);
     const consumer1 = new Consumer(300, 100, 5000);
@@ -117,7 +117,7 @@ function scenario3() {
     scene.addChild(new Road(mainJunction, southConsumer));
 }
 
-function scenario4() {
+function _scenario4() {
     const producer1 = new Producer(100, 100, 1000);
     const producer2 = new Producer(300, 200, 1000);
     const producer3 = new Producer(100, 300, 1000);
@@ -153,7 +153,7 @@ function scenario4() {
     // );
 }
 
-function scenario6() {
+function _scenario6() {
     const producer = new Producer(300, 50, 1500).addTo(scene);
     const consumer = new Consumer(500, 50, 100).addTo(scene);
     new Road(producer, consumer, {

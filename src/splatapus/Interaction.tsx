@@ -6,7 +6,6 @@ import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { SplatLocation } from "@/splatapus/SplatLocation";
 import { DrawTool } from "@/splatapus/tools/DrawTool";
 import { KeyPointTool } from "@/splatapus/tools/KeyPointTool";
-import { OverlayProps } from "@/splatapus/tools/lib/createTool";
 import { KeyboardEventContext, PointerEventContext } from "@/splatapus/tools/lib/EventContext";
 import { QuickTool, SelectedTool } from "@/splatapus/tools/tools";
 import { ToolType } from "@/splatapus/tools/ToolType";

@@ -3,7 +3,6 @@ import {
     entries,
     exhaustiveSwitchError,
     get,
-    has,
     keys,
     ObjectMap,
     ReadonlyObjectMap,

@@ -1,5 +1,5 @@
+export {};
 // import { number } from 'prop-types';
-import * as React from "react";
 // import ReactDOM from 'react-dom';
 // import { DebugDraw } from '../lib/DebugDraw';
 // import { C } from './C';

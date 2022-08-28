@@ -1,6 +1,5 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { getId, compact, intersection } from "@/lib/utils";
-import Intersection from "@/network/networkNodes/Intersection";
 
 type TriangleGeom = [Vector2, Vector2, Vector2];
 type IntermediateTriangle = {

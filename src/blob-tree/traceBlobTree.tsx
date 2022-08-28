@@ -1,8 +1,6 @@
-import { assert } from "@/lib/assert";
 import { DebugDraw } from "@/lib/DebugDraw";
 import { fakeConsole } from "@/lib/fakeConsole";
 import Vector2 from "@/lib/geom/Vector2";
-import { constrainWrapped, indexed, sortBy } from "@/lib/utils";
 import { BlobTree, BlobTreeNode } from "@/blob-tree/BlobTree";
 
 // interface TracerInterface {

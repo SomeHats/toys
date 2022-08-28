@@ -20,7 +20,7 @@ class DebugDrawSystem extends SceneSystem {
     }
 }
 
-class AABBDrawSystem extends SceneSystem {
+class _AABBDrawSystem extends SceneSystem {
     static override systemName = "AABBDebugDrawSystem";
 
     debugDraw!: DebugDraw;

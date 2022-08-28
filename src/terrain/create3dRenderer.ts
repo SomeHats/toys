@@ -1,12 +1,10 @@
 import * as T from "three";
 import { frame, mapRange } from "@/lib/utils";
 import Terrain from "@/terrain/Terrain";
-import { POINT_SPACING, SIZE } from "@/terrain/config";
-import { Delaunay } from "@/terrain/Delaunay";
-import { canvasEl } from "@/terrain/canvas";
+import { SIZE } from "@/terrain/config";
 import Vector2 from "@/lib/geom/Vector2";
 
-function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
+function create3dRenderer(terrain: Terrain) {
     const scene = new T.Scene();
     const camera = new T.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 
@@ -22,13 +20,13 @@ function create3dRenderer(terrain: Terrain, delaunay: Delaunay) {
 
     const geometry = new T.BufferGeometry();
 
-    const vertexIndexByCellId = {} as Record<number, number>;
+    const _vertexIndexByCellId = {} as Record<number, number>;
     const seaLevelAdjust = 0 - terrain.cellsById[0].getSeaLevel();
     const adjustZ = (z: number) => {
         z += seaLevelAdjust;
         return z ** 1.3 * 30;
     };
-    const allPoints: Array<T.Vector3> = [];
+    const _allPoints: Array<T.Vector3> = [];
     const addTriangle = (a: T.Vector3, b: T.Vector3, c: T.Vector3, color: string) => {
         a.setX(SIZE / 2 - a.x);
         a.setY(-(SIZE / 2 - a.y));

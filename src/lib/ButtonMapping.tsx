@@ -1,5 +1,3 @@
-import { Key } from "readline";
-import { AnimationActionLoopStyles } from "three";
 import { assert } from "@/lib/assert";
 import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
 import { KeyCode } from "@/lib/KeyCode";

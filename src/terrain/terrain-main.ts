@@ -192,4 +192,4 @@ window.addEventListener("click", () => {
     // drawPlates();
 });
 
-create3dRenderer(terrain, delaunay);
+create3dRenderer(terrain);

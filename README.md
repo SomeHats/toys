@@ -16,6 +16,7 @@ rather focus my limited free time on actually making things with the tools.
 ## wip notes & todos
 
 -   splatapus
+    -   [ ] fix state splitting
     -   [x] localstorage state
     -   [x] reset document
     -   [x] go to undo/redo location first
@@ -30,8 +31,8 @@ rather focus my limited free time on actually making things with the tools.
         -   [ ] keypoint tool
             -   [x] tool boilerplate
             -   [x] tap vs drag gesture detection
-            -   [ ] select key points
-            -   [ ] move key points
+            -   [x] select key points
+            -   [x] move key points
             -   [ ] add key points
         -   [ ] md-interpolation
             -   [ ] preview mode?

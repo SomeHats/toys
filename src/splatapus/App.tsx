@@ -16,7 +16,9 @@ import { Tool, useTool } from "@/splatapus/tools/Tool";
 import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
 import { ToolRenderComponent, ToolRenderProps } from "@/splatapus/tools/AbstractTool";
 
-import.meta.hot?.accept(() => window.location.reload());
+if (import.meta.hot) {
+    import.meta.hot.accept(() => window.location.reload());
+}
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);

@@ -78,6 +78,39 @@ export const Interaction = {
             ctx.updateViewport({ pan: Vector2.ZERO, zoom: 1 });
             return interaction;
         }
+        const goToIdx = (idx: number) => {
+            const keyPointId = [...ctx.document.keyPoints][idx]?.id;
+            if (keyPointId) {
+                ctx.updateLocation((location) => location.with({ keyPointId }));
+            }
+        };
+        if (matchesKeyDown(ctx.event, "1")) {
+            goToIdx(0);
+        }
+        if (matchesKeyDown(ctx.event, "2")) {
+            goToIdx(1);
+        }
+        if (matchesKeyDown(ctx.event, "3")) {
+            goToIdx(2);
+        }
+        if (matchesKeyDown(ctx.event, "4")) {
+            goToIdx(3);
+        }
+        if (matchesKeyDown(ctx.event, "5")) {
+            goToIdx(4);
+        }
+        if (matchesKeyDown(ctx.event, "6")) {
+            goToIdx(5);
+        }
+        if (matchesKeyDown(ctx.event, "7")) {
+            goToIdx(6);
+        }
+        if (matchesKeyDown(ctx.event, "8")) {
+            goToIdx(8);
+        }
+        if (matchesKeyDown(ctx.event, "9")) {
+            goToIdx(9);
+        }
 
         return interaction;
     },

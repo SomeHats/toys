@@ -33,7 +33,6 @@ export function App() {
 }
 
 function Splatapus({ size }: { size: Vector2 }) {
-    console.log("rrr");
     const { document, location, updateDocument, updateLocation, undo, redo } = useUndoStack<
         SplatDocModel,
         SplatLocation

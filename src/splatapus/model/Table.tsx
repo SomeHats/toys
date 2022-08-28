@@ -1,4 +1,4 @@
-import { assert, assertExists, assertNumber, fail } from "@/lib/assert";
+import { assert, assertExists, fail } from "@/lib/assert";
 import { createDictParser, createShapeParser, Parser } from "@/lib/objectParser";
 import {
     applyUpdate,

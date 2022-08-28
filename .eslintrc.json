@@ -20,7 +20,7 @@
         "sourceType": "module"
     },
     "rules": {
-        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/no-empty-function": "off",
         "no-constant-condition": ["error", { "checkLoops": false }],
         "prefer-const": ["error", { "destructuring": "all" }],

@@ -1,28 +1,31 @@
-import { DrawTool } from "@/splatapus/tools/DrawTool";
-import { KeypointTool } from "@/splatapus/tools/KeypointTool";
-import { StandardTool, Tool } from "@/splatapus/tools/Tool";
+import { Interaction } from "@/splatapus/Interaction";
+import { ToolType } from "@/splatapus/tools/ToolType";
+import { CtxAction } from "@/splatapus/useEditorState";
 import classNames from "classnames";
 import { MouseEventHandler } from "react";
 
 export function Toolbar({
-    tool,
-    onSelectTool,
+    selectedToolType,
+    updateInteraction,
 }: {
-    tool: Tool;
-    onSelectTool: (tool: StandardTool) => void;
+    selectedToolType: ToolType;
+    updateInteraction: (update: CtxAction<Interaction>) => void;
 }) {
-    const selectedTool = tool.getSelected();
+    const onChangeTool = (tool: ToolType) => () =>
+        updateInteraction((ctx, interaction) =>
+            Interaction.requestSetSelectedTool(interaction, tool),
+        );
     return (
         <div className="pointer-events-none absolute top-0 bottom-0 flex cursor-wait flex-col items-center justify-center gap-3 p-3">
             <ToolbarButton
                 letter="d"
-                isSelected={selectedTool.name === "draw"}
-                onClick={() => onSelectTool(new DrawTool({ type: "idle" }))}
+                isSelected={selectedToolType === ToolType.Draw}
+                onClick={onChangeTool(ToolType.Draw)}
             />
             <ToolbarButton
                 letter="k"
-                isSelected={selectedTool.name === "keypoint"}
-                onClick={() => onSelectTool(new KeypointTool({ type: "idle" }))}
+                isSelected={selectedToolType === ToolType.KeyPoint}
+                onClick={onChangeTool(ToolType.KeyPoint)}
             />
         </div>
     );

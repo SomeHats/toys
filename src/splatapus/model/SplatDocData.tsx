@@ -6,8 +6,6 @@ import {
     SplatKeypointId,
     SplatShapeVersionId,
 } from "@/splatapus/model/SplatDoc";
-import { ReadonlyObjectMap } from "@/lib/utils";
-import { StrokeCenterPoint } from "@/splatapus/perfectFreehand";
 import { NormalizedShapeVersionState } from "@/splatapus/model/normalizedShape";
 
 export class SplatDocData {

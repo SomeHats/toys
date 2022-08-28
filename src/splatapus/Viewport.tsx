@@ -47,6 +47,10 @@ export class Viewport {
         return sceneCoords.sub(this.origin());
     }
 
+    eventSceneCoords(event: { clientX: number; clientY: number }): Vector2 {
+        return this.screenToScene(Vector2.fromEvent(event));
+    }
+
     getSceneTransform(): string {
         const pan = this.origin();
         return `translate(${-pan.x}, ${-pan.y})`;

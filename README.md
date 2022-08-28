@@ -16,7 +16,7 @@ rather focus my limited free time on actually making things with the tools.
 ## wip notes & todos
 
 -   splatapus
-    -   [ ] fix state splitting
+    -   [x] fix state splitting
     -   [x] localstorage state
     -   [x] reset document
     -   [x] go to undo/redo location first

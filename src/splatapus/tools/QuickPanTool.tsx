@@ -1,80 +1,64 @@
-import { assert } from "@/lib/assert";
 import Vector2 from "@/lib/geom/Vector2";
-import { exhaustiveSwitchError } from "@/lib/utils";
-import { createTool, EventContext, ToolDragGesture } from "@/splatapus/tools/AbstractTool";
-import { StandardTool } from "@/splatapus/tools/Tool";
-import { PointerEvent } from "react";
+import { createTool } from "@/splatapus/tools/lib/createTool";
+import { createGestureDetector, GestureType } from "@/splatapus/tools/lib/GestureDetection";
+import { QuickToolType } from "@/splatapus/tools/ToolType";
 
-export type QuickPanToolState =
-    | {
-          readonly type: "idle";
-          readonly previousTool: StandardTool;
-      }
-    | {
-          readonly type: "dragging";
-          readonly previousTool: StandardTool;
-          readonly initialPan: Vector2;
-          readonly previousScreenPoint: Vector2;
-      };
+export type IdleQuickPanTool = { readonly state: "idle" };
+export type ActiveQuickPanTool = {
+    readonly state: "active";
+    readonly initialPan: Vector2;
+    readonly previousScreenPoint: Vector2;
+};
 
-export class QuickPanTool extends createTool<"quickPan", QuickPanToolState>("quickPan") {
-    static toolName = "quickPan" as const;
-    getSelected() {
-        return this.state.previousTool;
-    }
-    isIdle(): boolean {
-        return true;
-    }
-    override canvasClassName(): string {
-        return "cursor-grab";
-    }
-    override onDragStart({
-        event,
-        location,
-    }: EventContext<PointerEvent<Element>>): ToolDragGesture<QuickPanToolState> {
-        assert(this.state.type === "idle");
-        return {
-            state: {
-                type: "dragging",
-                previousTool: this.state.previousTool,
-                initialPan: location.viewportState.pan,
-                previousScreenPoint: Vector2.fromEvent(event),
-            },
-            gesture: {
-                couldBeTap: false,
-                onMove(state, { updateViewport, event }) {
-                    assert(state.type === "dragging");
-                    const screenPoint = Vector2.fromEvent(event);
-                    updateViewport(({ pan, zoom }) => ({
-                        pan: pan.add(state.previousScreenPoint.sub(screenPoint).scale(zoom)),
-                        zoom,
-                    }));
-                    return { ...state, previousScreenPoint: screenPoint };
-                },
-                onEnd(state) {
-                    assert(state.type === "dragging");
-                    return { type: "idle", previousTool: state.previousTool };
-                },
-                onCancel(state, { updateViewport }) {
-                    assert(state.type === "dragging");
-                    updateViewport(({ zoom }) => ({ zoom, pan: state.initialPan }));
-                    return { type: "idle", previousTool: state.previousTool };
-                },
-            },
-        };
-    }
-    debugProperties(): Record<string, string> {
-        switch (this.state.type) {
+const QuickPanGesture = createGestureDetector<IdleQuickPanTool, ActiveQuickPanTool>({
+    onDragStart: ({ event, location }) => ({
+        state: "active",
+        initialPan: location.viewportState.pan,
+        previousScreenPoint: Vector2.fromEvent(event),
+    }),
+    onDragMove: ({ event, updateViewport }, state) => {
+        const screenPoint = Vector2.fromEvent(event);
+        updateViewport(({ pan, zoom }) => ({
+            pan: pan.add(state.previousScreenPoint.sub(screenPoint).scale(zoom)),
+            zoom,
+        }));
+        return { ...state, previousScreenPoint: screenPoint };
+    },
+    onDragEnd: () => ({ state: "idle" }),
+    onDragCancel: ({ updateViewport }, state) => {
+        updateViewport(({ zoom }) => ({ zoom, pan: state.initialPan }));
+        return { state: "idle" };
+    },
+});
+
+export type QuickPanTool = {
+    readonly type: QuickToolType.Pan;
+    readonly gesture: GestureType<typeof QuickPanGesture>;
+};
+export const QuickPanTool = createTool<QuickPanTool>()({
+    initialize: () => ({
+        type: QuickToolType.Pan,
+        gesture: QuickPanGesture.initialize({ state: "idle" }),
+    }),
+    getDebugProperties: (tool) => {
+        const state = QuickPanGesture.getState(tool.gesture);
+        switch (state.state) {
             case "idle":
-                return { _: this.state.type, prev: this.state.previousTool.toDebugString() };
-            case "dragging":
+                return { _: state.state };
+            case "active":
                 return {
-                    _: this.state.type,
-                    point: this.state.previousScreenPoint.toString(2),
-                    prev: this.state.previousTool.toDebugString(),
+                    _: state.state,
+                    initialPan: state.initialPan.toString(2),
+                    previousScreenPoint: state.previousScreenPoint.toString(0),
                 };
-            default:
-                exhaustiveSwitchError(this.state);
         }
-    }
-}
+    },
+    isIdle: (tool) => QuickPanGesture.isIdle(tool.gesture),
+    getCanvasClassName: (tool) => {
+        if (QuickPanTool.isIdle(tool)) {
+            return "cursor-grab";
+        }
+        return "cursor-grabbing";
+    },
+    gesture: QuickPanGesture,
+});

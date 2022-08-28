@@ -1,4 +1,3 @@
-import { fromEntries, ReadonlyObjectMap } from "@/lib/utils";
 import { SplatShapeVersion, SplatShapeVersionId } from "@/splatapus/model/SplatDoc";
 import {
     getStrokeCenterPoints,

@@ -353,7 +353,8 @@ export function noop() {}
 
 export const IS_MAC = /(Mac|iPhone|iPod|iPad)/i.test(globalThis.navigator?.platform ?? "");
 
-export type UpdateAction<T> = ((state: T) => T) | T;
+export type CallbackAction<T> = (state: T) => T;
+export type UpdateAction<T> = CallbackAction<T> | T;
 
 /**
  * Updates a `T` by either replacing it directly with a new `T` or calling a
@@ -365,4 +366,24 @@ export function applyUpdate<T>(prev: T, action: UpdateAction<T>): T {
     } else {
         return action;
     }
+}
+
+/**
+ * Updates a `T[Key]` by either replacing it directly with a new `T[Key]` or
+ * calling a function with the old value to return a new one.
+ */
+export function applyUpdateWithin<T, Key extends keyof T>(
+    state: T,
+    key: Key,
+    update: UpdateAction<T[Key]>,
+): T {
+    const before = state[key];
+    const after = applyUpdate(before, update);
+    if (Object.is(before, after)) {
+        return state;
+    }
+    return {
+        ...state,
+        [key]: after,
+    };
 }

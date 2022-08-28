@@ -12,7 +12,7 @@ import { calculateNormalizedShapePointsFromVersions } from "@/splatapus/model/no
 import Vector2 from "@/lib/geom/Vector2";
 import { deepEqual, UpdateAction } from "@/lib/utils";
 import { fail } from "@/lib/assert";
-import { diffJson, diffLines } from "diff";
+import { diffLines } from "diff";
 
 export class SplatDocModel {
     static create(): SplatDocModel {

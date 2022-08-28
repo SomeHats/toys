@@ -5,6 +5,7 @@ import { parseSplatDoc, SplatKeypointId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
 import { SplatLocation } from "@/splatapus/SplatLocation";
+import Vector2 from "@/lib/geom/Vector2";
 
 const parseSplatapusState = createShapeParser({
     doc: composeParsers(parseSplatDoc, (doc) => {
@@ -36,7 +37,7 @@ export const writeSavedDebounced = debounce(AUTOSAVE_DEBOUNCE_TIME_MS, writeSave
 export function makeEmptySaveState(): SplatapusState {
     const keyPointId = SplatKeypointId.generate();
     return {
-        doc: SplatDocModel.create().addKeyPoint(keyPointId),
+        doc: SplatDocModel.create().addKeyPoint(keyPointId, Vector2.ZERO),
         location: new SplatLocation({ keyPointId }),
     };
 }

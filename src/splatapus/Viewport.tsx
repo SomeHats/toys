@@ -26,13 +26,26 @@ export class Viewport {
         console.log("wheel", event);
         event.preventDefault();
         event.stopImmediatePropagation();
-        console.log(event.ctrlKey);
         const { deltaX, deltaY } = event;
-        this.update(({ pan, zoom }) => ({ pan: pan.add(new Vector2(deltaX, deltaY)), zoom }));
+        if (event.ctrlKey) {
+            const screenPosition = Vector2.fromEvent(event);
+            // const scenePosition = this.screenToScene(event);
+            this.update(({ pan, zoom }) => {
+                const newZoom = Math.exp(-deltaY / 100) * zoom;
+                const newPan = screenPosition
+                    .add(pan)
+                    .scale(newZoom / zoom)
+                    .sub(screenPosition);
+
+                return { zoom: newZoom, pan: newPan };
+            });
+        } else {
+            this.update(({ pan, zoom }) => ({ pan: pan.add(new Vector2(deltaX, deltaY)), zoom }));
+        }
     }
 
     origin(): Vector2 {
-        return this.pan.sub(this.screenSize.scale(0.5));
+        return this.pan.sub(this.screenSize.scale(0.5 * this.zoom));
     }
 
     visibleSceneBounds(): AABB {
@@ -40,11 +53,11 @@ export class Viewport {
     }
 
     screenToScene(screenCoords: Vector2): Vector2 {
-        return screenCoords.add(this.origin());
+        return screenCoords.add(this.origin()).scale(1 / this.zoom);
     }
 
     sceneToScreen(sceneCoords: Vector2): Vector2 {
-        return sceneCoords.sub(this.origin());
+        return sceneCoords.scale(this.zoom).sub(this.origin());
     }
 
     eventSceneCoords(event: { clientX: number; clientY: number }): Vector2 {
@@ -53,6 +66,6 @@ export class Viewport {
 
     getSceneTransform(): string {
         const pan = this.origin();
-        return `translate(${-pan.x}, ${-pan.y})`;
+        return `translate(${-pan.x}, ${-pan.y}) scale(${this.zoom}) `;
     }
 }

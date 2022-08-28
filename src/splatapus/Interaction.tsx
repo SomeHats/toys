@@ -106,10 +106,10 @@ export const Interaction = {
             goToIdx(6);
         }
         if (matchesKeyDown(ctx.event, "8")) {
-            goToIdx(8);
+            goToIdx(7);
         }
         if (matchesKeyDown(ctx.event, "9")) {
-            goToIdx(9);
+            goToIdx(8);
         }
 
         return interaction;

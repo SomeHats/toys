@@ -86,12 +86,12 @@ export class SplatDocModel {
         return this.shapeVersions.get(this.data.keyPointIdByShapeVersion.lookupInverse(keyPointId));
     }
 
-    addKeyPoint(keyPointId: SplatKeypointId): SplatDocModel {
+    addKeyPoint(keyPointId: SplatKeypointId, location: Vector2): SplatDocModel {
         console.log("doc.addKeyPoint", keyPointId);
         const shapeVersionId = SplatShapeVersionId.generate();
         const keyPoints = this.keyPoints.insert({
             id: keyPointId,
-            position: Vector2.UNIT,
+            position: location,
         });
         const shapeVersions = this.shapeVersions.insert({
             id: shapeVersionId,

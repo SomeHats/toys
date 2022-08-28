@@ -23,17 +23,17 @@ rather focus my limited free time on actually making things with the tools.
     -   [ ] pan/zoom
         -   [x] basic pan
         -   [x] reset pan/zoom
-        -   [ ] basic zoom
-        -   [ ] zoom at cursor location
+        -   [x] basic zoom
+        -   [x] zoom at cursor location
         -   [ ] fix zoom gesture zooming browser
         -   [ ] mobile pan/zoom support
     -   [ ] multi-dimensional
-        -   [ ] keypoint tool
+        -   [x] keypoint tool
             -   [x] tool boilerplate
             -   [x] tap vs drag gesture detection
             -   [x] select key points
             -   [x] move key points
-            -   [ ] add key points
+            -   [x] add key points
         -   [ ] md-interpolation
             -   [ ] preview mode?
             -   [ ] quick preview tool

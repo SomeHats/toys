@@ -12,6 +12,7 @@ import { Toolbar } from "@/splatapus/Toolbar";
 import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
 import { EditorState, useEditorState } from "@/splatapus/useEditorState";
 import { Interaction } from "@/splatapus/Interaction";
+import { findPositionForNewKeyPoint } from "@/splatapus/findPositionForNewKeyPoint";
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
@@ -175,9 +176,16 @@ function Splatapus({ size }: { size: Vector2 }) {
                         )}
                         onClick={() => {
                             const keyPointId = SplatKeypointId.generate();
-                            updateDocument((ctx, document) => document.addKeyPoint(keyPointId), {
-                                lockstepLocation: (location) => location.with({ keyPointId }),
-                            });
+                            updateDocument(
+                                (ctx, document) =>
+                                    document.addKeyPoint(
+                                        keyPointId,
+                                        findPositionForNewKeyPoint(document, viewport),
+                                    ),
+                                {
+                                    lockstepLocation: (location) => location.with({ keyPointId }),
+                                },
+                            );
                         }}
                     >
                         +

@@ -1,4 +1,4 @@
-import{a as c,t as A,r as i}from"../chunks/chunk_assert.a61dfbc1.js";import{A as _}from"../chunks/chunk_AABB.4043706b.js";import{V as l}from"../chunks/chunk_Vector2.60ea25ce.js";var R=`attribute vec2 a_position;
+import{a as c,t as A,r as i}from"../chunks/chunk_assert.df27ef91.js";import{A as _}from"../chunks/chunk_AABB.d6b0d8c0.js";import{V as l}from"../chunks/chunk_Vector2.71f22924.js";var R=`attribute vec2 a_position;
 attribute vec4 a_color;
 
 varying vec4 v_color;

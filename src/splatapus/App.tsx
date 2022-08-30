@@ -13,6 +13,7 @@ import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
 import { EditorState, useEditorState } from "@/splatapus/useEditorState";
 import { Interaction } from "@/splatapus/Interaction";
 import { findPositionForNewKeyPoint } from "@/splatapus/findPositionForNewKeyPoint";
+import { PreviewPosition } from "@/splatapus/PreviewPosition";
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
@@ -31,6 +32,7 @@ function Splatapus({ size }: { size: Vector2 }) {
         document,
         location,
         interaction,
+        previewPosition,
         updateDocument,
         updateLocation,
         updateInteraction,
@@ -96,24 +98,10 @@ function Splatapus({ size }: { size: Vector2 }) {
         };
     }, [onKeyDown, onKeyUp, onWheel]);
 
-    // const toolRenderProps: ToolRenderProps<Tool["state"]> = {
-    //     viewport,
-    //     document,
-    //     location,
-    //     updateTool,
-    //     state: tool.state,
-    // };
-    // const ToolSceneSvgComponent = tool.getSceneSvgComponent() as ToolRenderComponent<Tool["state"]>;
-    // const ToolScreenSvgComponent = tool.getScreenSvgComponent() as ToolRenderComponent<
-    //     Tool["state"]
-    // >;
-    // const ToolScreenHtmlComponent = tool.getScreenHtmlComponent() as ToolRenderComponent<
-    //     Tool["state"]
-    // >;
-
     return (
         <>
             <div className="pointer-events-none absolute top-0">
+                {PreviewPosition.toDebugString(previewPosition)} |{" "}
                 {Interaction.toDebugString(interaction)}
             </div>
             <div
@@ -133,7 +121,7 @@ function Splatapus({ size }: { size: Vector2 }) {
                     <g transform={viewport.getSceneTransform()}>
                         <DocumentRenderer
                             document={document}
-                            keyPointId={location.keyPointId}
+                            previewPosition={previewPosition}
                             interaction={interaction}
                         />
                     </g>

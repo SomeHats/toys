@@ -48,6 +48,9 @@ export const SelectedTool = {
     },
     getCanvasClassName: (tool: SelectedTool): string =>
         getToolByType(tool.type).getCanvasClassName(tool),
+    getPreviewPosition: (tool: SelectedTool) => {
+        return getToolByType(tool.type).getPreviewPosition(tool);
+    },
     toDebugString,
     onPointerEvent: (ctx: PointerEventContext, tool: SelectedTool): SelectedTool => {
         switch (tool.type) {

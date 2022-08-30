@@ -1,7 +1,9 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { SplatKeypointId } from "@/splatapus/model/SplatDoc";
+import { PreviewPosition } from "@/splatapus/PreviewPosition";
 import { ScenePositionedDiv } from "@/splatapus/renderer/Positioned";
 import { createTool, OverlayProps } from "@/splatapus/tools/lib/createTool";
+import { PointerEventContext } from "@/splatapus/tools/lib/EventContext";
 import { createGestureDetector, GestureType } from "@/splatapus/tools/lib/GestureDetection";
 import { ToolType } from "@/splatapus/tools/ToolType";
 import classNames from "classnames";
@@ -59,6 +61,7 @@ const MoveGesture = createGestureDetector<
 export type KeyPointTool = {
     readonly type: ToolType.KeyPoint;
     readonly gesture: GestureType<typeof MoveGesture>;
+    readonly previewPosition: Vector2 | null;
 };
 
 const keyPointOffset = new Vector2(-12, -12);
@@ -66,6 +69,7 @@ export const KeyPointTool = createTool<KeyPointTool>()({
     initialize: () => ({
         type: ToolType.KeyPoint,
         gesture: MoveGesture.initialize({ state: "idle" }),
+        previewPosition: null,
     }),
     isIdle: (tool: KeyPointTool) => true,
     getDebugProperties: (tool) => {
@@ -81,7 +85,19 @@ export const KeyPointTool = createTool<KeyPointTool>()({
                 };
         }
     },
-    onPointerEvent: MoveGesture.createOnPointerEvent<"gesture", KeyPointTool>("gesture"),
+    getPreviewPosition: (tool: KeyPointTool): PreviewPosition | null =>
+        MoveGesture.isIdle(tool.gesture) && tool.previewPosition
+            ? PreviewPosition.interpolated(tool.previewPosition)
+            : null,
+    onPointerEvent: (
+        ctx: PointerEventContext,
+        tool: KeyPointTool,
+        splatPointId?: SplatKeypointId,
+    ) => ({
+        ...tool,
+        previewPosition: ctx.viewport.eventSceneCoords(ctx.event),
+        gesture: MoveGesture.onPointerEvent(ctx, tool.gesture, splatPointId),
+    }),
     Overlay: ({ tool, document, viewport, location, onUpdateTool }: OverlayProps<KeyPointTool>) => {
         const state = MoveGesture.getState(tool.gesture);
         return (

@@ -3,6 +3,7 @@ import { useEvent } from "@/lib/hooks/useEvent";
 import { CallbackAction, UpdateAction, applyUpdateWithin, applyUpdate } from "@/lib/utils";
 import { Interaction } from "@/splatapus/Interaction";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
+import { PreviewPosition } from "@/splatapus/PreviewPosition";
 import { SplatLocation } from "@/splatapus/SplatLocation";
 import { SplatapusState } from "@/splatapus/store";
 import { PointerEventType } from "@/splatapus/tools/lib/EventContext";
@@ -139,10 +140,18 @@ export function useEditorState(initialize: () => EditorState, _capture: () => Ca
         };
     }, []);
 
+    const keyPointId = state.undoStack.current.location.keyPointId;
+
     return {
         ...events,
         document: state.undoStack.current.doc,
         location: state.undoStack.current.location,
         interaction: state.interaction,
+        previewPosition: useMemo(
+            (): PreviewPosition =>
+                Interaction.getPreviewPosition(state.interaction) ??
+                PreviewPosition.keyPointId(keyPointId),
+            [keyPointId, state.interaction],
+        ),
     };
 }

@@ -35,6 +35,9 @@ export const Interaction = {
         }
         return SelectedTool.getCanvasClassName(interaction.selectedTool);
     },
+    getPreviewPosition: (interaction: Interaction) => {
+        return SelectedTool.getPreviewPosition(interaction.selectedTool);
+    },
 
     updateSelectedTool: (
         interaction: Interaction,

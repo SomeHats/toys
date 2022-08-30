@@ -1,5 +1,6 @@
 import { ObjectMap } from "@/lib/utils";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
+import { PreviewPosition } from "@/splatapus/PreviewPosition";
 import { SplatLocation } from "@/splatapus/SplatLocation";
 import { CtxAction } from "@/splatapus/useEditorState";
 import { Viewport } from "@/splatapus/Viewport";
@@ -18,6 +19,7 @@ export type ToolMethods<Tool> = {
     isIdle: (state: Tool) => boolean;
     getDebugProperties: (state: Tool) => ObjectMap<string, string | number | boolean | null>;
     getCanvasClassName?: (state: Tool) => string;
+    getPreviewPosition?: (state: Tool) => PreviewPosition | null;
     Overlay?: ComponentType<OverlayProps<Tool>>;
 };
 
@@ -29,6 +31,7 @@ export function createTool<Tool>() {
     return function make<T extends ToolMethods<Tool>>(tool: T) {
         return {
             getCanvasClassName: (state: T) => "",
+            getPreviewPosition: (state: T) => null,
             Overlay: DefaultOverlay,
             ...tool,
         };

@@ -1,27 +1,26 @@
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { perfectFreehandOpts } from "@/splatapus/constants";
 import { Interaction } from "@/splatapus/Interaction";
+import { interpolationCache } from "@/splatapus/InterpolationCache";
 import { SplatKeypointId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { normalizeCenterPointIntervalsQuadratic } from "@/splatapus/normalizeCenterPointIntervals";
 import { getStrokeCenterPoints, getStrokePoints } from "@/splatapus/perfectFreehand";
+import { PreviewPosition } from "@/splatapus/PreviewPosition";
 import { StrokeRenderer } from "@/splatapus/renderer/StrokeRenderer";
 import { DrawTool } from "@/splatapus/tools/DrawTool";
 import { ToolType } from "@/splatapus/tools/ToolType";
 
 export function DocumentRenderer({
     document,
-    keyPointId,
+    previewPosition,
     interaction,
 }: {
     document: SplatDocModel;
-    keyPointId: SplatKeypointId;
+    previewPosition: PreviewPosition;
     interaction: Interaction;
 }) {
-    const shapeVersion = document.getShapeVersionForKeyPoint(keyPointId);
-    let centerPoints = document.data.normalizedShapeVersions.get(
-        shapeVersion.id,
-    ).normalizedCenterPoints;
+    let centerPoints = null;
     switch (interaction.selectedTool.type) {
         case ToolType.Draw: {
             const state = DrawTool.getState(interaction.selectedTool);
@@ -46,6 +45,9 @@ export function DocumentRenderer({
             break;
         default:
             exhaustiveSwitchError(interaction.selectedTool);
+    }
+    if (!centerPoints) {
+        centerPoints = interpolationCache.getCenterPointsAtPosition(document, previewPosition);
     }
     return <StrokeRenderer centerPoints={centerPoints} />;
 }

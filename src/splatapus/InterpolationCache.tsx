@@ -1,4 +1,3 @@
-import { assert } from "@/lib/assert";
 import Vector2 from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { SplatKeypoint, SplatShapeVersion } from "@/splatapus/model/SplatDoc";

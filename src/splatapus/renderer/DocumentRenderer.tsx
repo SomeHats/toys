@@ -2,7 +2,6 @@ import { exhaustiveSwitchError } from "@/lib/utils";
 import { perfectFreehandOpts } from "@/splatapus/constants";
 import { Interaction } from "@/splatapus/Interaction";
 import { interpolationCache } from "@/splatapus/InterpolationCache";
-import { SplatKeypointId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { normalizeCenterPointIntervalsQuadratic } from "@/splatapus/normalizeCenterPointIntervals";
 import { getStrokeCenterPoints, getStrokePoints } from "@/splatapus/perfectFreehand";

@@ -111,5 +111,5 @@ jobs:
                   set -eux
                   git add -A
                   git_tree="$(git write-tree)"
-                  git commit-tree "$git_tree" -p HEAD -p "$GITHUB_SHA" -m "[automated] publish from $GITHUB_SHA on $(date)"
+                  git commit-tree "$git_tree" -p gh-pages -p "$GITHUB_SHA" -m "[automated] publish from $GITHUB_SHA on $(date)"
                   git push

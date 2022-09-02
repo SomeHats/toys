@@ -58,6 +58,7 @@ jobs:
                       ~/.cargo/registry/cache/
                       ~/.cargo/git/db/
                       src/slomojs/crate/target/
+                      target
                   key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
             - name: Install dependencies

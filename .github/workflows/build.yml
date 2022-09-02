@@ -70,7 +70,7 @@ jobs:
             - name: Build web
               run: yarn build
 
-            - name: Checl
+            - name: Check
               run: yarn run check
 
             - name: Upload artifact
@@ -109,5 +109,5 @@ jobs:
               run: |
                   git add -A
                   git write-tree
-                  git -p HEAD -p "$GITHUB_SHA" -m "[automated] publish from $GITHUB_SHA on $(date)"
+                  git commit-tree -p HEAD -p "$GITHUB_SHA" -m "[automated] publish from $GITHUB_SHA on $(date)"
                   git push

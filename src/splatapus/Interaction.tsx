@@ -3,6 +3,7 @@ import Vector2 from "@/lib/geom/Vector2";
 import { matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { applyUpdateWithin, exhaustiveSwitchError, UpdateAction } from "@/lib/utils";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
+import { MultiTouchPan } from "@/splatapus/MultiTouchPan";
 import { SplatLocation } from "@/splatapus/SplatLocation";
 import { DrawTool } from "@/splatapus/tools/DrawTool";
 import { KeyPointTool } from "@/splatapus/tools/KeyPointTool";
@@ -14,12 +15,14 @@ import { CtxAction } from "@/splatapus/useEditorState";
 import { Viewport } from "@/splatapus/Viewport";
 
 export type Interaction = {
+    multiTouchPan: MultiTouchPan;
     quickTool: QuickTool | null;
     selectedTool: SelectedTool;
 };
 
 export const Interaction = {
     initialize: (toolType: ToolType): Interaction => ({
+        multiTouchPan: MultiTouchPan.initialize(),
         quickTool: null,
         selectedTool: SelectedTool.initialize(toolType),
     }),
@@ -127,7 +130,18 @@ export const Interaction = {
         return interaction;
     },
 
-    onPointerEvent: (ctx: PointerEventContext, interaction: Interaction): Interaction => {
+    onPointerEvent: (_ctx: PointerEventContext, interaction: Interaction): Interaction => {
+        const { pan, passthroughContext: ctx } = MultiTouchPan.onPointerEvent(
+            _ctx,
+            interaction.multiTouchPan,
+        );
+        if (pan !== interaction.multiTouchPan) {
+            interaction = { ...interaction, multiTouchPan: pan };
+        }
+        if (!ctx) {
+            return interaction;
+        }
+
         if (interaction.quickTool) {
             return Interaction.updateQuickTool(interaction, (quickTool) =>
                 QuickTool.onPointerEvent(ctx, assertExists(quickTool)),

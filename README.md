@@ -20,13 +20,13 @@ rather focus my limited free time on actually making things with the tools.
     -   [x] localstorage state
     -   [x] reset document
     -   [x] go to undo/redo location first
-    -   [ ] pan/zoom
+    -   [x] pan/zoom
         -   [x] basic pan
         -   [x] reset pan/zoom
         -   [x] basic zoom
         -   [x] zoom at cursor location
         -   [ ] fix zoom gesture zooming browser
-        -   [ ] mobile pan/zoom support
+        -   [x] mobile pan/zoom support
     -   [ ] multi-dimensional
         -   [x] keypoint tool
             -   [x] tool boilerplate
@@ -35,9 +35,10 @@ rather focus my limited free time on actually making things with the tools.
             -   [x] move key points
             -   [x] add key points
         -   [ ] md-interpolation
-            -   [ ] preview mode?
-            -   [ ] quick preview tool
-            -   [ ] TPS interpolation
+            -   [x] preview mode?
+            -   [x] quick preview tool
+            -   [x] TPS interpolation
+            -   [ ] handle 1- and 2-point situations
     -   [ ] a r t
         -   [ ] more shapes
         -   [ ] colors

@@ -29,7 +29,6 @@ export class Viewport {
         const { deltaX, deltaY } = event;
         if (event.ctrlKey) {
             const screenPosition = Vector2.fromEvent(event);
-            // const scenePosition = this.screenToScene(event);
             this.update(({ pan, zoom }) => {
                 const newZoom = Math.exp(-deltaY / 100) * zoom;
                 const newPan = screenPosition

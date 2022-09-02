@@ -1,5 +1,6 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
+import { AutoInterpolator, Interpolator } from "@/splatapus/Interpolator";
 import { SplatKeypoint, SplatShapeVersion } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { StrokeCenterPoint } from "@/splatapus/perfectFreehand";
@@ -9,7 +10,11 @@ import { Tps } from "@/splatapus/ThinPlateSpline";
 class InterpolationCache {
     private cachedVersions: ReadonlySet<SplatShapeVersion> = new Set();
     private cachedKeyPoints: ReadonlySet<SplatKeypoint> = new Set();
-    private tpsForEachPoint: null | ReadonlyArray<{ x: Tps; y: Tps; r: Tps }> = null;
+    private tpsForEachPoint: null | ReadonlyArray<{
+        x: Interpolator;
+        y: Interpolator;
+        r: Interpolator;
+    }> = null;
 
     getCenterPointsAtPosition(
         document: SplatDocModel,
@@ -41,10 +46,9 @@ class InterpolationCache {
 
         const tpsForEachPoint = this.tpsForEachPoint;
 
-        const point = [position.x, position.y];
         return tpsForEachPoint.map(({ x, y, r }) => ({
-            center: new Vector2(x.getValue(point), y.getValue(point)),
-            radius: r.getValue(point),
+            center: new Vector2(x.interpolate(position), y.interpolate(position)),
+            radius: r.interpolate(position),
         }));
     }
 
@@ -60,10 +64,7 @@ class InterpolationCache {
             keyPoint: document.keyPoints.get(version.keyPointId),
         }));
 
-        const centers = allNormalizedPoints.map(({ keyPoint }) => [
-            keyPoint.position.x,
-            keyPoint.position.y,
-        ]);
+        const centers = allNormalizedPoints.map(({ keyPoint }) => keyPoint.position);
 
         const minLength = Math.min(
             ...allNormalizedPoints.map(
@@ -82,9 +83,9 @@ class InterpolationCache {
                 ({ normalizedCenterPoints }) => normalizedCenterPoints[i].radius,
             );
             tpsForEachPoint.push({
-                x: new Tps(centers, xs),
-                y: new Tps(centers, ys),
-                r: new Tps(centers, rs),
+                x: new AutoInterpolator(centers, xs),
+                y: new AutoInterpolator(centers, ys),
+                r: new AutoInterpolator(centers, rs),
             });
         }
         console.timeEnd("calculateTpsForEachPoint");

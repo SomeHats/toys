@@ -38,7 +38,7 @@ rather focus my limited free time on actually making things with the tools.
             -   [x] preview mode?
             -   [x] quick preview tool
             -   [x] TPS interpolation
-            -   [ ] handle 1- and 2-point situations
+            -   [x] handle 1- and 2-point situations
     -   [ ] a r t
         -   [ ] more shapes
         -   [ ] colors

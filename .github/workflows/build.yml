@@ -110,6 +110,7 @@ jobs:
               run: |
                   set -eux
                   git add -A
+                  # perform the steps of a git commit, but add the source commit as an extra parent:
                   tree_ref="$(git write-tree)"
                   commit_ref=git commit-tree "$tree_ref" -p HEAD -p "$GITHUB_SHA" -m "[automated] publish from $GITHUB_SHA on $(date)"
                   git update-ref refs/heads/gh-pages "$commit_ref"

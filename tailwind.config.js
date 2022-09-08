@@ -1,4 +1,4 @@
 module.exports = {
-    content: ["./src/**/*.{html,js,ts,tsx}", "./slomojs/**/*.rs"],
+    content: ["./src/**/*.{html,js,ts,tsx,rs}"],
     theme: {},
 };

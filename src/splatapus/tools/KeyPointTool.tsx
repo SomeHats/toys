@@ -1,5 +1,5 @@
 import Vector2 from "@/lib/geom/Vector2";
-import { SplatKeypointId } from "@/splatapus/model/SplatDoc";
+import { SplatKeyPointId } from "@/splatapus/model/SplatDoc";
 import { PreviewPosition } from "@/splatapus/PreviewPosition";
 import { ScenePositionedDiv } from "@/splatapus/renderer/Positioned";
 import { createTool, OverlayProps } from "@/splatapus/tools/lib/createTool";
@@ -13,7 +13,7 @@ export type IdleKeyPointToolState = {
 };
 export type MovingKeyPointToolState = {
     readonly state: "moving";
-    readonly keyPointId: SplatKeypointId;
+    readonly keyPointId: SplatKeyPointId;
     readonly delta: Vector2;
     readonly startingPosition: Vector2;
 };
@@ -21,7 +21,7 @@ export type MovingKeyPointToolState = {
 const MoveGesture = createGestureDetector<
     IdleKeyPointToolState,
     MovingKeyPointToolState,
-    SplatKeypointId
+    SplatKeyPointId
 >({
     onTap: ({ updateLocation }, state, keyPointId) => {
         if (keyPointId) {
@@ -92,7 +92,7 @@ export const KeyPointTool = createTool<KeyPointTool>()({
     onPointerEvent: (
         ctx: PointerEventContext,
         tool: KeyPointTool,
-        splatPointId?: SplatKeypointId,
+        splatPointId?: SplatKeyPointId,
     ) => ({
         ...tool,
         previewPosition: ctx.viewport.eventSceneCoords(ctx.event),
@@ -102,7 +102,7 @@ export const KeyPointTool = createTool<KeyPointTool>()({
         const state = MoveGesture.getState(tool.gesture);
         return (
             <>
-                {Array.from(document.data.keyPoints, (keyPoint, i) => {
+                {Array.from(document.keyPoints, (keyPoint, i) => {
                     const position =
                         state.state === "moving" && state.keyPointId === keyPoint.id
                             ? keyPoint.position.add(state.delta)

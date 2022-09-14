@@ -1,38 +1,34 @@
-import { OneToOneIndex, Table } from "@/splatapus/model/Table";
+import { Index, Table, UniqueIndex } from "@/splatapus/model/Table";
 import {
-    SplatKeypoint,
+    SplatKeyPoint as SplatKeyPoint,
     SplatDocId,
     SplatShapeVersion,
-    SplatKeypointId,
+    SplatKeyPointId,
     SplatShapeVersionId,
+    SplatShape,
+    SplatShapeId,
 } from "@/splatapus/model/SplatDoc";
 import { NormalizedShapeVersionState } from "@/splatapus/model/normalizedShape";
 
-export class SplatDocData {
-    constructor(
-        readonly id: SplatDocId,
-        readonly keyPoints: Table<SplatKeypoint>,
-        // readonly shapes: Table<SplatShape>,
-        readonly shapeVersions: Table<SplatShapeVersion>,
-        readonly keyPointIdByShapeVersion: OneToOneIndex<SplatShapeVersionId, SplatKeypointId>,
-        readonly normalizedShapeVersions: Table<NormalizedShapeVersionState>,
-    ) {}
+type ShapeVersionLookupIndex = UniqueIndex<
+    SplatShapeVersion,
+    SplatShapeVersionId,
+    [SplatShapeId, SplatKeyPointId]
+>;
+type ShapeVersionIdsByShapeIndex = Index<SplatShapeVersion, SplatShapeVersionId, SplatShapeId>;
+type ShapeVersionIdsByKeyPointIndex = Index<
+    SplatShapeVersion,
+    SplatShapeVersionId,
+    SplatKeyPointId
+>;
 
-    with(changes: {
-        id?: SplatDocId;
-        keyPoints?: Table<SplatKeypoint>;
-        // shapes?: Table<SplatShape>;
-        shapeVersions?: Table<SplatShapeVersion>;
-        keyPointIdByShapeVersion?: OneToOneIndex<SplatShapeVersionId, SplatKeypointId>;
-        normalizedCenterPointsByShapeVersion?: Table<NormalizedShapeVersionState>;
-    }): SplatDocData {
-        return new SplatDocData(
-            changes.id ?? this.id,
-            changes.keyPoints ?? this.keyPoints,
-            // changes.shapes ?? this.shapes,
-            changes.shapeVersions ?? this.shapeVersions,
-            changes.keyPointIdByShapeVersion ?? this.keyPointIdByShapeVersion,
-            changes.normalizedCenterPointsByShapeVersion ?? this.normalizedShapeVersions,
-        );
-    }
-}
+export type SplatDocData = {
+    readonly id: SplatDocId;
+    readonly keyPoints: Table<SplatKeyPoint>;
+    readonly shapes: Table<SplatShape>;
+    readonly shapeVersions: Table<SplatShapeVersion>;
+    readonly shapeVersionLookup: ShapeVersionLookupIndex;
+    readonly shapeVersionIdsByShape: ShapeVersionIdsByShapeIndex;
+    readonly shapeVersionIdsByKeyPoint: ShapeVersionIdsByKeyPointIndex;
+    readonly normalizedShapeVersions: Table<NormalizedShapeVersionState>;
+};

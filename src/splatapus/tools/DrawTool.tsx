@@ -22,12 +22,10 @@ const DrawGesture = createGestureDetector<IdleDrawTool, DrawingDrawTool>({
         points: [...state.points, viewport.eventSceneCoords(event)],
     }),
     onDragEnd: ({ updateDocument, location }, state) => {
-        updateDocument((document) =>
-            document.replaceShapeVersionPoints(
-                document.getShapeVersionForKeyPoint(location.keyPointId).id,
-                state.points,
-            ),
-        );
+        updateDocument((document) => {
+            const [shape] = document.shapes;
+            return document.replacePointsForVersion(location.keyPointId, shape.id, state.points);
+        });
         return { state: "idle" };
     },
     onDragCancel: (ctx, state) => ({ state: "idle" }),

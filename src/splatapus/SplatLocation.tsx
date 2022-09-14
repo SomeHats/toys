@@ -1,12 +1,12 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { composeParsers, createShapeParser, ParserType } from "@/lib/objectParser";
 import { Result } from "@/lib/Result";
-import { SplatKeypointId } from "@/splatapus/model/SplatDoc";
+import { SplatKeyPointId } from "@/splatapus/model/SplatDoc";
 import { parseToolType, ToolType } from "@/splatapus/tools/ToolType";
 import { parseViewportState, ViewportState } from "@/splatapus/Viewport";
 
 export const parseSplatLocationState = createShapeParser({
-    keyPointId: SplatKeypointId.parse,
+    keyPointId: SplatKeyPointId.parse,
     viewport: parseViewportState,
     tool: parseToolType,
 });
@@ -17,7 +17,7 @@ export class SplatLocation {
         Result.ok(new SplatLocation(state)),
     );
 
-    readonly keyPointId: SplatKeypointId;
+    readonly keyPointId: SplatKeyPointId;
     readonly viewportState: ViewportState;
     readonly tool: ToolType;
 
@@ -26,7 +26,7 @@ export class SplatLocation {
         viewport = { pan: Vector2.ZERO, zoom: 1 },
         tool = ToolType.Draw,
     }: {
-        keyPointId: SplatKeypointId;
+        keyPointId: SplatKeyPointId;
         viewport?: ViewportState;
         tool?: ToolType;
     }) {

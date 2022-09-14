@@ -1,7 +1,7 @@
 import { composeParsers, createShapeParser, ParserType } from "@/lib/objectParser";
 import { Result } from "@/lib/Result";
 import { debounce, getLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
-import { parseSplatDoc, SplatKeypointId } from "@/splatapus/model/SplatDoc";
+import { parseSplatDoc, SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
 import { SplatLocation } from "@/splatapus/SplatLocation";
@@ -35,9 +35,13 @@ export function writeSaved(key: string, { doc, location }: SplatapusState) {
 export const writeSavedDebounced = debounce(AUTOSAVE_DEBOUNCE_TIME_MS, writeSaved);
 
 export function makeEmptySaveState(): SplatapusState {
-    const keyPointId = SplatKeypointId.generate();
+    const keyPointId = SplatKeyPointId.generate();
+    const shapeId = SplatShapeId.generate();
     return {
-        doc: SplatDocModel.create().addKeyPoint(keyPointId, Vector2.ZERO),
+        doc: SplatDocModel.create()
+            .addKeyPoint(keyPointId, Vector2.ZERO)
+            .addShape(shapeId)
+            .replacePointsForVersion(keyPointId, shapeId, []),
         location: new SplatLocation({ keyPointId }),
     };
 }

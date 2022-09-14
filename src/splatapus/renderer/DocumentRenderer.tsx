@@ -46,7 +46,12 @@ export function DocumentRenderer({
             exhaustiveSwitchError(interaction.selectedTool);
     }
     if (!centerPoints) {
-        centerPoints = interpolationCache.getCenterPointsAtPosition(document, previewPosition);
+        const [shape] = document.shapes;
+        centerPoints = interpolationCache.getCenterPointsAtPosition(
+            document,
+            shape.id,
+            previewPosition,
+        );
     }
     return <StrokeRenderer centerPoints={centerPoints} />;
 }

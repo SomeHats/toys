@@ -1,11 +1,11 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
-import { SplatKeypointId } from "@/splatapus/model/SplatDoc";
+import { SplatKeyPointId } from "@/splatapus/model/SplatDoc";
 
 export type PreviewPosition =
     | {
           readonly type: "keyPointId";
-          readonly keyPointId: SplatKeypointId;
+          readonly keyPointId: SplatKeyPointId;
       }
     | {
           readonly type: "interpolated";
@@ -17,7 +17,7 @@ export const PreviewPosition = {
         type: "interpolated",
         scenePosition,
     }),
-    keyPointId: (keyPointId: SplatKeypointId): PreviewPosition => ({
+    keyPointId: (keyPointId: SplatKeyPointId): PreviewPosition => ({
         type: "keyPointId",
         keyPointId,
     }),

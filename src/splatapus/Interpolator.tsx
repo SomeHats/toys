@@ -7,6 +7,12 @@ export interface Interpolator {
     interpolate(center: Vector2): number;
 }
 
+class NoneInterpolator implements Interpolator {
+    interpolate(center: Vector2): number {
+        fail("cannot interpolate none");
+    }
+}
+
 class OneInterpolator implements Interpolator {
     private readonly value: number;
     constructor(value: number) {
@@ -51,7 +57,9 @@ export class AutoInterpolator implements Interpolator {
         assert(centers.length === values.length);
         switch (centers.length) {
             case 0:
-                throw fail("must have at least one point to interpolate");
+                fail("cannot interpolate none");
+                this.interpolator = new NoneInterpolator();
+                break;
             case 1:
                 this.interpolator = new OneInterpolator(values[0]);
                 break;

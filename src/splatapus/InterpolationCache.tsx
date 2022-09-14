@@ -1,65 +1,92 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { AutoInterpolator, Interpolator } from "@/splatapus/Interpolator";
-import { SplatKeypoint, SplatShapeVersion } from "@/splatapus/model/SplatDoc";
+import {
+    SplatKeyPoint,
+    SplatShape,
+    SplatShapeId,
+    SplatShapeVersion,
+} from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { StrokeCenterPoint } from "@/splatapus/perfectFreehand";
 import { PreviewPosition } from "@/splatapus/PreviewPosition";
-import { Tps } from "@/splatapus/ThinPlateSpline";
 
-class InterpolationCache {
-    private cachedVersions: ReadonlySet<SplatShapeVersion> = new Set();
-    private cachedKeyPoints: ReadonlySet<SplatKeypoint> = new Set();
-    private tpsForEachPoint: null | ReadonlyArray<{
+type CachedValues = {
+    keyPoints: ReadonlySet<SplatKeyPoint>;
+    versions: ReadonlySet<SplatShapeVersion>;
+    interpolators: ReadonlyArray<{
         x: Interpolator;
         y: Interpolator;
         r: Interpolator;
-    }> = null;
+    }>;
+};
+
+class InterpolationCache {
+    private cache = new Map<SplatShape, CachedValues>();
 
     getCenterPointsAtPosition(
         document: SplatDocModel,
+        shapeId: SplatShapeId,
         position: PreviewPosition,
     ): ReadonlyArray<StrokeCenterPoint> {
         switch (position.type) {
             case "keyPointId": {
-                const shapeVersion = document.getShapeVersionForKeyPoint(position.keyPointId);
-                return document.data.normalizedShapeVersions.get(shapeVersion.id)
-                    .normalizedCenterPoints;
+                const shapeVersion = document.getShapeVersion(position.keyPointId, shapeId);
+                if (!shapeVersion) {
+                    const keyPoint = document.keyPoints.get(position.keyPointId);
+                    return this.getCenterPointsAtInterpolatedPosition(
+                        document,
+                        shapeId,
+                        keyPoint.position,
+                    );
+                }
+                return document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id);
             }
             case "interpolated":
-                return this.getCenterPointsAtInterpolatedPosition(document, position.scenePosition);
+                return this.getCenterPointsAtInterpolatedPosition(
+                    document,
+                    shapeId,
+                    position.scenePosition,
+                );
             default:
                 exhaustiveSwitchError(position);
         }
     }
     getCenterPointsAtInterpolatedPosition(
         document: SplatDocModel,
+        shapeId: SplatShapeId,
         position: Vector2,
     ): StrokeCenterPoint[] {
-        const shapeVersions = new Set(document.shapeVersions);
-        const keyPoints = new Set(document.keyPoints);
-
-        if (!this.matchesCache(shapeVersions, keyPoints) || !this.tpsForEachPoint) {
-            this.tpsForEachPoint = this.calculateTpsForEachPoint(document, shapeVersions);
-            this.cachedVersions = shapeVersions;
+        const shape = document.shapes.get(shapeId);
+        const shapeVersions = new Set(document.iterateShapeVersionsForShape(shapeId));
+        const keyPoints = new Set<SplatKeyPoint>();
+        for (const shapeVersion of shapeVersions) {
+            keyPoints.add(document.keyPoints.get(shapeVersion.keyPointId));
         }
 
-        const tpsForEachPoint = this.tpsForEachPoint;
+        const cacheEntry = this.getCacheEntry(shape, shapeVersions, keyPoints);
+        let interpolators;
+        if (cacheEntry) {
+            interpolators = cacheEntry.interpolators;
+        } else {
+            interpolators = this.calculateInterpolators(document, shapeVersions);
+            this.cache.set(shape, {
+                versions: shapeVersions,
+                keyPoints,
+                interpolators,
+            });
+        }
 
-        return tpsForEachPoint.map(({ x, y, r }) => ({
+        return interpolators.map(({ x, y, r }) => ({
             center: new Vector2(x.interpolate(position), y.interpolate(position)),
             radius: r.interpolate(position),
         }));
     }
 
-    private calculateTpsForEachPoint(
-        document: SplatDocModel,
-        shapeVersions: Set<SplatShapeVersion>,
-    ) {
-        console.time("calculateTpsForEachPoint");
+    private calculateInterpolators(document: SplatDocModel, shapeVersions: Set<SplatShapeVersion>) {
+        console.time("calculatInterpolators");
         const allNormalizedPoints = Array.from(shapeVersions, (version) => ({
-            normalizedCenterPoints: document.data.normalizedShapeVersions.get(version.id)
-                .normalizedCenterPoints,
+            normalizedCenterPoints: document.getNormalizedCenterPointsForShapeVersion(version.id),
             version,
             keyPoint: document.keyPoints.get(version.keyPointId),
         }));
@@ -71,7 +98,7 @@ class InterpolationCache {
                 ({ normalizedCenterPoints }) => normalizedCenterPoints.length,
             ),
         );
-        const tpsForEachPoint = [];
+        const interpolators = [];
         for (let i = 0; i < minLength; i++) {
             const xs = allNormalizedPoints.map(
                 ({ normalizedCenterPoints }) => normalizedCenterPoints[i].center.x,
@@ -82,37 +109,42 @@ class InterpolationCache {
             const rs = allNormalizedPoints.map(
                 ({ normalizedCenterPoints }) => normalizedCenterPoints[i].radius,
             );
-            tpsForEachPoint.push({
+            interpolators.push({
                 x: new AutoInterpolator(centers, xs),
                 y: new AutoInterpolator(centers, ys),
                 r: new AutoInterpolator(centers, rs),
             });
         }
-        console.timeEnd("calculateTpsForEachPoint");
-        return tpsForEachPoint;
+        console.timeEnd("calculatInterpolators");
+        return interpolators;
     }
 
-    private matchesCache(
-        shapeVersions: Set<SplatShapeVersion>,
-        keyPoints: Set<SplatKeypoint>,
-    ): boolean {
-        if (shapeVersions.size !== this.cachedVersions.size) {
-            return false;
+    private getCacheEntry(
+        shape: SplatShape,
+        shapeVersions: ReadonlySet<SplatShapeVersion>,
+        keyPoints: ReadonlySet<SplatKeyPoint>,
+    ): CachedValues | null {
+        const cacheEntry = this.cache.get(shape);
+        if (!cacheEntry) {
+            return null;
         }
-        if (keyPoints.size !== this.cachedKeyPoints.size) {
-            return false;
+        if (shapeVersions.size !== cacheEntry.versions.size) {
+            return null;
+        }
+        if (keyPoints.size !== cacheEntry.keyPoints.size) {
+            return null;
         }
         for (const version of shapeVersions) {
-            if (!this.cachedVersions.has(version)) {
-                return false;
+            if (!cacheEntry.versions.has(version)) {
+                return null;
             }
         }
         for (const keyPoint of keyPoints) {
-            if (!this.cachedKeyPoints.has(keyPoint)) {
-                return false;
+            if (!cacheEntry.keyPoints.has(keyPoint)) {
+                return null;
             }
         }
-        return true;
+        return cacheEntry;
     }
 }
 

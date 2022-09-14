@@ -2,17 +2,19 @@ import { SplatDocData } from "@/splatapus/model/SplatDocData";
 import {
     createSplatDoc,
     SplatDoc,
-    SplatKeypoint,
-    SplatKeypointId,
+    SplatKeyPoint,
+    SplatKeyPointId,
+    SplatShape,
+    SplatShapeId,
     SplatShapeVersion,
     SplatShapeVersionId,
 } from "@/splatapus/model/SplatDoc";
-import { OneToOneIndex, Table } from "@/splatapus/model/Table";
+import { UniqueIndex, Table, Index } from "@/splatapus/model/Table";
 import { calculateNormalizedShapePointsFromVersions } from "@/splatapus/model/normalizedShape";
 import Vector2 from "@/lib/geom/Vector2";
-import { deepEqual, UpdateAction } from "@/lib/utils";
+import { deepEqual, identity, UpdateAction } from "@/lib/utils";
 import { fail } from "@/lib/assert";
-import { diffLines } from "diff";
+import { diffJson } from "diff";
 
 export class SplatDocModel {
     static create(): SplatDocModel {
@@ -22,21 +24,40 @@ export class SplatDocModel {
     static deserialize(data: SplatDoc, version = 0): SplatDocModel {
         const shapeVersions = new Table<SplatShapeVersion>(data.shapeVersions);
         return new SplatDocModel(
-            new SplatDocData(
-                data.id,
-                new Table(data.keyPoints),
-                // new Table(data.shapes),
-                shapeVersions,
-                OneToOneIndex.build("keyPointId", shapeVersions),
-                calculateNormalizedShapePointsFromVersions(Array.from(shapeVersions)).versions,
-            ),
+            {
+                id: data.id,
+                keyPoints: new Table(data.keyPoints),
+                shapes: new Table(data.shapes),
+                shapeVersions: shapeVersions,
+                shapeVersionLookup: UniqueIndex.build(
+                    shapeVersions,
+                    (version) => `${version.shapeId}/${version.keyPointId}`,
+                    (version) => version.id,
+                    ([shapeId, keyPointId]) => `${shapeId}/${keyPointId}`,
+                ),
+                shapeVersionIdsByShape: Index.build(
+                    shapeVersions,
+                    (version) => version.shapeId,
+                    (version) => version.id,
+                    identity,
+                ),
+                shapeVersionIdsByKeyPoint: Index.build(
+                    shapeVersions,
+                    (version) => version.keyPointId,
+                    (version) => version.id,
+                    identity,
+                ),
+                normalizedShapeVersions: calculateNormalizedShapePointsFromVersions(
+                    Array.from(shapeVersions),
+                ).versions,
+            },
             version,
             false,
         );
     }
 
     private constructor(
-        readonly data: SplatDocData,
+        private readonly data: SplatDocData,
         readonly version = 0,
         shouldRunDebugChecks = true,
     ) {
@@ -47,10 +68,12 @@ export class SplatDocModel {
         const serialized = this.serialize();
         const deserialized = SplatDocModel.deserialize(serialized, this.version);
         if (!deepEqual(this, deserialized)) {
+            console.log({ actual: this, expected: deserialized });
             const actual = JSON.stringify(this, null, 2);
             const expected = JSON.stringify(deserialized, null, 2);
-            const changes = diffLines(actual, expected);
-            console.log(changes);
+            for (const change of diffJson(actual, expected)) {
+                console.log("CHANGE", change);
+            }
             fail(
                 `Mismatch after update:\nActual:\n${JSON.stringify(
                     this,
@@ -61,20 +84,24 @@ export class SplatDocModel {
         }
     }
 
-    private with(...params: Parameters<SplatDocData["with"]>): SplatDocModel {
-        return new SplatDocModel(this.data.with(...params), this.version + 1);
+    private with(data: Partial<SplatDocData>): SplatDocModel {
+        return new SplatDocModel({ ...this.data, ...data }, this.version + 1);
     }
 
     serialize(): SplatDoc {
         return {
             id: this.data.id,
             keyPoints: this.data.keyPoints.data,
-            // shapes: this.data.shapes.data,
+            shapes: this.data.shapes.data,
             shapeVersions: this.data.shapeVersions.data,
         };
     }
 
-    get keyPoints(): Table<SplatKeypoint> {
+    get shapes(): Table<SplatShape> {
+        return this.data.shapes;
+    }
+
+    get keyPoints(): Table<SplatKeyPoint> {
         return this.data.keyPoints;
     }
 
@@ -82,59 +109,85 @@ export class SplatDocModel {
         return this.data.shapeVersions;
     }
 
-    getShapeVersionForKeyPoint(keyPointId: SplatKeypointId): SplatShapeVersion {
-        return this.shapeVersions.get(this.data.keyPointIdByShapeVersion.lookupInverse(keyPointId));
+    getShapeVersion(keyPointId: SplatKeyPointId, shapeId: SplatShapeId): SplatShapeVersion | null {
+        const shapeVersionId = this.data.shapeVersionLookup.lookup([shapeId, keyPointId]);
+        if (!shapeVersionId) {
+            return null;
+        }
+        return this.shapeVersions.get(shapeVersionId);
     }
 
-    addKeyPoint(keyPointId: SplatKeypointId, location: Vector2): SplatDocModel {
+    getNormalizedCenterPointsForShapeVersion(shapeVersionId: SplatShapeVersionId) {
+        return this.data.normalizedShapeVersions.get(shapeVersionId).normalizedCenterPoints;
+    }
+
+    *iterateShapeVersionsForShape(shapeId: SplatShapeId) {
+        for (const shapeVersionId of this.data.shapeVersionIdsByShape.lookup(shapeId)) {
+            yield this.shapeVersions.get(shapeVersionId);
+        }
+    }
+
+    addShape(shapeId: SplatShapeId): SplatDocModel {
+        console.log("doc.addShape", shapeId);
+
+        const shapes = this.shapes.insert({
+            id: shapeId,
+        });
+
+        return this.with({ shapes });
+    }
+
+    addKeyPoint(keyPointId: SplatKeyPointId, location: Vector2): SplatDocModel {
         console.log("doc.addKeyPoint", keyPointId);
-        const shapeVersionId = SplatShapeVersionId.generate();
+
         const keyPoints = this.keyPoints.insert({
             id: keyPointId,
             position: location,
         });
-        const shapeVersions = this.shapeVersions.insert({
-            id: shapeVersionId,
-            keyPointId,
-            rawPoints: [],
-        });
 
-        return this.with({
-            keyPoints,
-            shapeVersions,
-            keyPointIdByShapeVersion: this.data.keyPointIdByShapeVersion.add(
-                shapeVersionId,
-                keyPointId,
-            ),
-            normalizedCenterPointsByShapeVersion: calculateNormalizedShapePointsFromVersions(
-                Array.from(shapeVersions),
-            ).versions,
-        });
+        return this.with({ keyPoints });
     }
 
     updateKeypoint(
-        keyPointId: SplatKeypointId,
-        update: UpdateAction<SplatKeypoint>,
+        keyPointId: SplatKeyPointId,
+        update: UpdateAction<SplatKeyPoint>,
     ): SplatDocModel {
         return this.with({
             keyPoints: this.keyPoints.update(keyPointId, update),
         });
     }
 
-    replaceShapeVersionPoints(
-        shapeVersionId: SplatShapeVersionId,
+    replacePointsForVersion(
+        keyPointId: SplatKeyPointId,
+        shapeId: SplatShapeId,
         rawPoints: ReadonlyArray<Vector2>,
     ): SplatDocModel {
-        console.log("doc.replaceShapeVersionPoints", shapeVersionId);
-        const shapeVersions = this.shapeVersions.insert({
-            ...this.shapeVersions.get(shapeVersionId),
+        const existingVersion = this.getShapeVersion(keyPointId, shapeId);
+        if (existingVersion) {
+            const shapeVersions = this.shapeVersions.insert({
+                ...existingVersion,
+                rawPoints,
+            });
+            return this.with({
+                shapeVersions,
+                normalizedShapeVersions:
+                    calculateNormalizedShapePointsFromVersions(shapeVersions).versions,
+            });
+        }
+        const shapeVersion: SplatShapeVersion = {
+            id: SplatShapeVersionId.generate(),
+            keyPointId,
+            shapeId,
             rawPoints,
-        });
+        };
+        const shapeVersions = this.shapeVersions.insert(shapeVersion);
         return this.with({
             shapeVersions,
-            normalizedCenterPointsByShapeVersion: calculateNormalizedShapePointsFromVersions(
-                Array.from(shapeVersions),
-            ).versions,
+            normalizedShapeVersions:
+                calculateNormalizedShapePointsFromVersions(shapeVersions).versions,
+            shapeVersionLookup: this.data.shapeVersionLookup.insert(shapeVersion),
+            shapeVersionIdsByShape: this.data.shapeVersionIdsByShape.insert(shapeVersion),
+            shapeVersionIdsByKeyPoint: this.data.shapeVersionIdsByKeyPoint.insert(shapeVersion),
         });
     }
 }

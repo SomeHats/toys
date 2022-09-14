@@ -3,7 +3,7 @@ import { sizeFromEntry, useResizeObserver } from "@/lib/hooks/useResizeObserver"
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { applyUpdate, UpdateAction } from "@/lib/utils";
 import classNames from "classnames";
-import { SplatKeypointId } from "@/splatapus/model/SplatDoc";
+import { SplatKeyPointId } from "@/splatapus/model/SplatDoc";
 import { LOAD_FROM_AUTOSAVE_ENABLED } from "@/splatapus/constants";
 import { loadSaved, makeEmptySaveState, writeSavedDebounced } from "@/splatapus/store";
 import { useEvent } from "@/lib/hooks/useEvent";
@@ -163,7 +163,7 @@ function Splatapus({ size }: { size: Vector2 }) {
                             "flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
                         )}
                         onClick={() => {
-                            const keyPointId = SplatKeypointId.generate();
+                            const keyPointId = SplatKeyPointId.generate();
                             updateDocument(
                                 (ctx, document) =>
                                     document.addKeyPoint(

@@ -1,4 +1,4 @@
-export { default as deepEqual } from "fast-deep-equal";
+export { default as deepEqual } from "fast-deep-equal/es6";
 
 export type TimeoutId = ReturnType<typeof setTimeout>;
 export type IntervalId = ReturnType<typeof setInterval>;
@@ -167,9 +167,7 @@ export async function frameLoop(cb: (time: number, cancel: () => void) => void) 
     }
 }
 
-export function fromEntries<K extends PropertyKey, V>(
-    entries: ReadonlyArray<[K, V]>,
-): Record<K, V> {
+export function fromEntries<K extends PropertyKey, V>(entries: Iterable<[K, V]>): Record<K, V> {
     const result = {} as Record<K, V>;
     for (const [key, value] of entries) {
         result[key] = value;
@@ -350,6 +348,9 @@ export function copyAndRemove<T>(array: ReadonlyArray<T>, index: number): Array<
 }
 
 export function noop() {}
+export function identity<T>(value: T): T {
+    return value;
+}
 
 export const IS_MAC = /(Mac|iPhone|iPod|iPad)/i.test(globalThis.navigator?.platform ?? "");
 

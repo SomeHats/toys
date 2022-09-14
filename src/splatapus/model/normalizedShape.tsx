@@ -18,8 +18,9 @@ export type NormalizedShapeState = {
 };
 
 export function calculateNormalizedShapePointsFromVersions(
-    shapeVersions: Array<SplatShapeVersion>,
+    _shapeVersions: Iterable<SplatShapeVersion>,
 ): NormalizedShapeState {
+    const shapeVersions = Array.from(_shapeVersions);
     if (shapeVersions.length === 0) return { versions: new Table({}) };
 
     const pointsWithStrokes = [];

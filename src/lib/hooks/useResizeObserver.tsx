@@ -73,7 +73,6 @@ export function useResizeObserver<T>(
         }
 
         const handler = (entry: ResizeObserverEntry) => {
-            console.log({ entry });
             setValue(callback(entry));
         };
 

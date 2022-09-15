@@ -16,7 +16,7 @@
         "paths": {
             "@/*": ["./src/*"]
         },
-        "types": ["vitest/importMeta"]
+        "types": ["vitest/importMeta", "webgl-strict-types"]
     },
     "include": ["src/**/*", "types/**/*"],
     "references": [{ "path": "./tsconfig.node.json" }]

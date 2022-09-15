@@ -5155,6 +5155,7 @@ __metadata:
     vite: ^3.0.4
     vite-plugin-glsl: ^0.3.0
     vitest: ^0.22.1
+    webgl-strict-types: ^1.0.5
     webmidi: ^3.0.21
   languageName: unknown
   linkType: soft
@@ -5486,6 +5487,13 @@ __metadata:
   bin:
     vitest: vitest.mjs
   checksum: 7abe50ceb51181e77cd62eb3a07c2da17f13078f09be34cc2e98f1f94a77eba33a56c644d48ae16bb474945ffc1cfc8664b1f4976c3de495c5e474057420c4ca
+  languageName: node
+  linkType: hard
+
+"webgl-strict-types@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "webgl-strict-types@npm:1.0.5"
+  checksum: 4d1e25854ea7354cc4bab7d6ef6031a88d7b2f40dd5d1e85f0da833a85bf8ecf00c2906e6588d6eb62d80a3293a0c9c4e8629108ed99cf2f57c1017e8db3d8c4
   languageName: node
   linkType: hard
 

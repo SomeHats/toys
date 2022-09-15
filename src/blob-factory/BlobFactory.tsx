@@ -480,11 +480,16 @@ function SwitchInput({
 function stateToString(state: BlobFactoryState): string {
     switch (state.type) {
         case "idle":
+            return debugStateToString(state.type);
         case "resizing":
         case "selected":
-        case "unconfirmedCreate":
-            return debugStateToString(state.type);
+            return debugStateToString(state.type, { blob: state.blob.index });
         case "moving":
-            return debugStateToString(state.type, { _: state.offset.toString(2) });
+            return debugStateToString(state.type, {
+                offset: state.offset.toString(2),
+                blob: state.blob.index,
+            });
+        case "unconfirmedCreate":
+            return debugStateToString(state.type, { center: state.center.toString(2) });
     }
 }

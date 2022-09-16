@@ -2,6 +2,7 @@ import { assert, assertExists } from "@/lib/assert";
 import Vector2 from "@/lib/geom/Vector2";
 import { matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { applyUpdateWithin, exhaustiveSwitchError, UpdateAction } from "@/lib/utils";
+import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { MultiTouchPan } from "@/splatapus/MultiTouchPan";
 import { SplatLocation } from "@/splatapus/SplatLocation";
@@ -38,8 +39,8 @@ export const Interaction = {
         }
         return SelectedTool.getCanvasClassName(interaction.selectedTool);
     },
-    getPreviewPosition: (interaction: Interaction) => {
-        return SelectedTool.getPreviewPosition(interaction.selectedTool);
+    getPreviewPosition: (interaction: Interaction, selectedShapeId: SplatShapeId) => {
+        return SelectedTool.getPreviewPosition(interaction.selectedTool, selectedShapeId);
     },
 
     updateSelectedTool: (

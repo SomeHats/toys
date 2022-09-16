@@ -1,7 +1,8 @@
 import Vector2 from "@/lib/geom/Vector2";
-import { SplatKeyPointId } from "@/splatapus/model/SplatDoc";
+import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { PreviewPosition } from "@/splatapus/PreviewPosition";
 import { ScenePositionedDiv } from "@/splatapus/renderer/Positioned";
+import { SplatLocation } from "@/splatapus/SplatLocation";
 import { createTool, OverlayProps } from "@/splatapus/tools/lib/createTool";
 import { PointerEventContext } from "@/splatapus/tools/lib/EventContext";
 import { createGestureDetector, GestureType } from "@/splatapus/tools/lib/GestureDetection";
@@ -85,9 +86,12 @@ export const KeyPointTool = createTool<KeyPointTool>()({
                 };
         }
     },
-    getPreviewPosition: (tool: KeyPointTool): PreviewPosition | null =>
+    getPreviewPosition: (
+        tool: KeyPointTool,
+        selectedShapeId: SplatShapeId,
+    ): PreviewPosition | null =>
         MoveGesture.isIdle(tool.gesture) && tool.previewPosition
-            ? PreviewPosition.interpolated(tool.previewPosition)
+            ? PreviewPosition.interpolated(tool.previewPosition, selectedShapeId)
             : null,
     onPointerEvent: (
         ctx: PointerEventContext,

@@ -19,39 +19,17 @@ export function DocumentRenderer({
     previewPosition: PreviewPosition;
     interaction: Interaction;
 }) {
-    let centerPoints = null;
-    switch (interaction.selectedTool.type) {
-        case ToolType.Draw: {
-            const state = DrawTool.getState(interaction.selectedTool);
-            switch (state.state) {
-                case "drawing":
-                    centerPoints = normalizeCenterPointIntervalsQuadratic(
-                        getStrokeCenterPoints(
-                            getStrokePoints(state.points, perfectFreehandOpts),
-                            perfectFreehandOpts,
-                        ),
-                        perfectFreehandOpts.size,
-                    );
-                    break;
-                case "idle":
-                    break;
-                default:
-                    exhaustiveSwitchError(state);
-            }
-            break;
-        }
-        case ToolType.KeyPoint:
-            break;
-        default:
-            exhaustiveSwitchError(interaction.selectedTool);
-    }
-    if (!centerPoints) {
-        const [shape] = document.shapes;
-        centerPoints = interpolationCache.getCenterPointsAtPosition(
-            document,
-            shape.id,
-            previewPosition,
-        );
-    }
-    return <StrokeRenderer centerPoints={centerPoints} />;
+    return (
+        <>
+            {Array.from(document.shapes, (shape) => (
+                <StrokeRenderer
+                    key={shape.id}
+                    document={document}
+                    interaction={interaction}
+                    shapeId={shape.id}
+                    previewPosition={previewPosition}
+                />
+            ))}
+        </>
+    );
 }

@@ -1,5 +1,6 @@
 import { matchesKey, matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { applyUpdateWithin, entries, exhaustiveSwitchError, ObjectMap } from "@/lib/utils";
+import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { DrawTool } from "@/splatapus/tools/DrawTool";
 import { KeyPointTool } from "@/splatapus/tools/KeyPointTool";
 import { ToolMethods } from "@/splatapus/tools/lib/createTool";
@@ -48,8 +49,8 @@ export const SelectedTool = {
     },
     getCanvasClassName: (tool: SelectedTool): string =>
         getToolByType(tool.type).getCanvasClassName(tool),
-    getPreviewPosition: (tool: SelectedTool) => {
-        return getToolByType(tool.type).getPreviewPosition(tool);
+    getPreviewPosition: (tool: SelectedTool, selectedShapeId: SplatShapeId) => {
+        return getToolByType(tool.type).getPreviewPosition(tool, selectedShapeId);
     },
     toDebugString,
     onPointerEvent: (ctx: PointerEventContext, tool: SelectedTool): SelectedTool => {

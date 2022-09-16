@@ -140,7 +140,7 @@ export function useEditorState(initialize: () => EditorState, _capture: () => Ca
         };
     }, []);
 
-    const keyPointId = state.undoStack.current.location.keyPointId;
+    const { keyPointId, shapeId } = state.undoStack.current.location;
 
     return {
         ...events,
@@ -149,9 +149,9 @@ export function useEditorState(initialize: () => EditorState, _capture: () => Ca
         interaction: state.interaction,
         previewPosition: useMemo(
             (): PreviewPosition =>
-                Interaction.getPreviewPosition(state.interaction) ??
-                PreviewPosition.keyPointId(keyPointId),
-            [keyPointId, state.interaction],
+                Interaction.getPreviewPosition(state.interaction, shapeId) ??
+                PreviewPosition.keyPointId(keyPointId, shapeId),
+            [keyPointId, shapeId, state.interaction],
         ),
     };
 }

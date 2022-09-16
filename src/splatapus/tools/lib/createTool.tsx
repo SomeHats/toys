@@ -1,4 +1,5 @@
 import { ObjectMap } from "@/lib/utils";
+import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { PreviewPosition } from "@/splatapus/PreviewPosition";
 import { SplatLocation } from "@/splatapus/SplatLocation";
@@ -19,7 +20,7 @@ export type ToolMethods<Tool> = {
     isIdle: (state: Tool) => boolean;
     getDebugProperties: (state: Tool) => ObjectMap<string, string | number | boolean | null>;
     getCanvasClassName?: (state: Tool) => string;
-    getPreviewPosition?: (state: Tool) => PreviewPosition | null;
+    getPreviewPosition?: (state: Tool, selectedShapeId: SplatShapeId) => PreviewPosition | null;
     Overlay?: ComponentType<OverlayProps<Tool>>;
 };
 

@@ -1,5 +1,7 @@
 import { StrokeOptions } from "@/splatapus/perfectFreehand";
 
+export const SIDEBAR_WIDTH_PX = 300;
+
 export const LOAD_FROM_AUTOSAVE_ENABLED = true;
 export const UNDO_ACTIONS = 30;
 export const AUTOSAVE_DEBOUNCE_TIME_MS = 500;

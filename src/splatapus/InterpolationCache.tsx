@@ -59,6 +59,10 @@ class InterpolationCache {
     ): StrokeCenterPoint[] {
         const shape = document.shapes.get(shapeId);
         const shapeVersions = new Set(document.iterateShapeVersionsForShape(shapeId));
+        if (!shapeVersions.size) {
+            return [];
+        }
+
         const keyPoints = new Set<SplatKeyPoint>();
         for (const shapeVersion of shapeVersions) {
             keyPoints.add(document.keyPoints.get(shapeVersion.keyPointId));

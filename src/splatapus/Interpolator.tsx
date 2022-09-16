@@ -57,7 +57,7 @@ export class AutoInterpolator implements Interpolator {
         assert(centers.length === values.length);
         switch (centers.length) {
             case 0:
-                fail("cannot interpolate none");
+                // fail("cannot interpolate none");
                 this.interpolator = new NoneInterpolator();
                 break;
             case 1:

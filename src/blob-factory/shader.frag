@@ -1,6 +1,6 @@
 #version 300 es
 
-#define MAX_BLOBS 16
+#define MAX_BLOBS 32
 #define ENTRIES_PER_BLOB 2
 
 // fragment shaders don't have a default precision so we need

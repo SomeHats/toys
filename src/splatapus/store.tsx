@@ -42,6 +42,6 @@ export function makeEmptySaveState(): SplatapusState {
             .addKeyPoint(keyPointId, Vector2.ZERO)
             .addShape(shapeId)
             .replacePointsForVersion(keyPointId, shapeId, []),
-        location: new SplatLocation({ keyPointId }),
+        location: new SplatLocation({ keyPointId, shapeId }),
     };
 }

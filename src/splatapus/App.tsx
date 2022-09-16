@@ -14,6 +14,7 @@ import { EditorState, useEditorState } from "@/splatapus/useEditorState";
 import { Interaction } from "@/splatapus/Interaction";
 import { findPositionForNewKeyPoint } from "@/splatapus/findPositionForNewKeyPoint";
 import { PreviewPosition } from "@/splatapus/PreviewPosition";
+import { RightBar } from "@/splatapus/RightBar";
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
@@ -138,6 +139,12 @@ function Splatapus({ size }: { size: Vector2 }) {
                 selectedToolType={interaction.selectedTool.type}
                 updateInteraction={updateInteraction}
             />
+            <RightBar
+                document={document}
+                location={location}
+                updateDocument={updateDocument}
+                updateLocation={updateLocation}
+            />
             <div className="absolute bottom-0 left-0 flex w-full items-center justify-center gap-3 p-3">
                 <div className="flex min-w-0 flex-auto items-center justify-center gap-3">
                     {Array.from(document.keyPoints, (keyPoint, i) => (
@@ -181,7 +188,7 @@ function Splatapus({ size }: { size: Vector2 }) {
                 </div>
                 <button
                     className={classNames(
-                        "absolute right-3 flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-3 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
+                        "absolute right-3 flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-4 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
                     )}
                     onClick={() => {
                         const { doc, location } = makeEmptySaveState();

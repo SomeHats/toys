@@ -40,7 +40,8 @@ rather focus my limited free time on actually making things with the tools.
             -   [x] TPS interpolation
             -   [x] handle 1- and 2-point situations
     -   [ ] a r t
-        -   [ ] more shapes
+        -   [x] more shapes
+            -   [ ] proper more shapes ui
         -   [ ] colors
         -   [ ] fills
     -   [ ] fun
@@ -52,6 +53,14 @@ rather focus my limited free time on actually making things with the tools.
         -   [ ] turn around?
     -   [ ] design overhaul
     -   [ ] login/share????
+-   blob factory
+    -   [ ] blur mode
+    -   [ ] fix color hue blending
+    -   [ ] eased color blending
+    -   [ ] experiment with noise?
+    -   [ ] save as image
+    -   [ ] import/export
+    -   [ ] light/dark mode
 -   octopus
     -   [x] disable signals inspector in prod
     -   [x] get tentacle retract motion feeling good

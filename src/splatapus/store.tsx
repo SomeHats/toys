@@ -1,13 +1,13 @@
 import { composeParsers, createShapeParser, ParserType } from "@/lib/objectParser";
 import { Result } from "@/lib/Result";
 import { debounce, getLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
-import { parseSplatDoc, SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
+import { parseSplatDoc, SplatDoc, SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
-import { SplatLocation } from "@/splatapus/SplatLocation";
+import { SplatLocation, SplatLocationState } from "@/splatapus/SplatLocation";
 import Vector2 from "@/lib/geom/Vector2";
 
-const parseSplatapusState = createShapeParser({
+export const parseSplatapusState = createShapeParser({
     doc: composeParsers(parseSplatDoc, (doc) => {
         return Result.ok(SplatDocModel.deserialize(doc));
     }),
@@ -25,11 +25,19 @@ export function loadSaved(key: string): Result<SplatapusState, string> {
     );
 }
 
+export type SerializedSplatState = {
+    readonly doc: SplatDoc;
+    readonly location: SplatLocationState;
+};
+
 export function writeSaved(key: string, { doc, location }: SplatapusState) {
-    setLocalStorageItem(`splatapus.${key}`, {
+    const serialized = {
         doc: doc.serialize(),
         location: location.serialize(),
-    });
+    };
+    // @ts-expect-error this is fine
+    window.splatSerializedDoc = serialized;
+    setLocalStorageItem(`splatapus.${key}`, serialized);
 }
 
 export const writeSavedDebounced = debounce(AUTOSAVE_DEBOUNCE_TIME_MS, writeSaved);

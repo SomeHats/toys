@@ -1,9 +1,8 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { sizeFromEntry, useResizeObserver } from "@/lib/hooks/useResizeObserver";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { applyUpdate, UpdateAction } from "@/lib/utils";
 import classNames from "classnames";
-import { SplatKeyPointId } from "@/splatapus/model/SplatDoc";
 import { LOAD_FROM_AUTOSAVE_ENABLED } from "@/splatapus/constants";
 import { loadSaved, makeEmptySaveState, writeSavedDebounced } from "@/splatapus/store";
 import { useEvent } from "@/lib/hooks/useEvent";
@@ -12,9 +11,12 @@ import { Toolbar } from "@/splatapus/Toolbar";
 import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
 import { EditorState, useEditorState } from "@/splatapus/useEditorState";
 import { Interaction } from "@/splatapus/Interaction";
-import { findPositionForNewKeyPoint } from "@/splatapus/findPositionForNewKeyPoint";
 import { PreviewPosition } from "@/splatapus/PreviewPosition";
 import { RightBar } from "@/splatapus/RightBar";
+import { assertExists } from "@/lib/assert";
+import { UndoStack } from "@/splatapus/UndoStack";
+import { catExample } from "@/splatapus/catExample";
+import { SplatLocation } from "@/splatapus/SplatLocation";
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
@@ -29,6 +31,7 @@ export function App() {
 }
 
 function Splatapus({ size }: { size: Vector2 }) {
+    const canvasRef = useRef<HTMLDivElement>(null);
     const {
         document,
         location,
@@ -37,6 +40,7 @@ function Splatapus({ size }: { size: Vector2 }) {
         updateDocument,
         updateLocation,
         updateInteraction,
+        updateUndoStack,
         onPointerDown,
         onPointerMove,
         onPointerUp,
@@ -89,11 +93,12 @@ function Splatapus({ size }: { size: Vector2 }) {
     const onWheel = useEvent((event: WheelEvent) => viewport.handleWheelEvent(event));
 
     useEffect(() => {
-        window.addEventListener("wheel", onWheel, { passive: false });
+        const canvas = assertExists(canvasRef.current);
+        canvas.addEventListener("wheel", onWheel, { passive: false });
         window.addEventListener("keydown", onKeyDown);
         window.addEventListener("keyup", onKeyUp);
         return () => {
-            window.removeEventListener("wheel", onWheel);
+            canvas.removeEventListener("wheel", onWheel);
             window.removeEventListener("keydown", onKeyDown);
             window.removeEventListener("keyup", onKeyUp);
         };
@@ -107,6 +112,7 @@ function Splatapus({ size }: { size: Vector2 }) {
             </div>
             <div
                 className="absolute inset-0"
+                ref={canvasRef}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
@@ -146,49 +152,25 @@ function Splatapus({ size }: { size: Vector2 }) {
                 updateLocation={updateLocation}
             />
             <div className="absolute bottom-0 left-0 flex w-full items-center justify-center gap-3 p-3">
-                <div className="flex min-w-0 flex-auto items-center justify-center gap-3">
-                    {Array.from(document.keyPoints, (keyPoint, i) => (
-                        <button
-                            key={keyPoint.id}
-                            className={classNames(
-                                "flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
-                                keyPoint.id === location.keyPointId
-                                    ? "text-stone-500 ring-2 ring-inset ring-purple-400"
-                                    : "text-stone-400",
-                            )}
-                            onClick={() => {
-                                updateLocation((ctx, location) =>
-                                    location.with({ keyPointId: keyPoint.id }),
-                                );
-                            }}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
-                    <button
-                        className={classNames(
-                            "flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
-                        )}
-                        onClick={() => {
-                            const keyPointId = SplatKeyPointId.generate();
-                            updateDocument(
-                                (ctx, document) =>
-                                    document.addKeyPoint(
-                                        keyPointId,
-                                        findPositionForNewKeyPoint(document, viewport),
-                                    ),
-                                {
-                                    lockstepLocation: (location) => location.with({ keyPointId }),
-                                },
-                            );
-                        }}
-                    >
-                        +
-                    </button>
-                </div>
                 <button
                     className={classNames(
-                        "absolute right-3 flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-4 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
+                        "flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-4 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
+                    )}
+                    onClick={() => updateUndoStack((ctx, undoStack) => UndoStack.undo(undoStack))}
+                >
+                    undo
+                </button>
+                <button
+                    className={classNames(
+                        "flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-4 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
+                    )}
+                    onClick={() => updateUndoStack((ctx, undoStack) => UndoStack.redo(undoStack))}
+                >
+                    redo
+                </button>
+                <button
+                    className={classNames(
+                        "flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-4 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
                     )}
                     onClick={() => {
                         const { doc, location } = makeEmptySaveState();
@@ -197,6 +179,24 @@ function Splatapus({ size }: { size: Vector2 }) {
                 >
                     reset
                 </button>
+                {catExample.isOk() && (
+                    <button
+                        className={classNames(
+                            "flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-4 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
+                        )}
+                        onClick={() => {
+                            const { doc, location } = catExample.unwrap();
+                            updateDocument(() => doc, {
+                                lockstepLocation: new SplatLocation({
+                                    keyPointId: location.keyPointId,
+                                    shapeId: location.shapeId,
+                                }),
+                            });
+                        }}
+                    >
+                        example
+                    </button>
+                )}
             </div>
         </>
     );

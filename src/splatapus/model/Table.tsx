@@ -1,6 +1,14 @@
 import { assert, assertExists } from "@/lib/assert";
 import { createDictParser, createShapeParser, Parser } from "@/lib/objectParser";
-import { applyUpdate, fromEntries, get, has, ReadonlyObjectMap, UpdateAction } from "@/lib/utils";
+import {
+    applyUpdate,
+    fromEntries,
+    get,
+    has,
+    keys,
+    ReadonlyObjectMap,
+    UpdateAction,
+} from "@/lib/utils";
 
 export type UnknownTableEntry = { readonly id: string };
 export type TableData<T extends UnknownTableEntry> = ReadonlyObjectMap<T["id"], T>;
@@ -20,6 +28,10 @@ export class Table<T extends UnknownTableEntry> implements Iterable<T> {
 
     constructor(data: TableData<T>) {
         this.data = data;
+    }
+
+    count(): number {
+        return keys(this.data).length;
     }
 
     has(id: T["id"]): boolean {

@@ -175,7 +175,7 @@ export function fromEntries<K extends PropertyKey, V>(entries: Iterable<[K, V]>)
     return result;
 }
 
-export function keys<K extends string, V>(object: Record<K, V>): Array<K> {
+export function keys<K extends string, V>(object: ObjectMap<K, V>): Array<K> {
     return Object.keys(object) as K[];
 }
 

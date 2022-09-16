@@ -2,7 +2,7 @@ import { assert, assertExists } from "@/lib/assert";
 import { GlProgram } from "@/lib/gl/GlProgram";
 import { GlShader } from "@/lib/gl/GlShader";
 import { GlShaderType } from "@/lib/gl/GlTypes";
-import { get, ObjectMap } from "@/lib/utils";
+import { get } from "@/lib/utils";
 
 export class Gl {
     readonly gl: WebGL2RenderingContext;

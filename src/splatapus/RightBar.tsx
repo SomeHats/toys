@@ -6,7 +6,6 @@ import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { SplatLocation } from "@/splatapus/SplatLocation";
 import { OpOptions } from "@/splatapus/UndoStack";
 import { CtxAction } from "@/splatapus/useEditorState";
-import classNames from "classnames";
 
 const fadeSize = 60;
 const stopCount = 10;

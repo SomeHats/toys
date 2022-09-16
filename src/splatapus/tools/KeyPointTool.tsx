@@ -2,7 +2,6 @@ import Vector2 from "@/lib/geom/Vector2";
 import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { PreviewPosition } from "@/splatapus/PreviewPosition";
 import { ScenePositionedDiv } from "@/splatapus/renderer/Positioned";
-import { SplatLocation } from "@/splatapus/SplatLocation";
 import { createTool, OverlayProps } from "@/splatapus/tools/lib/createTool";
 import { PointerEventContext } from "@/splatapus/tools/lib/EventContext";
 import { createGestureDetector, GestureType } from "@/splatapus/tools/lib/GestureDetection";

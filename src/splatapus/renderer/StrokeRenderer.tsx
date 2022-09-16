@@ -15,7 +15,6 @@ import { PreviewPosition } from "@/splatapus/PreviewPosition";
 import { DrawTool } from "@/splatapus/tools/DrawTool";
 import { ToolType } from "@/splatapus/tools/ToolType";
 import classNames from "classnames";
-import { unwatchFile } from "fs";
 
 export function StrokeRenderer({
     interaction,

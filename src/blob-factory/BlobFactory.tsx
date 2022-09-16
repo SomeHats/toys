@@ -1,44 +1,57 @@
 import { assert, assertExists } from "@/lib/assert";
 import Vector2 from "@/lib/geom/Vector2";
 import { Gl } from "@/lib/gl/Gl";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import shaderFragSrc from "@/blob-factory/shader.frag";
 import shaderVertSrc from "@/blob-factory/shader.vert";
 import { GlBufferUsage, GlShaderType, GlVertexAttribType } from "@/lib/gl/GlTypes";
-import { exhaustiveSwitchError, frameLoop, random, times } from "@/lib/utils";
+import { exhaustiveSwitchError, frameLoop, random, sample, times } from "@/lib/utils";
 import { DebugDraw } from "@/lib/DebugDraw";
 import { matchesKey } from "@/lib/hooks/useKeyPress";
-import { m } from "vitest/dist/index-ea17aa0c";
 import { debugStateToString } from "@/lib/debugPropsToString";
+import { InstantUi, useInstantUi } from "@/lib/InstantUi";
+import { floatColor, floatColorToHex } from "@/blob-factory/colors";
 
-const initialBlobCount = 7;
+const initialBlobCount = Math.floor(random(5, 10));
+const possibleColors = [
+    floatColor("red-50"),
+    floatColor("orange-50"),
+    floatColor("yellow-50"),
+    floatColor("green-50"),
+    floatColor("cyan-50"),
+    floatColor("indigo-50"),
+    floatColor("purple-50"),
+    floatColor("pink-50"),
+];
+const colorOptions = possibleColors.map((color) => ({
+    value: color,
+    color: floatColorToHex(color),
+}));
 
 export function BlobFactoryRenderer({ size }: { size: Vector2 }) {
     const displayCanvasRef = useRef<HTMLCanvasElement>(null);
     const uiCanvasRef = useRef<HTMLCanvasElement>(null);
     const blobFactoryRef = useRef<BlobFactory>();
-
-    const [smoothness, setSmoothness] = useState(0);
+    const instantUi = useInstantUi();
 
     useEffect(() => {
         assert(displayCanvasRef.current && uiCanvasRef.current);
-        blobFactoryRef.current = startBlobFactory(displayCanvasRef.current, uiCanvasRef.current);
+        blobFactoryRef.current = startBlobFactory(
+            displayCanvasRef.current,
+            uiCanvasRef.current,
+            instantUi.ui,
+        );
         return () => {
             assert(blobFactoryRef.current);
             blobFactoryRef.current.destroy();
             blobFactoryRef.current = undefined;
         };
-    }, []);
+    }, [instantUi.ui]);
 
     useEffect(() => {
         assert(blobFactoryRef.current);
         blobFactoryRef.current.setSize(size);
     }, [size]);
-
-    useEffect(() => {
-        assert(blobFactoryRef.current);
-        blobFactoryRef.current.onUpdateParams({ smoothness });
-    });
 
     return (
         <>
@@ -74,14 +87,22 @@ export function BlobFactoryRenderer({ size }: { size: Vector2 }) {
                 />
             </div>
             <div className="absolute right-0 top-0 h-full w-72 bg-gray-900">
-                <RangeInput
+                <ul className="list-disc py-3 px-5 text-xs">
+                    <li>drag circles to move them</li>
+                    <li>drag an edge to resize</li>
+                    <li>drag in empty space for a new one</li>
+                    <li>backspace to delete</li>
+                    <li>refresh for something new</li>
+                </ul>
+                {/* <RangeInput
                     label="smoothness"
                     value={smoothness}
                     onChange={setSmoothness}
                     min={0}
                     max={100}
                     step={0.1}
-                />
+                /> */}
+                {instantUi.render()}
             </div>
         </>
     );
@@ -111,10 +132,15 @@ type BlobFactoryState =
           center: Vector2;
       };
 
-function startBlobFactory(displayCanvas: HTMLCanvasElement, uiCanvas: HTMLCanvasElement) {
+function startBlobFactory(
+    displayCanvas: HTMLCanvasElement,
+    uiCanvas: HTMLCanvasElement,
+    controls: InstantUi,
+) {
     let size = new Vector2(100, 100);
     let cursor = Vector2.ZERO;
-    let params = { smoothness: 0 };
+    let smoothness = random(50, 100);
+    let outlineMode = Math.random() < 0.5;
 
     let state: BlobFactoryState = { type: "idle" };
 
@@ -129,14 +155,16 @@ function startBlobFactory(displayCanvas: HTMLCanvasElement, uiCanvas: HTMLCanvas
     const blobStore = { current: new Float32Array(Blob.size * initialBlobCount) };
     const blobs = times(initialBlobCount, (i) => {
         const blob = new Blob(blobStore, i);
-        blob.x = random(100, 600);
-        blob.y = random(100, 600);
-        blob.radius = random(20, 60);
+        blob.color = sample(possibleColors);
+        blob.x = random(200, 600);
+        blob.y = random(200, 600);
+        blob.radius = random(30, 100);
         return blob;
     });
 
     const resolutionUniform = program.uniformVector2("u_resolution");
     const smoothnessUniform = program.uniformFloat("u_smoothness");
+    const outlineModeUniform = program.uniformBool("u_outlineMode");
 
     const positionsVao = program.createAndBindVertexArray({
         name: "a_position",
@@ -188,7 +216,7 @@ function startBlobFactory(displayCanvas: HTMLCanvasElement, uiCanvas: HTMLCanvas
                 let nearest = null;
                 for (const blob of blobs) {
                     const distance = blob.center.distanceTo(cursor);
-                    if (distance < blob.radius && distance < nearestDist) {
+                    if (distance < blob.radius + 5 && distance < nearestDist) {
                         nearestDist = distance;
                         nearest = blob;
                     }
@@ -219,18 +247,23 @@ function startBlobFactory(displayCanvas: HTMLCanvasElement, uiCanvas: HTMLCanvas
     };
 
     const draw = () => {
+        // controls:
+        smoothness = controls.range("smoothness", smoothness, { min: 0, max: 100, step: 0.1 });
+        outlineMode = controls.checkbox("outline", outlineMode);
+
         // draw actual:
         displayGl.clear();
         program.use();
 
         resolutionUniform.set(size);
-        smoothnessUniform.set(params.smoothness);
+        smoothnessUniform.set(smoothness);
+        outlineModeUniform.set(outlineMode);
 
         displayGl.gl.texImage2D(
             displayGl.gl.TEXTURE_2D,
             0, // level
             displayGl.gl.RGBA32F, // internal format
-            blobs.length, // width
+            blobs.length * 2, // width
             1, // height
             0, // border
             displayGl.gl.RGBA, // format
@@ -253,8 +286,15 @@ function startBlobFactory(displayCanvas: HTMLCanvasElement, uiCanvas: HTMLCanvas
         }
         if (selected) {
             ui.circle(selected.center, selected.radius, { stroke: "cyan", strokeWidth: 2 });
+            selected.color = controls.colorPicker("color", selected.color, colorOptions) as [
+                number,
+                number,
+                number,
+            ];
         }
         ui.fillText(stateToString(state), new Vector2(30, 40), { fill: "white" });
+
+        controls.flush();
     };
 
     let isCancelled = false;
@@ -301,10 +341,10 @@ function startBlobFactory(displayCanvas: HTMLCanvasElement, uiCanvas: HTMLCanvas
                 case "unconfirmedCreate": {
                     const distance = state.center.distanceTo(cursor);
                     if (distance > 5) {
-                        // TODO: confirm create
                         const newData = [...blobStore.current, ...times(Blob.size, () => 0)];
                         blobStore.current = new Float32Array(newData);
                         const blob = new Blob(blobStore, blobs.length);
+                        blob.color = sample(possibleColors);
                         blob.center = state.center;
                         blob.radius = distance;
                         blobs.push(blob);
@@ -366,14 +406,11 @@ function startBlobFactory(displayCanvas: HTMLCanvasElement, uiCanvas: HTMLCanvas
                     exhaustiveSwitchError(state);
             }
         },
-        onUpdateParams: (newParams: typeof params) => {
-            params = newParams;
-        },
     };
 }
 
 class Blob {
-    static size = 4;
+    static size = 8 as const;
     constructor(private readonly backingStore: { current: Float32Array }, readonly index: number) {}
 
     private getAt(offset: number): number {
@@ -413,68 +450,36 @@ class Blob {
         this.y = value.y;
     }
 
+    get red() {
+        return this.getAt(4);
+    }
+    set red(value: number) {
+        this.setAt(4, value);
+    }
+    get green() {
+        return this.getAt(5);
+    }
+    set green(value: number) {
+        this.setAt(5, value);
+    }
+    get blue() {
+        return this.getAt(6);
+    }
+    set blue(value: number) {
+        this.setAt(6, value);
+    }
+    get color(): [number, number, number] {
+        return [this.red, this.green, this.blue];
+    }
+    set color(color: [number, number, number]) {
+        this.red = color[0];
+        this.green = color[1];
+        this.blue = color[2];
+    }
+
     toJSON() {
         return { center: this.center, radius: this.radius };
     }
-}
-
-function RangeInput({
-    label,
-    value,
-    onChange,
-    min,
-    max,
-    step,
-}: {
-    label: string;
-    value: number;
-    onChange: (newValue: number) => void;
-    min: number;
-    max: number;
-    step: number;
-}) {
-    const id = useId();
-    return (
-        <div className="flex flex-col gap-2 p-3">
-            <label htmlFor={id}>{label}</label>
-            <div className="flex items-center justify-between gap-3">
-                <input
-                    id={id}
-                    className="w-2/3 flex-auto"
-                    type="range"
-                    value={value}
-                    min={min}
-                    max={max}
-                    step={step}
-                    onChange={(e) => onChange(e.currentTarget.valueAsNumber)}
-                />
-                <span className="w-1/3 flex-none text-right">{value.toPrecision(3)}</span>
-            </div>
-        </div>
-    );
-}
-
-function SwitchInput({
-    label,
-    value,
-    onChange,
-}: {
-    label: string;
-    value: boolean;
-    onChange: (newValue: boolean) => void;
-}) {
-    const id = useId();
-    return (
-        <div className="flex gap-3 p-3">
-            <input
-                id={id}
-                type="checkbox"
-                onChange={(e) => onChange(e.currentTarget.checked)}
-                checked={value}
-            />
-            <label htmlFor={id}>{label}</label>
-        </div>
-    );
 }
 
 function stateToString(state: BlobFactoryState): string {

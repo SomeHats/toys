@@ -4,13 +4,21 @@ import { Gl } from "@/lib/gl/Gl";
 import { useEffect, useRef } from "react";
 import shaderFragSrc from "@/blob-factory/shader.frag";
 import shaderVertSrc from "@/blob-factory/shader.vert";
-import { GlBufferUsage, GlShaderType, GlVertexAttribType } from "@/lib/gl/GlTypes";
+import {
+    GlBufferUsage,
+    GlPixelType,
+    GlPixelFormat,
+    GlShaderType,
+    GlTextureInternalFormat,
+    GlVertexAttribType,
+} from "@/lib/gl/GlTypes";
 import { exhaustiveSwitchError, frameLoop, random, sample, times } from "@/lib/utils";
 import { DebugDraw } from "@/lib/DebugDraw";
 import { matchesKey } from "@/lib/hooks/useKeyPress";
 import { debugStateToString } from "@/lib/debugPropsToString";
 import { InstantUi, useInstantUi } from "@/lib/InstantUi";
 import { floatColor, floatColorToHex } from "@/blob-factory/colors";
+import { text } from "stream/consumers";
 
 const initialBlobCount = Math.floor(random(5, 10));
 const possibleColors = [
@@ -165,6 +173,7 @@ function startBlobFactory(
     const resolutionUniform = program.uniformVector2("u_resolution");
     const smoothnessUniform = program.uniformFloat("u_smoothness");
     const outlineModeUniform = program.uniformBool("u_outlineMode");
+    const blobsUniform = program.uniformTexture2d("u_blobs");
 
     const positionsVao = program.createAndBindVertexArray({
         name: "a_position",
@@ -172,32 +181,12 @@ function startBlobFactory(
         type: GlVertexAttribType.Float,
     });
 
-    const blobsTexturePosition = assertExists(
-        displayGl.gl.getUniformLocation(program.program, "u_blobs"),
-    );
-    const texture = assertExists(displayGl.gl.createTexture());
-
-    // texture:
-    {
-        const { gl } = displayGl;
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            0, // level
-            gl.RGBA32F, // internal format
-            blobs.length, // width
-            1, // height
-            0, // border
-            gl.RGBA, // format
-            gl.FLOAT, // type
-            blobStore.current, // data
-        );
-
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    }
+    const texture = displayGl.createTexture(0, {
+        internalFormat: GlTextureInternalFormat.Rgba32f,
+        pixelType: GlPixelType.Float,
+        pixelFormat: GlPixelFormat.Rgba,
+    });
+    texture.configureForData();
 
     const setSize = (newSize: Vector2) => {
         size = newSize;
@@ -259,20 +248,14 @@ function startBlobFactory(
         smoothnessUniform.set(smoothness);
         outlineModeUniform.set(outlineMode);
 
-        displayGl.gl.texImage2D(
-            displayGl.gl.TEXTURE_2D,
-            0, // level
-            displayGl.gl.RGBA32F, // internal format
-            blobs.length * 2, // width
-            1, // height
-            0, // border
-            displayGl.gl.RGBA, // format
-            displayGl.gl.FLOAT, // type
-            blobStore.current, // data
-        );
+        texture.update({
+            width: blobs.length * 2,
+            height: 1,
+            data: blobStore.current,
+        });
+        blobsUniform.set(texture);
 
         positionsVao.bindVao();
-        displayGl.gl.uniform1i(blobsTexturePosition, 0);
         displayGl.gl.drawArrays(WebGL2RenderingContext.TRIANGLES, 0, 6);
 
         // draw ui:

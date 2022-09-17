@@ -1,5 +1,6 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { Gl } from "@/lib/gl/Gl";
+import { GlTexture2d } from "@/lib/gl/GlTexture2d";
 
 export abstract class GlUniform<T> {
     constructor(readonly gl: Gl, readonly name: string, readonly location: WebGLUniformLocation) {}
@@ -22,5 +23,11 @@ export class GlUniformFloat extends GlUniform<number> {
 export class GlUniformBool extends GlUniform<boolean> {
     set(value: boolean) {
         this.gl.gl.uniform1ui(this.location, value ? 1 : 0);
+    }
+}
+
+export class GlUniformTexture2d extends GlUniform<GlTexture2d> {
+    set(value: GlTexture2d) {
+        this.gl.gl.uniform1i(this.location, value.textureUnit);
     }
 }

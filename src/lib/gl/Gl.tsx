@@ -1,7 +1,8 @@
 import { assert, assertExists } from "@/lib/assert";
 import { GlProgram } from "@/lib/gl/GlProgram";
 import { GlShader } from "@/lib/gl/GlShader";
-import { GlShaderType } from "@/lib/gl/GlTypes";
+import { GlTexture2d } from "@/lib/gl/GlTexture2d";
+import { GlShaderType, GlTextureFormat } from "@/lib/gl/GlTypes";
 import { get } from "@/lib/utils";
 
 export class Gl {
@@ -24,6 +25,11 @@ export class Gl {
         () => assertExists(this.gl.createVertexArray()),
         (vertexArray) => this.gl.deleteVertexArray(vertexArray),
     );
+    private textures = new GlResources(
+        (textureUnit: number, format: GlTextureFormat, level?: number) =>
+            new GlTexture2d(this, textureUnit, format, level),
+        (texture) => this.gl.deleteTexture(texture.texture),
+    );
 
     constructor(readonly canvas: HTMLCanvasElement) {
         const gl = canvas.getContext("webgl2");
@@ -36,6 +42,7 @@ export class Gl {
         this.programs.destroyAll();
         this.buffers.destroyAll();
         this.vertexArrays.destroyAll();
+        this.textures.destroyAll();
     }
 
     createShader(type: GlShaderType, source: string): GlShader {
@@ -49,6 +56,9 @@ export class Gl {
     }
     createVertexArray() {
         return this.vertexArrays.create();
+    }
+    createTexture(textureUnit: number, format: GlTextureFormat, level?: number) {
+        return this.textures.create(textureUnit, format, level);
     }
 
     setDefaultViewport() {

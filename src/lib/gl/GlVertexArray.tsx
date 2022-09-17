@@ -1,5 +1,5 @@
 import { Gl } from "@/lib/gl/Gl";
-import { GlBufferUsage } from "@/lib/gl/GlTypes";
+import { GlBufferUsage, glEnum } from "@/lib/gl/GlTypes";
 
 export class GlVertexArray {
     constructor(
@@ -11,7 +11,7 @@ export class GlVertexArray {
     bufferData(data: BufferSource, usage: GlBufferUsage) {
         const { gl } = this.gl;
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, data, usage);
+        gl.bufferData(gl.ARRAY_BUFFER, data, glEnum(usage));
     }
 
     bindVao() {

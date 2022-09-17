@@ -1,8 +1,13 @@
 import { assertExists, fail } from "@/lib/assert";
 import { Gl } from "@/lib/gl/Gl";
 import { GlShader } from "@/lib/gl/GlShader";
-import { GlVertexAttribType } from "@/lib/gl/GlTypes";
-import { GlUniformBool, GlUniformFloat, GlUniformVector2 } from "@/lib/gl/GlUniform";
+import { glEnum, GlVertexAttribType } from "@/lib/gl/GlTypes";
+import {
+    GlUniformBool,
+    GlUniformFloat,
+    GlUniformTexture2d,
+    GlUniformVector2,
+} from "@/lib/gl/GlUniform";
 import { GlVertexArray } from "@/lib/gl/GlVertexArray";
 
 export class GlProgram {
@@ -51,7 +56,7 @@ export class GlProgram {
 
         const attribLocation = gl.getAttribLocation(this.program, name);
         gl.enableVertexAttribArray(attribLocation);
-        gl.vertexAttribPointer(attribLocation, size, type, normalize, stride, offset);
+        gl.vertexAttribPointer(attribLocation, size, glEnum(type), normalize, stride, offset);
 
         return new GlVertexArray(this.gl, vertexArray, buffer);
     }
@@ -68,6 +73,9 @@ export class GlProgram {
     }
     uniformBool(name: string) {
         return new GlUniformBool(this.gl, name, this.getUniformLocation(name));
+    }
+    uniformTexture2d(name: string) {
+        return new GlUniformTexture2d(this.gl, name, this.getUniformLocation(name));
     }
 
     use() {

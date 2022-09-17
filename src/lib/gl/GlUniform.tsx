@@ -3,31 +3,45 @@ import { Gl } from "@/lib/gl/Gl";
 import { GlTexture2d } from "@/lib/gl/GlTexture2d";
 
 export abstract class GlUniform<T> {
-    constructor(readonly gl: Gl, readonly name: string, readonly location: WebGLUniformLocation) {}
+    value: T;
+    constructor(
+        readonly gl: Gl,
+        readonly name: string,
+        readonly location: WebGLUniformLocation,
+        initialValue: T,
+    ) {
+        this.value = initialValue;
+    }
 
-    abstract set(value: T): void;
+    abstract apply(): void;
 }
 
 export class GlUniformVector2 extends GlUniform<Vector2> {
-    set(value: Vector2) {
-        this.gl.gl.uniform2f(this.location, value.x, value.y);
+    apply() {
+        this.gl.gl.uniform2f(this.location, this.value.x, this.value.y);
     }
 }
 
 export class GlUniformFloat extends GlUniform<number> {
-    set(value: number) {
-        this.gl.gl.uniform1f(this.location, value);
+    apply() {
+        this.gl.gl.uniform1f(this.location, this.value);
     }
 }
 
 export class GlUniformBool extends GlUniform<boolean> {
-    set(value: boolean) {
-        this.gl.gl.uniform1ui(this.location, value ? 1 : 0);
+    apply() {
+        this.gl.gl.uniform1ui(this.location, this.value ? 1 : 0);
     }
 }
 
 export class GlUniformTexture2d extends GlUniform<GlTexture2d> {
-    set(value: GlTexture2d) {
-        this.gl.gl.uniform1i(this.location, value.textureUnit);
+    apply() {
+        this.gl.gl.uniform1i(this.location, this.value.textureUnit);
+    }
+}
+
+export class GlUniformEnum<T extends number> extends GlUniform<T> {
+    apply(): void {
+        this.gl.gl.uniform1i(this.location, this.value);
     }
 }

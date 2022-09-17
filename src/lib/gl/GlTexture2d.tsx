@@ -67,15 +67,6 @@ export class GlTexture2d {
     upload() {
         assert(this.data, "data must be set on texture to upload");
         this.bind();
-        console.log(
-            this.format,
-            glEnum(this.format.internalFormat),
-            this.gl.gl.RGBA32F,
-            glEnum(this.format.pixelFormat),
-            this.gl.gl.RGBA,
-            glEnum(this.format.pixelType),
-            this.gl.gl.FLOAT,
-        );
         this.gl.gl.texImage2D(
             WebGL2RenderingContext.TEXTURE_2D,
             this.level,

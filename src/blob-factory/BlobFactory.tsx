@@ -12,13 +12,12 @@ import {
     GlTextureInternalFormat,
     GlVertexAttribType,
 } from "@/lib/gl/GlTypes";
-import { exhaustiveSwitchError, frameLoop, random, sample, times } from "@/lib/utils";
+import { exhaustiveSwitchError, frameLoop, random, sample, times, varyRelative } from "@/lib/utils";
 import { DebugDraw } from "@/lib/DebugDraw";
 import { matchesKey } from "@/lib/hooks/useKeyPress";
 import { debugStateToString } from "@/lib/debugPropsToString";
 import { InstantUi, useInstantUi } from "@/lib/InstantUi";
 import { floatColor, floatColorToHex } from "@/blob-factory/colors";
-import { text } from "stream/consumers";
 
 const initialBlobCount = Math.floor(random(5, 10));
 const possibleColors = [
@@ -72,12 +71,12 @@ export function BlobFactoryRenderer({ size }: { size: Vector2 }) {
                 }}
                 onPointerDown={(e) => {
                     if (blobFactoryRef.current) {
-                        blobFactoryRef.current.onPointerDown();
+                        blobFactoryRef.current.onPointerDown(Vector2.fromEvent(e));
                     }
                 }}
                 onPointerUp={(e) => {
                     if (blobFactoryRef.current) {
-                        blobFactoryRef.current.onPointerUp();
+                        blobFactoryRef.current.onPointerUp(Vector2.fromEvent(e));
                     }
                 }}
             >
@@ -140,15 +139,25 @@ type BlobFactoryState =
           center: Vector2;
       };
 
+enum BlobFactoryMode {
+    Blur = 0,
+    Inside = 1,
+    Outside = 2,
+    Fill = 3,
+}
+const modes = [
+    { label: "blur", value: BlobFactoryMode.Blur },
+    { label: "fill", value: BlobFactoryMode.Fill },
+    { label: "inside", value: BlobFactoryMode.Inside },
+    { label: "outside", value: BlobFactoryMode.Outside },
+];
+
 function startBlobFactory(
     displayCanvas: HTMLCanvasElement,
     uiCanvas: HTMLCanvasElement,
     controls: InstantUi,
 ) {
-    let size = new Vector2(100, 100);
     let cursor = Vector2.ZERO;
-    let smoothness = random(50, 100);
-    let outlineMode = Math.random() < 0.5;
 
     let state: BlobFactoryState = { type: "idle" };
 
@@ -170,10 +179,11 @@ function startBlobFactory(
         return blob;
     });
 
-    const resolutionUniform = program.uniformVector2("u_resolution");
-    const smoothnessUniform = program.uniformFloat("u_smoothness");
-    const outlineModeUniform = program.uniformBool("u_outlineMode");
-    const blobsUniform = program.uniformTexture2d("u_blobs");
+    const size = program.uniformVector2("u_resolution", new Vector2(100, 100));
+    const smoothness = program.uniformFloat("u_smoothness", random(50, 100));
+    const blurSize = program.uniformFloat("u_blurSize", random(70, 150));
+    const blurSpread = program.uniformFloat("u_blurSpread", random(0.1, 0.7));
+    const mode = program.uniformEnum("u_mode", sample(modes).value);
 
     const positionsVao = program.createAndBindVertexArray({
         name: "a_position",
@@ -187,11 +197,25 @@ function startBlobFactory(
         pixelFormat: GlPixelFormat.Rgba,
     });
     texture.configureForData();
+    program.uniformTexture2d("u_blobs", texture);
 
     const setSize = (newSize: Vector2) => {
-        size = newSize;
+        size.value = newSize;
         displayGl.setDefaultViewport();
-        const positions = [0, 0, size.x, size.y, 0, size.y, 0, 0, size.x, 0, size.x, size.y];
+        const positions = [
+            0,
+            0,
+            newSize.x,
+            newSize.y,
+            0,
+            newSize.y,
+            0,
+            0,
+            newSize.x,
+            0,
+            newSize.x,
+            newSize.y,
+        ];
         positionsVao.bufferData(new Float32Array(positions), GlBufferUsage.StaticDraw);
         draw();
     };
@@ -237,24 +261,37 @@ function startBlobFactory(
 
     const draw = () => {
         // controls:
-        smoothness = controls.range("smoothness", smoothness, { min: 0, max: 100, step: 0.1 });
-        outlineMode = controls.checkbox("outline", outlineMode);
+        mode.value = controls.segmentedControl("mode", mode.value, modes);
+        if (mode.value === BlobFactoryMode.Inside || mode.value === BlobFactoryMode.Outside) {
+            smoothness.value = controls.range("smoothness", smoothness.value, {
+                min: 0,
+                max: 100,
+                step: 0.1,
+            });
+        }
+        blurSize.value = controls.range("blur size", blurSize.value, {
+            min: 0,
+            max: 150,
+            step: 0.1,
+        });
+        if (mode.value === BlobFactoryMode.Blur) {
+            blurSpread.value = controls.range("blur spread", blurSpread.value, {
+                min: 0.01,
+                max: 0.99,
+                step: 0.01,
+            });
+        }
 
         // draw actual:
         displayGl.clear();
-        program.use();
-
-        resolutionUniform.set(size);
-        smoothnessUniform.set(smoothness);
-        outlineModeUniform.set(outlineMode);
 
         texture.update({
             width: blobs.length * 2,
             height: 1,
             data: blobStore.current,
         });
-        blobsUniform.set(texture);
 
+        program.use();
         positionsVao.bindVao();
         displayGl.gl.drawArrays(WebGL2RenderingContext.TRIANGLES, 0, 6);
 
@@ -339,7 +376,8 @@ function startBlobFactory(
                     exhaustiveSwitchError(state);
             }
         },
-        onPointerDown: () => {
+        onPointerDown: (newPosition: Vector2) => {
+            cursor = newPosition;
             const hovered = getHover();
             switch (state.type) {
                 case "idle":
@@ -373,7 +411,8 @@ function startBlobFactory(
                     exhaustiveSwitchError(state);
             }
         },
-        onPointerUp: () => {
+        onPointerUp: (newPosition: Vector2) => {
+            cursor = newPosition;
             switch (state.type) {
                 case "idle":
                 case "selected":

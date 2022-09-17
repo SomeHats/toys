@@ -1,5 +1,6 @@
 import { useEvent } from "@/lib/hooks/useEvent";
 import { copyArrayAndReplace, deepEqual, exhaustiveSwitchError, UpdateAction } from "@/lib/utils";
+import classNames from "classnames";
 import { useId, useMemo, useRef, useState } from "react";
 
 type RangeUiEntry = {
@@ -19,15 +20,27 @@ type CheckboxUiEntry = {
     readonly oldValue: boolean;
 };
 
-type ColorPickerUiEntry = {
+type ColorPickerUiEntry<T> = {
     readonly type: "colorPicker";
     readonly label: string;
-    readonly value: unknown;
-    readonly oldValue: unknown;
-    readonly options: ReadonlyArray<{ value: unknown; color: string }>;
+    readonly value: T;
+    readonly oldValue: T;
+    readonly options: ReadonlyArray<{ value: T; color: string }>;
 };
 
-type UiEntry = RangeUiEntry | CheckboxUiEntry | ColorPickerUiEntry;
+type SegmentedControlEntry<T> = {
+    readonly type: "segmentedControl";
+    readonly label: string;
+    readonly value: T;
+    readonly oldValue: T;
+    readonly options: ReadonlyArray<{ label: string; value: T }>;
+};
+
+type UiEntry =
+    | RangeUiEntry
+    | CheckboxUiEntry
+    | ColorPickerUiEntry<unknown>
+    | SegmentedControlEntry<unknown>;
 
 export function useInstantUi() {
     const [state, setState] = useState<ReadonlyArray<UiEntry>>([]);
@@ -54,29 +67,48 @@ export function useInstantUi() {
             );
         },
     );
-    const colorPicker = useEvent(
-        (
-            label: string,
-            value: unknown,
-            options: ReadonlyArray<{ value: unknown; color: string }>,
-        ): unknown => {
-            pendingUiRef.current.push({
-                type: "colorPicker",
-                label,
-                value,
-                options,
-                oldValue: value,
-            });
-            return (
-                state.find(
-                    (entry): entry is ColorPickerUiEntry =>
-                        entry.type === "colorPicker" &&
-                        entry.label === label &&
-                        deepEqual(entry.oldValue, value),
-                )?.value ?? value
-            );
-        },
-    );
+    const colorPicker = useEvent(function colorPicker<T>(
+        label: string,
+        value: T,
+        options: ReadonlyArray<{ value: T; color: string }>,
+    ): unknown {
+        pendingUiRef.current.push({
+            type: "colorPicker",
+            label,
+            value,
+            options,
+            oldValue: value,
+        });
+        return (
+            state.find(
+                (entry): entry is ColorPickerUiEntry<T> =>
+                    entry.type === "colorPicker" &&
+                    entry.label === label &&
+                    deepEqual(entry.oldValue, value),
+            )?.value ?? value
+        );
+    });
+    const segmentedControl = useEvent(function segmentedControl<T>(
+        label: string,
+        value: T,
+        options: ReadonlyArray<{ value: T; label: string }>,
+    ) {
+        pendingUiRef.current.push({
+            type: "segmentedControl",
+            label,
+            value,
+            options,
+            oldValue: value,
+        });
+        return (
+            state.find(
+                (entry): entry is SegmentedControlEntry<T> =>
+                    entry.type === "segmentedControl" &&
+                    entry.label === label &&
+                    deepEqual(entry.oldValue, value),
+            )?.value ?? value
+        );
+    });
     const checkbox = useEvent((label: string, value: boolean): boolean => {
         pendingUiRef.current.push({
             type: "checkbox",
@@ -101,8 +133,8 @@ export function useInstantUi() {
     return {
         render: () => <InstantUiRenderer state={state} onChange={setState} />,
         ui: useMemo(
-            () => ({ checkbox, range, flush, colorPicker }),
-            [checkbox, colorPicker, flush, range],
+            () => ({ checkbox, range, flush, colorPicker, segmentedControl }),
+            [checkbox, colorPicker, flush, range, segmentedControl],
         ),
     };
 }
@@ -149,6 +181,19 @@ function InstantUiRenderer({
                     case "colorPicker":
                         return (
                             <ColorPickerInput
+                                key={i}
+                                label={entry.label}
+                                value={entry.value}
+                                options={entry.options}
+                                onChange={(value) =>
+                                    onChange(copyArrayAndReplace(state, i, { ...entry, value }))
+                                }
+                            />
+                        );
+
+                    case "segmentedControl":
+                        return (
+                            <SegmentedControlInput
                                 key={i}
                                 label={entry.label}
                                 value={entry.value}
@@ -251,6 +296,38 @@ function ColorPickerInput({
                             <div className="h-3 w-3 rounded-full border-2 border-black bg-white" />
                         )}
                     </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function SegmentedControlInput({
+    label,
+    value,
+    onChange,
+    options,
+}: {
+    label: string;
+    value: unknown;
+    onChange: (newValue: unknown) => void;
+    options: ReadonlyArray<{ value: unknown; label: string }>;
+}) {
+    return (
+        <div className="flex-col gap-3 p-3">
+            {label}
+            <div className="flex gap-2">
+                {options.map((option, i) => (
+                    <button
+                        key={i}
+                        className={classNames(
+                            "flex h-6 flex-auto items-center justify-center rounded text-sm",
+                            deepEqual(option.value, value) ? "bg-gray-600" : "hover:bg-gray-800",
+                        )}
+                        onClick={() => onChange(option.value)}
+                    >
+                        {option.label}
+                    </button>
                 ))}
             </div>
         </div>

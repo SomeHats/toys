@@ -1,9 +1,13 @@
 import { assertExists, fail } from "@/lib/assert";
+import Vector2 from "@/lib/geom/Vector2";
 import { Gl } from "@/lib/gl/Gl";
 import { GlShader } from "@/lib/gl/GlShader";
+import { GlTexture2d } from "@/lib/gl/GlTexture2d";
 import { glEnum, GlVertexAttribType } from "@/lib/gl/GlTypes";
 import {
+    GlUniform,
     GlUniformBool,
+    GlUniformEnum,
     GlUniformFloat,
     GlUniformTexture2d,
     GlUniformVector2,
@@ -13,6 +17,7 @@ import { GlVertexArray } from "@/lib/gl/GlVertexArray";
 export class GlProgram {
     readonly program: WebGLProgram;
     private readonly gl: Gl;
+    private readonly uniforms: Array<GlUniform<unknown>> = [];
 
     constructor(_gl: Gl, readonly vertexShader: GlShader, readonly fragmentShader: GlShader) {
         this.gl = _gl;
@@ -62,23 +67,47 @@ export class GlProgram {
     }
 
     private getUniformLocation(name: string) {
-        return assertExists(this.gl.gl.getUniformLocation(this.program, name));
+        return assertExists(
+            this.gl.gl.getUniformLocation(this.program, name),
+            `uniform ${name} does not exist`,
+        );
     }
-
-    uniformVector2(name: string) {
-        return new GlUniformVector2(this.gl, name, this.getUniformLocation(name));
+    private addUniform<T, Uniform extends GlUniform<T>>(
+        GlUniformType: {
+            new (gl: Gl, name: string, location: WebGLUniformLocation, initialValue: T): Uniform;
+        },
+        name: string,
+        initialValue: T,
+    ): Uniform {
+        const uniform = new GlUniformType(
+            this.gl,
+            name,
+            this.getUniformLocation(name),
+            initialValue,
+        );
+        this.uniforms.push(uniform);
+        return uniform;
     }
-    uniformFloat(name: string) {
-        return new GlUniformFloat(this.gl, name, this.getUniformLocation(name));
+    uniformVector2(name: string, initialValue: Vector2) {
+        return this.addUniform(GlUniformVector2, name, initialValue);
     }
-    uniformBool(name: string) {
-        return new GlUniformBool(this.gl, name, this.getUniformLocation(name));
+    uniformFloat(name: string, initialValue: number) {
+        return this.addUniform(GlUniformFloat, name, initialValue);
     }
-    uniformTexture2d(name: string) {
-        return new GlUniformTexture2d(this.gl, name, this.getUniformLocation(name));
+    uniformBool(name: string, initialValue: boolean) {
+        return this.addUniform(GlUniformBool, name, initialValue);
+    }
+    uniformTexture2d(name: string, initialValue: GlTexture2d) {
+        return this.addUniform(GlUniformTexture2d, name, initialValue);
+    }
+    uniformEnum<T extends number>(name: string, initialValue: T) {
+        return this.addUniform(GlUniformEnum, name, initialValue);
     }
 
     use() {
         this.gl.gl.useProgram(this.program);
+        for (const uniform of this.uniforms) {
+            uniform.apply();
+        }
     }
 }

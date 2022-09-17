@@ -14,10 +14,10 @@ const roots = glob
     ]);
 
 // https://vitejs.dev/config/
-export default defineConfig(async () => {
+export default defineConfig(async ({ mode }) => {
     const glsl = await import("vite-plugin-glsl");
     return {
-        plugins: [react(), glsl.default()],
+        plugins: [react(), glsl.default({ compress: mode === "production" })],
         base: "./",
         root: path.resolve(__dirname, "src"),
         publicDir: false,

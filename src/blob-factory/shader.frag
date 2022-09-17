@@ -3,13 +3,22 @@
 #define MAX_BLOBS 32
 #define ENTRIES_PER_BLOB 2
 
+#define MODE_BLUR 0
+#define MODE_INSIDE 1
+#define MODE_OUTSIDE 2
+#define MODE_FILL 3
+
 // fragment shaders don't have a default precision so we need
 // to pick one. highp is a good default. It means "high precision"
 precision highp float;
 
 uniform sampler2D u_blobs;
 uniform float u_smoothness;
-uniform bool u_outlineMode;
+uniform float u_blurSize;
+uniform float u_blurSpread;
+uniform int u_mode;
+// uniform bool u_outlineMode;
+// uniform bool u_blurMode;
 
 in vec2 screenPosition;
 
@@ -65,38 +74,61 @@ vec3 lch2rgb(in vec3 c) {
     return rgb;
 }
 
+float easeInOutCubic(in float t) {
+    return t < 0.5 ? 4. * t * t * t
+                   : (t - 1.) * (2. * t - 2.) * (2. * t - 2.) + 1.;
+}
+
+float expDropOff(in float t, in float k) { return 1. / ((t / k) + 1.); }
+
 void main() {
     int blobCount =
         min(textureSize(u_blobs, 0).x / ENTRIES_PER_BLOB, MAX_BLOBS);
 
     float totalStrength = 0.;
     vec3 totalColor = vec3(0);
-
     float dist = 99999.0;
 
     for (int i = 0; i < blobCount; i++) {
         vec4 d1 = texelFetch(u_blobs, ivec2(i * ENTRIES_PER_BLOB, 0), 0);
         vec2 center = d1.xy;
         float radius = d1.z;
-        vec3 color = rgb2lch(
+        vec3 blobColor = rgb2lch(
             texelFetch(u_blobs, ivec2((i * ENTRIES_PER_BLOB) + 1, 0), 0).rgb);
 
         float sd = sdfCircle(center, radius);
-        float strength = clamp(map(sd, 0., u_smoothness, 1., 0.), 0., 1.);
-        totalStrength += strength;
-        totalColor += color * strength;
+        // float strength = clamp(map(sd, 0., u_blurSize, 1., 0.), 0., 1.);
+        // float strength = expDropOff(max(0., sd), u_blurSize);
+        // exponential dropoff + smoothstep ease-in
+        float strength = mix(smoothstep(1.0, 0.0, sd / (u_blurSize * 2.)),
+                             expDropOff(sd, u_blurSize),
+                             smoothstep(0., 1., sd / u_blurSize));
+        strength = pow(strength, 5.0);
 
+        // vec4 colorToMix = color == bg && strength > 0.
+        //                       ? vec4(bg.xy, blobColor.z, 1.)
+        //                       : color;
+        // color = mix(colorToMix, vec4(blobColor, strength), strength);
+
+        totalStrength += strength;
+        totalColor += blobColor * strength;
         dist = opSmoothUnion(sd, dist, u_smoothness);
     }
 
-    float result = smoothstep(0.0, 1.0, -dist);
-
-    // super cool outline version:
-    if (u_outlineMode) {
+    float cutoff = smoothstep(0.0, 1.0, -dist);
+    if (u_mode == MODE_BLUR) {
+        // blur mode
+        outColor =
+            vec4(mix(vec3(0), lch2rgb(totalColor / totalStrength),
+                     clamp(pow(totalStrength, 1. - u_blurSpread), 0., 1.)),
+                 1);
+    } else if (u_mode == MODE_INSIDE) {
         outColor = vec4(
-            mix(lch2rgb(totalColor / totalStrength), vec3(0, 0, 0), result), 1);
-    } else {
+            mix(vec3(0, 0, 0), lch2rgb(totalColor / totalStrength), cutoff), 1);
+    } else if (u_mode == MODE_OUTSIDE) {
         outColor = vec4(
-            mix(vec3(0, 0, 0), lch2rgb(totalColor / totalStrength), result), 1);
+            mix(lch2rgb(totalColor / totalStrength), vec3(0, 0, 0), cutoff), 1);
+    } else if (u_mode == MODE_FILL) {
+        outColor = vec4(lch2rgb(totalColor / totalStrength), 1);
     }
 }

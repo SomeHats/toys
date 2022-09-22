@@ -1,6 +1,7 @@
 import { assert, assertExists } from "@/lib/assert";
+import { debugStateToString } from "@/lib/debugPropsToString";
 import Vector2 from "@/lib/geom/Vector2";
-import { matchesKeyDown } from "@/lib/hooks/useKeyPress";
+import { matchesKey, matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { applyUpdateWithin, exhaustiveSwitchError, UpdateAction } from "@/lib/utils";
 import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
@@ -9,7 +10,8 @@ import { SplatLocation } from "@/splatapus/SplatLocation";
 import { DrawTool } from "@/splatapus/tools/DrawTool";
 import { KeyPointTool } from "@/splatapus/tools/KeyPointTool";
 import { KeyboardEventContext, PointerEventContext } from "@/splatapus/tools/lib/EventContext";
-import { QuickTool, SelectedTool } from "@/splatapus/tools/tools";
+import { QuickPanTool } from "@/splatapus/tools/QuickPanTool";
+import { SelectedTool } from "@/splatapus/tools/tools";
 import { ToolType } from "@/splatapus/tools/ToolType";
 import { UndoStack } from "@/splatapus/UndoStack";
 import { CtxAction } from "@/splatapus/useEditorState";
@@ -17,25 +19,28 @@ import { Viewport } from "@/splatapus/Viewport";
 
 export type Interaction = {
     multiTouchPan: MultiTouchPan;
-    quickTool: QuickTool | null;
+    quickPanTool: QuickPanTool | null;
     selectedTool: SelectedTool;
 };
 
 export const Interaction = {
     initialize: (toolType: ToolType): Interaction => ({
         multiTouchPan: MultiTouchPan.initialize(),
-        quickTool: null,
+        quickPanTool: null,
         selectedTool: SelectedTool.initialize(toolType),
     }),
     toDebugString: (interaction: Interaction): string => {
-        if (interaction.quickTool) {
-            return QuickTool.toDebugString(interaction.quickTool);
+        if (interaction.quickPanTool) {
+            return debugStateToString(
+                interaction.quickPanTool.type,
+                QuickPanTool.getDebugProperties(interaction.quickPanTool),
+            );
         }
         return SelectedTool.toDebugString(interaction.selectedTool);
     },
     getCanvasClassName: (interaction: Interaction) => {
-        if (interaction.quickTool) {
-            return QuickTool.getCanvasClassName(interaction.quickTool);
+        if (interaction.quickPanTool) {
+            return QuickPanTool.getCanvasClassName(interaction.quickPanTool);
         }
         return SelectedTool.getCanvasClassName(interaction.selectedTool);
     },
@@ -47,13 +52,13 @@ export const Interaction = {
         interaction: Interaction,
         update: UpdateAction<SelectedTool>,
     ): Interaction => applyUpdateWithin(interaction, "selectedTool", update),
-    updateQuickTool: (
+    updateQuickPanTool: (
         interaction: Interaction,
-        update: UpdateAction<QuickTool | null>,
-    ): Interaction => applyUpdateWithin(interaction, "quickTool", update),
+        update: UpdateAction<QuickPanTool | null>,
+    ): Interaction => applyUpdateWithin(interaction, "quickPanTool", update),
 
     requestSetSelectedTool: (interaction: Interaction, toolType: ToolType): Interaction => {
-        if (interaction.quickTool || !SelectedTool.isIdle(interaction.selectedTool)) {
+        if (interaction.quickPanTool || !SelectedTool.isIdle(interaction.selectedTool)) {
             return interaction;
         }
         return { ...interaction, selectedTool: SelectedTool.initialize(toolType) };
@@ -61,14 +66,11 @@ export const Interaction = {
 
     onKeyDown: (ctx: KeyboardEventContext, interaction: Interaction): Interaction => {
         if (SelectedTool.isIdle(interaction.selectedTool)) {
-            if (!interaction.quickTool) {
-                const activatedQuickTool = QuickTool.initializeForKeyDown(ctx);
-                if (activatedQuickTool) {
-                    return { ...interaction, quickTool: activatedQuickTool };
-                }
+            if (!interaction.quickPanTool && matchesKeyDown(ctx.event, " ")) {
+                return { ...interaction, quickPanTool: QuickPanTool.initialize() };
             }
             const activatedSelectedTool = SelectedTool.initializeForKeyDown(ctx);
-            if (activatedSelectedTool && !interaction.quickTool) {
+            if (activatedSelectedTool && !interaction.quickPanTool) {
                 return { ...interaction, selectedTool: activatedSelectedTool };
             }
             if (matchesKeyDown(ctx.event, { key: "z", command: true })) {
@@ -122,11 +124,8 @@ export const Interaction = {
         return interaction;
     },
     onKeyUp: (ctx: KeyboardEventContext, interaction: Interaction): Interaction => {
-        if (interaction.quickTool) {
-            const nextQuickTool = QuickTool.onKeyUp(ctx, interaction.quickTool);
-            if (nextQuickTool !== interaction.quickTool) {
-                return { ...interaction, quickTool: nextQuickTool };
-            }
+        if (interaction.quickPanTool && matchesKey(ctx.event, " ")) {
+            return { ...interaction, quickPanTool: null };
         }
         return interaction;
     },
@@ -143,9 +142,9 @@ export const Interaction = {
             return interaction;
         }
 
-        if (interaction.quickTool) {
-            return Interaction.updateQuickTool(interaction, (quickTool) =>
-                QuickTool.onPointerEvent(ctx, assertExists(quickTool)),
+        if (interaction.quickPanTool) {
+            return Interaction.updateQuickPanTool(interaction, (quickTool) =>
+                QuickPanTool.onPointerEvent(ctx, assertExists(quickTool)),
             );
         }
 

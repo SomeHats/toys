@@ -145,6 +145,7 @@ function Splatapus({ size }: { size: Vector2 }) {
                 />
             </div>
             <UiOverlayFrame
+                size={size}
                 leftBar={
                     <Toolbar
                         selectedToolType={interaction.selectedTool.type}

@@ -60,5 +60,5 @@ export const QuickPanTool = createTool<QuickPanTool>()({
         }
         return "cursor-grabbing";
     },
-    gesture: QuickPanGesture,
+    onPointerEvent: QuickPanGesture.createOnPointerEvent<"gesture", QuickPanTool>("gesture"),
 });

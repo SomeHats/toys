@@ -16,7 +16,7 @@ import React from "react";
 
 const contentGradient = makeGradient(Color(tailwindColors.stone50), "to right", 40, 1);
 const contentStyle = {
-    webkitMaskImage: contentGradient,
+    WebkitMaskImage: contentGradient,
     maskImage: contentGradient,
 };
 const buttonStyle = {
@@ -57,7 +57,7 @@ export function RightBar({
                 }}
             />
             {Array.from(document.shapes, (shape, i) => (
-                <div className="relative flex w-max flex-col gap-2">
+                <div className="relative flex w-max flex-col gap-2" key={shape.id}>
                     <div
                         className={classNames(
                             "flex gap-1",
@@ -68,6 +68,7 @@ export function RightBar({
                     >
                         {Array.from(document.keyPoints, (keyPoint) => (
                             <button
+                                key={keyPoint.id}
                                 className={classNames(
                                     "overflow-none h-16 w-20 flex-none rounded border",
                                     shape.id === location.shapeId &&

@@ -28,7 +28,6 @@ export class Viewport {
     }
 
     handleWheelEvent(event: WheelEvent) {
-        console.log("wheel", event);
         event.preventDefault();
         event.stopImmediatePropagation();
         const { deltaX, deltaY } = event;

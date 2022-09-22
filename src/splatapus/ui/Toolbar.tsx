@@ -16,7 +16,7 @@ export function Toolbar({
             Interaction.requestSetSelectedTool(interaction, tool),
         );
     return (
-        <div className="pointer-events-none absolute top-0 bottom-0 flex cursor-wait flex-col items-center justify-center gap-3 p-3">
+        <div className="pointer-events-none flex flex-col items-center justify-center gap-3 p-3">
             <ToolbarButton
                 letter="d"
                 isSelected={selectedToolType === ToolType.Draw}

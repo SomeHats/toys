@@ -388,3 +388,16 @@ export function applyUpdateWithin<T, Key extends keyof T>(
         [key]: after,
     };
 }
+
+export function stringFromError(error: unknown) {
+    if (typeof error === "string") {
+        return error;
+    }
+    if (typeof error === "object" && error !== null) {
+        const message = get(error, "message");
+        if (message) {
+            return message;
+        }
+    }
+    return "unknown error";
+}

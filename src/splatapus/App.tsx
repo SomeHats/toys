@@ -7,16 +7,19 @@ import { LOAD_FROM_AUTOSAVE_ENABLED } from "@/splatapus/constants";
 import { loadSaved, makeEmptySaveState, writeSavedDebounced } from "@/splatapus/store";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { Viewport, ViewportState } from "@/splatapus/Viewport";
-import { Toolbar } from "@/splatapus/Toolbar";
+import { Toolbar } from "@/splatapus/ui/Toolbar";
 import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
 import { EditorState, useEditorState } from "@/splatapus/useEditorState";
 import { Interaction } from "@/splatapus/Interaction";
 import { PreviewPosition } from "@/splatapus/PreviewPosition";
-import { RightBar } from "@/splatapus/RightBar";
+import { RightBar } from "@/splatapus/ui/RightBar";
 import { assertExists } from "@/lib/assert";
 import { UndoStack } from "@/splatapus/UndoStack";
 import { catExample } from "@/splatapus/catExample";
 import { SplatLocation } from "@/splatapus/SplatLocation";
+import { Button } from "@/splatapus/ui/Button";
+import { UiOverlayFrame } from "@/splatapus/ui/UiOverlayFrame";
+import { ExportButton, ImportButton } from "@/splatapus/ui/ImportExportButtons";
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
@@ -141,63 +144,65 @@ function Splatapus({ size }: { size: Vector2 }) {
                     onUpdateInteraction={updateInteraction}
                 />
             </div>
-            <Toolbar
-                selectedToolType={interaction.selectedTool.type}
-                updateInteraction={updateInteraction}
-            />
-            <RightBar
-                document={document}
-                location={location}
-                updateDocument={updateDocument}
-                updateLocation={updateLocation}
-            />
-            <div className="absolute bottom-0 left-0 flex w-full items-center justify-center gap-3 p-3">
-                <button
-                    className={classNames(
-                        "flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-4 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
-                    )}
-                    onClick={() => updateUndoStack((ctx, undoStack) => UndoStack.undo(undoStack))}
-                >
-                    undo
-                </button>
-                <button
-                    className={classNames(
-                        "flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-4 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
-                    )}
-                    onClick={() => updateUndoStack((ctx, undoStack) => UndoStack.redo(undoStack))}
-                >
-                    redo
-                </button>
-                <button
-                    className={classNames(
-                        "flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-4 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
-                    )}
-                    onClick={() => {
-                        const { doc, location } = makeEmptySaveState();
-                        updateDocument(() => doc, { lockstepLocation: location });
-                    }}
-                >
-                    reset
-                </button>
-                {catExample.isOk() && (
-                    <button
-                        className={classNames(
-                            "flex h-10 flex-none items-center justify-center justify-self-end rounded-full border border-stone-200 px-4 text-stone-400 shadow-md transition-transform hover:-translate-y-1",
+            <UiOverlayFrame
+                leftBar={
+                    <Toolbar
+                        selectedToolType={interaction.selectedTool.type}
+                        updateInteraction={updateInteraction}
+                    />
+                }
+                rightBar={
+                    <RightBar
+                        document={document}
+                        location={location}
+                        updateDocument={updateDocument}
+                        updateLocation={updateLocation}
+                    />
+                }
+                bottomBar={
+                    <>
+                        <Button
+                            onClick={() =>
+                                updateUndoStack((ctx, undoStack) => UndoStack.undo(undoStack))
+                            }
+                        >
+                            undo
+                        </Button>
+                        <Button
+                            onClick={() =>
+                                updateUndoStack((ctx, undoStack) => UndoStack.redo(undoStack))
+                            }
+                        >
+                            redo
+                        </Button>
+                        <ExportButton document={document} />
+                        <ImportButton updateDocument={updateDocument} />
+                        <Button
+                            onClick={() => {
+                                const { doc, location } = makeEmptySaveState();
+                                updateDocument(() => doc, { lockstepLocation: location });
+                            }}
+                        >
+                            reset
+                        </Button>
+                        {catExample.isOk() && (
+                            <Button
+                                onClick={() => {
+                                    const { doc, location } = catExample.unwrap();
+                                    updateDocument(() => doc, {
+                                        lockstepLocation: new SplatLocation({
+                                            keyPointId: location.keyPointId,
+                                            shapeId: location.shapeId,
+                                        }),
+                                    });
+                                }}
+                            >
+                                example
+                            </Button>
                         )}
-                        onClick={() => {
-                            const { doc, location } = catExample.unwrap();
-                            updateDocument(() => doc, {
-                                lockstepLocation: new SplatLocation({
-                                    keyPointId: location.keyPointId,
-                                    shapeId: location.shapeId,
-                                }),
-                            });
-                        }}
-                    >
-                        example
-                    </button>
-                )}
-            </div>
+                    </>
+                }
+            />
         </>
     );
 }

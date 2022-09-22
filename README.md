@@ -39,6 +39,7 @@ rather focus my limited free time on actually making things with the tools.
             -   [x] quick preview tool
             -   [x] TPS interpolation
             -   [x] handle 1- and 2-point situations
+    -   [x] import/export
     -   [ ] (P0) introduce new "draw" -> "rig" -> "play" modes
     -   [ ] (P0) fix up new drawing for unplaced point - extrapolation produces bad onion skins
             currently

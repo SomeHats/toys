@@ -12,7 +12,7 @@ import {
     GlTextureInternalFormat,
     GlVertexAttribType,
 } from "@/lib/gl/GlTypes";
-import { exhaustiveSwitchError, frameLoop, random, sample, times, varyRelative } from "@/lib/utils";
+import { exhaustiveSwitchError, frameLoop, random, sample, times } from "@/lib/utils";
 import { DebugDraw } from "@/lib/DebugDraw";
 import { matchesKey } from "@/lib/hooks/useKeyPress";
 import { debugStateToString } from "@/lib/debugPropsToString";

@@ -27,37 +27,40 @@ rather focus my limited free time on actually making things with the tools.
         -   [x] zoom at cursor location
         -   [ ] fix zoom gesture zooming browser
         -   [x] mobile pan/zoom support
-    -   [ ] multi-dimensional
+    -   [x] multi-dimensional
         -   [x] keypoint tool
             -   [x] tool boilerplate
             -   [x] tap vs drag gesture detection
             -   [x] select key points
             -   [x] move key points
             -   [x] add key points
-        -   [ ] md-interpolation
+        -   [x] md-interpolation
             -   [x] preview mode?
             -   [x] quick preview tool
             -   [x] TPS interpolation
             -   [x] handle 1- and 2-point situations
+    -   [ ] (P0) introduce new "draw" -> "rig" -> "play" modes
+    -   [ ] (P0) fix up new drawing for unplaced point - extrapolation produces bad onion skins
+            currently
     -   [ ] a r t
         -   [x] more shapes
-            -   [ ] proper more shapes ui
-        -   [ ] colors
-        -   [ ] fills
+            -   [x] proper more shapes ui
+        -   [ ] (P1) colors
+        -   [ ] (P1) fills
     -   [ ] fun
         -   [ ] spring-interpolation
         -   [ ] paint spring params on lines
     -   [ ] animation
-        -   [ ] try density based point allocation instead of distance based
-        -   [ ] "pin" points on the line for animation consistency
+        -   [ ] (P2) try density based point allocation instead of distance based
+        -   [ ] (P2) "pin" points on the line for animation consistency
         -   [ ] turn around?
     -   [ ] design overhaul
     -   [ ] login/share????
 -   blob factory
-    -   [ ] blur mode
+    -   [x] blur mode
     -   [ ] fix color hue blending
     -   [ ] eased color blending
-    -   [ ] experiment with noise?
+    -   [x] experiment with noise?
     -   [ ] save as image
     -   [ ] import/export
     -   [ ] light/dark mode

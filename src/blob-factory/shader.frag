@@ -8,6 +8,12 @@
 #define MODE_OUTSIDE 2
 #define MODE_FILL 3
 
+#define INTERPOLATE_NAIVE 0
+#define INTERPOLATE_VECTOR 1
+#define INTERPOLATE_MIN 2
+
+#define PI 3.1415926538
+
 // fragment shaders don't have a default precision so we need
 // to pick one. highp is a good default. It means "high precision"
 precision highp float;
@@ -17,6 +23,8 @@ uniform float u_smoothness;
 uniform float u_blurSize;
 uniform float u_blurSpread;
 uniform int u_mode;
+uniform bool u_darkMode;
+uniform int u_interpolateMode;
 // uniform bool u_outlineMode;
 // uniform bool u_blurMode;
 
@@ -88,6 +96,8 @@ void main() {
     float totalStrength = 0.;
     vec3 totalColor = vec3(0);
     float dist = 99999.0;
+    vec2 hueVec = vec2(0);
+    float minHue = 0.;
 
     for (int i = 0; i < blobCount; i++) {
         vec4 d1 = texelFetch(u_blobs, ivec2(i * ENTRIES_PER_BLOB, 0), 0);
@@ -112,23 +122,41 @@ void main() {
 
         totalStrength += strength;
         totalColor += blobColor * strength;
+        hueVec += vec2(cos(blobColor.z), sin(blobColor.z)) * strength;
+        if (u_interpolateMode == INTERPOLATE_MIN) {
+            float a = minHue / totalStrength;
+            float d = blobColor.z - a;
+            d = d > radians(180.) || d < radians(-180.)
+                    ? d - radians(360.) * round(d / radians(360.))
+                    : d;
+            minHue += (strength * d);
+        }
         dist = opSmoothUnion(sd, dist, u_smoothness);
     }
 
     float cutoff = smoothstep(0.0, 1.0, -dist);
+    vec3 bgColor = u_darkMode ? vec3(0) : vec3(1);
+    vec3 resultColor = vec3(1, 0, 1);
+    if (u_interpolateMode == INTERPOLATE_NAIVE) {
+        resultColor = lch2rgb(totalColor / totalStrength);
+    } else if (u_interpolateMode == INTERPOLATE_VECTOR) {
+        resultColor = lch2rgb(
+            vec3((totalColor / totalStrength).xy, atan(hueVec.y, hueVec.x)));
+    } else if (u_interpolateMode == INTERPOLATE_MIN) {
+        resultColor = lch2rgb(
+            vec3((totalColor / totalStrength).xy, minHue / totalStrength));
+    }
     if (u_mode == MODE_BLUR) {
         // blur mode
         outColor =
-            vec4(mix(vec3(0), lch2rgb(totalColor / totalStrength),
+            vec4(mix(bgColor, resultColor,
                      clamp(pow(totalStrength, 1. - u_blurSpread), 0., 1.)),
                  1);
     } else if (u_mode == MODE_INSIDE) {
-        outColor = vec4(
-            mix(vec3(0, 0, 0), lch2rgb(totalColor / totalStrength), cutoff), 1);
+        outColor = vec4(mix(bgColor, resultColor, cutoff), 1);
     } else if (u_mode == MODE_OUTSIDE) {
-        outColor = vec4(
-            mix(lch2rgb(totalColor / totalStrength), vec3(0, 0, 0), cutoff), 1);
+        outColor = vec4(mix(resultColor, bgColor, cutoff), 1);
     } else if (u_mode == MODE_FILL) {
-        outColor = vec4(lch2rgb(totalColor / totalStrength), 1);
+        outColor = vec4(resultColor, 1);
     }
 }

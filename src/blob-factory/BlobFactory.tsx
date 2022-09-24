@@ -12,28 +12,48 @@ import {
     GlTextureInternalFormat,
     GlVertexAttribType,
 } from "@/lib/gl/GlTypes";
-import { exhaustiveSwitchError, frameLoop, random, sample, times } from "@/lib/utils";
+import { exhaustiveSwitchError, frameLoop, invLerp, random, sample, times } from "@/lib/utils";
 import { DebugDraw } from "@/lib/DebugDraw";
 import { matchesKey } from "@/lib/hooks/useKeyPress";
 import { debugStateToString } from "@/lib/debugPropsToString";
 import { InstantUi, useInstantUi } from "@/lib/InstantUi";
 import { tailwindColors } from "@/lib/theme";
 import Color from "color";
+import { interpolateHcl } from "d3-interpolate";
+
+type CyberColorScale = (level: 5 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90) => string;
+function interpolateScale(n: number, scale: CyberColorScale): Color {
+    if (n < 5) return Color(scale(5));
+    if (n < 10) return interpolateColors(scale(5), scale(10), invLerp(5, 10, n));
+    if (n < 20) return interpolateColors(scale(10), scale(20), invLerp(10, 20, n));
+    if (n < 30) return interpolateColors(scale(20), scale(30), invLerp(20, 30, n));
+    if (n < 40) return interpolateColors(scale(30), scale(40), invLerp(30, 40, n));
+    if (n < 50) return interpolateColors(scale(40), scale(50), invLerp(40, 50, n));
+    if (n < 60) return interpolateColors(scale(50), scale(60), invLerp(50, 60, n));
+    if (n < 70) return interpolateColors(scale(60), scale(70), invLerp(60, 70, n));
+    if (n < 80) return interpolateColors(scale(70), scale(80), invLerp(70, 80, n));
+    if (n < 90) return interpolateColors(scale(80), scale(90), invLerp(80, 90, n));
+    if (n < 100) return interpolateColors(scale(90), "#000000", invLerp(90, 100, n));
+    return Color("#000000");
+}
+function interpolateColors(a: string, b: string, n: number) {
+    return Color(interpolateHcl(a, b)(n));
+}
 
 const initialBlobCount = Math.floor(random(5, 10));
 const possibleColors = [
-    Color(tailwindColors.cyberRed50),
-    Color(tailwindColors.cyberOrange50),
-    Color(tailwindColors.cyberYellow50),
-    Color(tailwindColors.cyberGreen50),
-    Color(tailwindColors.cyberCyan50),
-    Color(tailwindColors.cyberIndigo50),
-    Color(tailwindColors.cyberPurple50),
-    Color(tailwindColors.cyberPink50),
+    tailwindColors.cyberRed,
+    tailwindColors.cyberOrange,
+    tailwindColors.cyberYellow,
+    tailwindColors.cyberGreen,
+    tailwindColors.cyberCyan,
+    tailwindColors.cyberIndigo,
+    tailwindColors.cyberPurple,
+    tailwindColors.cyberPink,
 ];
 const colorOptions = possibleColors.map((color) => ({
     value: color,
-    color: color.toString(),
+    color: color(50),
 }));
 
 export function BlobFactoryRenderer({ size }: { size: Vector2 }) {
@@ -101,6 +121,8 @@ export function BlobFactoryRenderer({ size }: { size: Vector2 }) {
                     <li>drag in empty space for a new one</li>
                     <li>backspace to delete</li>
                     <li>refresh for something new</li>
+                    <li>good color level for bgs in dark mode = ~80</li>
+                    <li>good color level for bgs in light mode = ~20</li>
                 </ul>
                 {/* <RangeInput
                     label="smoothness"
@@ -153,6 +175,17 @@ const modes = [
     { label: "outside", value: BlobFactoryMode.Outside },
 ];
 
+enum BlobFactoryInterpolateMode {
+    Naive = 0,
+    Vector = 1,
+    Min = 2,
+}
+const interpolateModes = [
+    { label: "naive", value: BlobFactoryInterpolateMode.Naive },
+    { label: "vector", value: BlobFactoryInterpolateMode.Vector },
+    { label: "min", value: BlobFactoryInterpolateMode.Min },
+];
+
 function startBlobFactory(
     displayCanvas: HTMLCanvasElement,
     uiCanvas: HTMLCanvasElement,
@@ -182,9 +215,15 @@ function startBlobFactory(
 
     const size = program.uniformVector2("u_resolution", new Vector2(100, 100));
     const smoothness = program.uniformFloat("u_smoothness", random(50, 100));
-    const blurSize = program.uniformFloat("u_blurSize", random(70, 150));
-    const blurSpread = program.uniformFloat("u_blurSpread", random(0.1, 0.7));
+    const blurSize = program.uniformFloat("u_blurSize", 150);
+    const blurSpread = program.uniformFloat("u_blurSpread", 0.8);
     const mode = program.uniformEnum("u_mode", sample(modes).value);
+    const darkMode = program.uniformBool("u_darkMode", Math.random() < 0.5);
+    const interpolateMode = program.uniformEnum(
+        "u_interpolateMode",
+        sample(interpolateModes).value,
+    );
+    let colorLevel = darkMode.value ? random(50, 95) : random(5, 50);
 
     const positionsVao = program.createAndBindVertexArray({
         name: "a_position",
@@ -267,6 +306,13 @@ function startBlobFactory(
 
     const draw = () => {
         // controls:
+        darkMode.value = controls.checkbox("dark mode", darkMode.value);
+        colorLevel = controls.range("color level", colorLevel, { min: 5, max: 100, step: 1 });
+        interpolateMode.value = controls.segmentedControl(
+            "interpolation",
+            interpolateMode.value,
+            interpolateModes,
+        );
         mode.value = controls.segmentedControl("mode", mode.value, modes);
         if (mode.value === BlobFactoryMode.Inside || mode.value === BlobFactoryMode.Outside) {
             smoothness.value = controls.range("smoothness", smoothness.value, {
@@ -277,7 +323,7 @@ function startBlobFactory(
         }
         blurSize.value = controls.range("blur size", blurSize.value, {
             min: 0,
-            max: 150,
+            max: 200,
             step: 0.1,
         });
         if (mode.value === BlobFactoryMode.Blur) {
@@ -294,7 +340,7 @@ function startBlobFactory(
         texture.update({
             width: blobs.length * 2,
             height: 1,
-            data: new Float32Array(blobs.flatMap((blob) => blob.toArray())),
+            data: new Float32Array(blobs.flatMap((blob) => blob.toArray(colorLevel))),
         });
 
         program.use();
@@ -312,7 +358,11 @@ function startBlobFactory(
         }
         if (selected) {
             ui.circle(selected.center, selected.radius, { stroke: "cyan", strokeWidth: 2 });
-            selected.color = controls.colorPicker("color", selected.color, colorOptions) as Color;
+            selected.colorScale = controls.colorPicker(
+                "color",
+                selected.colorScale,
+                colorOptions,
+            ) as CyberColorScale;
         }
         ui.fillText(stateToString(state), new Vector2(30, 40), { fill: "white" });
 
@@ -438,17 +488,22 @@ function startBlobFactory(
 class Blob {
     static size = 8 as const;
 
-    constructor(public center: Vector2, public radius: number, public color: Color) {}
+    constructor(
+        public center: Vector2,
+        public radius: number,
+        public colorScale: CyberColorScale,
+    ) {}
 
-    toArray() {
+    toArray(colorLevel: number) {
+        const color = interpolateScale(colorLevel, this.colorScale);
         return [
             this.center.x,
             this.center.y,
             this.radius,
             0,
-            this.color.red() / 255,
-            this.color.green() / 255,
-            this.color.blue() / 255,
+            color.red() / 255,
+            color.green() / 255,
+            color.blue() / 255,
             0,
         ];
     }

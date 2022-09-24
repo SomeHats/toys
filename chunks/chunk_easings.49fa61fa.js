@@ -1,1 +1,0 @@
-import"./chunk_assert.67ae27bf.js";const o=n=>a=>n(1-a),r=n=>n,c=n=>n<.5?4*n*n*n:(n-1)*(2*n-2)*(2*n-2)+1,e=n=>Math.sin(n/1*(Math.PI*.5)),i=(n=1.70158)=>a=>1*a*a*((n+1)*a-n),u=(n=1.70158)=>a=>(a=a-1,1*(a*a*((n+1)*a+n)+1));export{e as a,c as b,i,r as l,u as o,o as r};

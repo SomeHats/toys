@@ -4,7 +4,7 @@ import { catExample } from "@/splatapus/catExample";
 import { parseSplatDoc } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { SplatLocation } from "@/splatapus/editor/SplatLocation";
-import { makeEmptySaveState } from "@/splatapus/model/store";
+import { getDefaultLocationForDocument, makeEmptySaveState } from "@/splatapus/model/store";
 import { Button } from "@/splatapus/ui/Button";
 import { UpdateDocument } from "@/splatapus/editor/useEditorState";
 
@@ -109,12 +109,10 @@ function CatExampleButton({ updateDocument }: { updateDocument: UpdateDocument }
     return (
         <Button
             onClick={() => {
-                const { doc, location } = catExample.unwrap();
-                updateDocument(() => doc, {
-                    lockstepLocation: new SplatLocation({
-                        keyPointId: location.keyPointId,
-                        shapeId: location.shapeId,
-                    }),
+                const rawDoc = catExample.unwrap();
+                const document = SplatDocModel.deserialize(rawDoc);
+                updateDocument(() => document, {
+                    lockstepLocation: getDefaultLocationForDocument(document),
                 });
             }}
         >

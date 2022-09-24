@@ -22,9 +22,12 @@ const code = [
         if (typeof colors !== "object") {
             return [];
         }
+        const niceName = name.replace(/([a-z])-([a-z])/g, (_, a, b) => `${a}${b.toUpperCase()}`);
         return [
-            ...Object.entries(colors).map(([num, v]) => `${name}${num}: ${JSON.stringify(v)},`),
-            `${name}: makeColor(${JSON.stringify(colors)}),`,
+            ...Object.entries(colors).map(([num, v]) => `${niceName}${num}: ${JSON.stringify(v)},`),
+            `${niceName}: makeColor({`,
+            ...Object.entries(colors).map(([num, v]) => `${num}: ${JSON.stringify(v)},`),
+            `}),`,
         ];
     }),
     "} as const;",

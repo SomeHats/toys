@@ -17,22 +17,23 @@ import { DebugDraw } from "@/lib/DebugDraw";
 import { matchesKey } from "@/lib/hooks/useKeyPress";
 import { debugStateToString } from "@/lib/debugPropsToString";
 import { InstantUi, useInstantUi } from "@/lib/InstantUi";
-import { floatColor, floatColorToHex } from "@/blob-factory/colors";
+import { tailwindColors } from "@/lib/theme";
+import Color from "color";
 
 const initialBlobCount = Math.floor(random(5, 10));
 const possibleColors = [
-    floatColor("red-50"),
-    floatColor("orange-50"),
-    floatColor("yellow-50"),
-    floatColor("green-50"),
-    floatColor("cyan-50"),
-    floatColor("indigo-50"),
-    floatColor("purple-50"),
-    floatColor("pink-50"),
+    Color(tailwindColors.cyberRed50),
+    Color(tailwindColors.cyberOrange50),
+    Color(tailwindColors.cyberYellow50),
+    Color(tailwindColors.cyberGreen50),
+    Color(tailwindColors.cyberCyan50),
+    Color(tailwindColors.cyberIndigo50),
+    Color(tailwindColors.cyberPurple50),
+    Color(tailwindColors.cyberPink50),
 ];
 const colorOptions = possibleColors.map((color) => ({
     value: color,
-    color: floatColorToHex(color),
+    color: color.toString(),
 }));
 
 export function BlobFactoryRenderer({ size }: { size: Vector2 }) {
@@ -123,16 +124,16 @@ type BlobFactoryState =
       }
     | {
           type: "selected";
-          blob: Blob;
+          blobIndex: number;
       }
     | {
           type: "moving";
           offset: Vector2;
-          blob: Blob;
+          blobIndex: number;
       }
     | {
           type: "resizing";
-          blob: Blob;
+          blobIndex: number;
       }
     | {
           type: "unconfirmedCreate";
@@ -169,15 +170,15 @@ function startBlobFactory(
     const vertShader = displayGl.createShader(GlShaderType.Vertex, shaderVertSrc);
     const program = displayGl.createProgram(vertShader, fragShader);
 
-    const blobStore = { current: new Float32Array(Blob.size * initialBlobCount) };
-    const blobs = times(initialBlobCount, (i) => {
-        const blob = new Blob(blobStore, i);
-        blob.color = sample(possibleColors);
-        blob.x = random(200, 600);
-        blob.y = random(200, 600);
-        blob.radius = random(30, 100);
-        return blob;
-    });
+    const blobs = times(
+        initialBlobCount,
+        (i) =>
+            new Blob(
+                new Vector2(random(200, 600), random(200, 600)),
+                random(30, 100),
+                sample(possibleColors),
+            ),
+    );
 
     const size = program.uniformVector2("u_resolution", new Vector2(100, 100));
     const smoothness = program.uniformFloat("u_smoothness", random(50, 100));
@@ -220,26 +221,31 @@ function startBlobFactory(
         draw();
     };
 
-    const getHover = () => {
+    const blobAtIndex = (index: number) => blobs[index] ?? null;
+
+    const getHover = (): [Blob, number] | [null, null] => {
         switch (state.type) {
             case "idle":
             case "unconfirmedCreate":
             case "selected": {
                 let nearestDist = Infinity;
                 let nearest = null;
-                for (const blob of blobs) {
+                let nearestIndex = null;
+                for (let i = 0; i < blobs.length; i++) {
+                    const blob = blobs[i];
                     const distance = blob.center.distanceTo(cursor);
                     if (distance < blob.radius + 5 && distance < nearestDist) {
                         nearestDist = distance;
                         nearest = blob;
+                        nearestIndex = i;
                     }
                 }
 
-                return nearest;
+                return [nearest, nearestIndex] as [Blob, number] | [null, null];
             }
             case "moving":
             case "resizing":
-                return state.blob;
+                return [blobAtIndex(state.blobIndex), state.blobIndex];
             default:
                 exhaustiveSwitchError(state);
         }
@@ -253,7 +259,7 @@ function startBlobFactory(
             case "moving":
             case "selected":
             case "resizing":
-                return state.blob;
+                return blobAtIndex(state.blobIndex);
             default:
                 exhaustiveSwitchError(state);
         }
@@ -288,7 +294,7 @@ function startBlobFactory(
         texture.update({
             width: blobs.length * 2,
             height: 1,
-            data: blobStore.current,
+            data: new Float32Array(blobs.flatMap((blob) => blob.toArray())),
         });
 
         program.use();
@@ -299,18 +305,14 @@ function startBlobFactory(
         ui.clear();
         ui.ctx.resetTransform();
         ui.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-        const hovered = getHover();
+        const [hovered] = getHover();
         const selected = getSelected();
         if (hovered && hovered !== selected) {
             ui.circle(hovered.center, hovered.radius, { stroke: "cyan", strokeWidth: 1 });
         }
         if (selected) {
             ui.circle(selected.center, selected.radius, { stroke: "cyan", strokeWidth: 2 });
-            selected.color = controls.colorPicker("color", selected.color, colorOptions) as [
-                number,
-                number,
-                number,
-            ];
+            selected.color = controls.colorPicker("color", selected.color, colorOptions) as Color;
         }
         ui.fillText(stateToString(state), new Vector2(30, 40), { fill: "white" });
 
@@ -328,11 +330,10 @@ function startBlobFactory(
 
     const onKeyDown = (e: KeyboardEvent) => {
         if (state.type === "selected" && matchesKey(e, "backspace")) {
-            const newData = [...blobStore.current];
-            newData.splice(state.blob.index * Blob.size, Blob.size);
-            blobStore.current = new Float32Array(newData);
-            blobs.pop();
-            state = { type: "idle" };
+            if (blobAtIndex(state.blobIndex)) {
+                blobs.splice(state.blobIndex, 1);
+                state = { type: "idle" };
+            }
         }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -352,23 +353,26 @@ function startBlobFactory(
                 case "idle":
                 case "selected":
                     break;
-                case "moving":
-                    state.blob.center = cursor.add(state.offset);
+                case "moving": {
+                    const blob = blobAtIndex(state.blobIndex);
+                    if (blob) {
+                        blob.center = cursor.add(state.offset);
+                    }
                     break;
-                case "resizing":
-                    state.blob.radius = cursor.distanceTo(state.blob.center);
+                }
+                case "resizing": {
+                    const blob = blobAtIndex(state.blobIndex);
+                    if (blob) {
+                        blob.radius = cursor.distanceTo(blob.center);
+                    }
                     break;
+                }
                 case "unconfirmedCreate": {
                     const distance = state.center.distanceTo(cursor);
                     if (distance > 5) {
-                        const newData = [...blobStore.current, ...times(Blob.size, () => 0)];
-                        blobStore.current = new Float32Array(newData);
-                        const blob = new Blob(blobStore, blobs.length);
-                        blob.color = sample(possibleColors);
-                        blob.center = state.center;
-                        blob.radius = distance;
-                        blobs.push(blob);
-                        state = { type: "resizing", blob };
+                        const blobIndex = blobs.length;
+                        blobs.push(new Blob(state.center, distance, sample(possibleColors)));
+                        state = { type: "resizing", blobIndex };
                     }
                     break;
                 }
@@ -378,7 +382,7 @@ function startBlobFactory(
         },
         onPointerDown: (newPosition: Vector2) => {
             cursor = newPosition;
-            const hovered = getHover();
+            const [hovered, hoveredIdx] = getHover();
             switch (state.type) {
                 case "idle":
                 case "selected": {
@@ -389,13 +393,13 @@ function startBlobFactory(
                         if (distanceFromEdge < 5) {
                             state = {
                                 type: "resizing",
-                                blob: hovered,
+                                blobIndex: hoveredIdx,
                             };
                         } else {
                             state = {
                                 type: "moving",
                                 offset: hovered.center.sub(cursor),
-                                blob: hovered,
+                                blobIndex: hoveredIdx,
                             };
                         }
                     } else {
@@ -419,7 +423,7 @@ function startBlobFactory(
                     break;
                 case "moving":
                 case "resizing":
-                    state = { type: "selected", blob: state.blob };
+                    state = { type: "selected", blobIndex: state.blobIndex };
                     break;
                 case "unconfirmedCreate":
                     state = { type: "idle" };
@@ -433,70 +437,20 @@ function startBlobFactory(
 
 class Blob {
     static size = 8 as const;
-    constructor(private readonly backingStore: { current: Float32Array }, readonly index: number) {}
 
-    private getAt(offset: number): number {
-        return this.backingStore.current[this.index * Blob.size + offset];
-    }
+    constructor(public center: Vector2, public radius: number, public color: Color) {}
 
-    private setAt(offset: number, value: number) {
-        this.backingStore.current[this.index * Blob.size + offset] = value;
-    }
-
-    get x() {
-        return this.getAt(0);
-    }
-    set x(value: number) {
-        this.setAt(0, value);
-    }
-
-    get y() {
-        return this.getAt(1);
-    }
-    set y(value: number) {
-        this.setAt(1, value);
-    }
-
-    get radius() {
-        return this.getAt(2);
-    }
-    set radius(value: number) {
-        this.setAt(2, value);
-    }
-
-    get center(): Vector2 {
-        return new Vector2(this.x, this.y);
-    }
-    set center(value: Vector2) {
-        this.x = value.x;
-        this.y = value.y;
-    }
-
-    get red() {
-        return this.getAt(4);
-    }
-    set red(value: number) {
-        this.setAt(4, value);
-    }
-    get green() {
-        return this.getAt(5);
-    }
-    set green(value: number) {
-        this.setAt(5, value);
-    }
-    get blue() {
-        return this.getAt(6);
-    }
-    set blue(value: number) {
-        this.setAt(6, value);
-    }
-    get color(): [number, number, number] {
-        return [this.red, this.green, this.blue];
-    }
-    set color(color: [number, number, number]) {
-        this.red = color[0];
-        this.green = color[1];
-        this.blue = color[2];
+    toArray() {
+        return [
+            this.center.x,
+            this.center.y,
+            this.radius,
+            0,
+            this.color.red() / 255,
+            this.color.green() / 255,
+            this.color.blue() / 255,
+            0,
+        ];
     }
 
     toJSON() {
@@ -510,11 +464,11 @@ function stateToString(state: BlobFactoryState): string {
             return debugStateToString(state.type);
         case "resizing":
         case "selected":
-            return debugStateToString(state.type, { blob: state.blob.index });
+            return debugStateToString(state.type, { blob: state.blobIndex });
         case "moving":
             return debugStateToString(state.type, {
                 offset: state.offset.toString(2),
-                blob: state.blob.index,
+                blob: state.blobIndex,
             });
         case "unconfirmedCreate":
             return debugStateToString(state.type, { center: state.center.toString(2) });

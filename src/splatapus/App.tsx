@@ -1,5 +1,5 @@
 import Vector2 from "@/lib/geom/Vector2";
-import { sizeFromEntry, useResizeObserver } from "@/lib/hooks/useResizeObserver";
+import { sizeFromContentRect, useResizeObserver } from "@/lib/hooks/useResizeObserver";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { applyUpdate, UpdateAction } from "@/lib/utils";
 import classNames from "classnames";
@@ -21,7 +21,7 @@ import { UndoRedoButtons } from "@/splatapus/ui/UndoRedoButtons";
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
-    const size = useResizeObserver(container, sizeFromEntry);
+    const size = useResizeObserver(container, sizeFromContentRect);
 
     return (
         <div ref={setContainer} className="absolute inset-0 touch-none">

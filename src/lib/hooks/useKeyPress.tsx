@@ -1,15 +1,17 @@
-import { useEffect } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { IS_MAC } from "@/lib/utils";
+import { Unsubscribe } from "@/lib/EventEmitter";
+import { assert } from "@/lib/assert";
 
-type Key = string;
-type KeyObj = {
+export type Key = string;
+export type KeyObj = {
     key: Key;
     command?: boolean;
     shift?: boolean;
     alt?: boolean;
 };
-type TargetKey = Key | KeyObj;
+export type TargetKey = Key | KeyObj;
 
 function isCommandKeyPressed(event: KeyboardEvent): boolean {
     if (IS_MAC) {
@@ -33,15 +35,48 @@ export function matchesKeyDown(event: KeyboardEvent, key: TargetKey): boolean {
 }
 
 export function useKeyPress(key: TargetKey, cb: (event: KeyboardEvent) => void) {
-    const handler = useEvent((event: KeyboardEvent) => {
+    useKeyDown((event) => {
         if (matchesKeyDown(event, key)) {
             event.preventDefault();
             cb(event);
+            return true;
         }
+        return false;
     });
-
-    useEffect(() => {
-        document.addEventListener("keydown", handler);
-        return () => document.removeEventListener("keydown", handler);
-    }, [handler]);
 }
+
+export function useKeyDown(cb: (event: KeyboardEvent) => boolean) {
+    const keyHandler = useContext(KeyHandlerContext);
+    const callback = useEvent(cb);
+    useEffect(() => keyHandler.onKeyDown(callback), [callback, keyHandler]);
+}
+
+class KeyHandler {
+    private handlers = new Set<{ callback: (event: KeyboardEvent) => boolean }>();
+
+    constructor() {
+        document.addEventListener("keydown", this.handleKeyDown);
+    }
+
+    destroy() {
+        document.removeEventListener("keydown", this.handleKeyDown);
+    }
+
+    onKeyDown(callback: (event: KeyboardEvent) => boolean): Unsubscribe {
+        const handler = { callback };
+        this.handlers.add(handler);
+        return () => {
+            assert(this.handlers.delete(handler), "handler has already been deleted");
+        };
+    }
+
+    private handleKeyDown = (e: KeyboardEvent) => {
+        for (const { callback } of this.handlers) {
+            if (callback(e)) {
+                return;
+            }
+        }
+    };
+}
+
+const KeyHandlerContext = createContext<KeyHandler>(new KeyHandler());

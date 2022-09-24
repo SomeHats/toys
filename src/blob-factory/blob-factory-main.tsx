@@ -1,5 +1,5 @@
 import { assertExists } from "@/lib/assert";
-import { sizeFromEntry, useResizeObserver } from "@/lib/hooks/useResizeObserver";
+import { sizeFromContentRect, useResizeObserver } from "@/lib/hooks/useResizeObserver";
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { BlobFactoryRenderer } from "@/blob-factory/BlobFactory";
@@ -8,7 +8,7 @@ createRoot(assertExists(document.getElementById("root"))).render(<App />);
 
 function App() {
     const [container, setContainer] = useState<Element | null>(null);
-    const size = useResizeObserver(container, sizeFromEntry);
+    const size = useResizeObserver(container, sizeFromContentRect);
 
     return (
         <div ref={setContainer} className="absolute inset-0 touch-none">

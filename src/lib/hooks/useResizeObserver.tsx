@@ -85,6 +85,10 @@ export function useResizeObserver<T>(
     return value;
 }
 
-export function sizeFromEntry(entry: ResizeObserverEntry): Vector2 {
+export function sizeFromContentRect(entry: ResizeObserverEntry): Vector2 {
     return new Vector2(entry.contentRect.width, entry.contentRect.height);
+}
+
+export function sizeFromBorderBox(entry: ResizeObserverEntry): Vector2 {
+    return new Vector2(entry.borderBoxSize[0].inlineSize, entry.borderBoxSize[0].blockSize);
 }

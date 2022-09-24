@@ -17,6 +17,8 @@ type UndoEntry = {
 export type UndoStack = {
     undoStates: ReadonlyArray<UndoEntry>;
     redoStates: ReadonlyArray<UndoEntry> | null;
+    undoOpCount: number;
+    redoOpCount: number;
     pendingOp: null | {
         txId: number;
         initialDoc: SplatDocModel;
@@ -29,6 +31,8 @@ export const UndoStack = {
     initialize: (entry: Omit<UndoEntry, "options">): UndoStack => ({
         undoStates: [],
         redoStates: [],
+        undoOpCount: 0,
+        redoOpCount: 0,
         pendingOp: null,
         current: { ...entry, options: {} },
     }),
@@ -128,6 +132,7 @@ export const UndoStack = {
         ) {
             return {
                 ...undoStack,
+                undoOpCount: undoStack.undoOpCount + 1,
                 current: {
                     ...undoStack.current,
                     location: targetState.location,
@@ -138,6 +143,7 @@ export const UndoStack = {
         const redoStates = [undoStack.current, ...(undoStack.redoStates ?? [])];
         return {
             ...undoStack,
+            undoOpCount: undoStack.undoOpCount + 1,
             current: targetState,
             undoStates,
             redoStates,
@@ -156,6 +162,7 @@ export const UndoStack = {
         ) {
             return {
                 ...undoStack,
+                redoOpCount: undoStack.redoOpCount + 1,
                 current: {
                     ...undoStack.current,
                     location: targetState.location,
@@ -166,6 +173,7 @@ export const UndoStack = {
         const undoStates = [undoStack.current, ...undoStack.undoStates];
         return {
             ...undoStack,
+            redoOpCount: undoStack.redoOpCount + 1,
             current: targetState.options.lockstepLocation
                 ? {
                       ...targetState,

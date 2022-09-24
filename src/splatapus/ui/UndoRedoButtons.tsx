@@ -2,6 +2,7 @@ import { Button } from "@/splatapus/ui/Button";
 import { UndoStack } from "@/splatapus/editor/UndoStack";
 import { UpdateUndoStack } from "@/splatapus/editor/useEditorState";
 import classNames from "classnames";
+import { FaUndoAlt, FaRedoAlt } from "react-icons/fa";
 
 export function UndoRedoButtons({
     undoStack,
@@ -23,6 +24,14 @@ export function UndoRedoButtons({
                         : "scale-0 opacity-0 ease-in-back",
                 )}
                 onClick={() => updateUndoStack((_, stack) => UndoStack.undo(stack))}
+                iconLeft={
+                    <div
+                        className="mt-[2px] h-3 w-3 transition-transform duration-300 ease-in-out"
+                        style={{ transform: `rotate(${-undoStack.undoOpCount}turn)` }}
+                    >
+                        <FaUndoAlt size={12} />
+                    </div>
+                }
             >
                 undo
             </Button>
@@ -35,6 +44,14 @@ export function UndoRedoButtons({
                         : "scale-0 opacity-0 ease-in-back-md",
                 )}
                 onClick={() => updateUndoStack((_, stack) => UndoStack.redo(stack))}
+                iconRight={
+                    <div
+                        className="mt-[2px] h-3 w-3 transition-transform duration-300 ease-in-out"
+                        style={{ transform: `rotate(${undoStack.redoOpCount}turn)` }}
+                    >
+                        <FaRedoAlt size={12} />
+                    </div>
+                }
             >
                 redo
             </Button>

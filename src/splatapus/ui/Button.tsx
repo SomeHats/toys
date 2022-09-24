@@ -9,6 +9,8 @@ export function Button({
     style,
     disabled,
     pressed,
+    iconLeft,
+    iconRight,
 }: {
     children: ReactNode;
     className?: string;
@@ -16,6 +18,8 @@ export function Button({
     style?: CSSProperties;
     disabled?: boolean;
     pressed?: boolean;
+    iconLeft?: ReactNode;
+    iconRight?: ReactNode;
 }) {
     const [element, setElement] = useState<null | HTMLButtonElement>(null);
     const clipPath = useSquircleClipPath(element);
@@ -26,7 +30,7 @@ export function Button({
             onClick={onClick}
             className={classNames(
                 className,
-                "group rounded px-4 py-1 text-center font-bold tracking-wide text-stone-400 hover:bg-stone-300/25 hover:text-stone-500",
+                "group inline-flex items-center justify-center gap-2 rounded px-4 py-1 text-center font-bold tracking-wide text-stone-400 hover:bg-stone-300/25 hover:text-stone-500",
             )}
             style={{
                 ...(style ?? {}),
@@ -34,6 +38,7 @@ export function Button({
             }}
             disabled={disabled}
         >
+            {iconLeft}
             <span
                 className={classNames(
                     "inline-block transition-transform duration-200 ease-out-back-xl group-hover:scale-110 group-active:scale-90",
@@ -42,6 +47,7 @@ export function Button({
             >
                 {children}
             </span>
+            {iconRight}
         </button>
     );
 }

@@ -2,7 +2,7 @@ import { createEnumParser } from "@/lib/objectParser";
 
 export enum ToolType {
     Draw = "draw",
-    KeyPoint = "keyPoint",
+    Rig = "rig",
 }
 
 export const parseToolType = createEnumParser(ToolType);

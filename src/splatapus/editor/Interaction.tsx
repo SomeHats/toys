@@ -8,7 +8,7 @@ import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { MultiTouchPan } from "@/splatapus/editor/MultiTouchPan";
 import { SplatLocation } from "@/splatapus/editor/SplatLocation";
 import { DrawTool } from "@/splatapus/editor/tools/DrawTool";
-import { KeyPointTool } from "@/splatapus/editor/tools/KeyPointTool";
+import { RigTool } from "@/splatapus/editor/tools/RigTool";
 import { KeyboardEventContext, PointerEventContext } from "@/splatapus/editor/lib/EventContext";
 import { QuickPanTool } from "@/splatapus/editor/tools/QuickPanTool";
 import { SelectedTool } from "@/splatapus/editor/tools/tools";
@@ -182,9 +182,9 @@ export const Interaction = {
                         {...props}
                     />
                 );
-            case ToolType.KeyPoint:
+            case ToolType.Rig:
                 return (
-                    <KeyPointTool.Overlay
+                    <RigTool.Overlay
                         tool={interaction.selectedTool}
                         onUpdateTool={onUpdateTool}
                         {...props}

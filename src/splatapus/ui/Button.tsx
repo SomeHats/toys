@@ -1,8 +1,6 @@
-import Vector2 from "@/lib/geom/Vector2";
-import { sizeFromBorderBox, useResizeObserver } from "@/lib/hooks/useResizeObserver";
-import { invLerp, lerp, mapRange } from "@/lib/utils";
+import { useSquircleClipPath } from "@/splatapus/ui/useSquircle";
 import classNames from "classnames";
-import { CSSProperties, MouseEventHandler, ReactNode, useMemo, useState } from "react";
+import { CSSProperties, MouseEventHandler, ReactNode, useState } from "react";
 
 export function Button({
     children,
@@ -20,24 +18,8 @@ export function Button({
     pressed?: boolean;
 }) {
     const [element, setElement] = useState<null | HTMLButtonElement>(null);
-    const size = useResizeObserver(element, sizeFromBorderBox) ?? Vector2.ZERO;
-    const clipPath = useMemo(() => {
-        const rounding = Math.min(size.x * 0.5, size.y * 0.5);
-        const clipPath = [
-            `M 0,${size.y / 2}`,
-            `Q 0,0 ${rounding},0`,
-            `T ${size.x - rounding},0`,
-            `Q ${size.x},0 ${size.x},${size.y / 2}`,
-            `Q ${size.x},${size.y} ${size.x - rounding},${size.y}`,
-            `T ${rounding},${size.y}`,
-            `Q 0,${size.y} 0,${size.y / 2}`,
-            "Z",
-        ].join(" ");
+    const clipPath = useSquircleClipPath(element);
 
-        return `path('${clipPath}')`;
-    }, [size.x, size.y]);
-
-    console.log({ clipPath });
     return (
         <button
             ref={setElement}

@@ -49,7 +49,7 @@ export function StrokeRenderer({
                 }
                 break;
             }
-            case ToolType.KeyPoint:
+            case ToolType.Rig:
                 break;
             default:
                 exhaustiveSwitchError(interaction.selectedTool);

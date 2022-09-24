@@ -3,7 +3,7 @@ import { matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { DrawTool } from "@/splatapus/editor/tools/DrawTool";
-import { KeyPointTool } from "@/splatapus/editor/tools/KeyPointTool";
+import { RigTool } from "@/splatapus/editor/tools/RigTool";
 import { ToolMethods } from "@/splatapus/editor/lib/createTool";
 import { KeyboardEventContext, PointerEventContext } from "@/splatapus/editor/lib/EventContext";
 import { QuickPanTool } from "@/splatapus/editor/tools/QuickPanTool";
@@ -11,7 +11,7 @@ import { QuickToolType, ToolType } from "@/splatapus/editor/tools/ToolType";
 
 const toolsByType = {
     [ToolType.Draw]: DrawTool,
-    [ToolType.KeyPoint]: KeyPointTool,
+    [ToolType.Rig]: RigTool,
     [QuickToolType.Pan]: QuickPanTool,
 };
 
@@ -20,7 +20,7 @@ export function getToolByType<Tool extends QuickPanTool | SelectedTool>(type: To
     return toolsByType[type] as Required<ToolMethods<Tool>>;
 }
 
-export type SelectedTool = DrawTool | KeyPointTool;
+export type SelectedTool = DrawTool | RigTool;
 
 export const SelectedTool = {
     initialize: (toolType: ToolType): SelectedTool => {
@@ -30,8 +30,8 @@ export const SelectedTool = {
         if (matchesKeyDown(event, "d")) {
             return DrawTool.initialize();
         }
-        if (matchesKeyDown(event, "k")) {
-            return KeyPointTool.initialize();
+        if (matchesKeyDown(event, "r")) {
+            return RigTool.initialize();
         }
         return null;
     },
@@ -50,8 +50,8 @@ export const SelectedTool = {
         switch (tool.type) {
             case ToolType.Draw:
                 return DrawTool.onPointerEvent(ctx, tool);
-            case ToolType.KeyPoint:
-                return KeyPointTool.onPointerEvent(ctx, tool);
+            case ToolType.Rig:
+                return RigTool.onPointerEvent(ctx, tool);
             default:
                 exhaustiveSwitchError(tool);
         }

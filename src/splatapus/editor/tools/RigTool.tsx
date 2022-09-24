@@ -8,21 +8,17 @@ import { createGestureDetector, GestureType } from "@/splatapus/editor/lib/Gestu
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import classNames from "classnames";
 
-export type IdleKeyPointToolState = {
+export type IdleRigToolState = {
     readonly state: "idle";
 };
-export type MovingKeyPointToolState = {
+export type MovingRigToolState = {
     readonly state: "moving";
     readonly keyPointId: SplatKeyPointId;
     readonly delta: Vector2;
     readonly startingPosition: Vector2;
 };
 
-const MoveGesture = createGestureDetector<
-    IdleKeyPointToolState,
-    MovingKeyPointToolState,
-    SplatKeyPointId
->({
+const MoveGesture = createGestureDetector<IdleRigToolState, MovingRigToolState, SplatKeyPointId>({
     onTap: ({ updateLocation }, state, keyPointId) => {
         if (keyPointId) {
             updateLocation((location) => location.with({ keyPointId }));
@@ -58,20 +54,20 @@ const MoveGesture = createGestureDetector<
     onDragCancel: () => ({ state: "idle" }),
 });
 
-export type KeyPointTool = {
-    readonly type: ToolType.KeyPoint;
+export type RigTool = {
+    readonly type: ToolType.Rig;
     readonly gesture: GestureType<typeof MoveGesture>;
     readonly previewPosition: Vector2 | null;
 };
 
 const keyPointOffset = new Vector2(-12, -12);
-export const KeyPointTool = createTool<KeyPointTool>()({
+export const RigTool = createTool<RigTool>()({
     initialize: () => ({
-        type: ToolType.KeyPoint,
+        type: ToolType.Rig,
         gesture: MoveGesture.initialize({ state: "idle" }),
         previewPosition: null,
     }),
-    isIdle: (tool: KeyPointTool) => true,
+    isIdle: (tool: RigTool) => true,
     getDebugProperties: (tool) => {
         const state = MoveGesture.getState(tool.gesture);
         switch (state.state) {
@@ -85,23 +81,16 @@ export const KeyPointTool = createTool<KeyPointTool>()({
                 };
         }
     },
-    getPreviewPosition: (
-        tool: KeyPointTool,
-        selectedShapeId: SplatShapeId,
-    ): PreviewPosition | null =>
+    getPreviewPosition: (tool: RigTool, selectedShapeId: SplatShapeId): PreviewPosition | null =>
         MoveGesture.isIdle(tool.gesture) && tool.previewPosition
             ? PreviewPosition.interpolated(tool.previewPosition, selectedShapeId)
             : null,
-    onPointerEvent: (
-        ctx: PointerEventContext,
-        tool: KeyPointTool,
-        splatPointId?: SplatKeyPointId,
-    ) => ({
+    onPointerEvent: (ctx: PointerEventContext, tool: RigTool, splatPointId?: SplatKeyPointId) => ({
         ...tool,
         previewPosition: ctx.viewport.eventSceneCoords(ctx.event),
         gesture: MoveGesture.onPointerEvent(ctx, tool.gesture, splatPointId),
     }),
-    Overlay: ({ tool, document, viewport, location, onUpdateTool }: OverlayProps<KeyPointTool>) => {
+    Overlay: ({ tool, document, viewport, location, onUpdateTool }: OverlayProps<RigTool>) => {
         const state = MoveGesture.getState(tool.gesture);
         return (
             <>
@@ -125,7 +114,7 @@ export const KeyPointTool = createTool<KeyPointTool>()({
                             )}
                             onPointerDown={(event) => {
                                 onUpdateTool((ctx, tool) =>
-                                    KeyPointTool.onPointerEvent(
+                                    RigTool.onPointerEvent(
                                         { ...ctx, event, eventType: "down" },
                                         tool,
                                         keyPoint.id,

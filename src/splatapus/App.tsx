@@ -7,14 +7,13 @@ import { LOAD_FROM_AUTOSAVE_ENABLED } from "@/splatapus/constants";
 import { loadSaved, makeEmptySaveState, writeSavedDebounced } from "@/splatapus/model/store";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { Viewport, ViewportState } from "@/splatapus/editor/Viewport";
-import { Toolbar } from "@/splatapus/ui/Toolbar";
+import { ModePicker } from "@/splatapus/ui/ModePicker";
 import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
 import { EditorState, useEditorState } from "@/splatapus/editor/useEditorState";
 import { Interaction } from "@/splatapus/editor/Interaction";
 import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 import { RightBar } from "@/splatapus/ui/RightBar";
 import { assertExists } from "@/lib/assert";
-import { Button } from "@/splatapus/ui/Button";
 import { UiOverlayFrame } from "@/splatapus/ui/UiOverlayFrame";
 import { ImportExportButtons } from "@/splatapus/ui/ImportExportButtons";
 import { UndoRedoButtons } from "@/splatapus/ui/UndoRedoButtons";
@@ -145,19 +144,13 @@ function Splatapus({ size }: { size: Vector2 }) {
             <UiOverlayFrame
                 size={size}
                 topBarLeft={
-                    <>
-                        <Button>draw</Button>
-                        <Button>rig</Button>
-                    </>
-                }
-                topBarRight={
-                    <ImportExportButtons updateDocument={updateDocument} document={document} />
-                }
-                leftBar={
-                    <Toolbar
+                    <ModePicker
                         selectedToolType={interaction.selectedTool.type}
                         updateInteraction={updateInteraction}
                     />
+                }
+                topBarRight={
+                    <ImportExportButtons updateDocument={updateDocument} document={document} />
                 }
                 rightBar={
                     <RightBar

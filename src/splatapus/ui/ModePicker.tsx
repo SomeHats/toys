@@ -1,8 +1,10 @@
 import { Interaction } from "@/splatapus/editor/Interaction";
+import { toolClassNames } from "@/splatapus/editor/toolClassNames";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { UpdateInteraction } from "@/splatapus/editor/useEditorState";
 import { Button } from "@/splatapus/ui/Button";
 import classNames from "classnames";
+import { ReactNode } from "react";
 
 export function ModePicker({
     selectedToolType,
@@ -11,32 +13,59 @@ export function ModePicker({
     selectedToolType: ToolType;
     updateInteraction: UpdateInteraction;
 }) {
-    const onChangeTool = (tool: ToolType) => () =>
-        updateInteraction((ctx, interaction) =>
-            Interaction.requestSetSelectedTool(interaction, tool),
-        );
     return (
         <>
-            <Button
-                onClick={onChangeTool(ToolType.Draw)}
-                className={classNames(
-                    selectedToolType === ToolType.Draw &&
-                        "pointer-events-none bg-gradient-to-br from-fuchsia-500 to-violet-500 !text-white",
-                )}
-                disabled={selectedToolType === ToolType.Draw}
+            <ModeButton
+                selectedToolType={selectedToolType}
+                updateInteraction={updateInteraction}
+                toolType={ToolType.Draw}
             >
                 draw
-            </Button>
-            <Button
-                onClick={onChangeTool(ToolType.Rig)}
-                className={classNames(
-                    selectedToolType === ToolType.Rig &&
-                        "pointer-events-none bg-gradient-to-br from-lime-500 to-emerald-500 !text-white",
-                )}
-                disabled={selectedToolType === ToolType.Rig}
+            </ModeButton>
+            <ModeButton
+                selectedToolType={selectedToolType}
+                updateInteraction={updateInteraction}
+                toolType={ToolType.Rig}
             >
                 rig
-            </Button>
+            </ModeButton>
+            <ModeButton
+                selectedToolType={selectedToolType}
+                updateInteraction={updateInteraction}
+                toolType={ToolType.Play}
+            >
+                play
+            </ModeButton>
         </>
+    );
+}
+
+function ModeButton({
+    selectedToolType,
+    updateInteraction,
+    toolType,
+    children,
+}: {
+    selectedToolType: ToolType;
+    updateInteraction: UpdateInteraction;
+    toolType: ToolType;
+    children: ReactNode;
+}) {
+    const isActive = selectedToolType === toolType;
+    return (
+        <Button
+            onClick={() =>
+                updateInteraction((ctx, interaction) =>
+                    Interaction.requestSetSelectedTool(interaction, toolType),
+                )
+            }
+            className={classNames(
+                isActive &&
+                    `pointer-events-none bg-gradient-to-br ${toolClassNames[toolType].gradient500} !text-white`,
+            )}
+            disabled={isActive}
+        >
+            {children}
+        </Button>
     );
 }

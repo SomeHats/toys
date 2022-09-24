@@ -30,7 +30,7 @@ export function Button({
             onClick={onClick}
             className={classNames(
                 className,
-                "group inline-flex items-center justify-center gap-2 rounded px-4 py-1 text-center font-bold tracking-wide text-stone-400 hover:bg-stone-300/25 hover:text-stone-500 focus:text-purple-600 focus:outline-none",
+                "group inline-flex items-center justify-center gap-2 rounded px-4 py-1 text-center font-bold tracking-wide text-stone-400 hover:bg-stone-300/25 hover:text-stone-500 focus:outline-none focus-visible:text-purple-600",
             )}
             style={{
                 ...(style ?? {}),

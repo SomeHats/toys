@@ -154,6 +154,7 @@ function Splatapus({ size }: { size: Vector2 }) {
                 }
                 rightBar={
                     <RightBar
+                        selectedToolType={interaction.selectedTool.type}
                         document={document}
                         location={location}
                         updateDocument={updateDocument}

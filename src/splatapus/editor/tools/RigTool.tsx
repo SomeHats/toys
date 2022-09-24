@@ -57,10 +57,9 @@ const MoveGesture = createGestureDetector<IdleRigToolState, MovingRigToolState, 
 export type RigTool = {
     readonly type: ToolType.Rig;
     readonly gesture: GestureType<typeof MoveGesture>;
-    readonly previewPosition: Vector2 | null;
 };
 
-const keyPointOffset = new Vector2(-12, -12);
+const keyPointOffset = new Vector2(-16, -16);
 export const RigTool = createTool<RigTool>()({
     initialize: () => ({
         type: ToolType.Rig,
@@ -81,15 +80,7 @@ export const RigTool = createTool<RigTool>()({
                 };
         }
     },
-    getPreviewPosition: (tool: RigTool, selectedShapeId: SplatShapeId): PreviewPosition | null =>
-        MoveGesture.isIdle(tool.gesture) && tool.previewPosition
-            ? PreviewPosition.interpolated(tool.previewPosition, selectedShapeId)
-            : null,
-    onPointerEvent: (ctx: PointerEventContext, tool: RigTool, splatPointId?: SplatKeyPointId) => ({
-        ...tool,
-        previewPosition: ctx.viewport.eventSceneCoords(ctx.event),
-        gesture: MoveGesture.onPointerEvent(ctx, tool.gesture, splatPointId),
-    }),
+    onPointerEvent: MoveGesture.createOnPointerEvent<"gesture", RigTool>("gesture"),
     Overlay: ({ tool, document, viewport, location, onUpdateTool }: OverlayProps<RigTool>) => {
         const state = MoveGesture.getState(tool.gesture);
         return (
@@ -104,13 +95,9 @@ export const RigTool = createTool<RigTool>()({
                         <ScenePositionedDiv
                             key={keyPoint.id}
                             position={position}
-                            screenOffset={keyPointOffset}
                             viewport={viewport}
                             className={classNames(
-                                "flex h-6 w-6 cursor-move items-center justify-center rounded-full border border-stone-200 bg-white text-xs text-stone-400 shadow-md",
-                                keyPoint.id === location.keyPointId
-                                    ? "text-stone-500 ring-2 ring-inset ring-purple-400"
-                                    : "text-stone-400",
+                                "-mt-4 -ml-4 flex h-8 w-8 cursor-move items-center justify-center rounded-full",
                             )}
                             onPointerDown={(event) => {
                                 onUpdateTool((ctx, tool) =>
@@ -122,7 +109,16 @@ export const RigTool = createTool<RigTool>()({
                                 );
                             }}
                         >
-                            {i + 1}
+                            <div
+                                className={classNames(
+                                    "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shadow-md",
+                                    keyPoint.id === location.keyPointId
+                                        ? "bg-gradient-to-br from-cyan-400 to-blue-400 text-white"
+                                        : "border border-stone-200 bg-white text-stone-400",
+                                )}
+                            >
+                                {i + 1}
+                            </div>
                         </ScenePositionedDiv>
                     );
                 })}

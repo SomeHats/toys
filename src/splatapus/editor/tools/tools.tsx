@@ -8,19 +8,20 @@ import { ToolMethods } from "@/splatapus/editor/lib/createTool";
 import { KeyboardEventContext, PointerEventContext } from "@/splatapus/editor/lib/EventContext";
 import { QuickPanTool } from "@/splatapus/editor/tools/QuickPanTool";
 import { QuickToolType, ToolType } from "@/splatapus/editor/tools/ToolType";
+import { PlayTool } from "@/splatapus/editor/tools/PlayTool";
 
 const toolsByType = {
     [ToolType.Draw]: DrawTool,
     [ToolType.Rig]: RigTool,
+    [ToolType.Play]: PlayTool,
     [QuickToolType.Pan]: QuickPanTool,
 };
+export type SelectedTool = DrawTool | RigTool | PlayTool;
 
 export function getToolByType<Tool extends QuickPanTool | SelectedTool>(type: Tool["type"]) {
     // @ts-expect-error contain the badness in this unsound fn:
     return toolsByType[type] as Required<ToolMethods<Tool>>;
 }
-
-export type SelectedTool = DrawTool | RigTool;
 
 export const SelectedTool = {
     initialize: (toolType: ToolType): SelectedTool => {
@@ -32,6 +33,9 @@ export const SelectedTool = {
         }
         if (matchesKeyDown(event, "r")) {
             return RigTool.initialize();
+        }
+        if (matchesKeyDown(event, "p")) {
+            return PlayTool.initialize();
         }
         return null;
     },
@@ -52,6 +56,8 @@ export const SelectedTool = {
                 return DrawTool.onPointerEvent(ctx, tool);
             case ToolType.Rig:
                 return RigTool.onPointerEvent(ctx, tool);
+            case ToolType.Play:
+                return PlayTool.onPointerEvent(ctx, tool);
             default:
                 exhaustiveSwitchError(tool);
         }

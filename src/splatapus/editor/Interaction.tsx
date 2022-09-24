@@ -16,6 +16,7 @@ import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { UndoStack } from "@/splatapus/editor/UndoStack";
 import { CtxAction, UpdateInteraction } from "@/splatapus/editor/useEditorState";
 import { Viewport } from "@/splatapus/editor/Viewport";
+import { PlayTool } from "@/splatapus/editor/tools/PlayTool";
 
 export type Interaction = {
     multiTouchPan: MultiTouchPan;
@@ -185,6 +186,14 @@ export const Interaction = {
             case ToolType.Rig:
                 return (
                     <RigTool.Overlay
+                        tool={interaction.selectedTool}
+                        onUpdateTool={onUpdateTool}
+                        {...props}
+                    />
+                );
+            case ToolType.Play:
+                return (
+                    <PlayTool.Overlay
                         tool={interaction.selectedTool}
                         onUpdateTool={onUpdateTool}
                         {...props}

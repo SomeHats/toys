@@ -50,6 +50,7 @@ export function StrokeRenderer({
                 break;
             }
             case ToolType.Rig:
+            case ToolType.Play:
                 break;
             default:
                 exhaustiveSwitchError(interaction.selectedTool);

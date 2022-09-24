@@ -8,6 +8,8 @@ import { Button } from "@/splatapus/ui/Button";
 import { UpdateDocument, UpdateLocation } from "@/splatapus/editor/useEditorState";
 import classNames from "classnames";
 import React from "react";
+import { ToolType } from "@/splatapus/editor/tools/ToolType";
+import { toolClassNames } from "@/splatapus/editor/toolClassNames";
 
 // const buttonStyle = {
 //     width: SIDEBAR_WIDTH_PX - 24,
@@ -22,11 +24,13 @@ const HEIGHT_PER_THUMB = 80;
 export function RightBar({
     document,
     location,
+    selectedToolType,
     updateDocument,
     updateLocation,
 }: {
     document: SplatDocModel;
     location: SplatLocation;
+    selectedToolType: ToolType;
     updateDocument: UpdateDocument;
     updateLocation: UpdateLocation;
 }) {
@@ -63,7 +67,7 @@ export function RightBar({
                                     "overflow-none h-16 w-20 flex-none rounded border",
                                     shape.id === location.shapeId &&
                                         keyPoint.id === location.keyPointId
-                                        ? "border-purple-500 bg-white"
+                                        ? `${toolClassNames[selectedToolType].border500} ring-1 ${toolClassNames[selectedToolType].ring500} bg-white`
                                         : "border-stone-300 bg-white/25 hover:bg-white/50",
                                 )}
                                 onClick={() => {

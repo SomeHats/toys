@@ -41,6 +41,9 @@ rather focus my limited free time on actually making things with the tools.
             -   [x] handle 1- and 2-point situations
     -   [x] import/export
     -   [ ] (P0) introduce new "draw" -> "rig" -> "play" modes
+        -   [x] add basics
+        -   [ ] restore mode as part of location
+        -   [ ] drag-preview in rig mode
     -   [ ] (P0) fix up new drawing for unplaced point - extrapolation produces bad onion skins
             currently
     -   [ ] a r t
@@ -55,7 +58,7 @@ rather focus my limited free time on actually making things with the tools.
         -   [ ] (P2) try density based point allocation instead of distance based
         -   [ ] (P2) "pin" points on the line for animation consistency
         -   [ ] turn around?
-    -   [ ] design overhaul
+    -   [x] design overhaul
     -   [ ] login/share????
 -   blob factory
     -   [x] blur mode

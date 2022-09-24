@@ -12,7 +12,7 @@ export function UndoRedoButtons({
     updateUndoStack: UpdateUndoStack;
 }) {
     return (
-        <div className="pointer-events-none absolute bottom-2 left-3">
+        <div className="absolute bottom-2 left-3">
             <Button
                 disabled={!UndoStack.canUndo(undoStack)}
                 className={classNames(
@@ -20,8 +20,8 @@ export function UndoRedoButtons({
                     UndoStack.canUndo(undoStack)
                         ? "pointer-events-auto ease-out-back"
                         : UndoStack.canRedo(undoStack)
-                        ? "opacity-50"
-                        : "scale-0 opacity-0 ease-in-back",
+                        ? "pointer-events-none opacity-50"
+                        : "pointer-events-none scale-0 opacity-0 ease-in-back",
                 )}
                 onClick={() => updateUndoStack((_, stack) => UndoStack.undo(stack))}
                 iconLeft={

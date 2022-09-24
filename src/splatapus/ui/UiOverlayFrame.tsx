@@ -1,6 +1,6 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
-import { ReactNode, useId } from "react";
+import { ReactNode } from "react";
 
 const rightBarStyle = {
     width: SIDEBAR_WIDTH_PX,
@@ -27,10 +27,7 @@ export function UiOverlayFrame({
             </div>
             <div className="flex flex-auto items-stretch justify-between">
                 {leftBar}
-                <div
-                    className="pointer-events-auto h-full bg-stone-100 pl-8 backdrop-blur-md"
-                    style={rightBarStyle}
-                >
+                <div className="pointer-events-auto h-full bg-stone-100" style={rightBarStyle}>
                     {rightBar}
                 </div>
             </div>

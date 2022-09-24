@@ -19,12 +19,14 @@ export function Button({
             onClick={onClick}
             className={classNames(
                 className,
-                "rounded px-3 py-1 text-center font-bold tracking-wide text-stone-400 hover:bg-stone-300/25 hover:text-stone-500",
+                "group rounded px-3 py-1 text-center font-bold tracking-wide text-stone-400 hover:bg-stone-300/25 hover:text-stone-500",
             )}
             style={style}
             disabled={disabled}
         >
-            {children}
+            <span className="inline-block transition-transform ease-out-back-xl group-hover:scale-110 group-active:scale-90">
+                {children}
+            </span>
         </button>
     );
 }

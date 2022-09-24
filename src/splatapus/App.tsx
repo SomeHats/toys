@@ -22,7 +22,6 @@ import { UndoRedoButtons } from "@/splatapus/ui/UndoRedoButtons";
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
     const size = useResizeObserver(container, sizeFromEntry);
-    console.log(size);
 
     return (
         <div ref={setContainer} className="absolute inset-0 touch-none">

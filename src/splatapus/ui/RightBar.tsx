@@ -33,25 +33,29 @@ export function RightBar({
     const keyFrameIndex = Array.from(document.keyPoints).findIndex(
         (keyPoint) => location.keyPointId === keyPoint.id,
     );
+    const shapeIndex = Array.from(document.shapes).findIndex(
+        (shape) => location.shapeId === shape.id,
+    );
 
     return (
         <div className="relative flex h-full flex-col gap-4 overflow-auto p-5 [-webkit-overflow-scrolling:touch]">
             <div
-                className="absolute top-5 z-0 w-20 rounded bg-stone-300/25 ring-2 ring-stone-300/25"
+                className="absolute top-5 left-5 z-0 w-20 rounded bg-stone-200 ring-2 ring-stone-200 transition-transform"
                 style={{
                     height: -16 + HEIGHT_PER_THUMB * document.shapes.count(),
-                    left: 32 + keyFrameIndex * WIDTH_PER_THUMB,
+                    transform: `translateX(${keyFrameIndex * WIDTH_PER_THUMB}px)`,
+                }}
+            />
+            <div
+                className="absolute top-5 z-0 h-16 rounded bg-stone-200 ring-2 ring-stone-200 transition-transform"
+                style={{
+                    width: -4 + WIDTH_PER_THUMB * (document.keyPoints.count() + 1),
+                    transform: `translateY(${shapeIndex * HEIGHT_PER_THUMB}px)`,
                 }}
             />
             {Array.from(document.shapes, (shape, i) => (
                 <div className="relative flex w-max flex-col gap-2" key={shape.id}>
-                    <div
-                        className={classNames(
-                            "flex gap-1",
-                            shape.id === location.shapeId &&
-                                "rounded bg-stone-300/25 ring-2 ring-stone-300/25",
-                        )}
-                    >
+                    <div className={"flex gap-1"}>
                         {Array.from(document.keyPoints, (keyPoint) => (
                             <button
                                 key={keyPoint.id}
@@ -59,8 +63,8 @@ export function RightBar({
                                     "overflow-none h-16 w-20 flex-none rounded border",
                                     shape.id === location.shapeId &&
                                         keyPoint.id === location.keyPointId
-                                        ? "border-purple-500 bg-stone-50"
-                                        : "border-stone-200 bg-stone-50/50",
+                                        ? "border-purple-500 bg-white"
+                                        : "border-stone-300 bg-white/25 hover:bg-white/50",
                                 )}
                                 onClick={() => {
                                     updateLocation(({ location }) =>
@@ -80,7 +84,7 @@ export function RightBar({
                             </button>
                         ))}
                         <button
-                            className="h-16 w-20 flex-none rounded border border-stone-200 text-xl text-stone-400"
+                            className="h-16 w-20 flex-none rounded border border-stone-300 text-xl text-stone-400 hover:bg-white/50"
                             onClick={() => {
                                 const keyPointId = SplatKeyPointId.generate();
                                 updateDocument(

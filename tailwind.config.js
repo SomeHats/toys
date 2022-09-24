@@ -5,6 +5,10 @@ module.exports = {
             transitionTimingFunction: {
                 "in-back": "cubic-bezier(0.36, 0, 0.66, -0.56)",
                 "out-back": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                "in-back-md": "cubic-bezier(0.36, 0, 0.66, -0.96)",
+                "out-back-md": "cubic-bezier(0.34, 1.96, 0.64, 1)",
+                "in-back-xl": "cubic-bezier(0.36, 0, 0.66, -1.96)",
+                "out-back-xl": "cubic-bezier(0.34, 2.96, 0.64, 1)",
             },
         },
     },

@@ -3,7 +3,6 @@ import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { UpdateInteraction } from "@/splatapus/editor/useEditorState";
 import { Button } from "@/splatapus/ui/Button";
 import classNames from "classnames";
-import { MouseEventHandler } from "react";
 
 export function ModePicker({
     selectedToolType,

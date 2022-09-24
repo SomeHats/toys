@@ -1,15 +1,15 @@
 import { assert } from "@/lib/assert";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { CallbackAction, UpdateAction, applyUpdateWithin, applyUpdate } from "@/lib/utils";
-import { Interaction } from "@/splatapus/Interaction";
+import { Interaction } from "@/splatapus/editor/Interaction";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { PreviewPosition } from "@/splatapus/PreviewPosition";
-import { SplatLocation } from "@/splatapus/SplatLocation";
-import { SplatapusState } from "@/splatapus/store";
-import { PointerEventType } from "@/splatapus/tools/lib/EventContext";
-import { ToolType } from "@/splatapus/tools/ToolType";
-import { OpOptions, UndoStack } from "@/splatapus/UndoStack";
-import { Viewport, ViewportState } from "@/splatapus/Viewport";
+import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
+import { SplatLocation } from "@/splatapus/editor/SplatLocation";
+import { SplatapusState } from "@/splatapus/model/store";
+import { PointerEventType } from "@/splatapus/editor/lib/EventContext";
+import { ToolType } from "@/splatapus/editor/tools/ToolType";
+import { OpOptions, UndoStack } from "@/splatapus/editor/UndoStack";
+import { Viewport, ViewportState } from "@/splatapus/editor/Viewport";
 import { PointerEvent, useMemo, useReducer } from "react";
 
 export type EditorState = {
@@ -146,6 +146,7 @@ export function useEditorState(initialize: () => EditorState, _capture: () => Ca
         ...events,
         document: state.undoStack.current.doc,
         location: state.undoStack.current.location,
+        undoStack: state.undoStack,
         interaction: state.interaction,
         previewPosition: useMemo(
             (): PreviewPosition =>
@@ -155,3 +156,10 @@ export function useEditorState(initialize: () => EditorState, _capture: () => Ca
         ),
     };
 }
+
+export type EditorStateHook = ReturnType<typeof useEditorState>;
+export type UpdateUndoStack = EditorStateHook["updateUndoStack"];
+export type UpdateLocation = EditorStateHook["updateLocation"];
+export type UpdateDocument = EditorStateHook["updateDocument"];
+export type UpdateViewport = EditorStateHook["updateViewport"];
+export type UpdateInteraction = EditorStateHook["updateInteraction"];

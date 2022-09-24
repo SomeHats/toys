@@ -2,8 +2,8 @@ import Vector2 from "@/lib/geom/Vector2";
 import { composeParsers, createShapeParser, ParserType } from "@/lib/objectParser";
 import { Result } from "@/lib/Result";
 import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
-import { parseToolType, ToolType } from "@/splatapus/tools/ToolType";
-import { parseViewportState, ViewportState } from "@/splatapus/Viewport";
+import { parseToolType, ToolType } from "@/splatapus/editor/tools/ToolType";
+import { parseViewportState, ViewportState } from "@/splatapus/editor/Viewport";
 
 export const parseSplatLocationState = createShapeParser({
     keyPointId: SplatKeyPointId.parse,

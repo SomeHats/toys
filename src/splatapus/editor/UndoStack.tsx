@@ -2,7 +2,7 @@ import { assert } from "@/lib/assert";
 import { UNDO_ACTIONS } from "@/splatapus/constants";
 import { deepEqual, UpdateAction, applyUpdate } from "@/lib/utils";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { SplatLocation } from "@/splatapus/SplatLocation";
+import { SplatLocation } from "@/splatapus/editor/SplatLocation";
 
 export type OpOptions = {
     readonly lockstepLocation?: UpdateAction<SplatLocation>;
@@ -32,6 +32,8 @@ export const UndoStack = {
         pendingOp: null,
         current: { ...entry, options: {} },
     }),
+    canUndo: (undoStack: UndoStack): boolean => undoStack.undoStates.length > 0,
+    canRedo: (undoStack: UndoStack): boolean => (undoStack.redoStates?.length ?? 0) > 0,
     beginOperation: (undoStack: UndoStack): { undoStack: UndoStack; txId: number } => {
         const txId = Math.random();
         assert(undoStack.pendingOp == null, "pending op already in progress");

@@ -1,7 +1,7 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { applyUpdateWithin, exhaustiveSwitchError } from "@/lib/utils";
 import { MIN_DRAG_GESTURE_DISTANCE_PX } from "@/splatapus/constants";
-import { PointerEventContext } from "@/splatapus/tools/lib/EventContext";
+import { PointerEventContext } from "@/splatapus/editor/lib/EventContext";
 import { PointerEvent } from "react";
 
 type PointerId = PointerEvent["pointerId"];

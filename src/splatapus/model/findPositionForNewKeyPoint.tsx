@@ -2,7 +2,7 @@ import AABB from "@/lib/geom/AABB";
 import Vector2 from "@/lib/geom/Vector2";
 import { random } from "@/lib/utils";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { Viewport } from "@/splatapus/Viewport";
+import { Viewport } from "@/splatapus/editor/Viewport";
 
 export function findPositionForNewKeyPoint(document: SplatDocModel, viewport: Viewport) {
     const bounds = viewport.visibleSceneBounds();

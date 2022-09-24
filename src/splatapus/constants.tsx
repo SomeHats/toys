@@ -1,4 +1,4 @@
-import { StrokeOptions } from "@/splatapus/perfectFreehand";
+import { StrokeOptions } from "@/splatapus/model/perfectFreehand";
 
 export const SIDEBAR_WIDTH_PX = 300;
 

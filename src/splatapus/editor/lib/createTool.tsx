@@ -1,10 +1,10 @@
 import { ObjectMap } from "@/lib/utils";
 import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { PreviewPosition } from "@/splatapus/PreviewPosition";
-import { SplatLocation } from "@/splatapus/SplatLocation";
-import { CtxAction } from "@/splatapus/useEditorState";
-import { Viewport } from "@/splatapus/Viewport";
+import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
+import { SplatLocation } from "@/splatapus/editor/SplatLocation";
+import { CtxAction } from "@/splatapus/editor/useEditorState";
+import { Viewport } from "@/splatapus/editor/Viewport";
 import { ComponentType } from "react";
 
 export type OverlayProps<Tool> = {

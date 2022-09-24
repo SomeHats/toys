@@ -1,5 +1,5 @@
 import { lerp } from "@/lib/utils";
-import { StrokeCenterPoint } from "@/splatapus/perfectFreehand";
+import { StrokeCenterPoint } from "@/splatapus/model/perfectFreehand";
 
 export function normalizeCenterPointIntervalsLinear(
     path: StrokeCenterPoint[],

@@ -1,8 +1,8 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
-import { createTool } from "@/splatapus/tools/lib/createTool";
-import { createGestureDetector, GestureType } from "@/splatapus/tools/lib/GestureDetection";
-import { ToolType } from "@/splatapus/tools/ToolType";
+import { createTool } from "@/splatapus/editor/lib/createTool";
+import { createGestureDetector, GestureType } from "@/splatapus/editor/lib/GestureDetection";
+import { ToolType } from "@/splatapus/editor/tools/ToolType";
 
 export type IdleDrawTool = {
     readonly state: "idle";

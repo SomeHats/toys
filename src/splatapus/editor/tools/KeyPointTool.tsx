@@ -1,11 +1,11 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
-import { PreviewPosition } from "@/splatapus/PreviewPosition";
+import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 import { ScenePositionedDiv } from "@/splatapus/renderer/Positioned";
-import { createTool, OverlayProps } from "@/splatapus/tools/lib/createTool";
-import { PointerEventContext } from "@/splatapus/tools/lib/EventContext";
-import { createGestureDetector, GestureType } from "@/splatapus/tools/lib/GestureDetection";
-import { ToolType } from "@/splatapus/tools/ToolType";
+import { createTool, OverlayProps } from "@/splatapus/editor/lib/createTool";
+import { PointerEventContext } from "@/splatapus/editor/lib/EventContext";
+import { createGestureDetector, GestureType } from "@/splatapus/editor/lib/GestureDetection";
+import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import classNames from "classnames";
 
 export type IdleKeyPointToolState = {

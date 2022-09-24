@@ -1,19 +1,19 @@
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { perfectFreehandOpts } from "@/splatapus/constants";
-import { Interaction } from "@/splatapus/Interaction";
-import { interpolationCache } from "@/splatapus/InterpolationCache";
+import { Interaction } from "@/splatapus/editor/Interaction";
+import { interpolationCache } from "@/splatapus/model/InterpolationCache";
 import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { normalizeCenterPointIntervalsQuadratic } from "@/splatapus/normalizeCenterPointIntervals";
-import { pathFromCenterPoints } from "@/splatapus/pathFromCenterPoints";
+import { normalizeCenterPointIntervalsQuadratic } from "@/splatapus/model/normalizeCenterPointIntervals";
+import { pathFromCenterPoints } from "@/splatapus/model/pathFromCenterPoints";
 import {
     getStrokeCenterPoints,
     getStrokePoints,
     getSvgPathFromStroke,
-} from "@/splatapus/perfectFreehand";
-import { PreviewPosition } from "@/splatapus/PreviewPosition";
-import { DrawTool } from "@/splatapus/tools/DrawTool";
-import { ToolType } from "@/splatapus/tools/ToolType";
+} from "@/splatapus/model/perfectFreehand";
+import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
+import { DrawTool } from "@/splatapus/editor/tools/DrawTool";
+import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import classNames from "classnames";
 
 export function StrokeRenderer({

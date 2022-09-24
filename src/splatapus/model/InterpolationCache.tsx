@@ -1,6 +1,6 @@
 import Vector2 from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
-import { AutoInterpolator, Interpolator } from "@/splatapus/Interpolator";
+import { AutoInterpolator, Interpolator } from "@/splatapus/model/Interpolator";
 import {
     SplatKeyPoint,
     SplatShape,
@@ -8,8 +8,8 @@ import {
     SplatShapeVersion,
 } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { StrokeCenterPoint } from "@/splatapus/perfectFreehand";
-import { PreviewPosition } from "@/splatapus/PreviewPosition";
+import { StrokeCenterPoint } from "@/splatapus/model/perfectFreehand";
+import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 
 type CachedValues = {
     keyPoints: ReadonlySet<SplatKeyPoint>;

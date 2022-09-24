@@ -2,12 +2,12 @@ import { debugStateToString } from "@/lib/debugPropsToString";
 import { matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { SplatShapeId } from "@/splatapus/model/SplatDoc";
-import { DrawTool } from "@/splatapus/tools/DrawTool";
-import { KeyPointTool } from "@/splatapus/tools/KeyPointTool";
-import { ToolMethods } from "@/splatapus/tools/lib/createTool";
-import { KeyboardEventContext, PointerEventContext } from "@/splatapus/tools/lib/EventContext";
-import { QuickPanTool } from "@/splatapus/tools/QuickPanTool";
-import { QuickToolType, ToolType } from "@/splatapus/tools/ToolType";
+import { DrawTool } from "@/splatapus/editor/tools/DrawTool";
+import { KeyPointTool } from "@/splatapus/editor/tools/KeyPointTool";
+import { ToolMethods } from "@/splatapus/editor/lib/createTool";
+import { KeyboardEventContext, PointerEventContext } from "@/splatapus/editor/lib/EventContext";
+import { QuickPanTool } from "@/splatapus/editor/tools/QuickPanTool";
+import { QuickToolType, ToolType } from "@/splatapus/editor/tools/ToolType";
 
 const toolsByType = {
     [ToolType.Draw]: DrawTool,

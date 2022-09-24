@@ -4,7 +4,7 @@ import { debounce, getLocalStorageItem, setLocalStorageItem } from "@/lib/utils"
 import { parseSplatDoc, SplatDoc, SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
-import { SplatLocation, SplatLocationState } from "@/splatapus/SplatLocation";
+import { SplatLocation, SplatLocationState } from "@/splatapus/editor/SplatLocation";
 import Vector2 from "@/lib/geom/Vector2";
 
 export const parseSplatapusState = createShapeParser({
@@ -42,14 +42,20 @@ export function writeSaved(key: string, { doc, location }: SplatapusState) {
 
 export const writeSavedDebounced = debounce(AUTOSAVE_DEBOUNCE_TIME_MS, writeSaved);
 
+export function getDefaultLocationForDocument(document: SplatDocModel) {
+    const keyPointId = [...document.keyPoints][0].id;
+    const shapeId = [...document.shapes][0].id;
+    return new SplatLocation({ keyPointId, shapeId });
+}
 export function makeEmptySaveState(): SplatapusState {
     const keyPointId = SplatKeyPointId.generate();
     const shapeId = SplatShapeId.generate();
+    const doc = SplatDocModel.create()
+        .addKeyPoint(keyPointId, Vector2.ZERO)
+        .addShape(shapeId)
+        .replacePointsForVersion(keyPointId, shapeId, []);
     return {
-        doc: SplatDocModel.create()
-            .addKeyPoint(keyPointId, Vector2.ZERO)
-            .addShape(shapeId)
-            .replacePointsForVersion(keyPointId, shapeId, []),
-        location: new SplatLocation({ keyPointId, shapeId }),
+        doc,
+        location: getDefaultLocationForDocument(doc),
     };
 }

@@ -1,30 +1,20 @@
-import { tailwindColors } from "@/lib/theme";
-import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
-import { findPositionForNewKeyPoint } from "@/splatapus/findPositionForNewKeyPoint";
+import { findPositionForNewKeyPoint } from "@/splatapus/model/findPositionForNewKeyPoint";
 import { SplatKeyPointId, SplatShapeId, SplatShapeVersion } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { pathFromCenterPoints } from "@/splatapus/pathFromCenterPoints";
-import { getSvgPathFromStroke } from "@/splatapus/perfectFreehand";
-import { SplatLocation } from "@/splatapus/SplatLocation";
+import { pathFromCenterPoints } from "@/splatapus/model/pathFromCenterPoints";
+import { getSvgPathFromStroke } from "@/splatapus/model/perfectFreehand";
+import { SplatLocation } from "@/splatapus/editor/SplatLocation";
 import { Button } from "@/splatapus/ui/Button";
-import { makeGradient } from "@/splatapus/ui/makeGradient";
-import { OpOptions } from "@/splatapus/UndoStack";
-import { CtxAction } from "@/splatapus/useEditorState";
+import { UpdateDocument, UpdateLocation } from "@/splatapus/editor/useEditorState";
 import classNames from "classnames";
-import Color from "color";
 import React from "react";
 
-const contentGradient = makeGradient(Color(tailwindColors.stone50), "to right", 40, 1);
-const contentStyle = {
-    WebkitMaskImage: contentGradient,
-    maskImage: contentGradient,
-};
-const buttonStyle = {
-    width: SIDEBAR_WIDTH_PX - 24,
-};
-const rowStyle = {
-    minWidth: SIDEBAR_WIDTH_PX - 24,
-};
+// const buttonStyle = {
+//     width: SIDEBAR_WIDTH_PX - 24,
+// };
+// const rowStyle = {
+//     minWidth: SIDEBAR_WIDTH_PX - 24,
+// };
 
 const WIDTH_PER_THUMB = 84;
 const HEIGHT_PER_THUMB = 80;
@@ -37,18 +27,15 @@ export function RightBar({
 }: {
     document: SplatDocModel;
     location: SplatLocation;
-    updateDocument: (ctx: CtxAction<SplatDocModel>, options: OpOptions) => void;
-    updateLocation: (ctx: CtxAction<SplatLocation>) => void;
+    updateDocument: UpdateDocument;
+    updateLocation: UpdateLocation;
 }) {
     const keyFrameIndex = Array.from(document.keyPoints).findIndex(
         (keyPoint) => location.keyPointId === keyPoint.id,
     );
 
     return (
-        <div
-            className="relative flex h-full flex-col gap-4 overflow-auto p-5 pl-8 [-webkit-overflow-scrolling:touch]"
-            style={contentStyle}
-        >
+        <div className="relative flex h-full flex-col gap-4 overflow-auto p-5 [-webkit-overflow-scrolling:touch]">
             <div
                 className="absolute top-5 z-0 w-20 rounded bg-stone-300/25 ring-2 ring-stone-300/25"
                 style={{
@@ -64,7 +51,6 @@ export function RightBar({
                             shape.id === location.shapeId &&
                                 "rounded bg-stone-300/25 ring-2 ring-stone-300/25",
                         )}
-                        style={rowStyle}
                     >
                         {Array.from(document.keyPoints, (keyPoint) => (
                             <button
@@ -117,7 +103,6 @@ export function RightBar({
             ))}
             <Button
                 className="sticky left-0"
-                style={buttonStyle}
                 onClick={() => {
                     const shapeId = SplatShapeId.generate();
                     updateDocument(({ document }) => document.addShape(shapeId), {

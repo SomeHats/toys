@@ -1,5 +1,5 @@
 import Vector2 from "@/lib/geom/Vector2";
-import { Viewport } from "@/splatapus/Viewport";
+import { Viewport } from "@/splatapus/editor/Viewport";
 import classNames from "classnames";
 import { ComponentProps } from "react";
 

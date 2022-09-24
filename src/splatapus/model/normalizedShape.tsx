@@ -3,9 +3,9 @@ import {
     getStrokeCenterPoints,
     getStrokePoints,
     StrokeCenterPoint,
-} from "@/splatapus/perfectFreehand";
+} from "@/splatapus/model/perfectFreehand";
 import { perfectFreehandOpts } from "@/splatapus/constants";
-import { normalizeCenterPointIntervalsQuadratic } from "@/splatapus/normalizeCenterPointIntervals";
+import { normalizeCenterPointIntervalsQuadratic } from "@/splatapus/model/normalizeCenterPointIntervals";
 import { Table } from "@/splatapus/model/Table";
 
 export type NormalizedShapeVersionState = {

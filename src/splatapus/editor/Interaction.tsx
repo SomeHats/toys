@@ -5,17 +5,17 @@ import { matchesKey, matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { applyUpdateWithin, exhaustiveSwitchError, UpdateAction } from "@/lib/utils";
 import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { MultiTouchPan } from "@/splatapus/MultiTouchPan";
-import { SplatLocation } from "@/splatapus/SplatLocation";
-import { DrawTool } from "@/splatapus/tools/DrawTool";
-import { KeyPointTool } from "@/splatapus/tools/KeyPointTool";
-import { KeyboardEventContext, PointerEventContext } from "@/splatapus/tools/lib/EventContext";
-import { QuickPanTool } from "@/splatapus/tools/QuickPanTool";
-import { SelectedTool } from "@/splatapus/tools/tools";
-import { ToolType } from "@/splatapus/tools/ToolType";
-import { UndoStack } from "@/splatapus/UndoStack";
-import { CtxAction } from "@/splatapus/useEditorState";
-import { Viewport } from "@/splatapus/Viewport";
+import { MultiTouchPan } from "@/splatapus/editor/MultiTouchPan";
+import { SplatLocation } from "@/splatapus/editor/SplatLocation";
+import { DrawTool } from "@/splatapus/editor/tools/DrawTool";
+import { KeyPointTool } from "@/splatapus/editor/tools/KeyPointTool";
+import { KeyboardEventContext, PointerEventContext } from "@/splatapus/editor/lib/EventContext";
+import { QuickPanTool } from "@/splatapus/editor/tools/QuickPanTool";
+import { SelectedTool } from "@/splatapus/editor/tools/tools";
+import { ToolType } from "@/splatapus/editor/tools/ToolType";
+import { UndoStack } from "@/splatapus/editor/UndoStack";
+import { CtxAction, UpdateInteraction } from "@/splatapus/editor/useEditorState";
+import { Viewport } from "@/splatapus/editor/Viewport";
 
 export type Interaction = {
     multiTouchPan: MultiTouchPan;
@@ -162,7 +162,7 @@ export const Interaction = {
         location: SplatLocation;
         viewport: Viewport;
         interaction: Interaction;
-        onUpdateInteraction: (update: CtxAction<Interaction>) => void;
+        onUpdateInteraction: UpdateInteraction;
     }) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const onUpdateTool = (update: CtxAction<any>) =>

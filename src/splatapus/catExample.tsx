@@ -1,4 +1,4 @@
-import { parseSplatapusState } from "@/splatapus/store";
+import { parseSplatapusState } from "@/splatapus/model/store";
 
 export const catExample = parseSplatapusState({
     doc: {

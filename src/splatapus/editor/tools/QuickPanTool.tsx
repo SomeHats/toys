@@ -1,7 +1,7 @@
 import Vector2 from "@/lib/geom/Vector2";
-import { createTool } from "@/splatapus/tools/lib/createTool";
-import { createGestureDetector, GestureType } from "@/splatapus/tools/lib/GestureDetection";
-import { QuickToolType } from "@/splatapus/tools/ToolType";
+import { createTool } from "@/splatapus/editor/lib/createTool";
+import { createGestureDetector, GestureType } from "@/splatapus/editor/lib/GestureDetection";
+import { QuickToolType } from "@/splatapus/editor/tools/ToolType";
 
 export type IdleQuickPanTool = { readonly state: "idle" };
 export type ActiveQuickPanTool = {

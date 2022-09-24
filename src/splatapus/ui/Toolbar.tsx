@@ -1,6 +1,6 @@
-import { Interaction } from "@/splatapus/Interaction";
-import { ToolType } from "@/splatapus/tools/ToolType";
-import { CtxAction } from "@/splatapus/useEditorState";
+import { Interaction } from "@/splatapus/editor/Interaction";
+import { ToolType } from "@/splatapus/editor/tools/ToolType";
+import { UpdateInteraction } from "@/splatapus/editor/useEditorState";
 import classNames from "classnames";
 import { MouseEventHandler } from "react";
 
@@ -9,7 +9,7 @@ export function Toolbar({
     updateInteraction,
 }: {
     selectedToolType: ToolType;
-    updateInteraction: (update: CtxAction<Interaction>) => void;
+    updateInteraction: UpdateInteraction;
 }) {
     const onChangeTool = (tool: ToolType) => () =>
         updateInteraction((ctx, interaction) =>

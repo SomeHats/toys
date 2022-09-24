@@ -1,13 +1,31 @@
 import { assert } from "@/lib/assert";
 import { stringFromError } from "@/lib/utils";
+import { catExample } from "@/splatapus/catExample";
 import { parseSplatDoc } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { SplatLocation } from "@/splatapus/SplatLocation";
+import { SplatLocation } from "@/splatapus/editor/SplatLocation";
+import { makeEmptySaveState } from "@/splatapus/model/store";
 import { Button } from "@/splatapus/ui/Button";
-import { OpOptions } from "@/splatapus/UndoStack";
-import { CtxAction } from "@/splatapus/useEditorState";
+import { UpdateDocument } from "@/splatapus/editor/useEditorState";
 
-export function ExportButton({ document }: { document: SplatDocModel }) {
+export function ImportExportButtons({
+    document,
+    updateDocument,
+}: {
+    document: SplatDocModel;
+    updateDocument: UpdateDocument;
+}) {
+    return (
+        <>
+            <ImportButton updateDocument={updateDocument} />
+            <ExportButton document={document} />
+            <CatExampleButton updateDocument={updateDocument} />
+            <ResetButton updateDocument={updateDocument} />
+        </>
+    );
+}
+
+function ExportButton({ document }: { document: SplatDocModel }) {
     return (
         <Button
             onClick={() => {
@@ -23,11 +41,7 @@ export function ExportButton({ document }: { document: SplatDocModel }) {
     );
 }
 
-export function ImportButton({
-    updateDocument,
-}: {
-    updateDocument: (update: CtxAction<SplatDocModel>, options: OpOptions) => void;
-}) {
+function ImportButton({ updateDocument }: { updateDocument: UpdateDocument }) {
     return (
         <Button
             onClick={() => {
@@ -71,6 +85,40 @@ export function ImportButton({
             }}
         >
             import
+        </Button>
+    );
+}
+
+function ResetButton({ updateDocument }: { updateDocument: UpdateDocument }) {
+    return (
+        <Button
+            onClick={() => {
+                const { doc, location } = makeEmptySaveState();
+                updateDocument(() => doc, { lockstepLocation: location });
+            }}
+        >
+            reset
+        </Button>
+    );
+}
+
+function CatExampleButton({ updateDocument }: { updateDocument: UpdateDocument }) {
+    if (!catExample.isOk()) {
+        return null;
+    }
+    return (
+        <Button
+            onClick={() => {
+                const { doc, location } = catExample.unwrap();
+                updateDocument(() => doc, {
+                    lockstepLocation: new SplatLocation({
+                        keyPointId: location.keyPointId,
+                        shapeId: location.shapeId,
+                    }),
+                });
+            }}
+        >
+            example
         </Button>
     );
 }

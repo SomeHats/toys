@@ -6,11 +6,13 @@ export function Button({
     className,
     onClick,
     style,
+    disabled,
 }: {
     children: ReactNode;
     className?: string;
     onClick?: MouseEventHandler;
     style?: CSSProperties;
+    disabled?: boolean;
 }) {
     return (
         <button
@@ -20,6 +22,7 @@ export function Button({
                 "rounded px-3 py-1 text-center font-bold tracking-wide text-stone-400 hover:bg-stone-300/25 hover:text-stone-500",
             )}
             style={style}
+            disabled={disabled}
         >
             {children}
         </button>

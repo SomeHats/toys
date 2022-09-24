@@ -4,22 +4,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { applyUpdate, UpdateAction } from "@/lib/utils";
 import classNames from "classnames";
 import { LOAD_FROM_AUTOSAVE_ENABLED } from "@/splatapus/constants";
-import { loadSaved, makeEmptySaveState, writeSavedDebounced } from "@/splatapus/store";
+import { loadSaved, makeEmptySaveState, writeSavedDebounced } from "@/splatapus/model/store";
 import { useEvent } from "@/lib/hooks/useEvent";
-import { Viewport, ViewportState } from "@/splatapus/Viewport";
+import { Viewport, ViewportState } from "@/splatapus/editor/Viewport";
 import { Toolbar } from "@/splatapus/ui/Toolbar";
 import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
-import { EditorState, useEditorState } from "@/splatapus/useEditorState";
-import { Interaction } from "@/splatapus/Interaction";
-import { PreviewPosition } from "@/splatapus/PreviewPosition";
+import { EditorState, useEditorState } from "@/splatapus/editor/useEditorState";
+import { Interaction } from "@/splatapus/editor/Interaction";
+import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 import { RightBar } from "@/splatapus/ui/RightBar";
 import { assertExists } from "@/lib/assert";
-import { UndoStack } from "@/splatapus/UndoStack";
-import { catExample } from "@/splatapus/catExample";
-import { SplatLocation } from "@/splatapus/SplatLocation";
 import { Button } from "@/splatapus/ui/Button";
 import { UiOverlayFrame } from "@/splatapus/ui/UiOverlayFrame";
-import { ExportButton, ImportButton } from "@/splatapus/ui/ImportExportButtons";
+import { ImportExportButtons } from "@/splatapus/ui/ImportExportButtons";
+import { UndoRedoButtons } from "@/splatapus/ui/UndoRedoButtons";
 
 export function App() {
     const [container, setContainer] = useState<Element | null>(null);
@@ -40,6 +38,7 @@ function Splatapus({ size }: { size: Vector2 }) {
         location,
         interaction,
         previewPosition,
+        undoStack,
         updateDocument,
         updateLocation,
         updateInteraction,
@@ -146,6 +145,15 @@ function Splatapus({ size }: { size: Vector2 }) {
             </div>
             <UiOverlayFrame
                 size={size}
+                topBarLeft={
+                    <>
+                        <Button>draw</Button>
+                        <Button>rig</Button>
+                    </>
+                }
+                topBarRight={
+                    <ImportExportButtons updateDocument={updateDocument} document={document} />
+                }
                 leftBar={
                     <Toolbar
                         selectedToolType={interaction.selectedTool.type}
@@ -160,50 +168,8 @@ function Splatapus({ size }: { size: Vector2 }) {
                         updateLocation={updateLocation}
                     />
                 }
-                bottomBar={
-                    <>
-                        <Button
-                            onClick={() =>
-                                updateUndoStack((ctx, undoStack) => UndoStack.undo(undoStack))
-                            }
-                        >
-                            undo
-                        </Button>
-                        <Button
-                            onClick={() =>
-                                updateUndoStack((ctx, undoStack) => UndoStack.redo(undoStack))
-                            }
-                        >
-                            redo
-                        </Button>
-                        <ExportButton document={document} />
-                        <ImportButton updateDocument={updateDocument} />
-                        <Button
-                            onClick={() => {
-                                const { doc, location } = makeEmptySaveState();
-                                updateDocument(() => doc, { lockstepLocation: location });
-                            }}
-                        >
-                            reset
-                        </Button>
-                        {catExample.isOk() && (
-                            <Button
-                                onClick={() => {
-                                    const { doc, location } = catExample.unwrap();
-                                    updateDocument(() => doc, {
-                                        lockstepLocation: new SplatLocation({
-                                            keyPointId: location.keyPointId,
-                                            shapeId: location.shapeId,
-                                        }),
-                                    });
-                                }}
-                            >
-                                example
-                            </Button>
-                        )}
-                    </>
-                }
             />
+            <UndoRedoButtons undoStack={undoStack} updateUndoStack={updateUndoStack} />
         </>
     );
 }

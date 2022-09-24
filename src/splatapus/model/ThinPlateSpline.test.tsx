@@ -1,4 +1,4 @@
-import { Tps } from "@/splatapus/ThinPlateSpline";
+import { Tps } from "@/splatapus/model/ThinPlateSpline";
 import { expect, test } from "vitest";
 
 const testInputs = [

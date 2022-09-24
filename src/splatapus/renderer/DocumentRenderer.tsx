@@ -1,6 +1,6 @@
-import { Interaction } from "@/splatapus/Interaction";
+import { Interaction } from "@/splatapus/editor/Interaction";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { PreviewPosition } from "@/splatapus/PreviewPosition";
+import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 import { StrokeRenderer } from "@/splatapus/renderer/StrokeRenderer";
 
 export function DocumentRenderer({

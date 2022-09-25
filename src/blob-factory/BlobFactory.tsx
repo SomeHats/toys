@@ -223,6 +223,7 @@ function startBlobFactory(
         "u_interpolateMode",
         sample(interpolateModes).value,
     );
+    const hueBias = program.uniformFloat("u_hueBias", random(0, 360));
     let colorLevel = darkMode.value ? random(50, 95) : random(5, 50);
 
     const positionsVao = program.createAndBindVertexArray({
@@ -313,6 +314,13 @@ function startBlobFactory(
             interpolateMode.value,
             interpolateModes,
         );
+        if (interpolateMode.value !== BlobFactoryInterpolateMode.Vector) {
+            hueBias.value = controls.range("hue bias", hueBias.value, {
+                min: 0,
+                max: 360,
+                step: 1,
+            });
+        }
         mode.value = controls.segmentedControl("mode", mode.value, modes);
         if (mode.value === BlobFactoryMode.Inside || mode.value === BlobFactoryMode.Outside) {
             smoothness.value = controls.range("smoothness", smoothness.value, {

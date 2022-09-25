@@ -25,6 +25,7 @@ uniform float u_blurSpread;
 uniform int u_mode;
 uniform bool u_darkMode;
 uniform int u_interpolateMode;
+uniform float u_hueBias;
 // uniform bool u_outlineMode;
 // uniform bool u_blurMode;
 
@@ -89,6 +90,12 @@ float easeInOutCubic(in float t) {
 
 float expDropOff(in float t, in float k) { return 1. / ((t / k) + 1.); }
 
+float rotate(in float angle, in float rotation) {
+    float rotated = angle + rotation;
+    // return rotated;
+    return atan(sin(rotated), cos(rotated));
+}
+
 void main() {
     int blobCount =
         min(textureSize(u_blobs, 0).x / ENTRIES_PER_BLOB, MAX_BLOBS);
@@ -105,6 +112,8 @@ void main() {
         float radius = d1.z;
         vec3 blobColor = rgb2lch(
             texelFetch(u_blobs, ivec2((i * ENTRIES_PER_BLOB) + 1, 0), 0).rgb);
+
+        blobColor.z = rotate(blobColor.z, radians(u_hueBias));
 
         float sd = sdfCircle(center, radius);
         // float strength = clamp(map(sd, 0., u_blurSize, 1., 0.), 0., 1.);
@@ -138,14 +147,18 @@ void main() {
     vec3 bgColor = u_darkMode ? vec3(0) : vec3(1);
     vec3 resultColor = vec3(1, 0, 1);
     if (u_interpolateMode == INTERPOLATE_NAIVE) {
-        resultColor = lch2rgb(totalColor / totalStrength);
+        resultColor = totalColor / totalStrength;
     } else if (u_interpolateMode == INTERPOLATE_VECTOR) {
-        resultColor = lch2rgb(
-            vec3((totalColor / totalStrength).xy, atan(hueVec.y, hueVec.x)));
+        resultColor =
+            vec3((totalColor / totalStrength).xy, atan(hueVec.y, hueVec.x));
     } else if (u_interpolateMode == INTERPOLATE_MIN) {
-        resultColor = lch2rgb(
-            vec3((totalColor / totalStrength).xy, minHue / totalStrength));
+        resultColor =
+            vec3((totalColor / totalStrength).xy, minHue / totalStrength);
     }
+
+    resultColor.z = rotate(resultColor.z, radians(-u_hueBias));
+    resultColor = lch2rgb(resultColor);
+
     if (u_mode == MODE_BLUR) {
         // blur mode
         outColor =

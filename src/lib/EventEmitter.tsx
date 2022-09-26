@@ -4,7 +4,7 @@ export type Unsubscribe = () => void;
 
 type Listener<T> = T extends undefined ? () => void : (event: T) => void;
 
-export default class EventEmitter<T> {
+export default class EventEmitter<T = undefined> {
     private handlers = new Set<Listener<T>>();
 
     listen(listener: Listener<T>) {

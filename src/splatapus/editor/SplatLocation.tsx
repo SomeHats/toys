@@ -1,50 +1,51 @@
 import Vector2 from "@/lib/geom/Vector2";
-import { composeParsers, createShapeParser, ParserType } from "@/lib/objectParser";
-import { Result } from "@/lib/Result";
+import { createShapeParser, ParserType } from "@/lib/objectParser";
 import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { parseToolType, ToolType } from "@/splatapus/editor/tools/ToolType";
-import { parseViewportState, ViewportState } from "@/splatapus/editor/Viewport";
+import { parseSerializedViewport, Viewport } from "@/splatapus/editor/Viewport";
 
-export const parseSplatLocationState = createShapeParser({
+export const parseSerializedSplatLocation = createShapeParser({
     keyPointId: SplatKeyPointId.parse,
     shapeId: SplatShapeId.parse,
-    viewport: parseViewportState,
+    viewport: parseSerializedViewport,
     tool: parseToolType,
 });
-export type SplatLocationState = ParserType<typeof parseSplatLocationState>;
+export type SerializedSplatLocation = ParserType<typeof parseSerializedSplatLocation>;
+
+type SplatLocationState = {
+    keyPointId: SplatKeyPointId;
+    shapeId: SplatShapeId;
+    viewport: Viewport;
+    tool: ToolType;
+};
 
 export class SplatLocation {
-    static parse = composeParsers(parseSplatLocationState, (state) =>
-        Result.ok(new SplatLocation(state)),
-    );
+    static deserialize(state: SerializedSplatLocation, screenSize: Vector2) {
+        return new SplatLocation({
+            keyPointId: state.keyPointId,
+            shapeId: state.shapeId,
+            viewport: Viewport.deserialize(state.viewport, screenSize),
+            tool: state.tool,
+        });
+    }
 
     readonly keyPointId: SplatKeyPointId;
     readonly shapeId: SplatShapeId;
-    readonly viewportState: ViewportState;
+    readonly viewport: Viewport;
     readonly tool: ToolType;
 
-    constructor({
-        keyPointId,
-        shapeId,
-        viewport = { pan: Vector2.ZERO, zoom: 1 },
-        tool = ToolType.Draw,
-    }: {
-        keyPointId: SplatKeyPointId;
-        shapeId: SplatShapeId;
-        viewport?: ViewportState;
-        tool?: ToolType;
-    }) {
+    constructor({ keyPointId, shapeId, viewport, tool }: SplatLocationState) {
         this.keyPointId = keyPointId;
         this.shapeId = shapeId;
-        this.viewportState = viewport;
+        this.viewport = viewport;
         this.tool = tool;
     }
 
-    serialize(): SplatLocationState {
+    serialize(): SerializedSplatLocation {
         return {
             keyPointId: this.keyPointId,
             shapeId: this.shapeId,
-            viewport: this.viewportState,
+            viewport: this.viewport.serialize(),
             tool: this.tool,
         };
     }
@@ -53,7 +54,7 @@ export class SplatLocation {
         return new SplatLocation({
             keyPointId: changes.keyPointId ?? this.keyPointId,
             shapeId: changes.shapeId ?? this.shapeId,
-            viewport: changes.viewport ?? this.viewportState,
+            viewport: changes.viewport ?? this.viewport,
             tool: changes.tool ?? this.tool,
         });
     }

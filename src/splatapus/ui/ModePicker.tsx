@@ -1,56 +1,31 @@
 import { Interaction } from "@/splatapus/editor/Interaction";
 import { toolClassNames } from "@/splatapus/editor/toolClassNames";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
-import { UpdateInteraction } from "@/splatapus/editor/useEditorState";
+import { useEditorEvents, useEditorState } from "@/splatapus/editor/useEditorState";
 import { Button } from "@/splatapus/ui/Button";
 import classNames from "classnames";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 
-export function ModePicker({
-    selectedToolType,
-    updateInteraction,
-}: {
-    selectedToolType: ToolType;
-    updateInteraction: UpdateInteraction;
-}) {
+export const ModePicker = React.memo(function ModePicker() {
     return (
         <>
-            <ModeButton
-                selectedToolType={selectedToolType}
-                updateInteraction={updateInteraction}
-                toolType={ToolType.Draw}
-            >
-                draw
-            </ModeButton>
-            <ModeButton
-                selectedToolType={selectedToolType}
-                updateInteraction={updateInteraction}
-                toolType={ToolType.Rig}
-            >
-                rig
-            </ModeButton>
-            <ModeButton
-                selectedToolType={selectedToolType}
-                updateInteraction={updateInteraction}
-                toolType={ToolType.Play}
-            >
-                play
-            </ModeButton>
+            <ModeButton toolType={ToolType.Draw}>draw</ModeButton>
+            <ModeButton toolType={ToolType.Rig}>rig</ModeButton>
+            <ModeButton toolType={ToolType.Play}>play</ModeButton>
         </>
     );
-}
+});
 
-function ModeButton({
-    selectedToolType,
-    updateInteraction,
+const ModeButton = function ModeButton({
     toolType,
     children,
 }: {
-    selectedToolType: ToolType;
-    updateInteraction: UpdateInteraction;
     toolType: ToolType;
     children: ReactNode;
 }) {
+    const selectedToolType = useEditorState((state) => state.interaction.selectedTool.type);
+    const { updateInteraction } = useEditorEvents();
+
     const isActive = selectedToolType === toolType;
     return (
         <Button
@@ -68,4 +43,4 @@ function ModeButton({
             {children}
         </Button>
     );
-}
+};

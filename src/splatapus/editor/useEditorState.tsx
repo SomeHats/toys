@@ -1,5 +1,10 @@
-import { assert } from "@/lib/assert";
-import { useEvent } from "@/lib/hooks/useEvent";
+import {
+    createContext,
+    useContextSelector,
+    useContext,
+    useContextUpdate,
+} from "use-context-selector";
+import { assert, assertExists } from "@/lib/assert";
 import { CallbackAction, UpdateAction, applyUpdateWithin, applyUpdate } from "@/lib/utils";
 import { Interaction } from "@/splatapus/editor/Interaction";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
@@ -9,8 +14,10 @@ import { SplatapusState } from "@/splatapus/model/store";
 import { PointerEventType } from "@/splatapus/editor/lib/EventContext";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { OpOptions, UndoStack } from "@/splatapus/editor/UndoStack";
-import { Viewport, ViewportState } from "@/splatapus/editor/Viewport";
-import { PointerEvent, useMemo, useReducer } from "react";
+import { Viewport } from "@/splatapus/editor/Viewport";
+import React, { PointerEvent, ReactNode, useCallback, useMemo, useReducer } from "react";
+import Vector2 from "@/lib/geom/Vector2";
+import { useEvent } from "@/lib/hooks/useEvent";
 
 export type EditorState = {
     undoStack: UndoStack;
@@ -36,130 +43,207 @@ export const EditorState = {
         EditorState.updateUndoStack(state, (undoStack) =>
             UndoStack.updateDocument(undoStack, update, options),
         ),
-    updateViewport: (state: EditorState, update: UpdateAction<ViewportState>) =>
+    updateViewport: (state: EditorState, update: UpdateAction<Viewport>) =>
         EditorState.updateLocation(state, (location) =>
-            location.with({ viewport: applyUpdate(location.viewportState, update) }),
+            location.with({ viewport: applyUpdate(location.viewport, update) }),
         ),
     updateInteraction: (state: EditorState, update: UpdateAction<Interaction>) =>
         applyUpdateWithin(state, "interaction", update),
 };
 
-export interface CapturedCtx {
-    viewport: Viewport;
-}
-
-export interface ReducerCtx extends CapturedCtx {
+export interface ReducerCtx {
     update: (update: CallbackAction<EditorState>) => void;
     updateUndoStack: (update: CallbackAction<UndoStack>) => void;
     updateLocation: (update: UpdateAction<SplatLocation>) => void;
     updateDocument: (update: UpdateAction<SplatDocModel>, options?: OpOptions) => void;
-    updateViewport: (update: UpdateAction<ViewportState>) => void;
+    updateViewport: (update: UpdateAction<Viewport>) => void;
     updateInteraction: (update: UpdateAction<Interaction>) => void;
     document: SplatDocModel;
     location: SplatLocation;
+    viewport: Viewport;
+    state: EditorState;
 }
 
 export type CtxAction<T> = (ctx: ReducerCtx, state: T) => T;
 
-function makeReducer(capture: () => CapturedCtx) {
-    return (state: EditorState, update: (ctx: ReducerCtx) => void): EditorState => {
-        const queue: Array<CallbackAction<EditorState>> = [];
-        let isDone = false;
-
-        function enqueueUpdate(fn: CallbackAction<EditorState>) {
-            assert(!isDone);
-            queue.push(fn);
-        }
-
-        const captured = capture();
-
-        update({
-            update: enqueueUpdate,
-            updateUndoStack: (update) =>
-                enqueueUpdate((state) => EditorState.updateUndoStack(state, update)),
-            updateLocation: (update) =>
-                enqueueUpdate((state) => EditorState.updateLocation(state, update)),
-            updateDocument: (update, options) =>
-                enqueueUpdate((state) => EditorState.updateDocument(state, update, options)),
-            updateViewport: (update) =>
-                enqueueUpdate((state) => EditorState.updateViewport(state, update)),
-            updateInteraction: (update) =>
-                enqueueUpdate((state) => EditorState.updateInteraction(state, update)),
-            document: state.undoStack.current.doc,
-            location: state.undoStack.current.location,
-            viewport: captured.viewport,
-        });
-
-        for (let i = 0; i < queue.length; i++) {
-            state = queue[i](state);
-        }
-
-        isDone = true;
-        return state;
+function makeReducerCtx(
+    state: EditorState,
+    enqueueUpdate: (fn: CallbackAction<EditorState>) => void,
+): ReducerCtx {
+    return {
+        update: enqueueUpdate,
+        updateUndoStack: (update) =>
+            enqueueUpdate((state) => EditorState.updateUndoStack(state, update)),
+        updateLocation: (update) =>
+            enqueueUpdate((state) => EditorState.updateLocation(state, update)),
+        updateDocument: (update, options) =>
+            enqueueUpdate((state) => EditorState.updateDocument(state, update, options)),
+        updateViewport: (update) =>
+            enqueueUpdate((state) => EditorState.updateViewport(state, update)),
+        updateInteraction: (update) =>
+            enqueueUpdate((state) => EditorState.updateInteraction(state, update)),
+        document: state.undoStack.current.document,
+        location: state.undoStack.current.location,
+        viewport: state.undoStack.current.location.viewport,
+        state,
     };
 }
 
-export function useEditorState(initialize: () => EditorState, _capture: () => CapturedCtx) {
-    const capture = useEvent(_capture);
-    const reducer = useMemo(() => makeReducer(capture), [capture]);
-    const [state, dispatch] = useReducer(reducer, null, initialize);
+function reducer(state: EditorState, update: (ctx: ReducerCtx) => void): EditorState {
+    const queue: Array<CallbackAction<EditorState>> = [];
+    let isDone = false;
 
-    const events = useMemo(() => {
-        const updateInteraction = (update: CtxAction<Interaction>) =>
-            dispatch((ctx) => ctx.updateInteraction((state) => update(ctx, state)));
+    function enqueueUpdate(fn: CallbackAction<EditorState>) {
+        assert(!isDone);
+        queue.push(fn);
+    }
 
-        const onPointerEvent = (eventType: PointerEventType) => (event: PointerEvent) =>
-            updateInteraction((ctx, interaction) =>
-                Interaction.onPointerEvent({ ...ctx, event, eventType }, interaction),
-            );
+    update(makeReducerCtx(state, enqueueUpdate));
 
-        return {
-            updateUndoStack: (update: CtxAction<UndoStack>) =>
-                dispatch((ctx) => ctx.updateUndoStack((state) => update(ctx, state))),
-            updateLocation: (update: CtxAction<SplatLocation>) =>
-                dispatch((ctx) => ctx.updateLocation((state) => update(ctx, state))),
-            updateDocument: (update: CtxAction<SplatDocModel>, options: OpOptions) =>
-                dispatch((ctx) => ctx.updateDocument((state) => update(ctx, state), options)),
-            updateViewport: (update: CtxAction<ViewportState>) =>
-                dispatch((ctx) => ctx.updateViewport((state) => update(ctx, state))),
-            updateInteraction,
+    for (let i = 0; i < queue.length; i++) {
+        state = queue[i](state);
+    }
 
-            onPointerDown: onPointerEvent("down"),
-            onPointerMove: onPointerEvent("move"),
-            onPointerUp: onPointerEvent("up"),
-            onPointerCancel: onPointerEvent("cancel"),
+    isDone = true;
+    return state;
+}
 
-            onKeyDown: (event: KeyboardEvent) =>
+function useEditorStateRoot(initialize: () => EditorState, size: Vector2) {
+    const [state, _dispatch] = useReducer(reducer, null, initialize);
+
+    const getState = useEvent(() => state);
+
+    const events = useCallback(
+        (runUpdate: (cb: () => void) => void) => {
+            const dispatch: typeof _dispatch = (update) => {
+                runUpdate(() => {
+                    _dispatch(update);
+                });
+            };
+            const updateInteraction = (update: CtxAction<Interaction>) =>
+                dispatch((ctx) => ctx.updateInteraction((state) => update(ctx, state)));
+            const updateViewport = (update: CtxAction<Viewport>) =>
+                dispatch((ctx) => ctx.updateViewport((state) => update(ctx, state)));
+
+            const onPointerEvent = (eventType: PointerEventType) => (event: PointerEvent) =>
                 updateInteraction((ctx, interaction) =>
-                    Interaction.onKeyDown({ ...ctx, event }, interaction),
-                ),
-            onKeyUp: (event: KeyboardEvent) =>
-                updateInteraction((ctx, interaction) =>
-                    Interaction.onKeyUp({ ...ctx, event }, interaction),
-                ),
-        };
-    }, []);
+                    Interaction.onPointerEvent({ ...ctx, event, eventType }, interaction),
+                );
+
+            const getContextForEvent = () =>
+                makeReducerCtx(getState(), (update) => {
+                    dispatch((ctx) => update(ctx.state));
+                });
+
+            return {
+                getContextForEvent,
+
+                updateUndoStack: (update: CtxAction<UndoStack>) =>
+                    dispatch((ctx) => ctx.updateUndoStack((state) => update(ctx, state))),
+                updateLocation: (update: CtxAction<SplatLocation>) =>
+                    dispatch((ctx) => ctx.updateLocation((state) => update(ctx, state))),
+                updateDocument: (update: CtxAction<SplatDocModel>, options: OpOptions) =>
+                    dispatch((ctx) => ctx.updateDocument((state) => update(ctx, state), options)),
+                updateViewport,
+                updateInteraction,
+
+                onPointerDown: onPointerEvent("down"),
+                onPointerMove: onPointerEvent("move"),
+                onPointerUp: onPointerEvent("up"),
+                onPointerCancel: onPointerEvent("cancel"),
+
+                onKeyDown: (event: KeyboardEvent) =>
+                    updateInteraction((ctx, interaction) =>
+                        Interaction.onKeyDown({ ...ctx, event }, interaction),
+                    ),
+                onKeyUp: (event: KeyboardEvent) =>
+                    updateInteraction((ctx, interaction) =>
+                        Interaction.onKeyUp({ ...ctx, event }, interaction),
+                    ),
+                onWheel: (event: WheelEvent) =>
+                    updateViewport((ctx, viewport) => viewport.handleWheelEvent(event)),
+            };
+        },
+        [getState],
+    );
+
+    const document = state.undoStack.current.document;
+    const location = state.undoStack.current.location;
 
     const { keyPointId, shapeId } = state.undoStack.current.location;
+    const interactionPreviewPosition = Interaction.getPreviewPosition(state.interaction, shapeId);
+    const previewPosition = useMemo(
+        (): PreviewPosition =>
+            interactionPreviewPosition ?? PreviewPosition.keyPointId(keyPointId, shapeId),
+        [interactionPreviewPosition, keyPointId, shapeId],
+    );
 
-    return {
-        ...events,
-        document: state.undoStack.current.doc,
-        location: state.undoStack.current.location,
-        undoStack: state.undoStack,
-        interaction: state.interaction,
-        previewPosition: useMemo(
-            (): PreviewPosition =>
-                Interaction.getPreviewPosition(state.interaction, shapeId) ??
-                PreviewPosition.keyPointId(keyPointId, shapeId),
-            [keyPointId, shapeId, state.interaction],
-        ),
-    };
+    return useMemo(
+        () => ({
+            events,
+            document,
+            location,
+            undoStack: state.undoStack,
+            interaction: state.interaction,
+            previewPosition,
+        }),
+        [document, events, location, previewPosition, state.interaction, state.undoStack],
+    );
 }
 
-export type EditorStateHook = ReturnType<typeof useEditorState>;
-export type UpdateUndoStack = EditorStateHook["updateUndoStack"];
-export type UpdateLocation = EditorStateHook["updateLocation"];
-export type UpdateDocument = EditorStateHook["updateDocument"];
-export type UpdateViewport = EditorStateHook["updateViewport"];
-export type UpdateInteraction = EditorStateHook["updateInteraction"];
+export type EditorStateHook = ReturnType<typeof useEditorStateRoot>;
+export type EditorStateEventsThunk = EditorStateHook["events"];
+export type EditorStateEvents = ReturnType<EditorStateEventsThunk>;
+export type UpdateUndoStack = EditorStateEvents["updateUndoStack"];
+export type UpdateLocation = EditorStateEvents["updateLocation"];
+export type UpdateDocument = EditorStateEvents["updateDocument"];
+export type UpdateViewport = EditorStateEvents["updateViewport"];
+export type UpdateInteraction = EditorStateEvents["updateInteraction"];
+
+const EditorStateContext = createContext<EditorStateHook | null>(null);
+const EditorEventsContext = createContext<EditorStateEvents | null>(null);
+
+export function EditorStateProvider({
+    initialize,
+    size,
+    children,
+}: {
+    initialize: () => EditorState;
+    size: Vector2;
+    children: ReactNode;
+}) {
+    const state = useEditorStateRoot(initialize, size);
+    return (
+        <EditorStateContext.Provider value={state}>
+            <_EventProvider events={state.events}>{children}</_EventProvider>
+        </EditorStateContext.Provider>
+    );
+}
+
+const _EventProvider = React.memo(function _EventProvider({
+    events,
+    children,
+}: {
+    events: EditorStateEventsThunk;
+    children: ReactNode;
+}) {
+    const update = useContextUpdate(EditorStateContext);
+    const boundEvents = useMemo(() => events(update), [events, update]);
+    return (
+        <EditorEventsContext.Provider value={boundEvents}>{children}</EditorEventsContext.Provider>
+    );
+});
+
+export function useEditorState<T>(selector: (state: EditorStateHook) => T): T {
+    return useContextSelector(EditorStateContext, (state) => {
+        assert(state);
+        return selector(state);
+    });
+}
+export function useEditorKey<Key extends keyof EditorStateHook>(key: Key): EditorStateHook[Key] {
+    return useEditorState((state) => state[key]);
+}
+
+export function useEditorEvents() {
+    return assertExists(useContext(EditorEventsContext));
+}

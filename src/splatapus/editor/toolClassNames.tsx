@@ -1,4 +1,5 @@
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
+import { useEditorState } from "@/splatapus/editor/useEditorState";
 
 export type ToolClassNames = {
     [Tool in ToolType]: {
@@ -25,3 +26,8 @@ export const toolClassNames: ToolClassNames = {
         ring500: "ring-green-500",
     },
 };
+
+export function useToolClassNames() {
+    const selectedToolType = useEditorState((state) => state.interaction.selectedTool.type);
+    return toolClassNames[selectedToolType];
+}

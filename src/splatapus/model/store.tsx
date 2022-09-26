@@ -1,61 +1,79 @@
-import { composeParsers, createShapeParser, ParserType } from "@/lib/objectParser";
+import { createShapeParser, ParserType } from "@/lib/objectParser";
 import { Result } from "@/lib/Result";
 import { debounce, getLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
-import { parseSplatDoc, SplatDoc, SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
+import { parseSplatDoc, SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
-import { SplatLocation, SplatLocationState } from "@/splatapus/editor/SplatLocation";
+import { SplatLocation, parseSerializedSplatLocation } from "@/splatapus/editor/SplatLocation";
 import Vector2 from "@/lib/geom/Vector2";
+import { Viewport } from "@/splatapus/editor/Viewport";
+import { ToolType } from "@/splatapus/editor/tools/ToolType";
 
-export const parseSplatapusState = createShapeParser({
-    doc: composeParsers(parseSplatDoc, (doc) => {
-        return Result.ok(SplatDocModel.deserialize(doc));
-    }),
-    location: SplatLocation.parse,
+export const parseSerializedSplatapusState = createShapeParser({
+    document: parseSplatDoc,
+    location: parseSerializedSplatLocation,
 });
-export type SplatapusState = ParserType<typeof parseSplatapusState>;
+export type SerializedSplatapusState = ParserType<typeof parseSerializedSplatapusState>;
 
-export function loadSaved(key: string): Result<SplatapusState, string> {
+export type SplatapusState = {
+    document: SplatDocModel;
+    location: SplatLocation;
+};
+
+export function serializeSplatapusState(state: SplatapusState): SerializedSplatapusState {
+    return {
+        document: state.document.serialize(),
+        location: state.location.serialize(),
+    };
+}
+
+export function deserializeSplatapusState(
+    state: SerializedSplatapusState,
+    screenSize: Vector2,
+): SplatapusState {
+    return {
+        document: SplatDocModel.deserialize(state.document),
+        location: SplatLocation.deserialize(state.location, screenSize),
+    };
+}
+
+export function loadSaved(key: string, screenSize: Vector2): Result<SplatapusState, string> {
     const item = getLocalStorageItem(`splatapus.${key}`);
     if (!item) {
         return Result.error("No saved data found");
     }
-    return parseSplatapusState(getLocalStorageItem(`splatapus.${key}`)).mapErr((err) =>
-        err.toString(),
-    );
+    return parseSerializedSplatapusState(getLocalStorageItem(`splatapus.${key}`))
+        .mapErr((err) => err.toString())
+        .map((state) => deserializeSplatapusState(state, screenSize));
 }
 
-export type SerializedSplatState = {
-    readonly doc: SplatDoc;
-    readonly location: SplatLocationState;
-};
-
-export function writeSaved(key: string, { doc, location }: SplatapusState) {
-    const serialized = {
-        doc: doc.serialize(),
-        location: location.serialize(),
-    };
+export function writeSaved(key: string, state: SplatapusState) {
     // @ts-expect-error this is fine
-    window.splatSerializedDoc = serialized;
-    setLocalStorageItem(`splatapus.${key}`, serialized);
+    window.splatSerializedDoc = state;
+    setLocalStorageItem(`splatapus.${key}`, serializeSplatapusState(state));
 }
 
 export const writeSavedDebounced = debounce(AUTOSAVE_DEBOUNCE_TIME_MS, writeSaved);
 
-export function getDefaultLocationForDocument(document: SplatDocModel) {
+export function getDefaultLocationForDocument(document: SplatDocModel, screenSize: Vector2) {
     const keyPointId = [...document.keyPoints][0].id;
     const shapeId = [...document.shapes][0].id;
-    return new SplatLocation({ keyPointId, shapeId });
+    return new SplatLocation({
+        keyPointId,
+        shapeId,
+        viewport: Viewport.default(screenSize),
+        tool: ToolType.Draw,
+    });
 }
-export function makeEmptySaveState(): SplatapusState {
+export function makeEmptySaveState(screenSize: Vector2): SplatapusState {
     const keyPointId = SplatKeyPointId.generate();
     const shapeId = SplatShapeId.generate();
-    const doc = SplatDocModel.create()
+    const document = SplatDocModel.create()
         .addKeyPoint(keyPointId, Vector2.ZERO)
         .addShape(shapeId)
         .replacePointsForVersion(keyPointId, shapeId, []);
     return {
-        doc,
-        location: getDefaultLocationForDocument(doc),
+        document,
+        location: getDefaultLocationForDocument(document, screenSize),
     };
 }

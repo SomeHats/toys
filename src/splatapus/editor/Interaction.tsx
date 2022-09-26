@@ -4,9 +4,7 @@ import Vector2 from "@/lib/geom/Vector2";
 import { matchesKey, matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { applyUpdateWithin, exhaustiveSwitchError, UpdateAction } from "@/lib/utils";
 import { SplatShapeId } from "@/splatapus/model/SplatDoc";
-import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { MultiTouchPan } from "@/splatapus/editor/MultiTouchPan";
-import { SplatLocation } from "@/splatapus/editor/SplatLocation";
 import { DrawTool } from "@/splatapus/editor/tools/DrawTool";
 import { RigTool } from "@/splatapus/editor/tools/RigTool";
 import { KeyboardEventContext, PointerEventContext } from "@/splatapus/editor/lib/EventContext";
@@ -14,9 +12,11 @@ import { QuickPanTool } from "@/splatapus/editor/tools/QuickPanTool";
 import { SelectedTool } from "@/splatapus/editor/tools/tools";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { UndoStack } from "@/splatapus/editor/UndoStack";
-import { CtxAction, UpdateInteraction } from "@/splatapus/editor/useEditorState";
-import { Viewport } from "@/splatapus/editor/Viewport";
+import { CtxAction, useEditorEvents, useEditorState } from "@/splatapus/editor/useEditorState";
 import { PlayTool } from "@/splatapus/editor/tools/PlayTool";
+import React from "react";
+import { useEvent } from "@/lib/hooks/useEvent";
+import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 
 export type Interaction = {
     multiTouchPan: MultiTouchPan;
@@ -45,7 +45,10 @@ export const Interaction = {
         }
         return SelectedTool.getCanvasClassName(interaction.selectedTool);
     },
-    getPreviewPosition: (interaction: Interaction, selectedShapeId: SplatShapeId) => {
+    getPreviewPosition: (
+        interaction: Interaction,
+        selectedShapeId: SplatShapeId,
+    ): PreviewPosition | null => {
         return SelectedTool.getPreviewPosition(interaction.selectedTool, selectedShapeId);
     },
 
@@ -85,7 +88,7 @@ export const Interaction = {
         }
 
         if (matchesKeyDown(ctx.event, { key: "0", command: true })) {
-            ctx.updateViewport({ pan: Vector2.ZERO, zoom: 1 });
+            ctx.updateViewport((viewport) => viewport.with({ pan: Vector2.ZERO, zoom: 1 }));
             return interaction;
         }
         const goToIdx = (idx: number) => {
@@ -154,53 +157,29 @@ export const Interaction = {
         );
     },
 
-    Overlay: ({
-        interaction,
-        onUpdateInteraction,
-        ...props
-    }: {
-        document: SplatDocModel;
-        location: SplatLocation;
-        viewport: Viewport;
-        interaction: Interaction;
-        onUpdateInteraction: UpdateInteraction;
-    }) => {
+    Overlay: React.memo(function InteractionOverlay() {
+        const { updateInteraction } = useEditorEvents();
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const onUpdateTool = (update: CtxAction<any>) =>
-            onUpdateInteraction((ctx, interaction) => {
+        const onUpdateTool = useEvent((update: CtxAction<any>) =>
+            updateInteraction((ctx, interaction) => {
                 return Interaction.updateSelectedTool(interaction, (selectedTool) => {
                     assert(selectedTool.type === interaction.selectedTool.type);
                     return update(ctx, selectedTool);
                 });
-            });
+            }),
+        );
 
-        switch (interaction.selectedTool.type) {
+        const selectedTool = useEditorState(({ interaction }) => interaction.selectedTool);
+        switch (selectedTool.type) {
             case ToolType.Draw:
-                return (
-                    <DrawTool.Overlay
-                        tool={interaction.selectedTool}
-                        onUpdateTool={onUpdateTool}
-                        {...props}
-                    />
-                );
+                return <DrawTool.Overlay tool={selectedTool} onUpdateTool={onUpdateTool} />;
             case ToolType.Rig:
-                return (
-                    <RigTool.Overlay
-                        tool={interaction.selectedTool}
-                        onUpdateTool={onUpdateTool}
-                        {...props}
-                    />
-                );
+                return <RigTool.Overlay tool={selectedTool} onUpdateTool={onUpdateTool} />;
             case ToolType.Play:
-                return (
-                    <PlayTool.Overlay
-                        tool={interaction.selectedTool}
-                        onUpdateTool={onUpdateTool}
-                        {...props}
-                    />
-                );
+                return <PlayTool.Overlay tool={selectedTool} onUpdateTool={onUpdateTool} />;
             default:
-                exhaustiveSwitchError(interaction.selectedTool);
+                exhaustiveSwitchError(selectedTool);
         }
-    },
+    }),
 };

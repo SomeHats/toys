@@ -127,13 +127,16 @@ export const MultiTouchPan = {
                                 0.5,
                             );
 
-                            ctx.updateViewport(() => {
+                            ctx.updateViewport((viewport) => {
                                 const newPan = initialScreenCenterPoint
                                     .add(pan.initialPan)
                                     .scale(scaleChange)
                                     .sub(currentScreenCenterPoint);
 
-                                return { zoom: pan.initialZoom * scaleChange, pan: newPan };
+                                return viewport.with({
+                                    zoom: pan.initialZoom * scaleChange,
+                                    pan: newPan,
+                                });
                             });
 
                             return {

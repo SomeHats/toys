@@ -1,15 +1,12 @@
 import { findPositionForNewKeyPoint } from "@/splatapus/model/findPositionForNewKeyPoint";
-import { SplatKeyPointId, SplatShapeId, SplatShapeVersion } from "@/splatapus/model/SplatDoc";
-import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
+import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { pathFromCenterPoints } from "@/splatapus/model/pathFromCenterPoints";
 import { getSvgPathFromStroke } from "@/splatapus/model/perfectFreehand";
-import { SplatLocation } from "@/splatapus/editor/SplatLocation";
 import { Button } from "@/splatapus/ui/Button";
-import { UpdateDocument, UpdateLocation } from "@/splatapus/editor/useEditorState";
+import { useEditorEvents, useEditorState } from "@/splatapus/editor/useEditorState";
 import classNames from "classnames";
 import React from "react";
-import { ToolType } from "@/splatapus/editor/tools/ToolType";
-import { toolClassNames } from "@/splatapus/editor/toolClassNames";
+import { useToolClassNames } from "@/splatapus/editor/toolClassNames";
 
 // const buttonStyle = {
 //     width: SIDEBAR_WIDTH_PX - 24,
@@ -21,53 +18,42 @@ import { toolClassNames } from "@/splatapus/editor/toolClassNames";
 const WIDTH_PER_THUMB = 84;
 const HEIGHT_PER_THUMB = 80;
 
-export function RightBar({
-    document,
-    location,
-    selectedToolType,
-    updateDocument,
-    updateLocation,
-}: {
-    document: SplatDocModel;
-    location: SplatLocation;
-    selectedToolType: ToolType;
-    updateDocument: UpdateDocument;
-    updateLocation: UpdateLocation;
-}) {
-    const keyFrameIndex = Array.from(document.keyPoints).findIndex(
-        (keyPoint) => location.keyPointId === keyPoint.id,
-    );
-    const shapeIndex = Array.from(document.shapes).findIndex(
-        (shape) => location.shapeId === shape.id,
-    );
+export function RightBar() {
+    const { updateLocation, updateDocument } = useEditorEvents();
+    const keyPointId = useEditorState((state) => state.location.keyPointId);
+    const shapeId = useEditorState((state) => state.location.shapeId);
+    const keyPoints = Array.from(useEditorState((state) => state.document.keyPoints));
+    const shapes = Array.from(useEditorState((state) => state.document.shapes));
+    const keyFrameIndex = Array.from(keyPoints).findIndex((keyPoint) => keyPointId === keyPoint.id);
+    const shapeIndex = Array.from(shapes).findIndex((shape) => shapeId === shape.id);
+    const toolClassNames = useToolClassNames();
 
     return (
         <div className="relative flex h-full flex-col gap-4 overflow-auto p-5 [-webkit-overflow-scrolling:touch]">
             <div
                 className="absolute top-5 left-5 z-0 w-20 rounded bg-stone-200 ring-2 ring-stone-200 transition-transform"
                 style={{
-                    height: -16 + HEIGHT_PER_THUMB * document.shapes.count(),
+                    height: -16 + HEIGHT_PER_THUMB * shapes.length,
                     transform: `translateX(${keyFrameIndex * WIDTH_PER_THUMB}px)`,
                 }}
             />
             <div
                 className="absolute top-5 z-0 h-16 rounded bg-stone-200 ring-2 ring-stone-200 transition-transform"
                 style={{
-                    width: -4 + WIDTH_PER_THUMB * (document.keyPoints.count() + 1),
+                    width: -4 + WIDTH_PER_THUMB * (keyPoints.length + 1),
                     transform: `translateY(${shapeIndex * HEIGHT_PER_THUMB}px)`,
                 }}
             />
-            {Array.from(document.shapes, (shape, i) => (
+            {shapes.map((shape, i) => (
                 <div className="relative flex w-max flex-col gap-2" key={shape.id}>
                     <div className={"flex gap-1"}>
-                        {Array.from(document.keyPoints, (keyPoint) => (
+                        {keyPoints.map((keyPoint) => (
                             <button
                                 key={keyPoint.id}
                                 className={classNames(
                                     "overflow-none h-16 w-20 flex-none rounded border",
-                                    shape.id === location.shapeId &&
-                                        keyPoint.id === location.keyPointId
-                                        ? `${toolClassNames[selectedToolType].border500} ring-1 ${toolClassNames[selectedToolType].ring500} bg-white`
+                                    shape.id === shapeId && keyPoint.id === keyPointId
+                                        ? `${toolClassNames.border500} ring-1 ${toolClassNames.ring500} bg-white`
                                         : "border-stone-300 bg-white/25 hover:bg-white/50",
                                 )}
                                 onClick={() => {
@@ -82,8 +68,8 @@ export function RightBar({
                                 <ShapeVersionPreview
                                     width={78}
                                     height={62}
-                                    shapeVersion={document.getShapeVersion(keyPoint.id, shape.id)}
-                                    document={document}
+                                    keyPointId={keyPoint.id}
+                                    shapeId={shape.id}
                                 />
                             </button>
                         ))}
@@ -127,22 +113,24 @@ export function RightBar({
 const ShapeVersionPreview = React.memo(function ShapeVersionPreview({
     width,
     height,
-    shapeVersion,
-    document,
+    shapeId,
+    keyPointId,
 }: {
     width: number;
     height: number;
-    shapeVersion: SplatShapeVersion | null;
-    document: SplatDocModel;
+    shapeId: SplatShapeId;
+    keyPointId: SplatKeyPointId;
 }) {
     const padding = 4;
 
-    if (!shapeVersion) {
-        return null;
-    }
-
-    const centerPoints = document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id);
-    if (centerPoints.length < 2) {
+    const centerPoints = useEditorState(({ document }) => {
+        const shapeVersion = document.getShapeVersion(keyPointId, shapeId);
+        if (!shapeVersion) {
+            return null;
+        }
+        return document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id);
+    });
+    if (!centerPoints || centerPoints.length < 2) {
         return null;
     }
 

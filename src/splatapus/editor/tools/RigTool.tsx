@@ -1,12 +1,11 @@
 import Vector2 from "@/lib/geom/Vector2";
-import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
-import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
+import { SplatKeyPointId } from "@/splatapus/model/SplatDoc";
 import { ScenePositionedDiv } from "@/splatapus/renderer/Positioned";
 import { createTool, OverlayProps } from "@/splatapus/editor/lib/createTool";
-import { PointerEventContext } from "@/splatapus/editor/lib/EventContext";
 import { createGestureDetector, GestureType } from "@/splatapus/editor/lib/GestureDetection";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import classNames from "classnames";
+import { useEditorState } from "@/splatapus/editor/useEditorState";
 
 export type IdleRigToolState = {
     readonly state: "idle";
@@ -59,7 +58,6 @@ export type RigTool = {
     readonly gesture: GestureType<typeof MoveGesture>;
 };
 
-const keyPointOffset = new Vector2(-16, -16);
 export const RigTool = createTool<RigTool>()({
     initialize: () => ({
         type: ToolType.Rig,
@@ -81,11 +79,13 @@ export const RigTool = createTool<RigTool>()({
         }
     },
     onPointerEvent: MoveGesture.createOnPointerEvent<"gesture", RigTool>("gesture"),
-    Overlay: ({ tool, document, viewport, location, onUpdateTool }: OverlayProps<RigTool>) => {
+    Overlay: ({ tool, onUpdateTool }: OverlayProps<RigTool>) => {
         const state = MoveGesture.getState(tool.gesture);
+        const keyPoints = useEditorState((state) => state.document.keyPoints);
+        const locationKeyPointId = useEditorState((state) => state.location.keyPointId);
         return (
             <>
-                {Array.from(document.keyPoints, (keyPoint, i) => {
+                {Array.from(keyPoints, (keyPoint, i) => {
                     const position =
                         state.state === "moving" && state.keyPointId === keyPoint.id
                             ? keyPoint.position.add(state.delta)
@@ -95,7 +95,6 @@ export const RigTool = createTool<RigTool>()({
                         <ScenePositionedDiv
                             key={keyPoint.id}
                             position={position}
-                            viewport={viewport}
                             className={classNames(
                                 "-mt-4 -ml-4 flex h-8 w-8 cursor-move items-center justify-center rounded-full",
                             )}
@@ -112,7 +111,7 @@ export const RigTool = createTool<RigTool>()({
                             <div
                                 className={classNames(
                                     "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shadow-md",
-                                    keyPoint.id === location.keyPointId
+                                    keyPoint.id === locationKeyPointId
                                         ? "bg-gradient-to-br from-cyan-400 to-blue-400 text-white"
                                         : "border border-stone-200 bg-white text-stone-400",
                                 )}

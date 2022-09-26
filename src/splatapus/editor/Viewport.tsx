@@ -1,49 +1,69 @@
 import AABB from "@/lib/geom/AABB";
-import Vector2 from "@/lib/geom/Vector2";
+import Vector2, { parseSerializedVector2 } from "@/lib/geom/Vector2";
 import { createShapeParser, parseNumber, ParserType } from "@/lib/objectParser";
-import { UpdateAction } from "@/lib/utils";
 import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
 
-export const parseViewportState = createShapeParser({
-    pan: Vector2.parse,
+export const parseSerializedViewport = createShapeParser({
+    pan: parseSerializedVector2,
     zoom: parseNumber,
 });
-export type ViewportState = ParserType<typeof parseViewportState>;
+export type SerializedViewport = ParserType<typeof parseSerializedViewport>;
 
-export class Viewport {
+type ViewportState = {
     readonly pan: Vector2;
     readonly zoom: number;
+    readonly screenSize: Vector2;
+};
 
-    constructor(
-        { pan, zoom }: ViewportState,
-        readonly screenSize: Vector2,
-        private readonly update: (update: UpdateAction<ViewportState>) => void,
-    ) {
+export class Viewport {
+    static default(screenSize: Vector2) {
+        return new Viewport({ pan: Vector2.ZERO, zoom: 1, screenSize });
+    }
+    static deserialize({ pan, zoom }: SerializedViewport, screenSize: Vector2) {
+        return new Viewport({ pan: Vector2.deserialize(pan), zoom, screenSize });
+    }
+
+    readonly pan: Vector2;
+    readonly zoom: number;
+    readonly screenSize: Vector2;
+    constructor({ pan, zoom, screenSize }: ViewportState) {
         this.pan = pan;
         this.zoom = zoom;
+        this.screenSize = screenSize;
+    }
+
+    with(changes: Partial<ViewportState>) {
+        return new Viewport({
+            pan: changes.pan ?? this.pan,
+            zoom: changes.zoom ?? this.zoom,
+            screenSize: changes.screenSize ?? this.screenSize,
+        });
+    }
+
+    serialize(): SerializedViewport {
+        return { pan: this.pan.serialize(), zoom: this.zoom };
     }
 
     canvasScreenSize(): Vector2 {
         return this.screenSize.sub(new Vector2(SIDEBAR_WIDTH_PX, 0));
     }
 
-    handleWheelEvent(event: WheelEvent) {
+    handleWheelEvent(event: WheelEvent): Viewport {
         event.preventDefault();
         event.stopImmediatePropagation();
         const { deltaX, deltaY } = event;
         if (event.ctrlKey) {
             const screenPosition = Vector2.fromEvent(event);
-            this.update(({ pan, zoom }) => {
-                const newZoom = Math.exp(-deltaY / 100) * zoom;
-                const newPan = screenPosition
-                    .add(pan)
-                    .scale(newZoom / zoom)
-                    .sub(screenPosition);
+            const { pan, zoom } = this;
+            const newZoom = Math.exp(-deltaY / 100) * zoom;
+            const newPan = screenPosition
+                .add(pan)
+                .scale(newZoom / zoom)
+                .sub(screenPosition);
 
-                return { zoom: newZoom, pan: newPan };
-            });
+            return this.with({ pan: newPan, zoom: newZoom });
         } else {
-            this.update(({ pan, zoom }) => ({ pan: pan.add(new Vector2(deltaX, deltaY)), zoom }));
+            return this.with({ pan: this.pan.add(new Vector2(deltaX, deltaY)) });
         }
     }
 

@@ -1,35 +1,38 @@
 import { assert } from "@/lib/assert";
 import { stringFromError } from "@/lib/utils";
 import { catExample } from "@/splatapus/catExample";
-import { parseSplatDoc } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { SplatLocation } from "@/splatapus/editor/SplatLocation";
-import { getDefaultLocationForDocument, makeEmptySaveState } from "@/splatapus/model/store";
+import {
+    getDefaultLocationForDocument,
+    makeEmptySaveState,
+    parseSerializedSplatapusState,
+    serializeSplatapusState,
+} from "@/splatapus/model/store";
 import { Button } from "@/splatapus/ui/Button";
-import { UpdateDocument } from "@/splatapus/editor/useEditorState";
+import { useEditorEvents } from "@/splatapus/editor/useEditorState";
+import Vector2 from "@/lib/geom/Vector2";
 
-export function ImportExportButtons({
-    document,
-    updateDocument,
-}: {
-    document: SplatDocModel;
-    updateDocument: UpdateDocument;
-}) {
+export function ImportExportButtons() {
     return (
         <>
-            <ImportButton updateDocument={updateDocument} />
-            <ExportButton document={document} />
-            <CatExampleButton updateDocument={updateDocument} />
-            <ResetButton updateDocument={updateDocument} />
+            <ImportButton />
+            <ExportButton />
+            <CatExampleButton />
+            <ResetButton />
         </>
     );
 }
 
-function ExportButton({ document }: { document: SplatDocModel }) {
+function ExportButton() {
+    const { getContextForEvent } = useEditorEvents();
     return (
         <Button
             onClick={() => {
-                const data = encodeURIComponent(JSON.stringify(document.serialize()));
+                const { document, location } = getContextForEvent();
+                const data = encodeURIComponent(
+                    JSON.stringify(serializeSplatapusState({ document, location })),
+                );
                 const el = window.document.createElement("a");
                 el.setAttribute("href", `data:text/json;charset=utf-8,${data}`);
                 el.setAttribute("download", "splatapus.json");
@@ -41,7 +44,8 @@ function ExportButton({ document }: { document: SplatDocModel }) {
     );
 }
 
-function ImportButton({ updateDocument }: { updateDocument: UpdateDocument }) {
+function ImportButton() {
+    const { updateDocument } = useEditorEvents();
     return (
         <Button
             onClick={() => {
@@ -63,17 +67,18 @@ function ImportButton({ updateDocument }: { updateDocument: UpdateDocument }) {
                         }
                         assert(typeof result === "string");
                         try {
-                            const parseResult = parseSplatDoc(JSON.parse(result));
+                            const parseResult = parseSerializedSplatapusState(JSON.parse(result));
                             if (parseResult.isError()) {
                                 alert(`cannot read splat doc: ${parseResult.error.message}`);
                                 return;
                             }
-                            const document = SplatDocModel.deserialize(parseResult.value);
-                            updateDocument(() => document, {
-                                lockstepLocation: new SplatLocation({
-                                    keyPointId: Array.from(document.keyPoints)[0].id,
-                                    shapeId: Array.from(document.shapes)[0].id,
-                                }),
+                            const serialized = parseResult.value;
+                            updateDocument(() => SplatDocModel.deserialize(serialized.document), {
+                                lockstepLocation: (location) =>
+                                    SplatLocation.deserialize(
+                                        serialized.location,
+                                        location.viewport.screenSize,
+                                    ),
                             });
                         } catch (err) {
                             alert(`could not parse json: ${stringFromError(err)}`);
@@ -89,12 +94,13 @@ function ImportButton({ updateDocument }: { updateDocument: UpdateDocument }) {
     );
 }
 
-function ResetButton({ updateDocument }: { updateDocument: UpdateDocument }) {
+function ResetButton() {
+    const { updateDocument } = useEditorEvents();
     return (
         <Button
             onClick={() => {
-                const { doc, location } = makeEmptySaveState();
-                updateDocument(() => doc, { lockstepLocation: location });
+                const { document, location } = makeEmptySaveState(Vector2.UNIT);
+                updateDocument(() => document, { lockstepLocation: location });
             }}
         >
             reset
@@ -102,7 +108,8 @@ function ResetButton({ updateDocument }: { updateDocument: UpdateDocument }) {
     );
 }
 
-function CatExampleButton({ updateDocument }: { updateDocument: UpdateDocument }) {
+function CatExampleButton() {
+    const { updateDocument } = useEditorEvents();
     if (!catExample.isOk()) {
         return null;
     }
@@ -112,7 +119,7 @@ function CatExampleButton({ updateDocument }: { updateDocument: UpdateDocument }
                 const rawDoc = catExample.unwrap();
                 const document = SplatDocModel.deserialize(rawDoc);
                 updateDocument(() => document, {
-                    lockstepLocation: getDefaultLocationForDocument(document),
+                    lockstepLocation: getDefaultLocationForDocument(document, Vector2.UNIT),
                 });
             }}
         >

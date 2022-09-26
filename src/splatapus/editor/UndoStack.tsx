@@ -9,7 +9,7 @@ export type OpOptions = {
 };
 
 type UndoEntry = {
-    readonly doc: SplatDocModel;
+    readonly document: SplatDocModel;
     readonly location: SplatLocation;
     readonly options: OpOptions;
 };
@@ -47,7 +47,7 @@ export const UndoStack = {
                 ...undoStack,
                 pendingOp: {
                     txId,
-                    initialDoc: undoStack.current.doc,
+                    initialDoc: undoStack.current.document,
                     initialOptions: undoStack.current.options,
                 },
                 current: {
@@ -68,7 +68,7 @@ export const UndoStack = {
             ...undoStack,
             current: {
                 ...undoStack.current,
-                doc: applyUpdate(undoStack.current.doc, action),
+                document: applyUpdate(undoStack.current.document, action),
             },
         };
     },
@@ -78,7 +78,7 @@ export const UndoStack = {
             ...undoStack,
             pendingOp: null,
             current: {
-                doc: undoStack.pendingOp.initialDoc,
+                document: undoStack.pendingOp.initialDoc,
                 location: undoStack.current.location,
                 options: undoStack.pendingOp.initialOptions,
             },
@@ -88,7 +88,7 @@ export const UndoStack = {
         assert(undoStack.pendingOp?.txId === txId, "Pending op mismatch");
         const undoStates = [
             {
-                doc: undoStack.pendingOp.initialDoc,
+                document: undoStack.pendingOp.initialDoc,
                 location: undoStack.current.location,
                 options: undoStack.pendingOp.initialOptions,
             },

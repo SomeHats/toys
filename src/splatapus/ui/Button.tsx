@@ -45,7 +45,7 @@ export function Button({
             {iconLeft}
             <span
                 className={classNames(
-                    "inline-block transition-transform duration-200 ease-out-back-xl group-hover:scale-110 group-active:scale-90",
+                    "inline-block transition-transform duration-200 ease-out-back-md group-hover:scale-110 group-active:scale-90",
                     pressed && "scale-90",
                 )}
             >

@@ -2,7 +2,7 @@ import { Interaction } from "@/splatapus/editor/Interaction";
 import { toolClassNames } from "@/splatapus/editor/toolClassNames";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { useEditorEvents, useEditorState } from "@/splatapus/editor/useEditorState";
-import { Button } from "@/splatapus/ui/Button";
+import { ActionButton, Button } from "@/splatapus/ui/Button";
 import classNames from "classnames";
 import React, { ReactNode } from "react";
 
@@ -28,11 +28,13 @@ const ModeButton = function ModeButton({
 
     const isActive = selectedToolType === toolType;
     return (
-        <Button
+        <ActionButton
+            actionName={toolType}
             onClick={() =>
-                updateInteraction((ctx, interaction) =>
-                    Interaction.requestSetSelectedTool(interaction, toolType),
-                )
+                updateInteraction((ctx, interaction) => {
+                    ctx.vfx.triggerAnimation(toolType);
+                    return Interaction.requestSetSelectedTool(interaction, toolType);
+                })
             }
             className={classNames(
                 isActive &&
@@ -41,6 +43,6 @@ const ModeButton = function ModeButton({
             disabled={isActive}
         >
             {children}
-        </Button>
+        </ActionButton>
     );
 };

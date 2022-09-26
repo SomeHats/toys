@@ -1,7 +1,14 @@
 import { approxEq } from "@/lib/utils";
 
+type CubicBezier = `cubic-bezier(${number}, ${number}, ${number}, ${number})`;
+
 /** n should be between 0 and 1 */
-export type Easing = (n: number) => number;
+export type EasingFn = (n: number) => number;
+/** n should be between 0 and 1 */
+export type Easing = {
+    (n: number): number;
+    cubicBezier: CubicBezier;
+};
 
 // based on https://github.com/servo/servo/blob/0d0cfd030347ab0711b3c0607a9ee07ffe7124cf/components/style/bezier.rs
 class UnitBezier {
@@ -91,7 +98,9 @@ class UnitBezier {
 
 export const cubicBezier = (x1: number, y1: number, x2: number, y2: number): Easing => {
     const bezier = new UnitBezier(x1, y1, x2, y2);
-    return (x) => bezier.solve(x);
+    const fn: Easing = (x: number) => bezier.solve(x);
+    fn.cubicBezier = `cubic-bezier(${x1}, ${y1}, ${x2}, ${y2})`;
+    return fn;
 };
 
 // https://gist.github.com/rezoner/713615dabedb59a15470
@@ -101,60 +110,81 @@ export const reverse =
     (n: number): number =>
         easing(1 - n);
 
-export const linear = (n: number): number => n;
+export const linear: Easing = (n) => n;
+linear.cubicBezier = "cubic-bezier(0.5, 0.5, 0.5, 0.5)";
 
-export const inQuad = (t: number): number => t * t;
+export const inQuad: Easing = (t) => t * t;
+inQuad.cubicBezier = "cubic-bezier(0.11, 0, 0.5, 0)";
 
-export const outQuad = (t: number): number => t * (2 - t);
+export const outQuad: Easing = (t) => t * (2 - t);
+outQuad.cubicBezier = "cubic-bezier(0.5, 1, 0.89, 1)";
 
-export const inOutQuad = (t: number): number => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+export const inOutQuad: Easing = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+inOutQuad.cubicBezier = "cubic-bezier(0.45, 0, 0.55, 1)";
 
-export const inCubic = (t: number): number => t * t * t;
+export const inCubic: Easing = (t) => t * t * t;
+inCubic.cubicBezier = "cubic-bezier(0.32, 0, 0.67, 0)";
 
-export const outCubic = (t: number): number => --t * t * t + 1;
+export const outCubic: Easing = (t) => --t * t * t + 1;
+outCubic.cubicBezier = "cubic-bezier(0.33, 1, 0.68, 1)";
 
-export const inOutCubic = (t: number): number =>
+export const inOutCubic: Easing = (t) =>
     t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+inOutCubic.cubicBezier = "cubic-bezier(0.65, 0, 0.35, 1)";
 
-export const inQuart = (t: number): number => t * t * t * t;
+export const inQuart: Easing = (t) => t * t * t * t;
+inQuart.cubicBezier = "cubic-bezier(0.5, 0, 0.75, 0)";
 
-export const outQuart = (t: number): number => 1 - --t * t * t * t;
+export const outQuart: Easing = (t) => 1 - --t * t * t * t;
+outQuart.cubicBezier = "cubic-bezier(0.25, 1, 0.5, 1)";
 
-export const inOutQuart = (t: number): number =>
-    t < 0.5 ? 8 * t * t * t * t : 1 - 8 * --t * t * t * t;
+export const inOutQuart: Easing = (t) => (t < 0.5 ? 8 * t * t * t * t : 1 - 8 * --t * t * t * t);
+inOutQuart.cubicBezier = "cubic-bezier(0.76, 0, 0.24, 1)";
 
-export const inQuint = (t: number): number => t * t * t * t * t;
+export const inQuint: Easing = (t) => t * t * t * t * t;
+inQuint.cubicBezier = "cubic-bezier(0.64, 0, 0.78, 0)";
 
-export const outQuint = (t: number): number => 1 + --t * t * t * t * t;
+export const outQuint: Easing = (t) => 1 + --t * t * t * t * t;
+outQuint.cubicBezier = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-export const inOutQuint = (t: number): number =>
+export const inOutQuint: Easing = (t) =>
     t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t;
+inOutQuint.cubicBezier = "cubic-bezier(0.83, 0, 0.17, 1)";
 
-export const inSine = (t: number): number => -1 * Math.cos((t / 1) * (Math.PI * 0.5)) + 1;
+export const inSin: Easing = (t) => -1 * Math.cos(t * Math.PI * 0.5) + 1;
+inSin.cubicBezier = "cubic-bezier(0.12, 0, 0.39, 0)";
 
-export const outSine = (t: number): number => Math.sin((t / 1) * (Math.PI * 0.5));
+export const outSin: Easing = (t) => Math.sin(t * Math.PI * 0.5);
+outSin.cubicBezier = "cubic-bezier(0.61, 1, 0.88, 1)";
 
-export const inOutSine = (t: number): number => (-1 / 2) * (Math.cos(Math.PI * t) - 1);
+export const inOutSin: Easing = (t) => (-1 / 2) * (Math.cos(Math.PI * t) - 1);
+inOutSin.cubicBezier = "cubic-bezier(0.37, 0, 0.63, 1)";
 
-export const inExpo = (t: number): number => (t == 0 ? 0 : Math.pow(2, 10 * (t - 1)));
+export const inExpo: Easing = (t) => (t == 0 ? 0 : Math.pow(2, 10 * (t - 1)));
+inExpo.cubicBezier = "cubic-bezier(0.7, 0, 0.84, 0)";
 
-export const outExpo = (t: number): number => (t == 1 ? 1 : -Math.pow(2, -10 * t) + 1);
+export const outExpo: Easing = (t) => (t == 1 ? 1 : -Math.pow(2, -10 * t) + 1);
+outExpo.cubicBezier = "cubic-bezier(0.16, 1, 0.3, 1)";
 
-export const inOutExpo = (t: number): number => {
+export const inOutExpo: Easing = (t) => {
     if (t == 0) return 0;
     if (t == 1) return 1;
     if ((t /= 1 / 2) < 1) return (1 / 2) * Math.pow(2, 10 * (t - 1));
     return (1 / 2) * (-Math.pow(2, -10 * --t) + 2);
 };
+inOutExpo.cubicBezier = "cubic-bezier(0.87, 0, 0.13, 1)";
 
-export const inCirc = (t: number): number => -1 * (Math.sqrt(1 - t * t) - 1);
+export const inCirc: Easing = (t) => -1 * (Math.sqrt(1 - t * t) - 1);
+inCirc.cubicBezier = "cubic-bezier(0.55, 0, 1, 0.45)";
 
-export const outCirc = (t: number): number => Math.sqrt(1 - (t = t - 1) * t);
+export const outCirc: Easing = (t) => Math.sqrt(1 - (t = t - 1) * t);
+outCirc.cubicBezier = "cubic-bezier(0, 0.55, 0.45, 1)";
 
-export const inOutCirc = (t: number): number => {
+export const inOutCirc: Easing = (t) => {
     if ((t /= 1 / 2) < 1) return (-1 / 2) * (Math.sqrt(1 - t * t) - 1);
     return (1 / 2) * (Math.sqrt(1 - (t -= 2) * t) + 1);
 };
+inOutCirc.cubicBezier = "cubic-bezier(0.85, 0, 0.15, 1)";
 
 export const inElastic = (t: number): number => {
     let s = 1.70158;

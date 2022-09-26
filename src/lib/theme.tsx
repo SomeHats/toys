@@ -692,3 +692,16 @@ export const tailwindColors = {
         90: "#3c154a",
     }),
 } as const;
+export const tailwindEasings = {
+    DEFAULT: "cubic-bezier(0.4, 0, 0.2, 1)",
+    linear: "linear",
+    in: "cubic-bezier(0.4, 0, 1, 1)",
+    out: "cubic-bezier(0, 0, 0.2, 1)",
+    inOut: "cubic-bezier(0.4, 0, 0.2, 1)",
+    inBack: "cubic-bezier(0.36, 0, 0.66, -0.56)",
+    outBack: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+    inBackMd: "cubic-bezier(0.36, 0, 0.66, -0.96)",
+    outBackMd: "cubic-bezier(0.34, 1.96, 0.64, 1)",
+    inBackXl: "cubic-bezier(0.36, 0, 0.66, -1.96)",
+    outBackXl: "cubic-bezier(0.34, 2.96, 0.64, 1)",
+} as const;

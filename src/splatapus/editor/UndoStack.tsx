@@ -3,6 +3,7 @@ import { UNDO_ACTIONS } from "@/splatapus/constants";
 import { deepEqual, UpdateAction, applyUpdate } from "@/lib/utils";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { SplatLocation } from "@/splatapus/editor/SplatLocation";
+import { VfxController } from "@/splatapus/editor/Vfx";
 
 export type OpOptions = {
     readonly lockstepLocation?: UpdateAction<SplatLocation>;
@@ -17,8 +18,6 @@ type UndoEntry = {
 export type UndoStack = {
     undoStates: ReadonlyArray<UndoEntry>;
     redoStates: ReadonlyArray<UndoEntry> | null;
-    undoOpCount: number;
-    redoOpCount: number;
     pendingOp: null | {
         txId: number;
         initialDoc: SplatDocModel;
@@ -31,8 +30,6 @@ export const UndoStack = {
     initialize: (entry: Omit<UndoEntry, "options">): UndoStack => ({
         undoStates: [],
         redoStates: [],
-        undoOpCount: 0,
-        redoOpCount: 0,
         pendingOp: null,
         current: { ...entry, options: {} },
     }),
@@ -119,11 +116,13 @@ export const UndoStack = {
         undoStack = UndoStack.updateOperation(undoStack, txId, action);
         return UndoStack.commitOperation(undoStack, txId, options);
     },
-    undo: (undoStack: UndoStack): UndoStack => {
+    undo: (undoStack: UndoStack, vfx: VfxController): UndoStack => {
         assert(undoStack.pendingOp == null, "Pending op in progress");
         if (undoStack.undoStates.length == 0) {
             return undoStack;
         }
+
+        vfx.triggerAnimation("undo");
 
         const [targetState, ...undoStates] = undoStack.undoStates;
         if (
@@ -132,7 +131,6 @@ export const UndoStack = {
         ) {
             return {
                 ...undoStack,
-                undoOpCount: undoStack.undoOpCount + 1,
                 current: {
                     ...undoStack.current,
                     location: targetState.location,
@@ -143,17 +141,18 @@ export const UndoStack = {
         const redoStates = [undoStack.current, ...(undoStack.redoStates ?? [])];
         return {
             ...undoStack,
-            undoOpCount: undoStack.undoOpCount + 1,
             current: targetState,
             undoStates,
             redoStates,
         };
     },
-    redo: (undoStack: UndoStack): UndoStack => {
+    redo: (undoStack: UndoStack, vfx: VfxController): UndoStack => {
         assert(undoStack.pendingOp == null, "pending op in progress");
         if (!undoStack.redoStates || undoStack.redoStates.length == 0) {
             return undoStack;
         }
+
+        vfx.triggerAnimation("redo");
 
         const [targetState, ...redoStates] = undoStack.redoStates;
         if (
@@ -162,7 +161,6 @@ export const UndoStack = {
         ) {
             return {
                 ...undoStack,
-                redoOpCount: undoStack.redoOpCount + 1,
                 current: {
                     ...undoStack.current,
                     location: targetState.location,
@@ -173,7 +171,6 @@ export const UndoStack = {
         const undoStates = [undoStack.current, ...undoStack.undoStates];
         return {
             ...undoStack,
-            redoOpCount: undoStack.redoOpCount + 1,
             current: targetState.options.lockstepLocation
                 ? {
                       ...targetState,

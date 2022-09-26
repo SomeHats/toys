@@ -37,7 +37,7 @@ export function App() {
     const size = useResizeObserver(container, sizeFromContentRect);
 
     return (
-        <div ref={setContainer} className="absolute inset-0 touch-none">
+        <div ref={setContainer} className="absolute inset-0 touch-none overflow-hidden">
             {size && (
                 <EditorStateProvider size={size} initialize={getInitialEditorState}>
                     <Splatapus size={size} />

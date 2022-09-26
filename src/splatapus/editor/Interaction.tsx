@@ -75,14 +75,15 @@ export const Interaction = {
             }
             const activatedSelectedTool = SelectedTool.initializeForKeyDown(ctx);
             if (activatedSelectedTool && !interaction.quickPanTool) {
+                ctx.vfx.triggerAnimation(activatedSelectedTool.type);
                 return { ...interaction, selectedTool: activatedSelectedTool };
             }
             if (matchesKeyDown(ctx.event, { key: "z", command: true })) {
-                ctx.updateUndoStack((undoStack) => UndoStack.undo(undoStack));
+                ctx.updateUndoStack((undoStack) => UndoStack.undo(undoStack, ctx.vfx));
                 return interaction;
             }
             if (matchesKeyDown(ctx.event, { key: "z", command: true, shift: true })) {
-                ctx.updateUndoStack((undoStack) => UndoStack.redo(undoStack));
+                ctx.updateUndoStack((undoStack) => UndoStack.redo(undoStack, ctx.vfx));
                 return interaction;
             }
         }

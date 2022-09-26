@@ -3,7 +3,7 @@ import SceneObject from "@/lib/scene/SceneObject";
 import Circle from "@/lib/geom/Circle";
 import Vector2 from "@/lib/geom/Vector2";
 import * as ShapeHelpers from "@/lib/canvasShapeHelpers";
-import { outSine } from "@/lib/easings";
+import { outSin } from "@/lib/easings";
 import { mapRange, constrain, flatten, uniq } from "@/lib/utils";
 import Pulse from "@/network/effects/Pulse";
 import { TEAL } from "@/network/colors";
@@ -134,7 +134,7 @@ export default class Producer extends SceneObject implements NetworkNode {
                 endRadius: PULSE_RADIUS,
                 duration: PULSE_DURATION,
                 color: PULSE_COLOR,
-                easeRadius: outSine,
+                easeRadius: outSin,
                 removeOnComplete: true,
             }),
         );

@@ -18,16 +18,19 @@ import { Viewport } from "@/splatapus/editor/Viewport";
 import React, { PointerEvent, ReactNode, useCallback, useMemo, useReducer } from "react";
 import Vector2 from "@/lib/geom/Vector2";
 import { useEvent } from "@/lib/hooks/useEvent";
+import { Vfx, VfxController } from "@/splatapus/editor/Vfx";
 
 export type EditorState = {
     undoStack: UndoStack;
     interaction: Interaction;
+    vfx: Vfx;
 };
 
 export const EditorState = {
     initialize: (state: SplatapusState): EditorState => ({
         undoStack: UndoStack.initialize(state),
         interaction: Interaction.initialize(ToolType.Draw),
+        vfx: Vfx.initialize(),
     }),
     updateUndoStack: (state: EditorState, update: CallbackAction<UndoStack>) =>
         applyUpdateWithin(state, "undoStack", update),
@@ -49,6 +52,8 @@ export const EditorState = {
         ),
     updateInteraction: (state: EditorState, update: UpdateAction<Interaction>) =>
         applyUpdateWithin(state, "interaction", update),
+    updateVfx: (state: EditorState, update: CallbackAction<Vfx>) =>
+        applyUpdateWithin(state, "vfx", update),
 };
 
 export interface ReducerCtx {
@@ -58,6 +63,8 @@ export interface ReducerCtx {
     updateDocument: (update: UpdateAction<SplatDocModel>, options?: OpOptions) => void;
     updateViewport: (update: UpdateAction<Viewport>) => void;
     updateInteraction: (update: UpdateAction<Interaction>) => void;
+    updateVfx: (update: CallbackAction<Vfx>) => void;
+    vfx: VfxController;
     document: SplatDocModel;
     location: SplatLocation;
     viewport: Viewport;
@@ -70,6 +77,8 @@ function makeReducerCtx(
     state: EditorState,
     enqueueUpdate: (fn: CallbackAction<EditorState>) => void,
 ): ReducerCtx {
+    const updateVfx = (update: CallbackAction<Vfx>) =>
+        enqueueUpdate((state) => EditorState.updateVfx(state, update));
     return {
         update: enqueueUpdate,
         updateUndoStack: (update) =>
@@ -82,6 +91,8 @@ function makeReducerCtx(
             enqueueUpdate((state) => EditorState.updateViewport(state, update)),
         updateInteraction: (update) =>
             enqueueUpdate((state) => EditorState.updateInteraction(state, update)),
+        updateVfx,
+        vfx: new VfxController(updateVfx),
         document: state.undoStack.current.document,
         location: state.undoStack.current.location,
         viewport: state.undoStack.current.location.viewport,
@@ -146,6 +157,8 @@ function useEditorStateRoot(initialize: () => EditorState, size: Vector2) {
                     dispatch((ctx) => ctx.updateDocument((state) => update(ctx, state), options)),
                 updateViewport,
                 updateInteraction,
+                updateVfx: (update: CtxAction<Vfx>) =>
+                    dispatch((ctx) => ctx.updateVfx((state) => update(ctx, state))),
 
                 onPointerDown: onPointerEvent("down"),
                 onPointerMove: onPointerEvent("move"),
@@ -186,8 +199,17 @@ function useEditorStateRoot(initialize: () => EditorState, size: Vector2) {
             undoStack: state.undoStack,
             interaction: state.interaction,
             previewPosition,
+            vfx: state.vfx,
         }),
-        [document, events, location, previewPosition, state.interaction, state.undoStack],
+        [
+            document,
+            events,
+            location,
+            previewPosition,
+            state.interaction,
+            state.undoStack,
+            state.vfx,
+        ],
     );
 }
 

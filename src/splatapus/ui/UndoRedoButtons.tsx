@@ -3,12 +3,26 @@ import { UndoStack } from "@/splatapus/editor/UndoStack";
 import { useEditorEvents, useEditorState } from "@/splatapus/editor/useEditorState";
 import classNames from "classnames";
 import { FaUndoAlt, FaRedoAlt } from "react-icons/fa";
+import { useVfxAnimation } from "@/splatapus/editor/Vfx";
+import { tailwindEasings } from "@/lib/theme";
 
 export function UndoRedoButtons() {
     const canUndo = useEditorState(({ undoStack }) => UndoStack.canUndo(undoStack));
     const canRedo = useEditorState(({ undoStack }) => UndoStack.canRedo(undoStack));
-    const opCounts = useEditorState(({ undoStack }) => undoStack);
     const { updateUndoStack } = useEditorEvents();
+
+    const undoAnimationRef = useVfxAnimation<HTMLDivElement>("undo", () => ({
+        keyFrames: { transform: ["rotate(0)", "rotate(-360deg)"] },
+        duration: 300,
+        easing: tailwindEasings.DEFAULT,
+    }));
+
+    const redoAnimationRef = useVfxAnimation<HTMLDivElement>("redo", () => ({
+        keyFrames: { transform: ["rotate(0)", "rotate(360deg)"] },
+        duration: 300,
+        easing: tailwindEasings.DEFAULT,
+    }));
+
     return (
         <div className="absolute bottom-2 left-3">
             <Button
@@ -21,11 +35,11 @@ export function UndoRedoButtons() {
                         ? "pointer-events-none opacity-50"
                         : "pointer-events-none scale-0 opacity-0 ease-in-back",
                 )}
-                onClick={() => updateUndoStack((_, stack) => UndoStack.undo(stack))}
+                onClick={() => updateUndoStack((ctx, stack) => UndoStack.undo(stack, ctx.vfx))}
                 iconLeft={
                     <div
                         className="mt-[2px] h-3 w-3 transition-transform duration-300 ease-in-out"
-                        style={{ transform: `rotate(${-opCounts.undoOpCount}turn)` }}
+                        ref={undoAnimationRef}
                     >
                         <FaUndoAlt size={12} />
                     </div>
@@ -41,11 +55,11 @@ export function UndoRedoButtons() {
                         ? "pointer-events-auto ease-out-back-md"
                         : "scale-0 opacity-0 ease-in-back-md",
                 )}
-                onClick={() => updateUndoStack((_, stack) => UndoStack.redo(stack))}
+                onClick={() => updateUndoStack((ctx, stack) => UndoStack.redo(stack, ctx.vfx))}
                 iconRight={
                     <div
                         className="mt-[2px] h-3 w-3 transition-transform duration-300 ease-in-out"
-                        style={{ transform: `rotate(${opCounts.redoOpCount}turn)` }}
+                        ref={redoAnimationRef}
                     >
                         <FaRedoAlt size={12} />
                     </div>

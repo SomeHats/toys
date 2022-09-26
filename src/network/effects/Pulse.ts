@@ -2,7 +2,7 @@ import Color from "color";
 import SceneObject from "@/lib/scene/SceneObject";
 import * as ShapeHelpers from "@/lib/canvasShapeHelpers";
 import Circle from "@/lib/geom/Circle";
-import { linear, Easing } from "@/lib/easings";
+import { linear, EasingFn } from "@/lib/easings";
 import { lerp } from "@/lib/utils";
 
 type PulseOptions = {
@@ -12,8 +12,8 @@ type PulseOptions = {
     endRadius: number;
     duration: number;
     color: Color;
-    easeRadius?: Easing;
-    easeOpacity?: Easing;
+    easeRadius?: EasingFn;
+    easeOpacity?: EasingFn;
     removeOnComplete?: boolean;
 };
 
@@ -24,8 +24,8 @@ export default class Pulse extends SceneObject {
     _duration: number;
     _color: Color;
     _progress: number;
-    _easeRadius: Easing;
-    _easeOpacity: Easing;
+    _easeRadius: EasingFn;
+    _easeOpacity: EasingFn;
     _removeOnComplete: boolean;
 
     constructor({

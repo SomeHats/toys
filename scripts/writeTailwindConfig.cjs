@@ -8,7 +8,12 @@ const prettier = require("prettier");
 const fs = require("fs");
 const path = require("path");
 
-const colors = resolveConfig(tailwindConfig).theme.colors;
+const config = resolveConfig(tailwindConfig);
+const { colors, transitionTimingFunction: easings } = config.theme;
+
+function camelCase(name) {
+    return name.replace(/([a-z])-([a-z])/g, (_, a, b) => `${a}${b.toUpperCase()}`);
+}
 
 const code = [
     "// GENERATED FILE, DO NOT EDIT DIRECTLY",
@@ -17,18 +22,24 @@ const code = [
     "return colors[key];",
     "}",
     "}",
-    `export const tailwindColors = {`,
+    "export const tailwindColors = {",
     ...Object.entries(colors).flatMap(([name, colors]) => {
         if (typeof colors !== "object") {
             return [];
         }
-        const niceName = name.replace(/([a-z])-([a-z])/g, (_, a, b) => `${a}${b.toUpperCase()}`);
+        const niceName = camelCase(name);
         return [
             ...Object.entries(colors).map(([num, v]) => `${niceName}${num}: ${JSON.stringify(v)},`),
             `${niceName}: makeColor({`,
             ...Object.entries(colors).map(([num, v]) => `${num}: ${JSON.stringify(v)},`),
             `}),`,
         ];
+    }),
+    "} as const;",
+    "export const tailwindEasings = {",
+    ...Object.entries(easings).map(([name, value]) => {
+        const niceName = camelCase(name);
+        return `${niceName}: ${JSON.stringify(value)},`;
     }),
     "} as const;",
 ].join("\n");

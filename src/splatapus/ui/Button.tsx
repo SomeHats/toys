@@ -1,6 +1,19 @@
+import { tailwindEasings } from "@/lib/theme";
+import { useVfxAnimation, VfxActionName } from "@/splatapus/editor/Vfx";
 import { useSquircleClipPath } from "@/splatapus/ui/useSquircle";
 import classNames from "classnames";
 import { CSSProperties, MouseEventHandler, ReactNode, useState } from "react";
+
+interface ButtonProps {
+    children: ReactNode;
+    className?: string;
+    onClick?: MouseEventHandler;
+    style?: CSSProperties;
+    disabled?: boolean;
+    pressed?: boolean;
+    iconLeft?: ReactNode;
+    iconRight?: ReactNode;
+}
 
 export function Button({
     children,
@@ -11,16 +24,7 @@ export function Button({
     pressed,
     iconLeft,
     iconRight,
-}: {
-    children: ReactNode;
-    className?: string;
-    onClick?: MouseEventHandler;
-    style?: CSSProperties;
-    disabled?: boolean;
-    pressed?: boolean;
-    iconLeft?: ReactNode;
-    iconRight?: ReactNode;
-}) {
+}: ButtonProps) {
     const [element, setElement] = useState<null | HTMLButtonElement>(null);
     const clipPath = useSquircleClipPath(element);
 
@@ -49,5 +53,24 @@ export function Button({
             </span>
             {iconRight}
         </button>
+    );
+}
+
+export function ActionButton({
+    children,
+    actionName,
+    ...props
+}: { actionName: VfxActionName } & ButtonProps) {
+    const ref = useVfxAnimation(actionName, () => ({
+        keyFrames: { transform: ["scale(1)", "scale(0.8)", "scale(1)"] },
+        duration: 300,
+        easing: tailwindEasings.outBackMd,
+    }));
+    return (
+        <Button {...props}>
+            <span className="inline-block" ref={ref}>
+                {children}
+            </span>
+        </Button>
     );
 }

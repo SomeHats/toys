@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { Gl } from "@/lib/gl/Gl";
 import { GlTexture2d } from "@/lib/gl/GlTexture2d";
 

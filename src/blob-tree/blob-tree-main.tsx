@@ -2,7 +2,7 @@ import { BlobTreeEditor } from "@/blob-tree/BlobTreeEditor";
 import { frameLoop } from "@/lib/utils";
 import { canvas } from "@/blob-tree/canvas";
 import { BlobTree } from "@/blob-tree/BlobTree";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 
 const editor = new BlobTreeEditor(canvas, new BlobTree());
 

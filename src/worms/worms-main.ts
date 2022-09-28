@@ -1,5 +1,5 @@
 import { canvas, width, height } from "@/worms/canvas";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { sample, times, randomInt, frameLoop, uniq, random } from "@/lib/utils";
 import createTriangleGrid, { Triangle } from "@/lib/createTriangleGrid";
 import { assert } from "@/lib/assert";

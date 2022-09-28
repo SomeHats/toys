@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { random } from "@/lib/utils";
 import RandomQueue from "@/lib/RandomQueue";
 import { Grid2 } from "@/terrain/Grid2";

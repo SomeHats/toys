@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { DelaunayCell } from "@/terrain/Delaunay";
 import Terrain from "@/terrain/Terrain";
 import { fromEntries, compact, mapRange, clamp } from "@/lib/utils";

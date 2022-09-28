@@ -1,7 +1,7 @@
 // @flow
 import SceneObject from "@/lib/scene/SceneObject";
 import Circle from "@/lib/geom/Circle";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import * as ShapeHelpers from "@/lib/canvasShapeHelpers";
 import { outSin } from "@/lib/easings";
 import { mapRange, constrain, flatten, uniq } from "@/lib/utils";

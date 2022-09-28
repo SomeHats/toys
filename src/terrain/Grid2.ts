@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { times } from "@/lib/utils";
 
 export class Grid2<T> {

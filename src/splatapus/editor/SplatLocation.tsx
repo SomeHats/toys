@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { createShapeParser, ParserType } from "@/lib/objectParser";
 import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { parseToolType, ToolType } from "@/splatapus/editor/tools/ToolType";

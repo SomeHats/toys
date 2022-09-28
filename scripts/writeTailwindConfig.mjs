@@ -1,18 +1,27 @@
 #!/usr/bin/env node
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* global require __dirname */
+/* eslint-disable no-relative-import-paths/no-relative-import-paths */
 
-const resolveConfig = require("tailwindcss/resolveConfig");
-const tailwindConfig = require("../tailwind.config");
-const prettier = require("prettier");
-const fs = require("fs");
-const path = require("path");
+import resolveConfig from "tailwindcss/resolveConfig.js";
+import tailwindConfig from "../tailwind.config.js";
+import prettier from "prettier";
+import fs from "fs";
+import path from "path";
+import url from "url";
 
 const config = resolveConfig(tailwindConfig);
 const { colors, transitionTimingFunction: easings } = config.theme;
 
+const scriptDir = url.fileURLToPath(new URL(".", import.meta.url));
+
+/**
+ * @param {string} name
+ */
 function camelCase(name) {
-    return name.replace(/([a-z])-([a-z])/g, (_, a, b) => `${a}${b.toUpperCase()}`);
+    return name.replace(
+        /([a-z])-([a-z])/g,
+        (/** @type {any} */ _, /** @type {any} */ a, /** @type {string} */ b) =>
+            `${a}${b.toUpperCase()}`,
+    );
 }
 
 const code = [
@@ -44,7 +53,7 @@ const code = [
     "} as const;",
 ].join("\n");
 
-prettier.resolveConfig(__dirname).then((config) => {
+prettier.resolveConfig(scriptDir).then((config) => {
     const formattedCode = prettier.format(code, { ...config, parser: "typescript" });
-    fs.writeFileSync(path.resolve(__dirname, "../src/lib/theme.tsx"), formattedCode, "utf-8");
+    fs.writeFileSync(path.resolve(scriptDir, "../src/lib/theme.tsx"), formattedCode, "utf-8");
 });

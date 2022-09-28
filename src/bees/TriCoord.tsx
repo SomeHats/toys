@@ -1,6 +1,6 @@
 import { assert } from "@/lib/assert";
 import AABB from "@/lib/geom/AABB";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 
 const SQRT_3 = Math.sqrt(3);
 

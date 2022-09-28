@@ -7,7 +7,7 @@ import { normalizeAngle, constrain } from "@/lib/utils";
 import Circle from "@/lib/geom/Circle";
 import { PalConfig } from "@/pals/PalConfig";
 import PalLegGeom from "@/pals/PalLegGeom";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 
 const Y_SCALE = 0.3;
 const HALF_PI = Math.PI / 2;

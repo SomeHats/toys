@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { sizeFromBorderBox, useResizeObserver } from "@/lib/hooks/useResizeObserver";
 import { useMemo } from "react";
 

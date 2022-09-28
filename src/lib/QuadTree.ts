@@ -1,6 +1,6 @@
 import AABB from "@/lib/geom/AABB";
 import Circle from "@/lib/geom/Circle";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 
 type Subdivisions<T> = [QuadTree<T>, QuadTree<T>, QuadTree<T>, QuadTree<T>];
 

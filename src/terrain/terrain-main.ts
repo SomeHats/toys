@@ -1,6 +1,6 @@
 import { generatePoisson } from "@/terrain/generatePoisson";
 import AABB from "@/lib/geom/AABB";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { Delaunay } from "@/terrain/Delaunay";
 import Terrain from "@/terrain/Terrain";
 import { canvas, ctx } from "@/terrain/canvas";

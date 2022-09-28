@@ -3,7 +3,12 @@
         "composite": true,
         "module": "ESNext",
         "moduleResolution": "Node",
-        "allowSyntheticDefaultImports": true
+        "target": "ES2019",
+        "allowSyntheticDefaultImports": true,
+        "allowJs": true,
+        "checkJs": true,
+        "outDir": "node_modules/.tsconfig.node.out",
+        "skipLibCheck": true
     },
-    "include": ["vite.config.ts"]
+    "include": ["vite.config.ts", "tailwind.config.js", "scripts/**/*"]
 }

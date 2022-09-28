@@ -2,7 +2,7 @@
 import SceneObject from "@/lib/scene/SceneObject";
 import Path from "@/lib/geom/Path";
 import StraightPathSegment from "@/lib/geom/StraightPathSegment";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import * as ShapeHelpers from "@/lib/canvasShapeHelpers";
 import { YELLOW } from "@/network/colors";
 import ConnectionDirection from "@/network/ConnectionDirection";

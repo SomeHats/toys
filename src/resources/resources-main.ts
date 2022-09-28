@@ -2,7 +2,7 @@ import { canvas, width, height } from "@/resources/canvas";
 import createTriangleGrid, { Triangle } from "@/lib/createTriangleGrid";
 import QuadTree from "@/lib/QuadTree";
 import AABB from "@/lib/geom/AABB";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 
 const TILE_SIZE = 30;
 

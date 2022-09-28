@@ -1,7 +1,7 @@
 import { PalAnimationController, PalGeomUpdate } from "@/pals/PalGeom";
 import { PalControlData } from "@/pals/PalController";
 import PalLegGeom, { PalLegGeomUpdate } from "@/pals/PalLegGeom";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { PalConfig } from "@/pals/PalConfig";
 import { constrain, mapRange } from "@/lib/utils";
 import { assert } from "@/lib/assert";

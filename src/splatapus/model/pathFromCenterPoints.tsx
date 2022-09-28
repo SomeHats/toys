@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { StrokeCenterPoint } from "@/splatapus/model/perfectFreehand";
 
 export function pathFromCenterPoints(path: ReadonlyArray<StrokeCenterPoint>): Vector2[] {

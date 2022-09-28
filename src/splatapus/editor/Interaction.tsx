@@ -1,6 +1,6 @@
 import { assert, assertExists } from "@/lib/assert";
 import { debugStateToString } from "@/lib/debugPropsToString";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { matchesKey, matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { applyUpdateWithin, exhaustiveSwitchError, UpdateAction } from "@/lib/utils";
 import { SplatShapeId } from "@/splatapus/model/SplatDoc";

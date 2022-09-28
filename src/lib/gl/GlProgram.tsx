@@ -1,5 +1,5 @@
 import { assertExists, fail } from "@/lib/assert";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { Gl } from "@/lib/gl/Gl";
 import { GlShader } from "@/lib/gl/GlShader";
 import { GlTexture2d } from "@/lib/gl/GlTexture2d";

@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { AutoInterpolator, Interpolator } from "@/splatapus/model/Interpolator";
 import {

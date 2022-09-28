@@ -1,5 +1,5 @@
 import { assert, assertExists } from "@/lib/assert";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { Gl } from "@/lib/gl/Gl";
 import { useEffect, useRef } from "react";
 import shaderFragSrc from "@/blob-factory/shader.frag";

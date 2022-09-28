@@ -7,7 +7,7 @@ export type Vector2Ish = { readonly x: number; readonly y: number };
 export const parseSerializedVector2 = createShapeParser({ x: parseNumber, y: parseNumber });
 export type SerializedVector2 = ParserType<typeof parseSerializedVector2>;
 
-export default class Vector2 {
+export class Vector2 {
     static readonly ZERO = new Vector2(0, 0);
     static readonly UNIT = new Vector2(1, 1);
     static readonly X = new Vector2(1, 0);

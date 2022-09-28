@@ -1,5 +1,5 @@
 import AABB from "@/lib/geom/AABB";
-import Vector2, { parseSerializedVector2 } from "@/lib/geom/Vector2";
+import { Vector2, parseSerializedVector2 } from "@/lib/geom/Vector2";
 import { createShapeParser, parseNumber, ParserType } from "@/lib/objectParser";
 import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
 

@@ -11,7 +11,7 @@ import {
 } from "@/splatapus/model/store";
 import { Button } from "@/splatapus/ui/Button";
 import { useEditorEvents } from "@/splatapus/editor/useEditorState";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 
 export function ImportExportButtons() {
     return (

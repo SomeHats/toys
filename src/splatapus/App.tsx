@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { sizeFromContentRect, useResizeObserver } from "@/lib/hooks/useResizeObserver";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { LOAD_FROM_AUTOSAVE_ENABLED } from "@/splatapus/constants";

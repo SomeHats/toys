@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
 import { ReactNode } from "react";
 

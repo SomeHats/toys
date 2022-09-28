@@ -1,0 +1,8 @@
+{
+    "name": "@somehats/vector2",
+    "version": "0.0.0",
+    "homepage": "https://github.com/somehats/toys",
+    "license": "MIT",
+    "author": "alex dytrych (https://github.com/somehats)",
+    "main": "../src/lib/geom/Vector2.ts"
+}

@@ -12,3 +12,5 @@
 !.yarn/versions
 
 .vitest
+*.tsbuildinfo
+/packages_out

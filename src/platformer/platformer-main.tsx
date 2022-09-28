@@ -2,7 +2,7 @@ import { assertExists } from "@/lib/assert";
 import { ButtonMapping } from "@/lib/ButtonMapping";
 import { DebugDraw, StrokeAndFillOptions } from "@/lib/DebugDraw";
 import AABB from "@/lib/geom/AABB";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { KeyCode } from "@/lib/KeyCode";
 import Component from "@/lib/scene/Component";
 import Entity from "@/lib/scene/Entity";

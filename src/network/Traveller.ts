@@ -1,7 +1,7 @@
 import { assert } from "@/lib/assert";
 import SceneObject from "@/lib/scene/SceneObject";
 import Circle from "@/lib/geom/Circle";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { outBack, inBack } from "@/lib/easings";
 import { sample, constrain, mapRange, random } from "@/lib/utils";
 import TravellerFinder from "@/network/TravellerFinder";

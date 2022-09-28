@@ -5,7 +5,7 @@ import { parseSplatDoc, SplatKeyPointId, SplatShapeId } from "@/splatapus/model/
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
 import { SplatLocation, parseSerializedSplatLocation } from "@/splatapus/editor/SplatLocation";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { Viewport } from "@/splatapus/editor/Viewport";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 

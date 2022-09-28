@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { getId, compact, intersection } from "@/lib/utils";
 
 type TriangleGeom = [Vector2, Vector2, Vector2];

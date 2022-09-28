@@ -1,6 +1,6 @@
 import { assert } from "@/lib/assert";
 import Circle from "@/lib/geom/Circle";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { IdGenerator } from "@/lib/IdGenerator";
 
 export class BlobTreeNode {

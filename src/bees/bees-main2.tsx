@@ -1,5 +1,5 @@
 import { Application, InteractionManager, Renderer, SCALE_MODES, settings } from "pixi.js";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { random, times } from "@/lib/utils";
 import { AnimatedSpriteStack } from "@/bees/AnimatedSpriteStack";
 import { assets } from "@/bees/assets/assets";

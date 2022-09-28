@@ -3,7 +3,7 @@ import testVert from "@/webgl/test.vert";
 import testFrag from "@/webgl/test.frag";
 import AABB from "@/lib/geom/AABB";
 import { times, random } from "@/lib/utils";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 
 const canvas = document.createElement("canvas");
 canvas.width = document.body.clientWidth * window.devicePixelRatio;

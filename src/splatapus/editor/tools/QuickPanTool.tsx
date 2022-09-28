@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { createTool } from "@/splatapus/editor/lib/createTool";
 import { createGestureDetector, GestureType } from "@/splatapus/editor/lib/GestureDetection";
 import { QuickToolType } from "@/splatapus/editor/tools/ToolType";

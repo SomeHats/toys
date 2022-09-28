@@ -1,5 +1,5 @@
 import { debugStateToString } from "@/lib/debugPropsToString";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 

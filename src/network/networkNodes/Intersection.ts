@@ -1,6 +1,6 @@
 // @flow
 import { assert } from "@/lib/assert";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { uniq, flatten } from "@/lib/utils";
 import ConnectionSet from "@/network/ConnectionSet";
 import ConnectionDirection from "@/network/ConnectionDirection";

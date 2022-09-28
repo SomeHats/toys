@@ -1,6 +1,6 @@
 import { Delaunay } from "@/terrain/Delaunay";
 import { TerrainCell } from "@/terrain/TerrainCell";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { times, sample, removeFromArray, mapRange, shuffle } from "@/lib/utils";
 import RandomQueue from "@/lib/RandomQueue";
 import AABB from "@/lib/geom/AABB";

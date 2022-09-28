@@ -1,6 +1,6 @@
 import PalGeom from "@/pals/PalGeom";
 import { PalConfig } from "@/pals/PalConfig";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { PalControlData } from "@/pals/PalController";
 import { lerp } from "@/lib/utils";
 

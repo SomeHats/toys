@@ -11,7 +11,7 @@ import {
 } from "@/splatapus/model/SplatDoc";
 import { UniqueIndex, Table, Index } from "@/splatapus/model/Table";
 import { calculateNormalizedShapePointsFromVersions } from "@/splatapus/model/normalizedShape";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { deepEqual, identity, UpdateAction } from "@/lib/utils";
 import { fail } from "@/lib/assert";
 import { diffJson } from "diff";

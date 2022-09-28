@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 
 export function getQuadraticArcLength(start: Vector2, control: Vector2, end: Vector2, t = 1) {
     const ax = start.x - 2 * control.x + end.x;

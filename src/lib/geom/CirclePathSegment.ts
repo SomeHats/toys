@@ -1,6 +1,6 @@
 // @flow
 import { constrain, mapRange } from "@/lib/utils";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import Circle from "@/lib/geom/Circle";
 import { PathSegment } from "@/lib/geom/Path";
 

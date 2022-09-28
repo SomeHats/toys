@@ -1,7 +1,7 @@
 import { ResizeObserver, ResizeObserverEntry, ResizeObserverSize } from "@juggle/resize-observer";
 import { useLayoutEffect, useState } from "react";
 import { assert, assertExists } from "@/lib/assert";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 
 export { ResizeObserverEntry, ResizeObserverSize };
 

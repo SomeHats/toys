@@ -7,7 +7,7 @@ import Road from "@/network/Road";
 import Junction from "@/network/Junction";
 // import DebugOverlay from "./systems/DebugOverlay";
 import TravellerFinder from "@/network/TravellerFinder";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 
 const ROUND = 50;
 

@@ -2,7 +2,7 @@
 import { compact } from "@/lib/utils";
 import SceneObject from "@/lib/scene/SceneObject";
 import Scene from "@/lib/scene/Scene";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import Circle from "@/lib/geom/Circle";
 import Path from "@/lib/geom/Path";
 import Road from "@/network/Road";

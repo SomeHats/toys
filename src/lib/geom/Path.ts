@@ -2,7 +2,7 @@
 import { assert } from "@/lib/assert";
 import { constrain, compact } from "@/lib/utils";
 import Circle from "@/lib/geom/Circle";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import StraightPathSegment from "@/lib/geom/StraightPathSegment";
 import CirclePathSegment from "@/lib/geom/CirclePathSegment";
 import Line2 from "@/lib/geom/Line2";

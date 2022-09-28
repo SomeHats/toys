@@ -1,5 +1,5 @@
 import { assert, fail } from "@/lib/assert";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { lerp } from "@/lib/utils";
 import { Tps } from "@/splatapus/model/ThinPlateSpline";
 

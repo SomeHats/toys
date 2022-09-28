@@ -46,6 +46,9 @@ rather focus my limited free time on actually making things with the tools.
         -   [ ] drag-preview in rig mode
     -   [ ] (P0) fix up new drawing for unplaced point - extrapolation produces bad onion skins
             currently
+    -   [ ] optimize for quickly drawing multiple shapes
+    -   [ ] figure out proper workflow/right way to use the tool
+    -   [ ] new "stack of cards" ui for keyframes
     -   [ ] a r t
         -   [x] more shapes
             -   [x] proper more shapes ui

@@ -1,5 +1,5 @@
 // @flow
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import Road from "@/network/Road";
 import Traveller from "@/network/Traveller";
 import ConnectionDirection from "@/network/ConnectionDirection";

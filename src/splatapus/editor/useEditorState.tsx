@@ -16,7 +16,7 @@ import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { OpOptions, UndoStack } from "@/splatapus/editor/UndoStack";
 import { Viewport } from "@/splatapus/editor/Viewport";
 import React, { PointerEvent, ReactNode, useCallback, useMemo, useReducer } from "react";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { Vfx, VfxController } from "@/splatapus/editor/Vfx";
 

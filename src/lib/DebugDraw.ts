@@ -1,6 +1,6 @@
 import AABB from "@/lib/geom/AABB";
 import Line2 from "@/lib/geom/Line2";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 
 const DEFAULT_DEBUG_COLOR = "magenta";
 const LABEL_OFFSET = new Vector2(5, 0);

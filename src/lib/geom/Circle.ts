@@ -1,5 +1,5 @@
 // @flow
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import AABB from "@/lib/geom/AABB";
 import Line2 from "@/lib/geom/Line2";
 

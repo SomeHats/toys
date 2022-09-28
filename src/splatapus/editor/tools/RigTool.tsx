@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { SplatKeyPointId } from "@/splatapus/model/SplatDoc";
 import { ScenePositionedDiv } from "@/splatapus/renderer/Positioned";
 import { createTool, OverlayProps } from "@/splatapus/editor/lib/createTool";

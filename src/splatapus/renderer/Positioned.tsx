@@ -1,4 +1,4 @@
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { useEditorState } from "@/splatapus/editor/useEditorState";
 import classNames from "classnames";
 import { ComponentProps } from "react";

@@ -2,7 +2,7 @@
 import { assert } from "@/lib/assert";
 import SceneObject from "@/lib/scene/SceneObject";
 import Circle from "@/lib/geom/Circle";
-import Vector2 from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import * as ShapeHelpers from "@/lib/canvasShapeHelpers";
 import { inBack, reverse, linear } from "@/lib/easings";
 import { constrain, mapRange } from "@/lib/utils";

@@ -23,7 +23,7 @@ export async function getListenToMidiInput(): Promise<ListenToMidiInputFn> {
 
     console.log(WebMidi);
 
-    const midiEventEmitter = new EventEmitter<{ id: string; value: number }>();
+    const midiEventEmitter = new EventEmitter<[{ id: string; value: number }]>();
     for (const input of WebMidi.inputs) {
         input.addListener("controlchange", (event) => {
             midiEventEmitter.emit({

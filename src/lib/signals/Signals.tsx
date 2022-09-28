@@ -97,8 +97,8 @@ export class ComputedSignal extends Signal {
 
 export class SignalManager {
     public debugSignalsByName: ReadonlyRecord<string, ReadonlyArray<Signal>> = {};
-    private readonly debugSignalsChangeEvent = new EventEmitter<undefined>();
-    private readonly updateEvent = new EventEmitter<undefined>();
+    private readonly debugSignalsChangeEvent = new EventEmitter();
+    private readonly updateEvent = new EventEmitter();
     private readonly signals = new Set<Signal>();
 
     private readonly driver: ControlledSignal;

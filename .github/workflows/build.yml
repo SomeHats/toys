@@ -12,6 +12,9 @@ concurrency:
     group: "pages"
     cancel-in-progress: true
 
+env:
+    VITE_BASE: "/toys/"
+
 jobs:
     build:
         runs-on: ubuntu-latest

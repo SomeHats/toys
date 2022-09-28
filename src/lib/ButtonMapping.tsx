@@ -4,8 +4,8 @@ import { KeyCode } from "@/lib/KeyCode";
 import { entries } from "@/lib/utils";
 
 type ActionInfo = {
-    downEvent: EventEmitter<void>;
-    upEvent: EventEmitter<void>;
+    downEvent: EventEmitter;
+    upEvent: EventEmitter;
     isDown: boolean;
 };
 

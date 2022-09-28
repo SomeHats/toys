@@ -24,7 +24,7 @@ export function UndoRedoButtons() {
     }));
 
     return (
-        <div className="absolute bottom-2 left-3">
+        <div className="pointer-events-auto pb-2 pl-3">
             <Button
                 disabled={!canUndo}
                 className={classNames(

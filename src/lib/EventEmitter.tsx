@@ -2,23 +2,23 @@ import { unstable_batchedUpdates } from "react-dom";
 
 export type Unsubscribe = () => void;
 
-type Listener<T> = T extends undefined ? () => void : (event: T) => void;
+type Listener<Args extends Array<unknown>> = (...args: Args) => void;
 
-export default class EventEmitter<T = undefined> {
-    private handlers = new Set<Listener<T>>();
+export default class EventEmitter<Args extends Array<unknown> = []> {
+    private handlers = new Set<Listener<Args>>();
 
-    listen(listener: Listener<T>) {
-        const handler = ((event: T) => listener(event)) as Listener<T>;
+    listen(listener: Listener<Args>) {
+        const handler: Listener<Args> = (...args) => listener(...args);
         this.handlers.add(handler);
         return () => {
             this.handlers.delete(handler);
         };
     }
 
-    emit(...args: T extends undefined ? [] : [T]) {
+    emit(...args: Args) {
         unstable_batchedUpdates(() => {
             for (const handler of this.handlers) {
-                handler(args[0] as T);
+                handler(...args);
             }
         });
     }

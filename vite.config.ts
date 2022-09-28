@@ -18,7 +18,7 @@ export default defineConfig(async ({ mode }) => {
     const glsl = await import("vite-plugin-glsl");
     return {
         plugins: [react(), glsl.default({ compress: mode === "production" })],
-        base: "./",
+        base: process.env.VITE_BASE || "./",
         root: path.resolve(__dirname, "src"),
         publicDir: false,
         resolve: {

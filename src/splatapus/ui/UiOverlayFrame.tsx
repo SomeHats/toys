@@ -30,12 +30,14 @@ export function UiOverlayFrame({
     topBarRight,
     topBarLeft,
     rightBar,
-    size,
+    bottomBarLeft,
+    bottomBarRight,
 }: {
     topBarRight: ReactNode;
     topBarLeft: ReactNode;
+    bottomBarRight: ReactNode;
+    bottomBarLeft: ReactNode;
     rightBar: ReactNode;
-    size: Vector2;
 }) {
     return (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-stretch">
@@ -50,9 +52,19 @@ export function UiOverlayFrame({
             </div>
             <div className="flex flex-auto items-start justify-end">
                 {ROUNDED_CORNER}
-                <div className="pointer-events-auto h-full bg-stone-100" style={rightBarStyle}>
+                <div
+                    className="pointer-events-auto flex h-full flex-col bg-stone-100"
+                    style={rightBarStyle}
+                >
                     {rightBar}
                 </div>
+            </div>
+            <div className="absolute bottom-0 left-0">{bottomBarLeft}</div>
+            <div
+                className="absolute bottom-0 right-0 transition-transform"
+                style={{ transform: `translateX(${-SIDEBAR_WIDTH_PX}px)` }}
+            >
+                {bottomBarRight}
             </div>
         </div>
     );

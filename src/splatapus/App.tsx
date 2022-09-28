@@ -18,6 +18,7 @@ import { assertExists } from "@/lib/assert";
 import { UiOverlayFrame } from "@/splatapus/ui/UiOverlayFrame";
 import { ImportExportButtons } from "@/splatapus/ui/ImportExportButtons";
 import { UndoRedoButtons } from "@/splatapus/ui/UndoRedoButtons";
+import { DebugSettingsMenu } from "@/splatapus/DebugSettings";
 
 function getInitialEditorState() {
     const screenSize = Vector2.UNIT;
@@ -85,12 +86,12 @@ function Splatapus({ size }: { size: Vector2 }) {
                 <Interaction.Overlay />
             </div>
             <UiOverlayFrame
-                size={size}
                 topBarLeft={<ModePicker />}
                 topBarRight={<ImportExportButtons />}
                 rightBar={<RightBar />}
+                bottomBarLeft={<UndoRedoButtons />}
+                bottomBarRight={<DebugSettingsMenu />}
             />
-            <UndoRedoButtons />
             {process.env.NODE_ENV === "development" && <DebugInfo />}
             <Updater size={size} />
         </>

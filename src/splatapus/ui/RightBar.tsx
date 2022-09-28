@@ -29,7 +29,7 @@ export function RightBar() {
     const toolClassNames = useToolClassNames();
 
     return (
-        <div className="relative flex h-full flex-col gap-4 overflow-auto p-5 [-webkit-overflow-scrolling:touch]">
+        <div className="relative flex h-0 flex-auto flex-col gap-4 overflow-auto p-5 [-webkit-overflow-scrolling:touch]">
             <div
                 className="absolute top-5 left-5 z-0 w-20 rounded bg-stone-200 ring-2 ring-stone-200 transition-transform"
                 style={{

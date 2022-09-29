@@ -1,6 +1,8 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
+import { useEditorState } from "@/splatapus/editor/useEditorState";
 import { ReactNode } from "react";
+import { Transition } from "@headlessui/react";
 
 const rightBarStyle = {
     width: SIDEBAR_WIDTH_PX,
@@ -39,6 +41,8 @@ export function UiOverlayFrame({
     bottomBarLeft: ReactNode;
     rightBar: ReactNode;
 }) {
+    const isSidebarOpen = useEditorState(({ location }) => location.viewport.isSidebarOpen);
+
     return (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-stretch">
             <div className="pointer-events-auto flex flex-none items-center justify-between gap-3 bg-stone-100 px-3 py-2">
@@ -50,7 +54,16 @@ export function UiOverlayFrame({
                     {topBarRight}
                 </div>
             </div>
-            <div className="flex flex-auto items-start justify-end">
+            <Transition
+                className="flex flex-auto items-start justify-end"
+                show={isSidebarOpen}
+                enter="transition"
+                enterFrom="translate-x-80"
+                enterTo="translate-x-0"
+                leave="transition"
+                leaveFrom="translate-0"
+                leaveTo="translate-x-80"
+            >
                 {ROUNDED_CORNER}
                 <div
                     className="pointer-events-auto flex h-full flex-col bg-stone-100"
@@ -58,7 +71,7 @@ export function UiOverlayFrame({
                 >
                     {rightBar}
                 </div>
-            </div>
+            </Transition>
             <div className="absolute bottom-0 left-0">{bottomBarLeft}</div>
             <div
                 className="absolute bottom-0 right-0 transition-transform"

@@ -13,23 +13,31 @@ type ViewportState = {
     readonly pan: Vector2;
     readonly zoom: number;
     readonly screenSize: Vector2;
+    readonly isSidebarOpen: boolean;
 };
 
 export class Viewport {
     static default(screenSize: Vector2) {
-        return new Viewport({ pan: Vector2.ZERO, zoom: 1, screenSize });
+        return new Viewport({ pan: Vector2.ZERO, zoom: 1, screenSize, isSidebarOpen: true });
     }
     static deserialize({ pan, zoom }: SerializedViewport, screenSize: Vector2) {
-        return new Viewport({ pan: Vector2.deserialize(pan), zoom, screenSize });
+        return new Viewport({
+            pan: Vector2.deserialize(pan),
+            zoom,
+            screenSize,
+            isSidebarOpen: false,
+        });
     }
 
     readonly pan: Vector2;
     readonly zoom: number;
     readonly screenSize: Vector2;
-    constructor({ pan, zoom, screenSize }: ViewportState) {
+    readonly isSidebarOpen: boolean;
+    constructor({ pan, zoom, screenSize, isSidebarOpen }: ViewportState) {
         this.pan = pan;
         this.zoom = zoom;
         this.screenSize = screenSize;
+        this.isSidebarOpen = isSidebarOpen;
     }
 
     with(changes: Partial<ViewportState>) {
@@ -37,6 +45,7 @@ export class Viewport {
             pan: changes.pan ?? this.pan,
             zoom: changes.zoom ?? this.zoom,
             screenSize: changes.screenSize ?? this.screenSize,
+            isSidebarOpen: changes.isSidebarOpen ?? this.isSidebarOpen,
         });
     }
 
@@ -45,7 +54,10 @@ export class Viewport {
     }
 
     canvasScreenSize(): Vector2 {
-        return this.screenSize.sub(new Vector2(SIDEBAR_WIDTH_PX, 0));
+        if (this.isSidebarOpen) {
+            return this.screenSize.sub(new Vector2(SIDEBAR_WIDTH_PX, 0));
+        }
+        return this.screenSize;
     }
 
     handleWheelEvent(event: WheelEvent): Viewport {
@@ -89,6 +101,6 @@ export class Viewport {
 
     getSceneTransform(): string {
         const pan = this.origin();
-        return `translate(${-pan.x}, ${-pan.y}) scale(${this.zoom}) `;
+        return `translate(${-pan.x}px, ${-pan.y}px) scale(${this.zoom}) `;
     }
 }

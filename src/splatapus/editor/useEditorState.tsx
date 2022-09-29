@@ -54,6 +54,15 @@ export const EditorState = {
         applyUpdateWithin(state, "interaction", update),
     updateVfx: (state: EditorState, update: CallbackAction<Vfx>) =>
         applyUpdateWithin(state, "vfx", update),
+    afterUpdate: (state: EditorState, previousState: EditorState): EditorState => {
+        const isSidebarOpen = Interaction.isSidebarOpen(state.interaction);
+        if (isSidebarOpen !== state.undoStack.current.location.viewport.isSidebarOpen) {
+            state = EditorState.updateViewport(state, (viewport) =>
+                viewport.with({ isSidebarOpen }),
+            );
+        }
+        return state;
+    },
 };
 
 export interface ReducerCtx {
@@ -110,9 +119,14 @@ function reducer(state: EditorState, update: (ctx: ReducerCtx) => void): EditorS
     }
 
     update(makeReducerCtx(state, enqueueUpdate));
-
+    const initialState = state;
     for (let i = 0; i < queue.length; i++) {
         state = queue[i](state);
+    }
+    state = EditorState.afterUpdate(state, initialState);
+
+    if (state !== initialState) {
+        console.log("STATE CHANGED");
     }
 
     isDone = true;
@@ -249,8 +263,8 @@ const _EventProvider = React.memo(function _EventProvider({
     events: EditorStateEventsThunk;
     children: ReactNode;
 }) {
-    const update = useContextUpdate(EditorStateContext);
-    const boundEvents = useMemo(() => events(update), [events, update]);
+    // const update = useContextUpdate(EditorStateContext);
+    const boundEvents = useMemo(() => events((cb) => cb()), [events]);
     return (
         <EditorEventsContext.Provider value={boundEvents}>{children}</EditorEventsContext.Provider>
     );

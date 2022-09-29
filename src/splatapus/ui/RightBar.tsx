@@ -8,13 +8,6 @@ import classNames from "classnames";
 import React from "react";
 import { useToolClassNames } from "@/splatapus/editor/toolClassNames";
 
-// const buttonStyle = {
-//     width: SIDEBAR_WIDTH_PX - 24,
-// };
-// const rowStyle = {
-//     minWidth: SIDEBAR_WIDTH_PX - 24,
-// };
-
 const WIDTH_PER_THUMB = 84;
 const HEIGHT_PER_THUMB = 80;
 

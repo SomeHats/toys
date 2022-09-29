@@ -51,6 +51,9 @@ export const Interaction = {
     ): PreviewPosition | null => {
         return SelectedTool.getPreviewPosition(interaction.selectedTool, selectedShapeId);
     },
+    isSidebarOpen: (interaction: Interaction): boolean => {
+        return interaction.selectedTool.type !== ToolType.Play;
+    },
 
     updateSelectedTool: (
         interaction: Interaction,

@@ -2,7 +2,7 @@ import { Interaction } from "@/splatapus/editor/Interaction";
 import { toolClassNames } from "@/splatapus/editor/toolClassNames";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { useEditorEvents, useEditorState } from "@/splatapus/editor/useEditorState";
-import { ActionButton, Button } from "@/splatapus/ui/Button";
+import { ActionButton } from "@/splatapus/ui/Button";
 import classNames from "classnames";
 import React, { ReactNode } from "react";
 

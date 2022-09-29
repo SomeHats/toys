@@ -1,4 +1,3 @@
-import { Vector2 } from "@/lib/geom/Vector2";
 import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
 import { useEditorState } from "@/splatapus/editor/useEditorState";
 import { ReactNode } from "react";

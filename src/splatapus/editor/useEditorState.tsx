@@ -1,9 +1,4 @@
-import {
-    createContext,
-    useContextSelector,
-    useContext,
-    useContextUpdate,
-} from "use-context-selector";
+import { createContext, useContextSelector, useContext } from "use-context-selector";
 import { assert, assertExists } from "@/lib/assert";
 import { CallbackAction, UpdateAction, applyUpdateWithin, applyUpdate } from "@/lib/utils";
 import { Interaction } from "@/splatapus/editor/Interaction";

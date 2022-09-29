@@ -1,7 +1,7 @@
 import { Cell, useCell, useCellValue } from "@/lib/Cell";
 import { createShapeParser, parseBoolean, ParserType } from "@/lib/objectParser";
 import { getLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
-import { BouncyLabel, Button, PlainButton } from "@/splatapus/ui/Button";
+import { Button, PlainButton } from "@/splatapus/ui/Button";
 import { useSquircleClipPath } from "@/splatapus/ui/useSquircle";
 import { Popover, Transition, Switch } from "@headlessui/react";
 import classNames from "classnames";

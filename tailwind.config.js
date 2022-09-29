@@ -1,5 +1,7 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
     content: ["./src/**/*.{html,js,ts,tsx,rs}"],
+    plugins: [require("@headlessui/tailwindcss")],
     theme: {
         extend: {
             transitionTimingFunction: {

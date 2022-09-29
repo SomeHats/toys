@@ -14,12 +14,14 @@ import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import classNames from "classnames";
 import React from "react";
 import { useEditorState } from "@/splatapus/editor/useEditorState";
+import { useDebugSetting } from "@/splatapus/DebugSettings";
 
 export const StrokeRenderer = React.memo(function StrokeRenderer({
     shapeId,
 }: {
     shapeId: SplatShapeId;
 }) {
+    const shouldShowPoints = useDebugSetting("shouldShowPoints");
     const toolPoints = useEditorState(({ previewPosition, interaction }) => {
         if (previewPosition.selectedShapeId === shapeId) {
             switch (interaction.selectedTool.type) {
@@ -76,6 +78,16 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                     className={classNames(isSelected ? "fill-stone-800" : "fill-stone-600")}
                 />
             )}
+            {shouldShowPoints &&
+                (toolPoints || centerPoints).map((point, i) => (
+                    <circle
+                        key={i}
+                        cx={point.center.x}
+                        cy={point.center.y}
+                        r={point.radius}
+                        className="fill-transparent stroke-cyan-400"
+                    />
+                ))}
         </>
     );
 });

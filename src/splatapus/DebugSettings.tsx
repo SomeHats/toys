@@ -1,11 +1,11 @@
-import { assertExists } from "@/lib/assert";
 import { Cell, useCell, useCellValue } from "@/lib/Cell";
 import { createShapeParser, parseBoolean, ParserType } from "@/lib/objectParser";
 import { getLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
-import { Button } from "@/splatapus/ui/Button";
+import { BouncyLabel, Button, PlainButton } from "@/splatapus/ui/Button";
 import { useSquircleClipPath } from "@/splatapus/ui/useSquircle";
+import { Popover, Transition, Switch } from "@headlessui/react";
 import classNames from "classnames";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useState } from "react";
 
 const STORAGE_KEY = "splatapus.debugSettings";
 
@@ -20,40 +20,22 @@ const defaultDebugSettings: DebugSettings = {
 
 export function DebugSettingsMenu() {
     const [settings, setSettings] = useCell(debugSettings);
-    const [isVisible, setIsVisible] = useState(false);
     const [menu, setMenu] = useState<HTMLElement | null>(null);
-    const clipPath = useSquircleClipPath(menu, 24);
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const container = assertExists(containerRef.current);
-        if (!isVisible) {
-            return undefined;
-        }
-
-        const hideIfOutside = (event: Event) => {
-            if (event.target instanceof Node && !container.contains(event.target)) {
-                setIsVisible(false);
-            }
-        };
-        window.addEventListener("pointerdown", hideIfOutside);
-        return () => {
-            window.removeEventListener("pointerdown", hideIfOutside);
-        };
-    });
+    const clipPath = useSquircleClipPath(menu, 16);
 
     return (
-        <div className="pointer-events-auto relative px-3 py-2" ref={containerRef}>
-            <Button onClick={() => setIsVisible(!isVisible)}>!</Button>
-            <div
-                className={classNames(
-                    "absolute bottom-12 right-3 origin-bottom-right drop-shadow transition-all duration-200",
-                    isVisible ? "ease-out-back" : "scale-75 opacity-0 ease-in-back",
-                )}
-                aria-hidden={!isVisible}
-                tabIndex={-1}
+        <Popover className="pointer-events-auto relative px-3 py-2 opacity-0 hover:opacity-100 ui-open:opacity-100">
+            <Popover.Button as={Button}>!</Popover.Button>
+            <Transition
+                className="absolute bottom-12 right-3 origin-bottom-right"
+                enter="transition duration-200 ease-out-back"
+                enterFrom="opacity-0 scale-75"
+                enterTo="opacity-100"
+                leave="transition duration-300 ease-in-back"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0 scale-75"
             >
-                <div
+                <Popover.Panel
                     ref={setMenu}
                     className={classNames("flex  w-60 flex-col gap-3 bg-stone-100 p-3")}
                     style={{ clipPath }}
@@ -65,16 +47,9 @@ export function DebugSettingsMenu() {
                             setSettings({ ...settings, shouldShowPoints })
                         }
                     />
-                    <ToggleItem
-                        label="Show points"
-                        value={settings.shouldShowPoints}
-                        onChange={(shouldShowPoints) =>
-                            setSettings({ ...settings, shouldShowPoints })
-                        }
-                    />
-                </div>
-            </div>
-        </div>
+                </Popover.Panel>
+            </Transition>
+        </Popover>
     );
 }
 
@@ -87,7 +62,19 @@ function ToggleItem({
     value: boolean;
     onChange: (newValue: boolean) => void;
 }) {
-    return <Button>{label}</Button>;
+    return (
+        <Switch
+            checked={value}
+            onChange={onChange}
+            as={PlainButton}
+            className="justify-between py-1 pl-3 pr-1"
+        >
+            <span>{label}</span>
+            <div className="relative inline-flex h-6 w-10 rounded-full bg-stone-200 transition ui-checked:bg-green-400">
+                <div className="absolute top-[2px] left-[2px] h-5 w-5 rounded-full bg-white transition ui-checked:translate-x-4" />
+            </div>
+        </Switch>
+    );
 }
 
 function readDebugSettings(): DebugSettings {

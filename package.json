@@ -16,6 +16,7 @@
         "format": "git ls-files | grep -E '.*\\.(js|mjs|cjs|ts|jsx|tsx|html|css|json|yml|md)$' | xargs prettier --write"
     },
     "devDependencies": {
+        "@headlessui/tailwindcss": "^0.1.1",
         "@types/classnames": "^2.3.0",
         "@types/diff": "^5.0.2",
         "@types/glob": "^7.2.0",
@@ -45,6 +46,7 @@
         "webgl-strict-types": "^1.0.5"
     },
     "dependencies": {
+        "@headlessui/react": "^1.7.2",
         "@juggle/resize-observer": "^3.3.1",
         "@types/color": "^3.0.3",
         "@types/d3-color": "^3.1.0",
@@ -80,5 +82,8 @@
         "webmidi": "^3.0.21"
     },
     "browserslist": "> 0.5%, last 2 versions, not dead",
-    "packageManager": "yarn@3.2.2"
+    "packageManager": "yarn@3.2.2",
+    "resolutions": {
+        "@headlessui/react@1.7.2": "patch:@headlessui/react@npm:1.7.2#.yarn/patches/@headlessui-react-npm-1.7.2-149c706e3c.patch"
+    }
 }

@@ -1,0 +1,1 @@
+import{a as r}from"./chunk_index.f8703814.js";class d{constructor(){this.handlers=new Set}listen(e){const t=(...s)=>e(...s);return this.handlers.add(t),()=>{this.handlers.delete(t)}}emit(...e){r.exports.unstable_batchedUpdates(()=>{for(const t of this.handlers)t(...e)})}}export{d as E};

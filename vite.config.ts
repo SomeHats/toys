@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, PluginOption } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { glob } from "glob";
@@ -13,12 +13,14 @@ const roots = glob
         path.resolve(__dirname, root),
     ]);
 
+const baseUrl = process.env.VITE_BASE || "./";
+
 // https://vitejs.dev/config/
 export default defineConfig(async ({ mode }) => {
     const glsl = await import("vite-plugin-glsl");
     return {
-        plugins: [react(), glsl.default({ compress: mode === "production" })],
-        base: process.env.VITE_BASE || "./",
+        plugins: [react(), glsl.default({ compress: mode === "production" }), resolveATags()],
+        base: baseUrl,
         root: path.resolve(__dirname, "src"),
         publicDir: path.resolve(__dirname, "public"),
         resolve: {
@@ -40,3 +42,14 @@ export default defineConfig(async ({ mode }) => {
         },
     };
 });
+
+function resolveATags(): PluginOption {
+    return {
+        name: "resolve-a-tags",
+        transformIndexHtml: async (html, ctx) => {
+            return html.replace(/(<a [^>]*?href=")([^"]+?)("[^>]*?>)/g, (_, pre, url, post) => {
+                return `${pre}${path.join(baseUrl, url)}${post}`;
+            });
+        },
+    };
+}

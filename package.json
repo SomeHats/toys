@@ -79,6 +79,7 @@
         "use-resize-observer": "^9.0.2",
         "use-subscription": "^1.8.0",
         "utility-types": "^3.10.0",
+        "vite-plugin-html": "^3.2.0",
         "webmidi": "^3.0.21"
     },
     "browserslist": "> 0.5%, last 2 versions, not dead",

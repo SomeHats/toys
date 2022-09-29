@@ -20,7 +20,7 @@ export default defineConfig(async ({ mode }) => {
         plugins: [react(), glsl.default({ compress: mode === "production" })],
         base: process.env.VITE_BASE || "./",
         root: path.resolve(__dirname, "src"),
-        publicDir: false,
+        publicDir: path.resolve(__dirname, "public"),
         resolve: {
             alias: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
         },
@@ -32,9 +32,9 @@ export default defineConfig(async ({ mode }) => {
                     ...Object.fromEntries(roots),
                 },
                 output: {
-                    assetFileNames: "assets/asset_[name].[hash].[ext]",
-                    chunkFileNames: "chunks/chunk_[name].[hash].js",
-                    entryFileNames: "[name]/[name].[hash].js",
+                    assetFileNames: "static/asset_[name].[hash].[ext]",
+                    chunkFileNames: "static/chunk_[name].[hash].js",
+                    entryFileNames: "static/[name].[hash].js",
                 },
             },
         },

@@ -22,4 +22,8 @@ export default class EventEmitter<Args extends Array<unknown> = []> {
             }
         });
     }
+
+    handlerCount(): number {
+        return this.handlers.size;
+    }
 }

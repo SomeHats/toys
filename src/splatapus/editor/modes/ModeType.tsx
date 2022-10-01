@@ -1,9 +1,9 @@
 import { createEnumParser } from "@/lib/objectParser";
 
-export enum ToolType {
+export enum ModeType {
     Draw = "draw",
     Rig = "rig",
     Play = "play",
 }
 
-export const parseToolType = createEnumParser(ToolType);
+export const parseModeType = createEnumParser(ModeType);

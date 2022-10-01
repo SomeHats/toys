@@ -1,10 +1,10 @@
 import { useEvent } from "@/lib/hooks/useEvent";
 import { LiveValue, useLive } from "@/lib/live";
 import { get, ReadonlyObjectMap } from "@/lib/utils";
-import { ToolType } from "@/splatapus/editor/tools/ToolType";
+import { ModeType } from "@/splatapus/editor/modes/ModeType";
 import React, { useEffect, useRef } from "react";
 
-export type VfxActionName = "undo" | "redo" | ToolType;
+export type VfxActionName = "undo" | "redo" | ModeType;
 let nextAnimationIdx = 1;
 
 export class Vfx {

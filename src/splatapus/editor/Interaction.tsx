@@ -4,18 +4,18 @@ import { matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { exhaustiveSwitchError, UpdateAction } from "@/lib/utils";
 import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { MultiTouchPan } from "@/splatapus/editor/MultiTouchPan";
-import { DrawTool } from "@/splatapus/editor/tools/DrawTool";
-import { RigTool } from "@/splatapus/editor/tools/RigTool";
+import { DrawMode } from "@/splatapus/editor/modes/DrawMode";
+import { RigMode } from "@/splatapus/editor/modes/RigMode";
 import {
     applyPointerEvent,
     KeyboardEventContext,
     PointerEventContext,
 } from "@/splatapus/editor/lib/EventContext";
 import { QuickPan } from "@/splatapus/editor/QuickPan";
-import { SelectedTool } from "@/splatapus/editor/tools/tools";
-import { ToolType } from "@/splatapus/editor/tools/ToolType";
+import { SelectedMode } from "@/splatapus/editor/modes/modes";
+import { ModeType } from "@/splatapus/editor/modes/ModeType";
 import { UndoStack } from "@/splatapus/editor/UndoStack";
-import { PlayTool } from "@/splatapus/editor/tools/PlayTool";
+import { PlayMode } from "@/splatapus/editor/modes/PlayMode";
 import React from "react";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
@@ -25,43 +25,43 @@ import { LiveValue, useLive } from "@/lib/live";
 export class Interaction {
     private readonly multiTouchPan = new MultiTouchPan();
     readonly quickPan = new QuickPan();
-    readonly selectedTool: LiveValue<SelectedTool>;
+    readonly activeMode: LiveValue<SelectedMode>;
 
-    constructor(toolType: ToolType) {
-        this.selectedTool = new LiveValue(SelectedTool.initialize(toolType));
+    constructor(modeType: ModeType) {
+        this.activeMode = new LiveValue(SelectedMode.initialize(modeType));
 
         // hack: force evaluation of effects
-        this.selectedTool.addBatchInvalidateListener(() => this.selectedTool.getWithoutListening());
+        this.activeMode.addBatchInvalidateListener(() => this.activeMode.getWithoutListening());
     }
     toDebugStringLive(): string {
-        return SelectedTool.toDebugString(this.selectedTool.live());
+        return SelectedMode.toDebugString(this.activeMode.live());
     }
     getCanvasClassNameLive(): string | null {
         return (
             this.quickPan.getCanvasClassNameLive() ??
-            SelectedTool.getCanvasClassName(this.selectedTool.live())
+            SelectedMode.getCanvasClassName(this.activeMode.live())
         );
     }
     getPreviewPositionLive(selectedShapeId: SplatShapeId): PreviewPosition | null {
-        return SelectedTool.getPreviewPosition(this.selectedTool.live(), selectedShapeId);
+        return SelectedMode.getPreviewPosition(this.activeMode.live(), selectedShapeId);
     }
     isSidebarOpenLive(): boolean {
-        return this.selectedTool.live().type !== ToolType.Play;
+        return this.activeMode.live().type !== ModeType.Play;
     }
-    requestSetSelectedTool(toolType: ToolType) {
+    requestSetActiveMode(modeType: ModeType) {
         if (this.quickPan.isKeyDown.getWithoutListening()) {
             return;
         }
-        this.selectedTool.update((selectedTool) => {
-            if (!SelectedTool.isIdle(selectedTool)) {
-                return selectedTool;
+        this.activeMode.update((activeMode) => {
+            if (!SelectedMode.isIdle(activeMode)) {
+                return activeMode;
             }
-            return SelectedTool.initialize(toolType);
+            return SelectedMode.initialize(modeType);
         });
     }
     onKeyDown(ctx: KeyboardEventContext) {
-        const selectedTool = this.selectedTool.getWithoutListening();
-        if (SelectedTool.isIdle(selectedTool)) {
+        const activeMode = this.activeMode.getWithoutListening();
+        if (SelectedMode.isIdle(activeMode)) {
             if (this.quickPan.onKeyDown(ctx)) {
                 return;
             }
@@ -70,10 +70,10 @@ export class Interaction {
                 return;
             }
 
-            const activatedSelectedTool = SelectedTool.initializeForKeyDown(ctx);
-            if (activatedSelectedTool) {
-                ctx.splatapus.vfx.triggerAnimation(activatedSelectedTool.type);
-                this.selectedTool.update(activatedSelectedTool);
+            const newActiveMode = SelectedMode.initializeForKeyDown(ctx);
+            if (newActiveMode) {
+                ctx.splatapus.vfx.triggerAnimation(newActiveMode.type);
+                this.activeMode.update(newActiveMode);
                 return;
             }
             if (matchesKeyDown(ctx.event, { key: "z", command: true })) {
@@ -120,7 +120,7 @@ export class Interaction {
         if (this.quickPan.isKeyDown.getWithoutListening()) {
             this.quickPan.onPointerEvent(ctx);
         } else {
-            this.selectedTool.update((tool) => SelectedTool.onPointerEvent(ctx, tool));
+            this.activeMode.update((mode) => SelectedMode.onPointerEvent(ctx, mode));
         }
     }
 
@@ -129,42 +129,42 @@ export class Interaction {
     }: {
         splatapus: Splatapus;
     }) {
-        const selectedTool = useLive(() => splatapus.interaction.selectedTool.live(), [splatapus]);
+        const activeMode = useLive(() => splatapus.interaction.activeMode.live(), [splatapus]);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const onUpdateTool = useEvent((update: UpdateAction<any>) =>
-            splatapus.interaction.selectedTool.update((tool) => {
-                assert(tool.type === selectedTool.type);
-                return update(tool);
+        const onUpdateMode = useEvent((update: UpdateAction<any>) =>
+            splatapus.interaction.activeMode.update((mode) => {
+                assert(mode.type === activeMode.type);
+                return update(mode);
             }),
         );
 
-        switch (selectedTool.type) {
-            case ToolType.Draw:
+        switch (activeMode.type) {
+            case ModeType.Draw:
                 return (
-                    <DrawTool.Overlay
-                        tool={selectedTool}
-                        onUpdateTool={onUpdateTool}
+                    <DrawMode.Overlay
+                        mode={activeMode}
+                        onUpdateMode={onUpdateMode}
                         splatapus={splatapus}
                     />
                 );
-            case ToolType.Rig:
+            case ModeType.Rig:
                 return (
-                    <RigTool.Overlay
-                        tool={selectedTool}
-                        onUpdateTool={onUpdateTool}
+                    <RigMode.Overlay
+                        mode={activeMode}
+                        onUpdateMode={onUpdateMode}
                         splatapus={splatapus}
                     />
                 );
-            case ToolType.Play:
+            case ModeType.Play:
                 return (
-                    <PlayTool.Overlay
-                        tool={selectedTool}
-                        onUpdateTool={onUpdateTool}
+                    <PlayMode.Overlay
+                        mode={activeMode}
+                        onUpdateMode={onUpdateMode}
                         splatapus={splatapus}
                     />
                 );
             default:
-                exhaustiveSwitchError(selectedTool);
+                exhaustiveSwitchError(activeMode);
         }
     });
 }

@@ -5,7 +5,7 @@ import { getSvgPathFromStroke } from "@/splatapus/model/perfectFreehand";
 import { Button } from "@/splatapus/ui/Button";
 import classNames from "classnames";
 import React from "react";
-import { useToolClassNames } from "@/splatapus/editor/toolClassNames";
+import { useModeClassNames } from "@/splatapus/editor/modeClassNames";
 import { Splatapus } from "@/splatapus/editor/useEditor";
 import { useLive } from "@/lib/live";
 
@@ -19,7 +19,7 @@ export function RightBar({ splatapus }: { splatapus: Splatapus }) {
     const shapes = Array.from(useLive(() => splatapus.document.live().shapes, [splatapus]));
     const keyFrameIndex = Array.from(keyPoints).findIndex((keyPoint) => keyPointId === keyPoint.id);
     const shapeIndex = Array.from(shapes).findIndex((shape) => shapeId === shape.id);
-    const toolClassNames = useToolClassNames(splatapus);
+    const modeClassNames = useModeClassNames(splatapus);
 
     return (
         <div className="relative flex h-0 flex-auto flex-col gap-4 overflow-auto p-5 [-webkit-overflow-scrolling:touch]">
@@ -46,7 +46,7 @@ export function RightBar({ splatapus }: { splatapus: Splatapus }) {
                                 className={classNames(
                                     "overflow-none h-16 w-20 flex-none rounded border",
                                     shape.id === shapeId && keyPoint.id === keyPointId
-                                        ? `${toolClassNames.border500} ring-1 ${toolClassNames.ring500} bg-white`
+                                        ? `${modeClassNames.border500} ring-1 ${modeClassNames.ring500} bg-white`
                                         : "border-stone-300 bg-white/25 hover:bg-white/50",
                                 )}
                                 onClick={() => {

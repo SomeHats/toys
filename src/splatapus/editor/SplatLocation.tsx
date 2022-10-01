@@ -1,6 +1,6 @@
 import { createShapeParser, ParserType } from "@/lib/objectParser";
 import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
-import { parseToolType, ToolType } from "@/splatapus/editor/tools/ToolType";
+import { parseModeType, ModeType } from "@/splatapus/editor/modes/ModeType";
 import { parseSerializedViewport, ViewportState } from "@/splatapus/editor/Viewport";
 import { applyUpdateWithin, UpdateAction } from "@/lib/utils";
 
@@ -8,14 +8,14 @@ export const parseSerializedSplatLocation = createShapeParser({
     keyPointId: SplatKeyPointId.parse,
     shapeId: SplatShapeId.parse,
     viewport: parseSerializedViewport,
-    tool: parseToolType,
+    mode: parseModeType,
 });
 export type SerializedSplatLocation = ParserType<typeof parseSerializedSplatLocation>;
 
 export type SplatLocation = {
     keyPointId: SplatKeyPointId;
     shapeId: SplatShapeId;
-    tool: ToolType;
+    mode: ModeType;
     viewport: ViewportState;
 };
 
@@ -23,7 +23,7 @@ export const SplatLocation = {
     initialize: (keyPointId: SplatKeyPointId, shapeId: SplatShapeId): SplatLocation => ({
         keyPointId,
         shapeId,
-        tool: ToolType.Draw,
+        mode: ModeType.Draw,
         viewport: ViewportState.initialize(),
     }),
     deserialize: (serialized: SerializedSplatLocation): SplatLocation => ({

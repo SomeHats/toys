@@ -1,23 +1,23 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 import { SplatKeyPointId } from "@/splatapus/model/SplatDoc";
 import { ScenePositionedDiv } from "@/splatapus/renderer/Positioned";
-import { createTool, OverlayProps } from "@/splatapus/editor/lib/createTool";
+import { createMode, OverlayProps } from "@/splatapus/editor/lib/createMode";
 import { createGestureDetector, GestureType } from "@/splatapus/editor/lib/GestureDetection";
-import { ToolType } from "@/splatapus/editor/tools/ToolType";
+import { ModeType } from "@/splatapus/editor/modes/ModeType";
 import classNames from "classnames";
 import { useLive } from "@/lib/live";
 
-export type IdleRigToolState = {
+export type IdleRigModeState = {
     readonly state: "idle";
 };
-export type MovingRigToolState = {
+export type MovingRigModeState = {
     readonly state: "moving";
     readonly keyPointId: SplatKeyPointId;
     readonly delta: Vector2;
     readonly startingPosition: Vector2;
 };
 
-const MoveGesture = createGestureDetector<IdleRigToolState, MovingRigToolState, SplatKeyPointId>({
+const MoveGesture = createGestureDetector<IdleRigModeState, MovingRigModeState, SplatKeyPointId>({
     onTap: ({ splatapus }, state, keyPointId) => {
         if (keyPointId) {
             splatapus.location.update((location) => ({ ...location, keyPointId }));
@@ -53,20 +53,20 @@ const MoveGesture = createGestureDetector<IdleRigToolState, MovingRigToolState, 
     onDragCancel: () => ({ state: "idle" }),
 });
 
-export type RigTool = {
-    readonly type: ToolType.Rig;
+export type RigMode = {
+    readonly type: ModeType.Rig;
     readonly gesture: GestureType<typeof MoveGesture>;
 };
 
-export const RigTool = createTool<RigTool>()({
+export const RigMode = createMode<RigMode>()({
     initialize: () => ({
-        type: ToolType.Rig,
+        type: ModeType.Rig,
         gesture: MoveGesture.initialize({ state: "idle" }),
         previewPosition: null,
     }),
-    isIdle: (tool: RigTool) => true,
-    getDebugProperties: (tool) => {
-        const state = MoveGesture.getState(tool.gesture);
+    isIdle: (mode: RigMode) => true,
+    getDebugProperties: (mode) => {
+        const state = MoveGesture.getState(mode.gesture);
         switch (state.state) {
             case "idle":
                 return { _: state.state };
@@ -78,9 +78,9 @@ export const RigTool = createTool<RigTool>()({
                 };
         }
     },
-    onPointerEvent: MoveGesture.createOnPointerEvent<"gesture", RigTool>("gesture"),
-    Overlay: ({ splatapus, tool, onUpdateTool }: OverlayProps<RigTool>) => {
-        const state = MoveGesture.getState(tool.gesture);
+    onPointerEvent: MoveGesture.createOnPointerEvent<"gesture", RigMode>("gesture"),
+    Overlay: ({ splatapus, mode, onUpdateMode }: OverlayProps<RigMode>) => {
+        const state = MoveGesture.getState(mode.gesture);
         const keyPoints = useLive(() => splatapus.document.live().keyPoints, [splatapus]);
         const locationKeyPointId = useLive(() => splatapus.location.live().keyPointId, [splatapus]);
         return (
@@ -100,10 +100,10 @@ export const RigTool = createTool<RigTool>()({
                                 "-mt-4 -ml-4 flex h-8 w-8 cursor-move items-center justify-center rounded-full",
                             )}
                             onPointerDown={(event) => {
-                                onUpdateTool((tool) =>
-                                    RigTool.onPointerEvent(
+                                onUpdateMode((mode) =>
+                                    RigMode.onPointerEvent(
                                         { splatapus, event, eventType: "down" },
-                                        tool,
+                                        mode,
                                         keyPoint.id,
                                     ),
                                 );

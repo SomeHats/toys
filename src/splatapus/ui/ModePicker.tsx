@@ -1,6 +1,6 @@
 import { useLive } from "@/lib/live";
-import { toolClassNames } from "@/splatapus/editor/toolClassNames";
-import { ToolType } from "@/splatapus/editor/tools/ToolType";
+import { modeClassNames } from "@/splatapus/editor/modeClassNames";
+import { ModeType } from "@/splatapus/editor/modes/ModeType";
 import { Splatapus } from "@/splatapus/editor/useEditor";
 import { ActionButton } from "@/splatapus/ui/Button";
 import classNames from "classnames";
@@ -9,13 +9,13 @@ import React, { ReactNode } from "react";
 export const ModePicker = React.memo(function ModePicker({ splatapus }: { splatapus: Splatapus }) {
     return (
         <>
-            <ModeButton toolType={ToolType.Draw} splatapus={splatapus}>
+            <ModeButton modeType={ModeType.Draw} splatapus={splatapus}>
                 draw
             </ModeButton>
-            <ModeButton toolType={ToolType.Rig} splatapus={splatapus}>
+            <ModeButton modeType={ModeType.Rig} splatapus={splatapus}>
                 rig
             </ModeButton>
-            <ModeButton toolType={ToolType.Play} splatapus={splatapus}>
+            <ModeButton modeType={ModeType.Play} splatapus={splatapus}>
                 play
             </ModeButton>
         </>
@@ -23,31 +23,31 @@ export const ModePicker = React.memo(function ModePicker({ splatapus }: { splata
 });
 
 const ModeButton = function ModeButton({
-    toolType,
+    modeType,
     splatapus,
     children,
 }: {
-    toolType: ToolType;
+    modeType: ModeType;
     splatapus: Splatapus;
     children: ReactNode;
 }) {
-    const selectedToolType = useLive(
-        () => splatapus.interaction.selectedTool.live().type,
+    const selectedModeType = useLive(
+        () => splatapus.interaction.activeMode.live().type,
         [splatapus.interaction],
     );
 
-    const isActive = selectedToolType === toolType;
+    const isActive = selectedModeType === modeType;
     return (
         <ActionButton
-            actionName={toolType}
+            actionName={modeType}
             vfx={splatapus.vfx}
             onClick={() => {
-                splatapus.vfx.triggerAnimation(toolType);
-                splatapus.interaction.requestSetSelectedTool(toolType);
+                splatapus.vfx.triggerAnimation(modeType);
+                splatapus.interaction.requestSetActiveMode(modeType);
             }}
             className={classNames(
                 isActive &&
-                    `pointer-events-none bg-gradient-to-br ${toolClassNames[toolType].gradient500} !text-white`,
+                    `pointer-events-none bg-gradient-to-br ${modeClassNames[modeType].gradient500} !text-white`,
             )}
             disabled={isActive}
         >

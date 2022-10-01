@@ -1,18 +1,18 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
-import { createTool } from "@/splatapus/editor/lib/createTool";
+import { createMode } from "@/splatapus/editor/lib/createMode";
 import { createGestureDetector, GestureType } from "@/splatapus/editor/lib/GestureDetection";
-import { ToolType } from "@/splatapus/editor/tools/ToolType";
+import { ModeType } from "@/splatapus/editor/modes/ModeType";
 
-export type IdleDrawTool = {
+export type IdleDrawMode = {
     readonly state: "idle";
 };
-export type DrawingDrawTool = {
+export type DrawingDrawMode = {
     readonly state: "drawing";
     readonly points: ReadonlyArray<Vector2>;
 };
 
-const DrawGesture = createGestureDetector<IdleDrawTool, DrawingDrawTool>({
+const DrawGesture = createGestureDetector<IdleDrawMode, DrawingDrawMode>({
     onDragStart: ({ event, splatapus }) => ({
         state: "drawing",
         points: [splatapus.viewport.eventSceneCoords(event)],
@@ -32,19 +32,19 @@ const DrawGesture = createGestureDetector<IdleDrawTool, DrawingDrawTool>({
     onDragCancel: (ctx, state) => ({ state: "idle" }),
 });
 
-export type DrawTool = {
-    readonly type: ToolType.Draw;
+export type DrawMode = {
+    readonly type: ModeType.Draw;
     readonly gesture: GestureType<typeof DrawGesture>;
 };
 
-export const DrawTool = createTool<DrawTool>()({
-    initialize: (): DrawTool => ({
-        type: ToolType.Draw,
+export const DrawMode = createMode<DrawMode>()({
+    initialize: (): DrawMode => ({
+        type: ModeType.Draw,
         gesture: DrawGesture.initialize({ state: "idle" }),
     }),
-    isIdle: (tool: DrawTool) => DrawGesture.isIdle(tool.gesture),
-    getDebugProperties: (tool: DrawTool) => {
-        const state = DrawGesture.getState(tool.gesture);
+    isIdle: (mode: DrawMode) => DrawGesture.isIdle(mode.gesture),
+    getDebugProperties: (mode: DrawMode) => {
+        const state = DrawGesture.getState(mode.gesture);
         switch (state.state) {
             case "idle":
                 return { _: "idle" };
@@ -54,6 +54,6 @@ export const DrawTool = createTool<DrawTool>()({
                 exhaustiveSwitchError(state);
         }
     },
-    getState: (tool: DrawTool) => DrawGesture.getState(tool.gesture),
-    onPointerEvent: DrawGesture.createOnPointerEvent<"gesture", DrawTool>("gesture"),
+    getState: (mode: DrawMode) => DrawGesture.getState(mode.gesture),
+    onPointerEvent: DrawGesture.createOnPointerEvent<"gesture", DrawMode>("gesture"),
 });

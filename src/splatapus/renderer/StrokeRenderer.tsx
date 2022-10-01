@@ -9,8 +9,8 @@ import {
     getStrokePoints,
     getSvgPathFromStroke,
 } from "@/splatapus/model/perfectFreehand";
-import { DrawTool } from "@/splatapus/editor/tools/DrawTool";
-import { ToolType } from "@/splatapus/editor/tools/ToolType";
+import { DrawMode } from "@/splatapus/editor/modes/DrawMode";
+import { ModeType } from "@/splatapus/editor/modes/ModeType";
 import classNames from "classnames";
 import React from "react";
 import { useDebugSetting } from "@/splatapus/DebugSettings";
@@ -25,12 +25,12 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
     splatapus: Splatapus;
 }) {
     const shouldShowPoints = useDebugSetting("shouldShowPoints");
-    const toolPoints = useLive(() => {
+    const previewPoints = useLive(() => {
         if (splatapus.previewPosition.live().selectedShapeId === shapeId) {
-            const selectedTool = splatapus.interaction.selectedTool.live();
-            switch (selectedTool.type) {
-                case ToolType.Draw: {
-                    const state = DrawTool.getState(selectedTool);
+            const activeMode = splatapus.interaction.activeMode.live();
+            switch (activeMode.type) {
+                case ModeType.Draw: {
+                    const state = DrawMode.getState(activeMode);
                     switch (state.state) {
                         case "drawing":
                             return normalizeCenterPointIntervalsQuadratic(
@@ -46,11 +46,11 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                             throw exhaustiveSwitchError(state);
                     }
                 }
-                case ToolType.Rig:
-                case ToolType.Play:
+                case ModeType.Rig:
+                case ModeType.Play:
                     return null;
                 default:
-                    throw exhaustiveSwitchError(selectedTool);
+                    throw exhaustiveSwitchError(activeMode);
             }
         }
         return null;
@@ -76,21 +76,21 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
             <path
                 d={getSvgPathFromStroke(pathFromCenterPoints(centerPoints))}
                 className={classNames(
-                    toolPoints
+                    previewPoints
                         ? "fill-stone-300"
                         : isSelected
                         ? "fill-stone-800"
                         : "fill-stone-600",
                 )}
             />
-            {toolPoints && (
+            {previewPoints && (
                 <path
-                    d={getSvgPathFromStroke(pathFromCenterPoints(toolPoints))}
+                    d={getSvgPathFromStroke(pathFromCenterPoints(previewPoints))}
                     className={classNames(isSelected ? "fill-stone-800" : "fill-stone-600")}
                 />
             )}
             {shouldShowPoints &&
-                (toolPoints || centerPoints).map((point, i) => (
+                (previewPoints || centerPoints).map((point, i) => (
                     <circle
                         key={i}
                         cx={point.center.x}

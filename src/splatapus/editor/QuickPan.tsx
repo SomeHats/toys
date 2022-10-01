@@ -1,3 +1,4 @@
+import { debugStateToString } from "@/lib/debugPropsToString";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { matchesKey, matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { LiveValue } from "@/lib/live";
@@ -60,5 +61,12 @@ export class QuickPan {
 
     onPointerEvent(ctx: PointerEventContext) {
         this.gesture.onPointerEvent(ctx);
+    }
+
+    toDebugStringLive() {
+        if (this.isKeyDown.live()) {
+            return debugStateToString("quickPan", { dragging: this.isDragging.live() });
+        }
+        return null;
     }
 }

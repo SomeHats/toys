@@ -34,7 +34,9 @@ export class Interaction {
         this.activeMode.addBatchInvalidateListener(() => this.activeMode.getWithoutListening());
     }
     toDebugStringLive(): string {
-        return SelectedMode.toDebugString(this.activeMode.live());
+        return (
+            this.quickPan.toDebugStringLive() ?? SelectedMode.toDebugString(this.activeMode.live())
+        );
     }
     getCanvasClassNameLive(): string | null {
         return (

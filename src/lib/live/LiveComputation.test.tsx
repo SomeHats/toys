@@ -125,7 +125,7 @@ test("invalidates and recomputes lazily event without invalidation fn", () => {
     expect(computationFn).toHaveBeenCalledTimes(2);
 });
 
-test.only("can write from computation", () => {
+test("can write from computation", () => {
     const value = new LiveValue(2);
     const computation = new LiveComputation(() => {
         const v = value.live();

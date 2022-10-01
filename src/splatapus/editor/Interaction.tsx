@@ -7,7 +7,11 @@ import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { MultiTouchPan } from "@/splatapus/editor/MultiTouchPan";
 import { DrawTool } from "@/splatapus/editor/tools/DrawTool";
 import { RigTool } from "@/splatapus/editor/tools/RigTool";
-import { KeyboardEventContext, PointerEventContext } from "@/splatapus/editor/lib/EventContext";
+import {
+    applyPointerEvent,
+    KeyboardEventContext,
+    PointerEventContext,
+} from "@/splatapus/editor/lib/EventContext";
 import { QuickPanTool } from "@/splatapus/editor/tools/QuickPanTool";
 import { SelectedTool } from "@/splatapus/editor/tools/tools";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
@@ -20,7 +24,7 @@ import { Splatapus } from "@/splatapus/editor/useEditor";
 import { LiveValue, useLive } from "@/lib/live";
 
 export class Interaction {
-    readonly multiTouchPan = new LiveValue(MultiTouchPan.initialize());
+    private readonly multiTouchPan = new MultiTouchPan();
     readonly quickPanTool = new LiveValue<QuickPanTool | null>(null);
     readonly selectedTool: LiveValue<SelectedTool>;
 
@@ -28,9 +32,6 @@ export class Interaction {
         this.selectedTool = new LiveValue(SelectedTool.initialize(toolType));
 
         // hack: force evaluation of effects
-        this.multiTouchPan.addBatchInvalidateListener(() =>
-            this.multiTouchPan.getWithoutListening(),
-        );
         this.quickPanTool.addBatchInvalidateListener(() => this.quickPanTool.getWithoutListening());
         this.selectedTool.addBatchInvalidateListener(() => this.selectedTool.getWithoutListening());
     }
@@ -118,25 +119,19 @@ export class Interaction {
         }
     }
     onPointerEvent(_ctx: PointerEventContext) {
-        this.multiTouchPan.update((multiTouchPan) => {
-            const { pan, passthroughContext: ctx } = MultiTouchPan.onPointerEvent(
-                _ctx,
-                multiTouchPan,
-            );
-            if (!ctx) {
-                return pan;
-            }
+        const ctx = applyPointerEvent(this.multiTouchPan, _ctx);
+        if (!ctx) {
+            // multi-touch pan handled the event so we don't need to
+            return;
+        }
 
-            const quickPanTool = this.quickPanTool.getWithoutListening();
-            if (quickPanTool) {
-                console.log(ctx.eventType, { quickPanTool });
-                this.quickPanTool.update(QuickPanTool.onPointerEvent(ctx, quickPanTool));
-            } else {
-                this.selectedTool.update((tool) => SelectedTool.onPointerEvent(ctx, tool));
-            }
-
-            return pan;
-        });
+        const quickPanTool = this.quickPanTool.getWithoutListening();
+        if (quickPanTool) {
+            console.log(ctx.eventType, { quickPanTool });
+            this.quickPanTool.update(QuickPanTool.onPointerEvent(ctx, quickPanTool));
+        } else {
+            this.selectedTool.update((tool) => SelectedTool.onPointerEvent(ctx, tool));
+        }
     }
 
     static Overlay = React.memo(function InteractionOverlay({

@@ -5,179 +5,156 @@ import { ViewportState } from "@/splatapus/editor/Viewport";
 import { PointerEvent } from "react";
 
 type ActivePointer = {
-    readonly id: number;
-    readonly startScreenPosition: Vector2;
-    readonly currentScreenPosition: Vector2;
-    readonly startEvent: PointerEvent;
+    id: number;
+    startScreenPosition: Vector2;
+    currentScreenPosition: Vector2;
+    startEvent: PointerEvent;
 };
 
-export type MultiTouchPan =
+export type MultiTouchPanState =
     | {
-          readonly state: "idle";
+          type: "idle";
       }
     | {
-          readonly state: "oneFingerDown";
-          readonly pointerA: ActivePointer;
+          type: "oneFingerDown";
+          pointerA: ActivePointer;
       }
     | {
-          readonly state: "bothFingersDown";
-          readonly pointerA: ActivePointer;
-          readonly pointerB: ActivePointer;
-          readonly initialViewportState: ViewportState;
+          type: "bothFingersDown";
+          pointerA: ActivePointer;
+          pointerB: ActivePointer;
+          initialViewportState: ViewportState;
       };
 
-export const MultiTouchPan = {
-    initialize(): MultiTouchPan {
-        return { state: "idle" };
-    },
-    onPointerEvent(
-        ctx: PointerEventContext,
-        pan: MultiTouchPan,
-    ): { pan: MultiTouchPan; passthroughContext: PointerEventContext | null } {
-        switch (ctx.eventType) {
-            case "down":
-                switch (pan.state) {
-                    case "idle":
-                        return {
-                            pan: {
-                                state: "oneFingerDown",
-                                pointerA: {
-                                    id: ctx.event.pointerId,
-                                    startScreenPosition: Vector2.fromEvent(ctx.event),
-                                    currentScreenPosition: Vector2.fromEvent(ctx.event),
-                                    startEvent: ctx.event,
-                                },
-                            },
-                            passthroughContext: ctx,
-                        };
-                    case "oneFingerDown":
-                        return {
-                            pan: {
-                                state: "bothFingersDown",
-                                pointerA: pan.pointerA,
-                                pointerB: {
-                                    id: ctx.event.pointerId,
-                                    startScreenPosition: Vector2.fromEvent(ctx.event),
-                                    currentScreenPosition: Vector2.fromEvent(ctx.event),
-                                    startEvent: ctx.event,
-                                },
-                                initialViewportState:
-                                    ctx.splatapus.viewport.state.getWithoutListening(),
-                            },
-                            // we're now doing a proper pan gesture, so cancel
-                            // any down stream gestures that might have been
-                            // detected from the initial pointerdown:
-                            passthroughContext: {
-                                ...ctx,
-                                eventType: "cancel",
-                                event: pan.pointerA.startEvent,
-                            },
-                        };
-                    case "bothFingersDown":
-                        return { pan, passthroughContext: ctx };
-                    default:
-                        throw exhaustiveSwitchError(pan);
-                }
-            case "move":
-                switch (pan.state) {
-                    case "idle":
-                        return { pan, passthroughContext: ctx };
-                    case "oneFingerDown":
-                        if (pan.pointerA.id === ctx.event.pointerId) {
-                            return {
-                                pan: {
-                                    ...pan,
-                                    pointerA: {
-                                        ...pan.pointerA,
-                                        currentScreenPosition: Vector2.fromEvent(ctx.event),
-                                    },
-                                },
-                                passthroughContext: ctx,
-                            };
-                        }
-                        return { pan, passthroughContext: ctx };
-                    case "bothFingersDown":
-                        if (
-                            ctx.event.pointerId === pan.pointerA.id ||
-                            ctx.event.pointerId === pan.pointerB.id
-                        ) {
-                            const pointerAScreenPosition =
-                                ctx.event.pointerId === pan.pointerA.id
-                                    ? Vector2.fromEvent(ctx.event)
-                                    : pan.pointerA.currentScreenPosition;
-                            const pointerBScreenPosition =
-                                ctx.event.pointerId === pan.pointerB.id
-                                    ? Vector2.fromEvent(ctx.event)
-                                    : pan.pointerB.currentScreenPosition;
+export class MultiTouchPan {
+    private state: MultiTouchPanState = { type: "idle" };
 
-                            const initialScreenDistance =
-                                pan.pointerA.startScreenPosition.distanceTo(
-                                    pan.pointerB.startScreenPosition,
-                                );
-                            const currentScreenDistance =
-                                pointerAScreenPosition.distanceTo(pointerBScreenPosition);
-                            const scaleChange = currentScreenDistance / initialScreenDistance;
-
-                            const initialScreenCenterPoint = pan.pointerA.startScreenPosition.lerp(
-                                pan.pointerB.startScreenPosition,
-                                0.5,
-                            );
-                            const currentScreenCenterPoint = pointerAScreenPosition.lerp(
-                                pointerBScreenPosition,
-                                0.5,
-                            );
-
-                            const newPan = initialScreenCenterPoint
-                                .add(pan.initialViewportState.pan)
-                                .scale(scaleChange)
-                                .sub(currentScreenCenterPoint);
-                            ctx.splatapus.viewport.state.update({
-                                zoom: pan.initialViewportState.zoom * scaleChange,
-                                pan: newPan,
-                            });
-
-                            return {
-                                pan: {
-                                    ...pan,
-                                    pointerA: {
-                                        ...pan.pointerA,
-                                        currentScreenPosition: pointerAScreenPosition,
-                                    },
-                                    pointerB: {
-                                        ...pan.pointerB,
-                                        currentScreenPosition: pointerBScreenPosition,
-                                    },
-                                },
-                                passthroughContext: null,
-                            };
-                        }
-                        return { pan, passthroughContext: ctx };
-                    default:
-                        throw exhaustiveSwitchError(pan);
-                }
-            case "up":
-            case "cancel":
-                switch (pan.state) {
-                    case "idle":
-                        return { pan, passthroughContext: ctx };
-                    case "oneFingerDown":
-                        if (ctx.event.pointerId === pan.pointerA.id) {
-                            return { pan: { state: "idle" }, passthroughContext: ctx };
-                        }
-                        return { pan, passthroughContext: ctx };
-                    case "bothFingersDown":
-                        if (
-                            ctx.event.pointerId === pan.pointerA.id ||
-                            ctx.event.pointerId === pan.pointerB.id
-                        ) {
-                            return { pan: { state: "idle" }, passthroughContext: null };
-                        }
-                        return { pan, passthroughContext: ctx };
-                    default:
-                        throw exhaustiveSwitchError(pan);
-                }
+    onPointerDown(ctx: PointerEventContext): PointerEventContext | null {
+        const { event, splatapus } = ctx;
+        switch (this.state.type) {
+            case "idle":
+                this.state = {
+                    type: "oneFingerDown",
+                    pointerA: {
+                        id: event.pointerId,
+                        startScreenPosition: Vector2.fromEvent(event),
+                        currentScreenPosition: Vector2.fromEvent(event),
+                        startEvent: event,
+                    },
+                };
+                return ctx;
+            case "oneFingerDown":
+                this.state = {
+                    type: "bothFingersDown",
+                    pointerA: this.state.pointerA,
+                    pointerB: {
+                        id: event.pointerId,
+                        startScreenPosition: Vector2.fromEvent(event),
+                        currentScreenPosition: Vector2.fromEvent(event),
+                        startEvent: event,
+                    },
+                    initialViewportState: splatapus.viewport.state.getWithoutListening(),
+                };
+                // we're now doing a proper pan gesture, so cancel
+                // any down stream gestures that might have been
+                // detected from the initial pointerdown:
+                return {
+                    splatapus,
+                    eventType: "cancel",
+                    event: this.state.pointerA.startEvent,
+                };
+            case "bothFingersDown":
+                return ctx;
             default:
-                exhaustiveSwitchError(ctx.eventType);
+                throw exhaustiveSwitchError(this.state);
         }
-    },
-};
+    }
+    onPointerMove(ctx: PointerEventContext): PointerEventContext | null {
+        const { event, splatapus } = ctx;
+        switch (this.state.type) {
+            case "idle":
+                return ctx;
+            case "oneFingerDown":
+                if (this.state.pointerA.id === event.pointerId) {
+                    this.state.pointerA.currentScreenPosition = Vector2.fromEvent(event);
+                }
+                return ctx;
+            case "bothFingersDown":
+                if (
+                    event.pointerId === this.state.pointerA.id ||
+                    event.pointerId === this.state.pointerB.id
+                ) {
+                    const pointerAScreenPosition =
+                        event.pointerId === this.state.pointerA.id
+                            ? Vector2.fromEvent(event)
+                            : this.state.pointerA.currentScreenPosition;
+                    const pointerBScreenPosition =
+                        event.pointerId === this.state.pointerB.id
+                            ? Vector2.fromEvent(event)
+                            : this.state.pointerB.currentScreenPosition;
+
+                    const initialScreenDistance =
+                        this.state.pointerA.startScreenPosition.distanceTo(
+                            this.state.pointerB.startScreenPosition,
+                        );
+                    const currentScreenDistance =
+                        pointerAScreenPosition.distanceTo(pointerBScreenPosition);
+                    const scaleChange = currentScreenDistance / initialScreenDistance;
+
+                    const initialScreenCenterPoint = this.state.pointerA.startScreenPosition.lerp(
+                        this.state.pointerB.startScreenPosition,
+                        0.5,
+                    );
+                    const currentScreenCenterPoint = pointerAScreenPosition.lerp(
+                        pointerBScreenPosition,
+                        0.5,
+                    );
+
+                    const newPan = initialScreenCenterPoint
+                        .add(this.state.initialViewportState.pan)
+                        .scale(scaleChange)
+                        .sub(currentScreenCenterPoint);
+
+                    splatapus.viewport.state.update({
+                        zoom: this.state.initialViewportState.zoom * scaleChange,
+                        pan: newPan,
+                    });
+
+                    this.state.pointerA.currentScreenPosition = pointerAScreenPosition;
+                    this.state.pointerB.currentScreenPosition = pointerBScreenPosition;
+
+                    // we're actively handling things, so don't pass-thru
+                    return null;
+                }
+                return ctx;
+            default:
+                throw exhaustiveSwitchError(this.state);
+        }
+    }
+    onPointerUp(ctx: PointerEventContext): PointerEventContext | null {
+        const { event } = ctx;
+        switch (this.state.type) {
+            case "idle":
+                return ctx;
+            case "oneFingerDown":
+                if (event.pointerId === this.state.pointerA.id) {
+                    this.state = { type: "idle" };
+                }
+                return ctx;
+            case "bothFingersDown":
+                if (
+                    event.pointerId === this.state.pointerA.id ||
+                    event.pointerId === this.state.pointerB.id
+                ) {
+                    this.state = { type: "idle" };
+                    return null;
+                }
+                return ctx;
+            default:
+                throw exhaustiveSwitchError(this.state);
+        }
+    }
+    onPointerCancel(ctx: PointerEventContext): PointerEventContext | null {
+        return this.onPointerUp(ctx);
+    }
+}

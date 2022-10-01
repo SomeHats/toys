@@ -7,7 +7,3 @@ export enum ToolType {
 }
 
 export const parseToolType = createEnumParser(ToolType);
-
-export enum QuickToolType {
-    Pan = "quickPan",
-}

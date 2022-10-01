@@ -1,7 +1,8 @@
 import AABB from "@/lib/geom/AABB";
 import { Vector2, parseSerializedVector2 } from "@/lib/geom/Vector2";
-import { Live, LiveWritable, runLiveWithoutListening } from "@/lib/live";
+import { Live, LiveMemoWritable, LiveWritable, runLiveWithoutListening } from "@/lib/live";
 import { createShapeParser, parseNumber, ParserType } from "@/lib/objectParser";
+import { applyUpdateWithin } from "@/lib/utils";
 import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
 
 export const parseSerializedViewport = createShapeParser({
@@ -38,6 +39,15 @@ export class Viewport {
         this.screenSize = screenSize;
         this.isSidebarOpen = isSidebarOpen;
     }
+
+    readonly pan = new LiveMemoWritable(
+        () => this.state.live().pan,
+        (update) => this.state.update((state) => applyUpdateWithin(state, "pan", update)),
+    );
+    readonly zoom = new LiveMemoWritable(
+        () => this.state.live().zoom,
+        (update) => this.state.update((state) => applyUpdateWithin(state, "zoom", update)),
+    );
 
     canvasScreenSizeLive(): Vector2 {
         if (this.isSidebarOpen.live()) {

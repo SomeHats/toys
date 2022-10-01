@@ -6,19 +6,17 @@ import { DrawTool } from "@/splatapus/editor/tools/DrawTool";
 import { RigTool } from "@/splatapus/editor/tools/RigTool";
 import { ToolMethods } from "@/splatapus/editor/lib/createTool";
 import { KeyboardEventContext, PointerEventContext } from "@/splatapus/editor/lib/EventContext";
-import { QuickPanTool } from "@/splatapus/editor/tools/QuickPanTool";
-import { QuickToolType, ToolType } from "@/splatapus/editor/tools/ToolType";
+import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { PlayTool } from "@/splatapus/editor/tools/PlayTool";
 
 const toolsByType = {
     [ToolType.Draw]: DrawTool,
     [ToolType.Rig]: RigTool,
     [ToolType.Play]: PlayTool,
-    [QuickToolType.Pan]: QuickPanTool,
 };
 export type SelectedTool = DrawTool | RigTool | PlayTool;
 
-export function getToolByType<Tool extends QuickPanTool | SelectedTool>(type: Tool["type"]) {
+export function getToolByType<Tool extends SelectedTool>(type: Tool["type"]) {
     // @ts-expect-error contain the badness in this unsound fn:
     return toolsByType[type] as Required<ToolMethods<Tool>>;
 }
@@ -47,7 +45,7 @@ export const SelectedTool = {
     getPreviewPosition: (tool: SelectedTool, selectedShapeId: SplatShapeId) => {
         return getToolByType(tool.type).getPreviewPosition(tool, selectedShapeId);
     },
-    toDebugString: (tool: QuickPanTool | SelectedTool) => {
+    toDebugString: (tool: SelectedTool) => {
         return debugStateToString(tool.type, getToolByType(tool.type).getDebugProperties(tool));
     },
     onPointerEvent: (ctx: PointerEventContext, tool: SelectedTool): SelectedTool => {

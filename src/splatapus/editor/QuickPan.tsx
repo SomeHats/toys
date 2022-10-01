@@ -1,0 +1,64 @@
+import { Vector2 } from "@/lib/geom/Vector2";
+import { matchesKey, matchesKeyDown } from "@/lib/hooks/useKeyPress";
+import { LiveValue } from "@/lib/live";
+import { noop } from "@/lib/utils";
+import {
+    KeyboardEventContext,
+    PointerEventContext,
+    SplatapusGestureDetector,
+} from "@/splatapus/editor/lib/EventContext";
+
+export class QuickPan {
+    readonly isKeyDown = new LiveValue(false);
+
+    private gesture = new SplatapusGestureDetector({
+        onDragStart: (event, splatapus) => {
+            const initialPan = splatapus.viewport.pan.getWithoutListening();
+            let previousScreenPoint = Vector2.fromEvent(event);
+
+            return {
+                couldBeTap: false,
+                onMove: (event) => {
+                    const screenPoint = Vector2.fromEvent(event);
+                    const delta = previousScreenPoint.sub(screenPoint);
+                    splatapus.viewport.pan.update((pan) => pan.add(delta));
+                    previousScreenPoint = screenPoint;
+                },
+                onEnd: noop,
+                onCancel: () => {
+                    splatapus.viewport.pan.update(initialPan);
+                },
+            };
+        },
+    });
+    readonly isDragging = this.gesture.isDragging;
+
+    onKeyDown({ event }: KeyboardEventContext): boolean {
+        if (matchesKeyDown(event, " ")) {
+            this.isKeyDown.update(true);
+            return true;
+        }
+        return false;
+    }
+    onKeyUp({ event, splatapus }: KeyboardEventContext): boolean {
+        if (this.isKeyDown.getWithoutListening() && matchesKey(event, " ")) {
+            this.isKeyDown.update(false);
+            this.gesture.end(splatapus);
+            return true;
+        }
+        return false;
+    }
+
+    getCanvasClassNameLive() {
+        if (!this.isKeyDown.live()) {
+            return null;
+        } else if (this.isDragging.live()) {
+            return "cursor-grabbing";
+        }
+        return "cursor-grab";
+    }
+
+    onPointerEvent(ctx: PointerEventContext) {
+        this.gesture.onPointerEvent(ctx);
+    }
+}

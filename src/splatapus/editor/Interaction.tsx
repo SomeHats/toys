@@ -1,7 +1,6 @@
 import { assert } from "@/lib/assert";
-import { debugStateToString } from "@/lib/debugPropsToString";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { matchesKey, matchesKeyDown } from "@/lib/hooks/useKeyPress";
+import { matchesKeyDown } from "@/lib/hooks/useKeyPress";
 import { exhaustiveSwitchError, UpdateAction } from "@/lib/utils";
 import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { MultiTouchPan } from "@/splatapus/editor/MultiTouchPan";
@@ -12,7 +11,7 @@ import {
     KeyboardEventContext,
     PointerEventContext,
 } from "@/splatapus/editor/lib/EventContext";
-import { QuickPanTool } from "@/splatapus/editor/tools/QuickPanTool";
+import { QuickPan } from "@/splatapus/editor/QuickPan";
 import { SelectedTool } from "@/splatapus/editor/tools/tools";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { UndoStack } from "@/splatapus/editor/UndoStack";
@@ -25,32 +24,23 @@ import { LiveValue, useLive } from "@/lib/live";
 
 export class Interaction {
     private readonly multiTouchPan = new MultiTouchPan();
-    readonly quickPanTool = new LiveValue<QuickPanTool | null>(null);
+    readonly quickPan = new QuickPan();
     readonly selectedTool: LiveValue<SelectedTool>;
 
     constructor(toolType: ToolType) {
         this.selectedTool = new LiveValue(SelectedTool.initialize(toolType));
 
         // hack: force evaluation of effects
-        this.quickPanTool.addBatchInvalidateListener(() => this.quickPanTool.getWithoutListening());
         this.selectedTool.addBatchInvalidateListener(() => this.selectedTool.getWithoutListening());
     }
     toDebugStringLive(): string {
-        const quickPanTool = this.quickPanTool.live();
-        if (quickPanTool) {
-            return debugStateToString(
-                quickPanTool.type,
-                QuickPanTool.getDebugProperties(quickPanTool),
-            );
-        }
         return SelectedTool.toDebugString(this.selectedTool.live());
     }
-    getCanvasClassNameLive(): string {
-        const quickPanTool = this.quickPanTool.live();
-        if (quickPanTool) {
-            return QuickPanTool.getCanvasClassName(quickPanTool);
-        }
-        return SelectedTool.getCanvasClassName(this.selectedTool.live());
+    getCanvasClassNameLive(): string | null {
+        return (
+            this.quickPan.getCanvasClassNameLive() ??
+            SelectedTool.getCanvasClassName(this.selectedTool.live())
+        );
     }
     getPreviewPositionLive(selectedShapeId: SplatShapeId): PreviewPosition | null {
         return SelectedTool.getPreviewPosition(this.selectedTool.live(), selectedShapeId);
@@ -59,8 +49,11 @@ export class Interaction {
         return this.selectedTool.live().type !== ToolType.Play;
     }
     requestSetSelectedTool(toolType: ToolType) {
+        if (this.quickPan.isKeyDown.getWithoutListening()) {
+            return;
+        }
         this.selectedTool.update((selectedTool) => {
-            if (this.quickPanTool.getWithoutListening() || !SelectedTool.isIdle(selectedTool)) {
+            if (!SelectedTool.isIdle(selectedTool)) {
                 return selectedTool;
             }
             return SelectedTool.initialize(toolType);
@@ -68,15 +61,17 @@ export class Interaction {
     }
     onKeyDown(ctx: KeyboardEventContext) {
         const selectedTool = this.selectedTool.getWithoutListening();
-        const quickPanTool = this.quickPanTool.getWithoutListening();
         if (SelectedTool.isIdle(selectedTool)) {
-            if (!quickPanTool && matchesKeyDown(ctx.event, " ")) {
-                this.quickPanTool.update(QuickPanTool.initialize());
+            if (this.quickPan.onKeyDown(ctx)) {
+                return;
+            }
+
+            if (this.quickPan.isKeyDown.getWithoutListening()) {
                 return;
             }
 
             const activatedSelectedTool = SelectedTool.initializeForKeyDown(ctx);
-            if (activatedSelectedTool && !quickPanTool) {
+            if (activatedSelectedTool) {
                 ctx.splatapus.vfx.triggerAnimation(activatedSelectedTool.type);
                 this.selectedTool.update(activatedSelectedTool);
                 return;
@@ -96,7 +91,8 @@ export class Interaction {
         }
 
         if (matchesKeyDown(ctx.event, { key: "0", command: true })) {
-            ctx.splatapus.viewport.state.update({ pan: Vector2.ZERO, zoom: 1 });
+            ctx.splatapus.viewport.pan.update(Vector2.ZERO);
+            ctx.splatapus.viewport.zoom.update(1);
             return;
         }
 
@@ -112,11 +108,7 @@ export class Interaction {
         }
     }
     onKeyUp(ctx: KeyboardEventContext) {
-        const quickPanTool = this.quickPanTool.getWithoutListening();
-        if (quickPanTool && matchesKey(ctx.event, " ")) {
-            this.quickPanTool.update(null);
-            return;
-        }
+        this.quickPan.onKeyUp(ctx);
     }
     onPointerEvent(_ctx: PointerEventContext) {
         const ctx = applyPointerEvent(this.multiTouchPan, _ctx);
@@ -125,10 +117,8 @@ export class Interaction {
             return;
         }
 
-        const quickPanTool = this.quickPanTool.getWithoutListening();
-        if (quickPanTool) {
-            console.log(ctx.eventType, { quickPanTool });
-            this.quickPanTool.update(QuickPanTool.onPointerEvent(ctx, quickPanTool));
+        if (this.quickPan.isKeyDown.getWithoutListening()) {
+            this.quickPan.onPointerEvent(ctx);
         } else {
             this.selectedTool.update((tool) => SelectedTool.onPointerEvent(ctx, tool));
         }

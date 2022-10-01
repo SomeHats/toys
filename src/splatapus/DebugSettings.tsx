@@ -1,4 +1,4 @@
-import { Cell, useCell, useCellValue } from "@/lib/Cell";
+import { LiveEffect, LiveValue, runLive, useLiveValue } from "@/lib/live";
 import { createShapeParser, parseBoolean, ParserType } from "@/lib/objectParser";
 import { getLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
 import { Button, PlainButton } from "@/splatapus/ui/Button";
@@ -19,7 +19,7 @@ const defaultDebugSettings: DebugSettings = {
 };
 
 export function DebugSettingsMenu() {
-    const [settings, setSettings] = useCell(debugSettings);
+    const settings = useLiveValue(debugSettings);
     const [menu, setMenu] = useState<HTMLElement | null>(null);
     const clipPath = useSquircleClipPath(menu, 16);
 
@@ -44,7 +44,7 @@ export function DebugSettingsMenu() {
                         label="Show points"
                         value={settings.shouldShowPoints}
                         onChange={(shouldShowPoints) =>
-                            setSettings({ ...settings, shouldShowPoints })
+                            debugSettings.update({ ...settings, shouldShowPoints })
                         }
                     />
                 </Popover.Panel>
@@ -86,11 +86,11 @@ function readDebugSettings(): DebugSettings {
     }
 }
 
-const debugSettings = new Cell(readDebugSettings());
-debugSettings.subscribe((nextSettings) => {
-    setLocalStorageItem(STORAGE_KEY, JSON.stringify(nextSettings));
+const debugSettings = new LiveValue(readDebugSettings());
+runLive(LiveEffect.idle, () => {
+    setLocalStorageItem(STORAGE_KEY, JSON.stringify(debugSettings.live()));
 });
 
 export function useDebugSetting<K extends keyof DebugSettings>(key: K): DebugSettings[K] {
-    return useCellValue(debugSettings).shouldShowPoints;
+    return useLiveValue(debugSettings)[key];
 }

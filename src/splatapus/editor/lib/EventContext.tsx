@@ -1,7 +1,8 @@
-import { ReducerCtx } from "@/splatapus/editor/useEditorState";
+import { Splatapus } from "@/splatapus/editor/useEditor";
 import { PointerEvent } from "react";
 
-export interface EventContext<Event> extends ReducerCtx {
+export interface EventContext<Event> {
+    splatapus: Splatapus;
     event: Event;
 }
 

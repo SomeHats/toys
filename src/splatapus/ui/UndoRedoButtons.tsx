@@ -1,23 +1,23 @@
 import { Button } from "@/splatapus/ui/Button";
 import { UndoStack } from "@/splatapus/editor/UndoStack";
-import { useEditorEvents, useEditorState } from "@/splatapus/editor/useEditorState";
+import { Splatapus } from "@/splatapus/editor/useEditor";
 import classNames from "classnames";
 import { FaUndoAlt, FaRedoAlt } from "react-icons/fa";
 import { useVfxAnimation } from "@/splatapus/editor/Vfx";
 import { tailwindEasings } from "@/lib/theme";
+import { useLive } from "@/lib/live";
 
-export function UndoRedoButtons() {
-    const canUndo = useEditorState(({ undoStack }) => UndoStack.canUndo(undoStack));
-    const canRedo = useEditorState(({ undoStack }) => UndoStack.canRedo(undoStack));
-    const { updateUndoStack } = useEditorEvents();
+export function UndoRedoButtons({ splatapus }: { splatapus: Splatapus }) {
+    const canUndo = useLive(() => UndoStack.canUndo(splatapus.undoStack.live()), [splatapus]);
+    const canRedo = useLive(() => UndoStack.canRedo(splatapus.undoStack.live()), [splatapus]);
 
-    const undoAnimationRef = useVfxAnimation<HTMLDivElement>("undo", () => ({
+    const undoAnimationRef = useVfxAnimation<HTMLDivElement>(splatapus.vfx, "undo", () => ({
         keyFrames: { transform: ["rotate(0)", "rotate(-360deg)"] },
         duration: 300,
         easing: tailwindEasings.DEFAULT,
     }));
 
-    const redoAnimationRef = useVfxAnimation<HTMLDivElement>("redo", () => ({
+    const redoAnimationRef = useVfxAnimation<HTMLDivElement>(splatapus.vfx, "redo", () => ({
         keyFrames: { transform: ["rotate(0)", "rotate(360deg)"] },
         duration: 300,
         easing: tailwindEasings.DEFAULT,
@@ -35,7 +35,9 @@ export function UndoRedoButtons() {
                         ? "pointer-events-none opacity-50"
                         : "pointer-events-none scale-0 opacity-0 ease-in-back",
                 )}
-                onClick={() => updateUndoStack((ctx, stack) => UndoStack.undo(stack, ctx.vfx))}
+                onClick={() =>
+                    splatapus.undoStack.update((stack) => UndoStack.undo(stack, splatapus.vfx))
+                }
                 iconLeft={
                     <div
                         className="mt-[2px] h-3 w-3 transition-transform duration-300 ease-in-out"
@@ -55,7 +57,9 @@ export function UndoRedoButtons() {
                         ? "pointer-events-auto ease-out-back-md"
                         : "scale-0 opacity-0 ease-in-back-md",
                 )}
-                onClick={() => updateUndoStack((ctx, stack) => UndoStack.redo(stack, ctx.vfx))}
+                onClick={() =>
+                    splatapus.undoStack.update((stack) => UndoStack.redo(stack, splatapus.vfx))
+                }
                 iconRight={
                     <div
                         className="mt-[2px] h-3 w-3 transition-transform duration-300 ease-in-out"

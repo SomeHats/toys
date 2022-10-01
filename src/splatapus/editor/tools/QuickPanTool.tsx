@@ -11,25 +11,22 @@ export type ActiveQuickPanTool = {
 };
 
 const QuickPanGesture = createGestureDetector<IdleQuickPanTool, ActiveQuickPanTool>({
-    onDragStart: ({ event, location }) => ({
+    onDragStart: ({ event, splatapus }) => ({
         state: "active",
-        initialPan: location.viewport.pan,
+        initialPan: splatapus.viewport.state.getWithoutListening().pan,
         previousScreenPoint: Vector2.fromEvent(event),
     }),
-    onDragMove: ({ event, updateViewport }, state) => {
+    onDragMove: ({ event, splatapus }, state) => {
         const screenPoint = Vector2.fromEvent(event);
-        updateViewport((viewport) =>
-            viewport.with({
-                pan: viewport.pan.add(
-                    state.previousScreenPoint.sub(screenPoint).scale(viewport.zoom),
-                ),
-            }),
-        );
+        splatapus.viewport.state.update(({ pan, zoom }) => ({
+            pan: pan.add(state.previousScreenPoint.sub(screenPoint)),
+            zoom,
+        }));
         return { ...state, previousScreenPoint: screenPoint };
     },
     onDragEnd: () => ({ state: "idle" }),
-    onDragCancel: ({ updateViewport }, state) => {
-        updateViewport((viewport) => viewport.with({ pan: state.initialPan }));
+    onDragCancel: ({ splatapus }, state) => {
+        splatapus.viewport.state.update(({ pan, zoom }) => ({ pan: state.initialPan, zoom }));
         return { state: "idle" };
     },
 });

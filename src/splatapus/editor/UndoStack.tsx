@@ -3,7 +3,7 @@ import { UNDO_ACTIONS } from "@/splatapus/constants";
 import { deepEqual, UpdateAction, applyUpdate } from "@/lib/utils";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { SplatLocation } from "@/splatapus/editor/SplatLocation";
-import { VfxController } from "@/splatapus/editor/Vfx";
+import { Vfx } from "@/splatapus/editor/Vfx";
 
 export type OpOptions = {
     readonly lockstepLocation?: UpdateAction<SplatLocation>;
@@ -116,7 +116,7 @@ export const UndoStack = {
         undoStack = UndoStack.updateOperation(undoStack, txId, action);
         return UndoStack.commitOperation(undoStack, txId, options);
     },
-    undo: (undoStack: UndoStack, vfx: VfxController): UndoStack => {
+    undo: (undoStack: UndoStack, vfx: Vfx): UndoStack => {
         assert(undoStack.pendingOp == null, "Pending op in progress");
         if (undoStack.undoStates.length == 0) {
             return undoStack;
@@ -146,7 +146,7 @@ export const UndoStack = {
             redoStates,
         };
     },
-    redo: (undoStack: UndoStack, vfx: VfxController): UndoStack => {
+    redo: (undoStack: UndoStack, vfx: Vfx): UndoStack => {
         assert(undoStack.pendingOp == null, "pending op in progress");
         if (!undoStack.redoStates || undoStack.redoStates.length == 0) {
             return undoStack;

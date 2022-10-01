@@ -1,5 +1,6 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import { useEditorState } from "@/splatapus/editor/useEditorState";
+import { useLive } from "@/lib/live";
+import { Splatapus } from "@/splatapus/editor/useEditor";
 import classNames from "classnames";
 import { ComponentProps } from "react";
 
@@ -25,17 +26,20 @@ export function PositionedDiv({
     );
 }
 
-interface ScenePositionedDiv extends PositionedDivProps {
+interface ScenePositionedDivProps extends PositionedDivProps {
     screenOffset?: Vector2;
+    splatapus: Splatapus;
 }
 
 export function ScenePositionedDiv({
     position,
     screenOffset = Vector2.ZERO,
+    splatapus,
     ...props
-}: ScenePositionedDiv) {
-    const viewport = useEditorState((state) => state.location.viewport);
-    return (
-        <PositionedDiv position={viewport.sceneToScreen(position).add(screenOffset)} {...props} />
+}: ScenePositionedDivProps) {
+    const screenPosition = useLive(
+        () => splatapus.viewport.sceneToScreenLive(position).add(screenOffset),
+        [position, screenOffset, splatapus.viewport],
     );
+    return <PositionedDiv position={screenPosition} {...props} />;
 }

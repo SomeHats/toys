@@ -23,14 +23,14 @@ export const PlayTool = createTool<PlayTool>()({
             ? PreviewPosition.interpolated(tool.previewPosition, selectedShapeId)
             : null,
     onPointerEvent: (
-        { event, eventType, viewport }: PointerEventContext,
+        { event, eventType, splatapus }: PointerEventContext,
         tool: PlayTool,
     ): PlayTool => {
         switch (eventType) {
             case "move":
             case "down":
                 if (event.isPrimary) {
-                    return { ...tool, previewPosition: viewport.eventSceneCoords(event) };
+                    return { ...tool, previewPosition: splatapus.viewport.eventSceneCoords(event) };
                 }
                 return tool;
             case "cancel":

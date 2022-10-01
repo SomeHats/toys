@@ -8,7 +8,7 @@ test("computes derived values", () => {
     const memo = new LiveMemo(() => v1.live() + v2.live());
 
     expect(memo.getWithoutListening()).toBe(3);
-    v1.set(2);
+    v1.update(2);
     expect(memo.getWithoutListening()).toBe(4);
 });
 
@@ -26,8 +26,8 @@ test("compose memos execute lazily", () => {
     expect(compute2).toBeCalledTimes(1);
 
     // values change, result is the same:
-    v1.set(2);
-    v2.set(1);
+    v1.update(2);
+    v2.update(1);
     expect(m2.getWithoutListening()).toBe(6);
     expect(compute1).toBeCalledTimes(2);
     expect(compute2).toBeCalledTimes(1);

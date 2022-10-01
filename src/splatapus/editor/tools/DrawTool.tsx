@@ -13,18 +13,19 @@ export type DrawingDrawTool = {
 };
 
 const DrawGesture = createGestureDetector<IdleDrawTool, DrawingDrawTool>({
-    onDragStart: ({ event, viewport }) => ({
+    onDragStart: ({ event, splatapus }) => ({
         state: "drawing",
-        points: [viewport.eventSceneCoords(event)],
+        points: [splatapus.viewport.eventSceneCoords(event)],
     }),
-    onDragMove: ({ event, viewport }, state) => ({
+    onDragMove: ({ event, splatapus }, state) => ({
         state: "drawing",
-        points: [...state.points, viewport.eventSceneCoords(event)],
+        points: [...state.points, splatapus.viewport.eventSceneCoords(event)],
     }),
-    onDragEnd: ({ updateDocument, location }, state) => {
-        updateDocument((document) => {
-            const shape = document.shapes.get(location.shapeId);
-            return document.replacePointsForVersion(location.keyPointId, shape.id, state.points);
+    onDragEnd: ({ splatapus }, state) => {
+        const { shapeId, keyPointId } = splatapus.location.getWithoutListening();
+        splatapus.document.update((document) => {
+            const shape = document.shapes.get(shapeId);
+            return document.replacePointsForVersion(keyPointId, shape.id, state.points);
         });
         return { state: "idle" };
     },

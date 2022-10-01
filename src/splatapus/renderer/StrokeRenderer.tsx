@@ -13,20 +13,24 @@ import { DrawTool } from "@/splatapus/editor/tools/DrawTool";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import classNames from "classnames";
 import React from "react";
-import { useEditorState } from "@/splatapus/editor/useEditorState";
 import { useDebugSetting } from "@/splatapus/DebugSettings";
+import { useLive } from "@/lib/live";
+import { Splatapus } from "@/splatapus/editor/useEditor";
 
 export const StrokeRenderer = React.memo(function StrokeRenderer({
     shapeId,
+    splatapus,
 }: {
     shapeId: SplatShapeId;
+    splatapus: Splatapus;
 }) {
     const shouldShowPoints = useDebugSetting("shouldShowPoints");
-    const toolPoints = useEditorState(({ previewPosition, interaction }) => {
-        if (previewPosition.selectedShapeId === shapeId) {
-            switch (interaction.selectedTool.type) {
+    const toolPoints = useLive(() => {
+        if (splatapus.previewPosition.live().selectedShapeId === shapeId) {
+            const selectedTool = splatapus.interaction.live().selectedTool;
+            switch (selectedTool.type) {
                 case ToolType.Draw: {
-                    const state = DrawTool.getState(interaction.selectedTool);
+                    const state = DrawTool.getState(selectedTool);
                     switch (state.state) {
                         case "drawing":
                             return normalizeCenterPointIntervalsQuadratic(
@@ -46,18 +50,25 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                 case ToolType.Play:
                     return null;
                 default:
-                    throw exhaustiveSwitchError(interaction.selectedTool);
+                    throw exhaustiveSwitchError(selectedTool);
             }
         }
         return null;
-    });
+    }, [splatapus, shapeId]);
 
-    const centerPoints = useEditorState(({ document, previewPosition }) =>
-        interpolationCache.getCenterPointsAtPosition(document, shapeId, previewPosition),
+    const centerPoints = useLive(
+        () =>
+            interpolationCache.getCenterPointsAtPosition(
+                splatapus.document.live(),
+                shapeId,
+                splatapus.previewPosition.live(),
+            ),
+        [shapeId, splatapus],
     );
 
-    const isSelected = useEditorState(
-        ({ previewPosition }) => previewPosition.selectedShapeId === shapeId,
+    const isSelected = useLive(
+        () => splatapus.previewPosition.live().selectedShapeId === shapeId,
+        [splatapus, shapeId],
     );
 
     return (

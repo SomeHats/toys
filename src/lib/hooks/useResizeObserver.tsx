@@ -2,6 +2,7 @@ import { ResizeObserver, ResizeObserverEntry, ResizeObserverSize } from "@juggle
 import { useLayoutEffect, useState } from "react";
 import { assert, assertExists } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
+import { useEvent } from "@/lib/hooks/useEvent";
 
 export { ResizeObserverEntry, ResizeObserverSize };
 
@@ -63,9 +64,10 @@ function removeCallbackForElement(
 
 export function useResizeObserver<T>(
     target: Element | null,
-    callback: (entry: ResizeObserverEntry) => T,
+    rawCallback: (entry: ResizeObserverEntry) => T,
 ): T | null {
     const [value, setValue] = useState<T | null>(null);
+    const callback = useEvent(rawCallback);
 
     useLayoutEffect(() => {
         if (!target) {

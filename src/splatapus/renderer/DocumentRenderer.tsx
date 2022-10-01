@@ -1,16 +1,24 @@
 import { Interaction } from "@/splatapus/editor/Interaction";
 import { StrokeRenderer } from "@/splatapus/renderer/StrokeRenderer";
-import { useEditorKey, useEditorState } from "@/splatapus/editor/useEditorState";
 import React, { useLayoutEffect, useState } from "react";
 import classNames from "classnames";
 import { usePrevious } from "@/lib/hooks/usePrevious";
+import { Splatapus } from "@/splatapus/editor/useEditor";
+import { useLive, useLiveValue } from "@/lib/live";
 
-export const DocumentRenderer = React.memo(function DocumentRenderer() {
-    const viewport = useEditorState((state) => state.location.viewport);
-    const canvasClassName = useEditorState((state) =>
-        Interaction.getCanvasClassName(state.interaction),
+export const DocumentRenderer = React.memo(function DocumentRenderer({
+    splatapus,
+}: {
+    splatapus: Splatapus;
+}) {
+    const canvasClassName = useLive(
+        () => Interaction.getCanvasClassName(splatapus.interaction.live()),
+        [splatapus],
     );
-    const isSidebarOpen = useEditorState((state) => state.location.viewport.isSidebarOpen);
+    const isSidebarOpen = useLiveValue(splatapus.viewport.isSidebarOpen);
+    const screenSize = useLiveValue(splatapus.viewport.screenSize);
+    const sceneTransform = useLive(() => splatapus.viewport.getSceneTransformLive(), [splatapus]);
+
     const prevIsSidebarOpen = usePrevious(isSidebarOpen);
     const [isTransitioning, setIsTransitioning] = useState(false);
     useLayoutEffect(() => {
@@ -19,33 +27,37 @@ export const DocumentRenderer = React.memo(function DocumentRenderer() {
         return () => clearTimeout(timer);
     }, [isSidebarOpen]);
 
-    console.log({ isTransitioning, isSidebarOpen, prevIsSidebarOpen });
-
     return (
         <svg
-            viewBox={`0 0 ${viewport.screenSize.x} ${viewport.screenSize.y}`}
+            viewBox={`0 0 ${screenSize.x} ${screenSize.y}`}
             className={classNames("absolute top-0 left-0", canvasClassName)}
         >
             <g
-                style={{ transform: viewport.getSceneTransform() }}
+                style={{ transform: sceneTransform }}
                 className={classNames(
                     (isTransitioning || isSidebarOpen !== prevIsSidebarOpen) &&
                         "transition-transform",
                 )}
             >
-                <DocumentPathRenderer />
+                <DocumentPathRenderer splatapus={splatapus} />
             </g>
         </svg>
     );
 });
 
-const DocumentPathRenderer = React.memo(function DocumentPathRenderer() {
-    const document = useEditorKey("document");
+const DocumentPathRenderer = React.memo(function DocumentPathRenderer({
+    splatapus,
+}: {
+    splatapus: Splatapus;
+}) {
     return (
         <>
-            {Array.from(document.shapes, (shape) => (
-                <StrokeRenderer key={shape.id} shapeId={shape.id} />
-            ))}
+            {Array.from(
+                useLive(() => splatapus.document.live().shapes, [splatapus]),
+                (shape) => (
+                    <StrokeRenderer key={shape.id} shapeId={shape.id} splatapus={splatapus} />
+                ),
+            )}
         </>
     );
 });

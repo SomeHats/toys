@@ -1,8 +1,8 @@
-import { Vector2 } from "@/lib/geom/Vector2";
 import { createShapeParser, ParserType } from "@/lib/objectParser";
 import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { parseToolType, ToolType } from "@/splatapus/editor/tools/ToolType";
-import { parseSerializedViewport, Viewport } from "@/splatapus/editor/Viewport";
+import { parseSerializedViewport, ViewportState } from "@/splatapus/editor/Viewport";
+import { applyUpdateWithin, UpdateAction } from "@/lib/utils";
 
 export const parseSerializedSplatLocation = createShapeParser({
     keyPointId: SplatKeyPointId.parse,
@@ -12,50 +12,64 @@ export const parseSerializedSplatLocation = createShapeParser({
 });
 export type SerializedSplatLocation = ParserType<typeof parseSerializedSplatLocation>;
 
-type SplatLocationState = {
+export type SplatLocation = {
     keyPointId: SplatKeyPointId;
     shapeId: SplatShapeId;
-    viewport: Viewport;
     tool: ToolType;
+    viewport: ViewportState;
 };
 
-export class SplatLocation {
-    static deserialize(state: SerializedSplatLocation, screenSize: Vector2) {
-        return new SplatLocation({
-            keyPointId: state.keyPointId,
-            shapeId: state.shapeId,
-            viewport: Viewport.deserialize(state.viewport, screenSize),
-            tool: state.tool,
-        });
-    }
+export const SplatLocation = {
+    initialize: (keyPointId: SplatKeyPointId, shapeId: SplatShapeId): SplatLocation => ({
+        keyPointId,
+        shapeId,
+        tool: ToolType.Draw,
+        viewport: ViewportState.initialize(),
+    }),
+    deserialize: (serialized: SerializedSplatLocation): SplatLocation => ({
+        ...serialized,
+        viewport: ViewportState.deserialize(serialized.viewport),
+    }),
+    serialize: (state: SplatLocation): SerializedSplatLocation => ({
+        ...state,
+        viewport: ViewportState.serialize(state.viewport),
+    }),
+    updateViewport: (state: SplatLocation, update: UpdateAction<ViewportState>) =>
+        applyUpdateWithin(state, "viewport", update),
+};
 
-    readonly keyPointId: SplatKeyPointId;
-    readonly shapeId: SplatShapeId;
-    readonly viewport: Viewport;
-    readonly tool: ToolType;
+// export class SplatLocation {
+//     readonly keyPointId: LiveValue<SplatKeyPointId>;
+//     readonly shapeId: LiveValue<SplatShapeId>;
+//     readonly tool: LiveValue<ToolType>;
+//     readonly viewport: LiveValue<ViewportState>;
 
-    constructor({ keyPointId, shapeId, viewport, tool }: SplatLocationState) {
-        this.keyPointId = keyPointId;
-        this.shapeId = shapeId;
-        this.viewport = viewport;
-        this.tool = tool;
-    }
+//     static default(keyPointId: SplatKeyPointId, shapeId: SplatShapeId): SplatLocation {
+//         return new SplatLocation(keyPointId, shapeId, ToolType.Draw, ViewportState.initialize());
+//     }
 
-    serialize(): SerializedSplatLocation {
-        return {
-            keyPointId: this.keyPointId,
-            shapeId: this.shapeId,
-            viewport: this.viewport.serialize(),
-            tool: this.tool,
-        };
-    }
+//     static deserialize({ keyPointId, shapeId, tool, viewport }: SerializedSplatLocation) {
+//         return new SplatLocation(keyPointId, shapeId, tool, ViewportState.deserialize(viewport));
+//     }
 
-    with(changes: Partial<SplatLocationState>): SplatLocation {
-        return new SplatLocation({
-            keyPointId: changes.keyPointId ?? this.keyPointId,
-            shapeId: changes.shapeId ?? this.shapeId,
-            viewport: changes.viewport ?? this.viewport,
-            tool: changes.tool ?? this.tool,
-        });
-    }
-}
+//     private constructor(
+//         keyPointId: SplatKeyPointId,
+//         shapeId: SplatShapeId,
+//         tool: ToolType,
+//         viewport: ViewportState,
+//     ) {
+//         this.keyPointId = new LiveValue(keyPointId);
+//         this.shapeId = new LiveValue(shapeId);
+//         this.tool = new LiveValue(tool);
+//         this.viewport = new LiveValue(viewport);
+//     }
+
+//     serializeLive(): SerializedSplatLocation {
+//         return {
+//             keyPointId: this.keyPointId.live(),
+//             shapeId: this.shapeId.live(),
+//             tool: this.tool.live(),
+//             viewport: ViewportState.serialize(this.viewport.live()),
+//         };
+//     }
+// }

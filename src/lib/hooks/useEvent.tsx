@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useDebugValue, useLayoutEffect, useRef } from "react";
 import { assert } from "@/lib/assert";
 
 export function useEvent<Args extends Array<unknown>, Result>(
@@ -10,6 +10,8 @@ export function useEvent<Args extends Array<unknown>, Result>(
     useLayoutEffect(() => {
         handlerRef.current = handler;
     });
+
+    useDebugValue(handler);
 
     return useCallback((...args: Args) => {
         // In a real implementation, this would throw if called during render

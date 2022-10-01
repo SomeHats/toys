@@ -1,5 +1,6 @@
+import { useLive } from "@/lib/live";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
-import { useEditorState } from "@/splatapus/editor/useEditorState";
+import { Splatapus } from "@/splatapus/editor/useEditor";
 
 export type ToolClassNames = {
     [Tool in ToolType]: {
@@ -27,7 +28,10 @@ export const toolClassNames: ToolClassNames = {
     },
 };
 
-export function useToolClassNames() {
-    const selectedToolType = useEditorState((state) => state.interaction.selectedTool.type);
+export function useToolClassNames(splatapus: Splatapus) {
+    const selectedToolType = useLive(
+        () => splatapus.interaction.live().selectedTool.type,
+        [splatapus],
+    );
     return toolClassNames[selectedToolType];
 }

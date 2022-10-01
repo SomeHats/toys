@@ -1,12 +1,13 @@
-import { ObjectMap } from "@/lib/utils";
+import { ObjectMap, UpdateAction } from "@/lib/utils";
 import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
-import { CtxAction } from "@/splatapus/editor/useEditorState";
+import { Splatapus } from "@/splatapus/editor/useEditor";
 import { ComponentType } from "react";
 
 export type OverlayProps<Tool> = {
+    readonly splatapus: Splatapus;
     readonly tool: Tool;
-    readonly onUpdateTool: (update: CtxAction<Tool>) => void;
+    readonly onUpdateTool: (update: UpdateAction<Tool>) => void;
 };
 
 export type ToolMethods<Tool> = {

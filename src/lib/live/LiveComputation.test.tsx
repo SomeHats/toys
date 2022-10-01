@@ -1,4 +1,4 @@
-import { LiveValue } from "@/lib/live/live";
+import { LiveValue } from "@/lib/live";
 import { LiveComputation } from "@/lib/live/LiveComputation";
 import { noop } from "@/lib/utils";
 import { expect, test, vi } from "vitest";
@@ -26,20 +26,20 @@ test("tracks dependencies", () => {
     expect(v2.getInvalidateListenerCount()).toBe(0);
     expect(vConditional.getInvalidateListenerCount()).toBe(0);
 
-    const unsubscribe = computation.addInvalidateListener(noop);
+    const unsubscribe = computation.addEagerInvalidateListener(noop);
 
     computation.computeIfNeeded();
     expect(v1.getInvalidateListenerCount()).toBe(1);
     expect(v2.getInvalidateListenerCount()).toBe(1);
     expect(vConditional.getInvalidateListenerCount()).toBe(0);
 
-    v2.set(1);
+    v2.update(1);
     computation.computeIfNeeded();
     expect(v1.getInvalidateListenerCount()).toBe(1);
     expect(v2.getInvalidateListenerCount()).toBe(1);
     expect(vConditional.getInvalidateListenerCount()).toBe(1);
 
-    v2.set(0);
+    v2.update(0);
     computation.computeIfNeeded();
     expect(v1.getInvalidateListenerCount()).toBe(1);
     expect(v2.getInvalidateListenerCount()).toBe(1);
@@ -58,14 +58,14 @@ test("invalidates and recomputes lazily", () => {
     expect(computation.isValid()).toBe(false);
     expect(computationFn).toHaveBeenCalledTimes(0);
 
-    computation.addInvalidateListener(invalidated);
+    computation.addEagerInvalidateListener(invalidated);
     computation.computeIfNeeded();
     expect(computation.isValid()).toBe(true);
     expect(computationFn).toHaveBeenCalledTimes(1);
     expect(invalidated).toHaveBeenCalledTimes(0);
 
     // set to same value means invalidate but no recomputation
-    v1.set(v1.getWithoutListening());
+    v1.update(v1.getWithoutListening());
     expect(computation.isValid()).toBe(false);
     expect(computationFn).toHaveBeenCalledTimes(1);
     expect(invalidated).toHaveBeenCalledTimes(1);
@@ -76,12 +76,12 @@ test("invalidates and recomputes lazily", () => {
     expect(invalidated).toHaveBeenCalledTimes(1);
 
     // set to different values on multiple only results in 1 recomputation/invalidation
-    v1.set(2);
+    v1.update(2);
     expect(computation.isValid()).toBe(false);
     expect(computationFn).toHaveBeenCalledTimes(1);
     expect(invalidated).toHaveBeenCalledTimes(2);
 
-    v2.set(3);
+    v2.update(3);
     expect(computation.isValid()).toBe(false);
     expect(computationFn).toHaveBeenCalledTimes(1);
     expect(invalidated).toHaveBeenCalledTimes(2);
@@ -103,7 +103,7 @@ test("invalidates and recomputes lazily event without invalidation fn", () => {
     expect(computationFn).toHaveBeenCalledTimes(1);
 
     // set to same value means invalidate but no recomputation
-    v1.set(v1.getWithoutListening());
+    v1.update(v1.getWithoutListening());
     expect(computation.isValid()).toBe(false);
     expect(computationFn).toHaveBeenCalledTimes(1);
 
@@ -112,11 +112,11 @@ test("invalidates and recomputes lazily event without invalidation fn", () => {
     expect(computationFn).toHaveBeenCalledTimes(1);
 
     // set to different values on multiple only results in 1 recomputation/invalidation
-    v1.set(2);
+    v1.update(2);
     expect(computation.isValid()).toBe(false);
     expect(computationFn).toHaveBeenCalledTimes(1);
 
-    v2.set(3);
+    v2.update(3);
     expect(computation.isValid()).toBe(false);
     expect(computationFn).toHaveBeenCalledTimes(1);
 
@@ -130,7 +130,7 @@ test.only("can write from computation", () => {
     const computation = new LiveComputation(() => {
         const v = value.live();
         if (v % 3 !== 0) {
-            value.set(v - 1);
+            value.update(v - 1);
         }
     });
 

@@ -1,7 +1,8 @@
 import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
-import { useEditorState } from "@/splatapus/editor/useEditorState";
 import { ReactNode } from "react";
 import { Transition } from "@headlessui/react";
+import { Splatapus } from "@/splatapus/editor/useEditor";
+import { useLiveValue } from "@/lib/live";
 
 const rightBarStyle = {
     width: SIDEBAR_WIDTH_PX,
@@ -33,14 +34,16 @@ export function UiOverlayFrame({
     rightBar,
     bottomBarLeft,
     bottomBarRight,
+    splatapus,
 }: {
     topBarRight: ReactNode;
     topBarLeft: ReactNode;
     bottomBarRight: ReactNode;
     bottomBarLeft: ReactNode;
     rightBar: ReactNode;
+    splatapus: Splatapus;
 }) {
-    const isSidebarOpen = useEditorState(({ location }) => location.viewport.isSidebarOpen);
+    const isSidebarOpen = useLiveValue(splatapus.viewport.isSidebarOpen);
 
     return (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-stretch">

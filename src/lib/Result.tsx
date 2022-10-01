@@ -75,6 +75,9 @@ export class ErrorResult<T, E> extends AbstractResult<T, E> {
         return true;
     }
     unwrap(message?: string): never {
+        if (this.error instanceof Error) {
+            throw this.error;
+        }
         fail(`${message ?? "expected value"}: ${String(this.error)}`);
     }
     unwrapError(message?: string | undefined): E {

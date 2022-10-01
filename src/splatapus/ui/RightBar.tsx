@@ -3,23 +3,23 @@ import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { pathFromCenterPoints } from "@/splatapus/model/pathFromCenterPoints";
 import { getSvgPathFromStroke } from "@/splatapus/model/perfectFreehand";
 import { Button } from "@/splatapus/ui/Button";
-import { useEditorEvents, useEditorState } from "@/splatapus/editor/useEditorState";
 import classNames from "classnames";
 import React from "react";
 import { useToolClassNames } from "@/splatapus/editor/toolClassNames";
+import { Splatapus } from "@/splatapus/editor/useEditor";
+import { useLive } from "@/lib/live";
 
 const WIDTH_PER_THUMB = 84;
 const HEIGHT_PER_THUMB = 80;
 
-export function RightBar() {
-    const { updateLocation, updateDocument } = useEditorEvents();
-    const keyPointId = useEditorState((state) => state.location.keyPointId);
-    const shapeId = useEditorState((state) => state.location.shapeId);
-    const keyPoints = Array.from(useEditorState((state) => state.document.keyPoints));
-    const shapes = Array.from(useEditorState((state) => state.document.shapes));
+export function RightBar({ splatapus }: { splatapus: Splatapus }) {
+    const keyPointId = useLive(() => splatapus.location.live().keyPointId, [splatapus]);
+    const shapeId = useLive(() => splatapus.location.live().shapeId, [splatapus]);
+    const keyPoints = Array.from(useLive(() => splatapus.document.live().keyPoints, [splatapus]));
+    const shapes = Array.from(useLive(() => splatapus.document.live().shapes, [splatapus]));
     const keyFrameIndex = Array.from(keyPoints).findIndex((keyPoint) => keyPointId === keyPoint.id);
     const shapeIndex = Array.from(shapes).findIndex((shape) => shapeId === shape.id);
-    const toolClassNames = useToolClassNames();
+    const toolClassNames = useToolClassNames(splatapus);
 
     return (
         <div className="relative flex h-0 flex-auto flex-col gap-4 overflow-auto p-5 [-webkit-overflow-scrolling:touch]">
@@ -50,12 +50,11 @@ export function RightBar() {
                                         : "border-stone-300 bg-white/25 hover:bg-white/50",
                                 )}
                                 onClick={() => {
-                                    updateLocation(({ location }) =>
-                                        location.with({
-                                            shapeId: shape.id,
-                                            keyPointId: keyPoint.id,
-                                        }),
-                                    );
+                                    splatapus.location.update((location) => ({
+                                        ...location,
+                                        shapeId: shape.id,
+                                        keyPointId: keyPoint.id,
+                                    }));
                                 }}
                             >
                                 <ShapeVersionPreview
@@ -63,6 +62,7 @@ export function RightBar() {
                                     height={62}
                                     keyPointId={keyPoint.id}
                                     shapeId={shape.id}
+                                    splatapus={splatapus}
                                 />
                             </button>
                         ))}
@@ -70,15 +70,21 @@ export function RightBar() {
                             className="h-16 w-20 flex-none rounded border border-stone-300 text-xl text-stone-400 hover:bg-white/50"
                             onClick={() => {
                                 const keyPointId = SplatKeyPointId.generate();
-                                updateDocument(
-                                    ({ document, viewport }) =>
+                                splatapus.document.update(
+                                    (document) =>
                                         document.addKeyPoint(
                                             keyPointId,
-                                            findPositionForNewKeyPoint(document, viewport),
+                                            findPositionForNewKeyPoint(
+                                                document,
+                                                splatapus.viewport,
+                                            ),
                                         ),
                                     {
-                                        lockstepLocation: (location) =>
-                                            location.with({ keyPointId, shapeId: shape.id }),
+                                        lockstepLocation: (location) => ({
+                                            ...location,
+                                            keyPointId,
+                                            shapeId: shape.id,
+                                        }),
                                     },
                                 );
                             }}
@@ -92,8 +98,8 @@ export function RightBar() {
                 className="sticky left-0"
                 onClick={() => {
                     const shapeId = SplatShapeId.generate();
-                    updateDocument(({ document }) => document.addShape(shapeId), {
-                        lockstepLocation: (location) => location.with({ shapeId }),
+                    splatapus.document.update((document) => document.addShape(shapeId), {
+                        lockstepLocation: (location) => ({ ...location, shapeId }),
                     });
                 }}
             >
@@ -108,21 +114,24 @@ const ShapeVersionPreview = React.memo(function ShapeVersionPreview({
     height,
     shapeId,
     keyPointId,
+    splatapus,
 }: {
     width: number;
     height: number;
     shapeId: SplatShapeId;
     keyPointId: SplatKeyPointId;
+    splatapus: Splatapus;
 }) {
     const padding = 4;
 
-    const centerPoints = useEditorState(({ document }) => {
+    const centerPoints = useLive(() => {
+        const document = splatapus.document.live();
         const shapeVersion = document.getShapeVersion(keyPointId, shapeId);
         if (!shapeVersion) {
             return null;
         }
         return document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id);
-    });
+    }, [keyPointId, shapeId, splatapus.document]);
     if (!centerPoints || centerPoints.length < 2) {
         return null;
     }

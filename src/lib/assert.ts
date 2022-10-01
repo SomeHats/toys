@@ -2,9 +2,9 @@ export function fail(message: string): never {
     throw new Error(message);
 }
 
-export function assert(value: unknown, message?: string): asserts value {
+export function assert(value: unknown, message?: string, debug?: boolean): asserts value {
     if (!value) {
-        if (process.env.NODE_ENV !== "production" && !import.meta.vitest) {
+        if (process.env.NODE_ENV !== "production" && !import.meta.vitest && debug) {
             // eslint-disable-next-line no-debugger
             debugger;
         }

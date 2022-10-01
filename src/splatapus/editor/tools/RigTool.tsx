@@ -5,7 +5,7 @@ import { createTool, OverlayProps } from "@/splatapus/editor/lib/createTool";
 import { createGestureDetector, GestureType } from "@/splatapus/editor/lib/GestureDetection";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import classNames from "classnames";
-import { useEditorState } from "@/splatapus/editor/useEditorState";
+import { useLive } from "@/lib/live";
 
 export type IdleRigToolState = {
     readonly state: "idle";
@@ -18,31 +18,31 @@ export type MovingRigToolState = {
 };
 
 const MoveGesture = createGestureDetector<IdleRigToolState, MovingRigToolState, SplatKeyPointId>({
-    onTap: ({ updateLocation }, state, keyPointId) => {
+    onTap: ({ splatapus }, state, keyPointId) => {
         if (keyPointId) {
-            updateLocation((location) => location.with({ keyPointId }));
+            splatapus.location.update((location) => ({ ...location, keyPointId }));
         }
         return state;
     },
-    onDragStart: ({ updateLocation, viewport, event }, state, keyPointId) => {
+    onDragStart: ({ splatapus, event }, state, keyPointId) => {
         if (!keyPointId) {
             return null;
         }
-        updateLocation((location) => location.with({ keyPointId }));
+        splatapus.location.update((location) => ({ ...location, keyPointId }));
         return {
             state: "moving",
             keyPointId,
             delta: Vector2.ZERO,
-            startingPosition: viewport.eventSceneCoords(event),
+            startingPosition: splatapus.viewport.eventSceneCoords(event),
         };
     },
-    onDragMove: ({ viewport, event }, state) => ({
+    onDragMove: ({ splatapus, event }, state) => ({
         ...state,
-        delta: viewport.eventSceneCoords(event).sub(state.startingPosition),
+        delta: splatapus.viewport.eventSceneCoords(event).sub(state.startingPosition),
     }),
-    onDragEnd: ({ event, viewport, updateDocument }, state) => {
-        const delta = viewport.eventSceneCoords(event).sub(state.startingPosition);
-        updateDocument((document) =>
+    onDragEnd: ({ event, splatapus }, state) => {
+        const delta = splatapus.viewport.eventSceneCoords(event).sub(state.startingPosition);
+        splatapus.document.update((document) =>
             document.updateKeypoint(state.keyPointId, (keyPoint) => ({
                 ...keyPoint,
                 position: keyPoint.position.add(delta),
@@ -79,10 +79,10 @@ export const RigTool = createTool<RigTool>()({
         }
     },
     onPointerEvent: MoveGesture.createOnPointerEvent<"gesture", RigTool>("gesture"),
-    Overlay: ({ tool, onUpdateTool }: OverlayProps<RigTool>) => {
+    Overlay: ({ splatapus, tool, onUpdateTool }: OverlayProps<RigTool>) => {
         const state = MoveGesture.getState(tool.gesture);
-        const keyPoints = useEditorState((state) => state.document.keyPoints);
-        const locationKeyPointId = useEditorState((state) => state.location.keyPointId);
+        const keyPoints = useLive(() => splatapus.document.live().keyPoints, [splatapus]);
+        const locationKeyPointId = useLive(() => splatapus.location.live().keyPointId, [splatapus]);
         return (
             <>
                 {Array.from(keyPoints, (keyPoint, i) => {
@@ -94,14 +94,15 @@ export const RigTool = createTool<RigTool>()({
                     return (
                         <ScenePositionedDiv
                             key={keyPoint.id}
+                            splatapus={splatapus}
                             position={position}
                             className={classNames(
                                 "-mt-4 -ml-4 flex h-8 w-8 cursor-move items-center justify-center rounded-full",
                             )}
                             onPointerDown={(event) => {
-                                onUpdateTool((ctx, tool) =>
+                                onUpdateTool((tool) =>
                                     RigTool.onPointerEvent(
-                                        { ...ctx, event, eventType: "down" },
+                                        { splatapus, event, eventType: "down" },
                                         tool,
                                         keyPoint.id,
                                     ),

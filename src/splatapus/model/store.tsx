@@ -6,8 +6,6 @@ import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
 import { SplatLocation, parseSerializedSplatLocation } from "@/splatapus/editor/SplatLocation";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { Viewport } from "@/splatapus/editor/Viewport";
-import { ToolType } from "@/splatapus/editor/tools/ToolType";
 
 export const parseSerializedSplatapusState = createShapeParser({
     document: parseSplatDoc,
@@ -23,28 +21,25 @@ export type SplatapusState = {
 export function serializeSplatapusState(state: SplatapusState): SerializedSplatapusState {
     return {
         document: state.document.serialize(),
-        location: state.location.serialize(),
+        location: SplatLocation.serialize(state.location),
     };
 }
 
-export function deserializeSplatapusState(
-    state: SerializedSplatapusState,
-    screenSize: Vector2,
-): SplatapusState {
+export function deserializeSplatapusState(state: SerializedSplatapusState): SplatapusState {
     return {
         document: SplatDocModel.deserialize(state.document),
-        location: SplatLocation.deserialize(state.location, screenSize),
+        location: SplatLocation.deserialize(state.location),
     };
 }
 
-export function loadSaved(key: string, screenSize: Vector2): Result<SplatapusState, string> {
+export function loadSaved(key: string): Result<SplatapusState, string> {
     const item = getLocalStorageItem(`splatapus.${key}`);
     if (!item) {
         return Result.error("No saved data found");
     }
     return parseSerializedSplatapusState(getLocalStorageItem(`splatapus.${key}`))
         .mapErr((err) => err.toString())
-        .map((state) => deserializeSplatapusState(state, screenSize));
+        .map((state) => deserializeSplatapusState(state));
 }
 
 export function writeSaved(key: string, state: SplatapusState) {
@@ -58,12 +53,7 @@ export const writeSavedDebounced = debounce(AUTOSAVE_DEBOUNCE_TIME_MS, writeSave
 export function getDefaultLocationForDocument(document: SplatDocModel, screenSize: Vector2) {
     const keyPointId = [...document.keyPoints][0].id;
     const shapeId = [...document.shapes][0].id;
-    return new SplatLocation({
-        keyPointId,
-        shapeId,
-        viewport: Viewport.default(screenSize),
-        tool: ToolType.Draw,
-    });
+    return SplatLocation.initialize(keyPointId, shapeId);
 }
 export function makeEmptySaveState(screenSize: Vector2): SplatapusState {
     const keyPointId = SplatKeyPointId.generate();

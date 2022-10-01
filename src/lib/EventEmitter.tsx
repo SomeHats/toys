@@ -23,7 +23,11 @@ export default class EventEmitter<Args extends Array<unknown> = []> {
         });
     }
 
-    handlerCount(): number {
+    listenerCount(): number {
         return this.handlers.size;
+    }
+
+    hasListeners(): boolean {
+        return this.handlers.size > 0;
     }
 }

@@ -12,11 +12,12 @@ import { QuickPanTool } from "@/splatapus/editor/tools/QuickPanTool";
 import { SelectedTool } from "@/splatapus/editor/tools/tools";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { UndoStack } from "@/splatapus/editor/UndoStack";
-import { CtxAction, useEditorEvents, useEditorState } from "@/splatapus/editor/useEditorState";
 import { PlayTool } from "@/splatapus/editor/tools/PlayTool";
 import React from "react";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
+import { Splatapus } from "@/splatapus/editor/useEditor";
+import { useLive } from "@/lib/live";
 
 export type Interaction = {
     multiTouchPan: MultiTouchPan;
@@ -78,27 +79,31 @@ export const Interaction = {
             }
             const activatedSelectedTool = SelectedTool.initializeForKeyDown(ctx);
             if (activatedSelectedTool && !interaction.quickPanTool) {
-                ctx.vfx.triggerAnimation(activatedSelectedTool.type);
+                ctx.splatapus.vfx.triggerAnimation(activatedSelectedTool.type);
                 return { ...interaction, selectedTool: activatedSelectedTool };
             }
             if (matchesKeyDown(ctx.event, { key: "z", command: true })) {
-                ctx.updateUndoStack((undoStack) => UndoStack.undo(undoStack, ctx.vfx));
+                ctx.splatapus.undoStack.update((undoStack) =>
+                    UndoStack.undo(undoStack, ctx.splatapus.vfx),
+                );
                 return interaction;
             }
             if (matchesKeyDown(ctx.event, { key: "z", command: true, shift: true })) {
-                ctx.updateUndoStack((undoStack) => UndoStack.redo(undoStack, ctx.vfx));
+                ctx.splatapus.undoStack.update((undoStack) =>
+                    UndoStack.redo(undoStack, ctx.splatapus.vfx),
+                );
                 return interaction;
             }
         }
 
         if (matchesKeyDown(ctx.event, { key: "0", command: true })) {
-            ctx.updateViewport((viewport) => viewport.with({ pan: Vector2.ZERO, zoom: 1 }));
+            ctx.splatapus.viewport.state.update({ pan: Vector2.ZERO, zoom: 1 });
             return interaction;
         }
         const goToIdx = (idx: number) => {
-            const keyPointId = [...ctx.document.keyPoints][idx]?.id;
+            const keyPointId = [...ctx.splatapus.document.getWithoutListening().keyPoints][idx]?.id;
             if (keyPointId) {
-                ctx.updateLocation((location) => location.with({ keyPointId }));
+                ctx.splatapus.location.update((location) => ({ ...location, keyPointId }));
             }
         };
         if (matchesKeyDown(ctx.event, "1")) {
@@ -161,27 +166,43 @@ export const Interaction = {
         );
     },
 
-    Overlay: React.memo(function InteractionOverlay() {
-        const { updateInteraction } = useEditorEvents();
-
+    Overlay: React.memo(function InteractionOverlay({ splatapus }: { splatapus: Splatapus }) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const onUpdateTool = useEvent((update: CtxAction<any>) =>
-            updateInteraction((ctx, interaction) => {
+        const onUpdateTool = useEvent((update: UpdateAction<any>) =>
+            splatapus.interaction.update((interaction) => {
                 return Interaction.updateSelectedTool(interaction, (selectedTool) => {
                     assert(selectedTool.type === interaction.selectedTool.type);
-                    return update(ctx, selectedTool);
+                    return update(selectedTool);
                 });
             }),
         );
 
-        const selectedTool = useEditorState(({ interaction }) => interaction.selectedTool);
+        const selectedTool = useLive(() => splatapus.interaction.live().selectedTool, [splatapus]);
         switch (selectedTool.type) {
             case ToolType.Draw:
-                return <DrawTool.Overlay tool={selectedTool} onUpdateTool={onUpdateTool} />;
+                return (
+                    <DrawTool.Overlay
+                        tool={selectedTool}
+                        onUpdateTool={onUpdateTool}
+                        splatapus={splatapus}
+                    />
+                );
             case ToolType.Rig:
-                return <RigTool.Overlay tool={selectedTool} onUpdateTool={onUpdateTool} />;
+                return (
+                    <RigTool.Overlay
+                        tool={selectedTool}
+                        onUpdateTool={onUpdateTool}
+                        splatapus={splatapus}
+                    />
+                );
             case ToolType.Play:
-                return <PlayTool.Overlay tool={selectedTool} onUpdateTool={onUpdateTool} />;
+                return (
+                    <PlayTool.Overlay
+                        tool={selectedTool}
+                        onUpdateTool={onUpdateTool}
+                        splatapus={splatapus}
+                    />
+                );
             default:
                 exhaustiveSwitchError(selectedTool);
         }

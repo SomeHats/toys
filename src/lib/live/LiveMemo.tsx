@@ -1,50 +1,54 @@
-import { assert } from "@/lib/assert";
 import { Unsubscribe } from "@/lib/EventEmitter";
-import { Live } from "@/lib/live/live";
+import { Live, LiveWritable } from "@/lib/live";
 import { LiveComputation, trackRead } from "@/lib/live/LiveComputation";
-import { applyUpdate, UpdateAction } from "@/lib/utils";
-
-const NOT_COMPUTED = Symbol();
+import { Result } from "@/lib/Result";
+import { UpdateAction } from "@/lib/utils";
 
 export class LiveMemo<T> implements Live<T> {
-    private readonly computation: LiveComputation;
-    private value: T | typeof NOT_COMPUTED = NOT_COMPUTED;
+    private readonly computation: LiveComputation<T>;
+    private completion: Result<T, unknown> | null = null;
 
     constructor(compute: () => T) {
-        this.computation = new LiveComputation(() => {
-            this.value = compute();
-        });
+        this.computation = new LiveComputation(compute);
     }
 
     getWithoutListening(): T {
-        this.computation.computeIfNeeded();
-        assert(this.value !== NOT_COMPUTED);
-        return this.value;
+        this.completion = this.computation.computeIfNeeded();
+        return this.completion.unwrap();
     }
 
     live(): T {
-        this.computation.computeIfNeeded();
+        this.completion = this.computation.computeIfNeeded();
         trackRead(this);
-        assert(this.value !== NOT_COMPUTED);
-        return this.value;
+        return this.completion.unwrap();
     }
 
-    addInvalidateListener(callback: () => void): Unsubscribe {
-        return this.computation.addInvalidateListener(callback);
+    addEagerInvalidateListener(callback: () => void): Unsubscribe {
+        return this.computation.addEagerInvalidateListener(callback);
+    }
+    addBatchInvalidateListener(callback: () => void): Unsubscribe {
+        return this.computation.addBatchInvalidateListener(callback);
     }
 }
 
-export class LiveMemoWritable<T> extends LiveMemo<T> {
-    constructor(read: () => T, private readonly write: (newValue: T) => void) {
+export class LiveMemoWritable<T, Args extends Array<unknown> = []>
+    extends LiveMemo<T>
+    implements LiveWritable<T>
+{
+    constructor(
+        read: () => T,
+        private readonly write: (update: UpdateAction<T>, ...args: Args | []) => void,
+    ) {
         super(read);
     }
 
-    set(update: UpdateAction<T>) {
-        // we have to eagerly evaluate memo updates because otherwise we don't know what to invalidate :(
-        const initialValue = this.getWithoutListening();
-        const newValue = applyUpdate(initialValue, update);
-        if (!Object.is(newValue, initialValue)) {
-            this.write(newValue);
-        }
+    update(update: UpdateAction<T>, ...args: Args | []) {
+        this.write(update, ...args);
+        // // we have to eagerly evaluate memo updates because otherwise we don't know what to invalidate :(
+        // const initialValue = this.getWithoutListening();
+        // const newValue = applyUpdate(initialValue, update);
+        // if (!Object.is(newValue, initialValue)) {
+        //     this.write(newValue);
+        // }
     }
 }

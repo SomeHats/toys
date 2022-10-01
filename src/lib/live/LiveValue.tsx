@@ -1,63 +1,63 @@
-import { assert } from "@/lib/assert";
 import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
-import { Live } from "@/lib/live/live";
-import { emitInvalidation, incrementGlobalVersion, trackRead } from "@/lib/live/LiveComputation";
+import { LiveWritable } from "@/lib/live";
+import { incrementGlobalVersion, trackRead } from "@/lib/live/LiveComputation";
+import { LiveInvalidation } from "@/lib/live/LiveInvalidation";
 import { applyUpdate, UpdateAction } from "@/lib/utils";
 
-export class LiveValue<T> implements Live<T> {
+export class LiveValue<T> implements LiveWritable<T> {
     private value: T;
     private pendingUpdates: Array<UpdateAction<T>> | null = null;
+    private invalidation = new LiveInvalidation();
     private isUpdating = false;
-    private invalidateEvent = new EventEmitter();
 
     constructor(initialValue: T) {
         this.value = initialValue;
     }
 
     private updateIfNeeded() {
-        if (!this.pendingUpdates) {
+        if (!this.pendingUpdates || this.isUpdating) {
             return;
         }
 
-        let value = this.value;
         this.isUpdating = true;
-        for (const update of this.pendingUpdates) {
-            value = applyUpdate(value, update);
+        for (let i = 0; i < this.pendingUpdates.length; i++) {
+            this.value = applyUpdate(this.value, this.pendingUpdates[i]);
         }
 
-        this.isUpdating = false;
-        this.value = value;
         this.pendingUpdates = null;
+        this.isUpdating = false;
     }
 
     getWithoutListening(): T {
-        assert(!this.isUpdating, "cannot call getWithoutListening from within an update callback");
         this.updateIfNeeded();
         return this.value;
     }
 
     live(): T {
-        assert(!this.isUpdating, "cannot call live from within an update callback");
         this.updateIfNeeded();
         trackRead(this);
         return this.value;
     }
 
-    set(update: UpdateAction<T>): void {
-        assert(!this.isUpdating, "cannot call set from within an update callback");
+    update(update: UpdateAction<T>): void {
         if (!this.pendingUpdates) {
             this.pendingUpdates = [];
-            incrementGlobalVersion();
-            emitInvalidation(this.invalidateEvent);
         }
         this.pendingUpdates.push(update);
+        if (this.pendingUpdates.length === 1) {
+            incrementGlobalVersion();
+            this.invalidation.invalidate();
+        }
     }
 
-    addInvalidateListener(callback: () => void): Unsubscribe {
-        return this.invalidateEvent.listen(callback);
+    addEagerInvalidateListener(callback: () => void): Unsubscribe {
+        return this.invalidation.addEagerListener(callback);
+    }
+    addBatchInvalidateListener(callback: () => void): Unsubscribe {
+        return this.invalidation.addBatchListener(callback);
     }
 
     getInvalidateListenerCount(): number {
-        return this.invalidateEvent.handlerCount();
+        return this.invalidation.listenerCount();
     }
 }

@@ -1,6 +1,7 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { PointerEventContext } from "@/splatapus/editor/lib/EventContext";
+import { ViewportState } from "@/splatapus/editor/Viewport";
 import { PointerEvent } from "react";
 
 type ActivePointer = {
@@ -22,8 +23,7 @@ export type MultiTouchPan =
           readonly state: "bothFingersDown";
           readonly pointerA: ActivePointer;
           readonly pointerB: ActivePointer;
-          readonly initialPan: Vector2;
-          readonly initialZoom: number;
+          readonly initialViewportState: ViewportState;
       };
 
 export const MultiTouchPan = {
@@ -61,8 +61,8 @@ export const MultiTouchPan = {
                                     currentScreenPosition: Vector2.fromEvent(ctx.event),
                                     startEvent: ctx.event,
                                 },
-                                initialPan: ctx.viewport.pan,
-                                initialZoom: ctx.viewport.zoom,
+                                initialViewportState:
+                                    ctx.splatapus.viewport.state.getWithoutListening(),
                             },
                             // we're now doing a proper pan gesture, so cancel
                             // any down stream gestures that might have been
@@ -127,16 +127,13 @@ export const MultiTouchPan = {
                                 0.5,
                             );
 
-                            ctx.updateViewport((viewport) => {
-                                const newPan = initialScreenCenterPoint
-                                    .add(pan.initialPan)
-                                    .scale(scaleChange)
-                                    .sub(currentScreenCenterPoint);
-
-                                return viewport.with({
-                                    zoom: pan.initialZoom * scaleChange,
-                                    pan: newPan,
-                                });
+                            const newPan = initialScreenCenterPoint
+                                .add(pan.initialViewportState.pan)
+                                .scale(scaleChange)
+                                .sub(currentScreenCenterPoint);
+                            ctx.splatapus.viewport.state.update({
+                                zoom: pan.initialViewportState.zoom * scaleChange,
+                                pan: newPan,
                             });
 
                             return {

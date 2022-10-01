@@ -1,6 +1,6 @@
 import { useMergedRefs } from "@/lib/hooks/useMergedRefs";
 import { tailwindEasings } from "@/lib/theme";
-import { useVfxAnimation, VfxActionName } from "@/splatapus/editor/Vfx";
+import { useVfxAnimation, Vfx, VfxActionName } from "@/splatapus/editor/Vfx";
 import { useSquircleClipPath } from "@/splatapus/ui/useSquircle";
 import classNames from "classnames";
 import { ComponentPropsWithoutRef, forwardRef, ReactNode, useState } from "react";
@@ -56,9 +56,10 @@ export const PlainButton = forwardRef<HTMLButtonElement, ComponentPropsWithoutRe
 export function ActionButton({
     children,
     actionName,
+    vfx,
     ...props
-}: { actionName: VfxActionName } & ButtonProps) {
-    const ref = useVfxAnimation(actionName, () => ({
+}: { actionName: VfxActionName; vfx: Vfx } & ButtonProps) {
+    const ref = useVfxAnimation(vfx, actionName, () => ({
         keyFrames: { transform: ["scale(1)", "scale(0.8)", "scale(1)"] },
         duration: 300,
         easing: tailwindEasings.outBackMd,

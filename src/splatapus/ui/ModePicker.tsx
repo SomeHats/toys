@@ -1,41 +1,53 @@
+import { useLive } from "@/lib/live";
 import { Interaction } from "@/splatapus/editor/Interaction";
 import { toolClassNames } from "@/splatapus/editor/toolClassNames";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
-import { useEditorEvents, useEditorState } from "@/splatapus/editor/useEditorState";
+import { Splatapus } from "@/splatapus/editor/useEditor";
 import { ActionButton } from "@/splatapus/ui/Button";
 import classNames from "classnames";
 import React, { ReactNode } from "react";
 
-export const ModePicker = React.memo(function ModePicker() {
+export const ModePicker = React.memo(function ModePicker({ splatapus }: { splatapus: Splatapus }) {
     return (
         <>
-            <ModeButton toolType={ToolType.Draw}>draw</ModeButton>
-            <ModeButton toolType={ToolType.Rig}>rig</ModeButton>
-            <ModeButton toolType={ToolType.Play}>play</ModeButton>
+            <ModeButton toolType={ToolType.Draw} splatapus={splatapus}>
+                draw
+            </ModeButton>
+            <ModeButton toolType={ToolType.Rig} splatapus={splatapus}>
+                rig
+            </ModeButton>
+            <ModeButton toolType={ToolType.Play} splatapus={splatapus}>
+                play
+            </ModeButton>
         </>
     );
 });
 
 const ModeButton = function ModeButton({
     toolType,
+    splatapus,
     children,
 }: {
     toolType: ToolType;
+    splatapus: Splatapus;
     children: ReactNode;
 }) {
-    const selectedToolType = useEditorState((state) => state.interaction.selectedTool.type);
-    const { updateInteraction } = useEditorEvents();
+    const selectedToolType = useLive(
+        () => splatapus.interaction.live().selectedTool.type,
+        [splatapus.interaction],
+    );
 
     const isActive = selectedToolType === toolType;
     return (
         <ActionButton
             actionName={toolType}
-            onClick={() =>
-                updateInteraction((ctx, interaction) => {
-                    ctx.vfx.triggerAnimation(toolType);
+            vfx={splatapus.vfx}
+            onClick={() => {
+                splatapus.interaction.update((interaction) => {
+                    splatapus.vfx.triggerAnimation(toolType);
                     return Interaction.requestSetSelectedTool(interaction, toolType);
-                })
-            }
+                });
+            }}
             className={classNames(
                 isActive &&
                     `pointer-events-none bg-gradient-to-br ${toolClassNames[toolType].gradient500} !text-white`,

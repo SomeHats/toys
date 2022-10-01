@@ -27,7 +27,7 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
     const shouldShowPoints = useDebugSetting("shouldShowPoints");
     const toolPoints = useLive(() => {
         if (splatapus.previewPosition.live().selectedShapeId === shapeId) {
-            const selectedTool = splatapus.interaction.live().selectedTool;
+            const selectedTool = splatapus.interaction.selectedTool.live();
             switch (selectedTool.type) {
                 case ToolType.Draw: {
                     const state = DrawTool.getState(selectedTool);

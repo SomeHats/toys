@@ -30,6 +30,12 @@ export function flushSyncInvalidationBatch() {
     for (const invalidation of invalidations) {
         invalidation.emit();
     }
+    if (pendingSyncInvalidations) {
+        // more invalidations were registered whilst invalidating this batch,
+        // flush them synchronously so that update-in-update doesn't cause an
+        // async gap
+        flushSyncInvalidationBatch();
+    }
 }
 
 export function isSyncInvalidationBatchInProgress() {

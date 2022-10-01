@@ -1,5 +1,4 @@
 import { useLive } from "@/lib/live";
-import { Interaction } from "@/splatapus/editor/Interaction";
 import { toolClassNames } from "@/splatapus/editor/toolClassNames";
 import { ToolType } from "@/splatapus/editor/tools/ToolType";
 import { Splatapus } from "@/splatapus/editor/useEditor";
@@ -33,7 +32,7 @@ const ModeButton = function ModeButton({
     children: ReactNode;
 }) {
     const selectedToolType = useLive(
-        () => splatapus.interaction.live().selectedTool.type,
+        () => splatapus.interaction.selectedTool.live().type,
         [splatapus.interaction],
     );
 
@@ -43,10 +42,8 @@ const ModeButton = function ModeButton({
             actionName={toolType}
             vfx={splatapus.vfx}
             onClick={() => {
-                splatapus.interaction.update((interaction) => {
-                    splatapus.vfx.triggerAnimation(toolType);
-                    return Interaction.requestSetSelectedTool(interaction, toolType);
-                });
+                splatapus.vfx.triggerAnimation(toolType);
+                splatapus.interaction.requestSetSelectedTool(toolType);
             }}
             className={classNames(
                 isActive &&

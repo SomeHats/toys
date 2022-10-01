@@ -12,7 +12,7 @@ export const DocumentRenderer = React.memo(function DocumentRenderer({
     splatapus: Splatapus;
 }) {
     const canvasClassName = useLive(
-        () => Interaction.getCanvasClassName(splatapus.interaction.live()),
+        () => splatapus.interaction.getCanvasClassNameLive(),
         [splatapus],
     );
     const isSidebarOpen = useLiveValue(splatapus.viewport.isSidebarOpen);

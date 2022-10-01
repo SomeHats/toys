@@ -30,7 +30,7 @@ export const toolClassNames: ToolClassNames = {
 
 export function useToolClassNames(splatapus: Splatapus) {
     const selectedToolType = useLive(
-        () => splatapus.interaction.live().selectedTool.type,
+        () => splatapus.interaction.selectedTool.live().type,
         [splatapus],
     );
     return toolClassNames[selectedToolType];

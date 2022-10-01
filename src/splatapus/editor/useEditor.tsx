@@ -15,7 +15,7 @@ export type SplatapusAction<T> = (splatapus: Splatapus, state: T) => T;
 
 export class Splatapus {
     readonly undoStack: LiveValue<UndoStack>;
-    readonly interaction: LiveValue<Interaction>;
+    readonly interaction: Interaction;
     readonly vfx = new Vfx();
     readonly location = new LiveMemoWritable(
         () => this.undoStack.live().current.location,
@@ -31,7 +31,7 @@ export class Splatapus {
     );
     readonly viewport = new Viewport(
         this.screenSize,
-        new LiveMemo(() => Interaction.isSidebarOpen(this.interaction.live())),
+        new LiveMemo(() => this.interaction.isSidebarOpenLive()),
         new LiveMemoWritable(
             () => this.location.live().viewport,
             (update) =>
@@ -41,13 +41,11 @@ export class Splatapus {
 
     constructor(readonly screenSize: LiveValue<Vector2>, state: SplatapusState) {
         this.undoStack = new LiveValue(UndoStack.initialize(state));
-        this.interaction = new LiveValue(Interaction.initialize(ToolType.Draw));
+        this.interaction = new Interaction(ToolType.Draw);
     }
 
     private onPointerEvent(eventType: PointerEventType, event: PointerEvent) {
-        this.interaction.update((interaction) =>
-            Interaction.onPointerEvent({ event, eventType, splatapus: this }, interaction),
-        );
+        this.interaction.onPointerEvent({ event, eventType, splatapus: this });
     }
 
     onPointerDown = (event: PointerEvent) => this.onPointerEvent("down", event);
@@ -57,19 +55,13 @@ export class Splatapus {
     onWheel = (event: WheelEvent) => {
         this.viewport.handleWheelEvent(event);
     };
-    onKeyDown = (event: KeyboardEvent) =>
-        this.interaction.update((interaction) =>
-            Interaction.onKeyDown({ event, splatapus: this }, interaction),
-        );
-    onKeyUp = (event: KeyboardEvent) =>
-        this.interaction.update((interaction) =>
-            Interaction.onKeyUp({ event, splatapus: this }, interaction),
-        );
+    onKeyDown = (event: KeyboardEvent) => this.interaction.onKeyDown({ event, splatapus: this });
+    onKeyUp = (event: KeyboardEvent) => this.interaction.onKeyUp({ event, splatapus: this });
 
     previewPosition = new LiveMemo(() => {
         const location = this.location.live();
         return (
-            Interaction.getPreviewPosition(this.interaction.live(), location.shapeId) ??
+            this.interaction.getPreviewPositionLive(location.shapeId) ??
             PreviewPosition.keyPointId(location.keyPointId, location.shapeId)
         );
     });

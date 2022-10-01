@@ -1,4 +1,3 @@
-import { Interaction } from "@/splatapus/editor/Interaction";
 import { StrokeRenderer } from "@/splatapus/renderer/StrokeRenderer";
 import React, { useLayoutEffect, useState } from "react";
 import classNames from "classnames";

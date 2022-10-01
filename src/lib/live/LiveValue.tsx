@@ -1,4 +1,4 @@
-import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
+import { Unsubscribe } from "@/lib/EventEmitter";
 import { LiveWritable } from "@/lib/live";
 import { incrementGlobalVersion, trackRead } from "@/lib/live/LiveComputation";
 import { LiveInvalidation } from "@/lib/live/LiveInvalidation";

@@ -31,7 +31,7 @@ type TrackingContext = {
 };
 type ComputationContext = TrackingContext | NonTrackingContext;
 
-export function beginTracking(
+function beginTracking(
     previousDependencies: DependencyMap | null,
     invalidateListener: () => void,
     shouldListen: boolean,
@@ -50,7 +50,7 @@ export function beginTracking(
     return computationContext;
 }
 
-export function endTracking(context: TrackingContext) {
+function endTracking(context: TrackingContext) {
     assert(computationContext === context);
     computationContext = computationContext.previous;
 

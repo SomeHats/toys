@@ -1,5 +1,4 @@
 import { assert, assertExists } from "@/lib/assert";
-import { createDictParser, createShapeParser, Parser } from "@/lib/objectParser";
 import {
     applyUpdate,
     fromEntries,
@@ -12,12 +11,6 @@ import {
 
 export type UnknownTableEntry = { readonly id: string };
 export type TableData<T extends UnknownTableEntry> = ReadonlyObjectMap<T["id"], T>;
-
-export function createTableDataParser<T extends UnknownTableEntry>(parsers: {
-    [K in keyof T]: Parser<T[K]>;
-}): Parser<TableData<T>> {
-    return createDictParser(parsers.id, createShapeParser(parsers));
-}
 
 export class Table<T extends UnknownTableEntry> implements Iterable<T> {
     readonly data: TableData<T>;

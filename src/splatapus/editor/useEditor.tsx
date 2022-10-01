@@ -11,8 +11,6 @@ import { LiveValue, LiveMemo, LiveMemoWritable } from "@/lib/live";
 import { PointerEventType } from "@/splatapus/editor/lib/EventContext";
 import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 
-export type SplatapusAction<T> = (splatapus: Splatapus, state: T) => T;
-
 export class Splatapus {
     readonly undoStack: LiveValue<UndoStack>;
     readonly interaction: Interaction;

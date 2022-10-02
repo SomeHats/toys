@@ -15,10 +15,13 @@ import { Splatapus } from "@/splatapus/editor/useEditor";
 
 export class RigMode implements Mode<ModeType.Rig> {
     readonly type = ModeType.Rig;
+
     private readonly previewMovement = new LiveValue<null | {
         readonly keyPointId: SplatKeyPointId;
         readonly delta: Vector2;
     }>(null);
+    private readonly previewPosition = new LiveValue<null | Vector2>(null);
+
     private readonly gesture = new SplatapusGestureDetector<[keyPointId?: SplatKeyPointId]>({
         onTap: (event, { location }, keyPointId) => {
             if (!keyPointId) {
@@ -28,7 +31,14 @@ export class RigMode implements Mode<ModeType.Rig> {
         },
         onDragStart: (event, { viewport, document, location }, keyPointId) => {
             if (!keyPointId) {
-                return null;
+                this.previewPosition.update(viewport.eventSceneCoords(event));
+                return {
+                    couldBeTap: false,
+                    onMove: (event) =>
+                        this.previewPosition.update(viewport.eventSceneCoords(event)),
+                    onEnd: () => this.previewPosition.update(null),
+                    onCancel: () => this.previewPosition.update(null),
+                };
             }
 
             location.keyPointId.update(keyPointId);
@@ -62,9 +72,12 @@ export class RigMode implements Mode<ModeType.Rig> {
     }
     toDebugStringLive(): string {
         const previewMovement = this.previewMovement.live();
+        const previewPosition = this.previewPosition.live();
         return debugStateToString(
             "rig",
-            previewMovement
+            previewPosition
+                ? { _: "preview", position: previewPosition.toString(2) }
+                : previewMovement
                 ? {
                       _: "moving",
                       keyPointId: previewMovement.keyPointId,
@@ -77,7 +90,7 @@ export class RigMode implements Mode<ModeType.Rig> {
         this.gesture.onPointerEvent(ctx);
     }
     getPreviewPositionLive(): Vector2 | null {
-        return null;
+        return this.previewPosition.live();
     }
     renderOverlay(splatapus: Splatapus): ReactNode {
         return <RigMode.Overlay splatapus={splatapus} mode={this} />;

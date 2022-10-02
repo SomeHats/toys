@@ -40,10 +40,10 @@ rather focus my limited free time on actually making things with the tools.
             -   [x] TPS interpolation
             -   [x] handle 1- and 2-point situations
     -   [x] import/export
-    -   [ ] (P0) introduce new "draw" -> "rig" -> "play" modes
+    -   [x] (P0) introduce new "draw" -> "rig" -> "play" modes
         -   [x] add basics
         -   [x] restore mode as part of location
-        -   [ ] drag-preview in rig mode
+        -   [x] drag-preview in rig mode
     -   [ ] (P0) fix up new drawing for unplaced point - extrapolation produces bad onion skins
             currently
     -   [ ] optimize for quickly drawing multiple shapes

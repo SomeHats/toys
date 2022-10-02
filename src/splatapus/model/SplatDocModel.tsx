@@ -148,7 +148,7 @@ export class SplatDocModel {
         return this.with({ keyPoints });
     }
 
-    updateKeypoint(
+    updateKeyPoint(
         keyPointId: SplatKeyPointId,
         update: UpdateAction<SplatKeyPoint>,
     ): SplatDocModel {

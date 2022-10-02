@@ -1,5 +1,5 @@
 import { useLive } from "@/lib/live";
-import { ModeType } from "@/splatapus/editor/modes/ModeType";
+import { ModeType } from "@/splatapus/editor/modes/Mode";
 import { Splatapus } from "@/splatapus/editor/useEditor";
 
 export type ModeClassNames = {

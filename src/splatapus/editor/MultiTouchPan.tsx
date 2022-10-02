@@ -1,6 +1,6 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
-import { PointerEventContext } from "@/splatapus/editor/lib/EventContext";
+import { PointerEventContext } from "@/splatapus/editor/EventContext";
 import { ViewportState } from "@/splatapus/editor/Viewport";
 import { PointerEvent } from "react";
 

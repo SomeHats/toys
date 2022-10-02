@@ -7,7 +7,7 @@ import {
     KeyboardEventContext,
     PointerEventContext,
     SplatapusGestureDetector,
-} from "@/splatapus/editor/lib/EventContext";
+} from "@/splatapus/editor/EventContext";
 
 export class QuickPan {
     readonly isKeyDown = new LiveValue(false);
@@ -41,10 +41,10 @@ export class QuickPan {
         }
         return false;
     }
-    onKeyUp({ event, splatapus }: KeyboardEventContext): boolean {
+    onKeyUp({ event }: KeyboardEventContext): boolean {
         if (this.isKeyDown.getOnce() && matchesKey(event, " ")) {
             this.isKeyDown.update(false);
-            this.gesture.end(splatapus);
+            this.gesture.end();
             return true;
         }
         return false;

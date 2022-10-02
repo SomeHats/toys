@@ -1,7 +1,7 @@
 import { useEvent } from "@/lib/hooks/useEvent";
 import { LiveValue, useLive } from "@/lib/live";
 import { get, ReadonlyObjectMap } from "@/lib/utils";
-import { ModeType } from "@/splatapus/editor/modes/ModeType";
+import { ModeType } from "@/splatapus/editor/modes/Mode";
 import React, { useEffect, useRef } from "react";
 
 export type VfxActionName = "undo" | "redo" | ModeType;

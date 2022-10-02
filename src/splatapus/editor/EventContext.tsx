@@ -45,49 +45,62 @@ export function applyPointerEvent<T>(
     }
 }
 
-export class SplatapusGestureDetector extends GestureDetector<[splatapus: Splatapus]> {
+export class SplatapusGestureDetector<Args extends Array<unknown> = []> {
     readonly isDragging = new LiveValue(false);
+
+    private readonly gesture: GestureDetector<[splatapus: Splatapus, ...args: Args]>;
 
     constructor({
         onTap,
         onDragStart,
     }: {
-        onTap?: TapGestureHandler<[splatapus: Splatapus]>;
-        onDragStart?: DragStartGestureHandler<[splatapus: Splatapus]>;
+        onTap?: TapGestureHandler<[splatapus: Splatapus, ...args: Args]>;
+        onDragStart?: DragStartGestureHandler<[splatapus: Splatapus, ...args: Args]>;
     }) {
         const dragStart = onDragStart ?? defaultDragGestureHandler;
-        super({
+        this.gesture = new GestureDetector({
             onTap,
-            onDragStart: (event, splatapus) => {
+            onDragStart: (event, splatapus, ...args) => {
+                const handler = dragStart(event, splatapus, ...args);
+                if (!handler) {
+                    return null;
+                }
                 this.isDragging.update(true);
-                const handler = dragStart(event, splatapus);
                 return {
                     couldBeTap: handler.couldBeTap,
                     onMove: handler.onMove,
-                    onEnd: (event, ctx) => {
+                    onEnd: (event) => {
                         this.isDragging.update(false);
-                        return handler.onEnd(event, splatapus);
+                        return handler.onEnd(event);
                     },
-                    onCancel: (event, ctx) => {
+                    onCancel: (event) => {
                         this.isDragging.update(false);
-                        return handler.onCancel(event, splatapus);
+                        return handler.onCancel(event);
                     },
                 };
             },
         });
     }
-    onPointerEvent(ctx: PointerEventContext) {
+    onPointerEvent(ctx: PointerEventContext, ...args: Args) {
         switch (ctx.eventType) {
             case "down":
-                return this.onPointerDown(ctx.event, ctx.splatapus);
+                return this.gesture.onPointerDown(ctx.event, ctx.splatapus, ...args);
             case "move":
-                return this.onPointerMove(ctx.event, ctx.splatapus);
+                return this.gesture.onPointerMove(ctx.event);
             case "up":
-                return this.onPointerUp(ctx.event, ctx.splatapus);
+                return this.gesture.onPointerUp(ctx.event);
             case "cancel":
-                return this.onPointerCancel(ctx.event, ctx.splatapus);
+                return this.gesture.onPointerCancel(ctx.event);
             default:
                 exhaustiveSwitchError(ctx.eventType);
         }
+    }
+
+    end() {
+        this.gesture.end();
+    }
+
+    cancel() {
+        this.gesture.end();
     }
 }

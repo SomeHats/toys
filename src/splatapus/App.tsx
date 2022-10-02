@@ -102,7 +102,7 @@ function DebugInfo({ splatapus }: { splatapus: Splatapus }) {
                 () => PreviewPosition.toDebugString(splatapus.previewPosition.live()),
                 [splatapus],
             )}
-            {" | "}
+            <br />
             {useLive(() => splatapus.interaction.toDebugStringLive(), [splatapus])}
         </div>
     );

@@ -1,6 +1,6 @@
 import { useLive } from "@/lib/live";
 import { modeClassNames } from "@/splatapus/editor/modeClassNames";
-import { ModeType } from "@/splatapus/editor/modes/ModeType";
+import { ModeType } from "@/splatapus/editor/modes/Mode";
 import { Splatapus } from "@/splatapus/editor/useEditor";
 import { ActionButton } from "@/splatapus/ui/Button";
 import classNames from "classnames";

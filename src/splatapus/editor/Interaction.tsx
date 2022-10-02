@@ -1,8 +1,6 @@
-import { assert } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { matchesKeyDown } from "@/lib/hooks/useKeyPress";
-import { exhaustiveSwitchError, UpdateAction } from "@/lib/utils";
-import { SplatShapeId } from "@/splatapus/model/SplatDoc";
+import { entries, exhaustiveSwitchError } from "@/lib/utils";
 import { MultiTouchPan } from "@/splatapus/editor/MultiTouchPan";
 import { DrawMode } from "@/splatapus/editor/modes/DrawMode";
 import { RigMode } from "@/splatapus/editor/modes/RigMode";
@@ -10,42 +8,54 @@ import {
     applyPointerEvent,
     KeyboardEventContext,
     PointerEventContext,
-} from "@/splatapus/editor/lib/EventContext";
+} from "@/splatapus/editor/EventContext";
 import { QuickPan } from "@/splatapus/editor/QuickPan";
-import { SelectedMode } from "@/splatapus/editor/modes/modes";
-import { ModeType } from "@/splatapus/editor/modes/ModeType";
+import { ModeType } from "@/splatapus/editor/modes/Mode";
 import { UndoStack } from "@/splatapus/editor/UndoStack";
 import { PlayMode } from "@/splatapus/editor/modes/PlayMode";
 import React from "react";
-import { useEvent } from "@/lib/hooks/useEvent";
-import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 import { Splatapus } from "@/splatapus/editor/useEditor";
-import { LiveValue, useLive } from "@/lib/live";
+import { LiveValue, runOnce, useLive } from "@/lib/live";
+
+type SpecificMode = DrawMode | RigMode | PlayMode;
+
+function initializeModeForType(type: ModeType) {
+    switch (type) {
+        case ModeType.Draw:
+            return new DrawMode();
+        case ModeType.Rig:
+            return new RigMode();
+        case ModeType.Play:
+            return new PlayMode();
+        default:
+            exhaustiveSwitchError(type);
+    }
+}
+const keyForModeType = {
+    [ModeType.Draw]: "d",
+    [ModeType.Rig]: "r",
+    [ModeType.Play]: "p",
+} as const;
 
 export class Interaction {
     private readonly multiTouchPan = new MultiTouchPan();
     readonly quickPan = new QuickPan();
-    readonly activeMode: LiveValue<SelectedMode>;
+    readonly activeMode: LiveValue<SpecificMode>;
 
     constructor(modeType: ModeType) {
-        this.activeMode = new LiveValue(SelectedMode.initialize(modeType));
+        this.activeMode = new LiveValue(initializeModeForType(modeType));
 
         // hack: force evaluation of effects
         this.activeMode.addBatchInvalidateListener(() => this.activeMode.getOnce());
     }
     toDebugStringLive(): string {
-        return (
-            this.quickPan.toDebugStringLive() ?? SelectedMode.toDebugString(this.activeMode.live())
-        );
+        return this.quickPan.toDebugStringLive() ?? this.activeMode.live().toDebugStringLive();
     }
     getCanvasClassNameLive(): string | null {
-        return (
-            this.quickPan.getCanvasClassNameLive() ??
-            SelectedMode.getCanvasClassName(this.activeMode.live())
-        );
+        return this.quickPan.getCanvasClassNameLive();
     }
-    getPreviewPositionLive(selectedShapeId: SplatShapeId): PreviewPosition | null {
-        return SelectedMode.getPreviewPosition(this.activeMode.live(), selectedShapeId);
+    getPreviewPositionLive(): Vector2 | null {
+        return this.activeMode.live().getPreviewPositionLive();
     }
     isSidebarOpenLive(): boolean {
         return this.activeMode.live().type !== ModeType.Play;
@@ -55,15 +65,15 @@ export class Interaction {
             return;
         }
         this.activeMode.update((activeMode) => {
-            if (!SelectedMode.isIdle(activeMode)) {
+            if (runOnce(() => !activeMode.isIdleLive())) {
                 return activeMode;
             }
-            return SelectedMode.initialize(modeType);
+            return initializeModeForType(modeType);
         });
     }
     onKeyDown(ctx: KeyboardEventContext) {
         const activeMode = this.activeMode.getOnce();
-        if (SelectedMode.isIdle(activeMode)) {
+        if (runOnce(() => activeMode.isIdleLive())) {
             if (this.quickPan.onKeyDown(ctx)) {
                 return;
             }
@@ -72,11 +82,13 @@ export class Interaction {
                 return;
             }
 
-            const newActiveMode = SelectedMode.initializeForKeyDown(ctx);
-            if (newActiveMode) {
-                ctx.splatapus.vfx.triggerAnimation(newActiveMode.type);
-                this.activeMode.update(newActiveMode);
-                return;
+            for (const [type, key] of entries(keyForModeType)) {
+                if (matchesKeyDown(ctx.event, key)) {
+                    const newActiveMode = initializeModeForType(type);
+                    ctx.splatapus.vfx.triggerAnimation(type);
+                    this.activeMode.update(newActiveMode);
+                    return;
+                }
             }
             if (matchesKeyDown(ctx.event, { key: "z", command: true })) {
                 ctx.splatapus.undoStack.update((undoStack) =>
@@ -121,7 +133,7 @@ export class Interaction {
         if (this.quickPan.isKeyDown.getOnce()) {
             this.quickPan.onPointerEvent(ctx);
         } else {
-            this.activeMode.update((mode) => SelectedMode.onPointerEvent(ctx, mode));
+            this.activeMode.getOnce().onPointerEvent(ctx);
         }
     }
 
@@ -131,41 +143,6 @@ export class Interaction {
         splatapus: Splatapus;
     }) {
         const activeMode = useLive(() => splatapus.interaction.activeMode.live(), [splatapus]);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const onUpdateMode = useEvent((update: UpdateAction<any>) =>
-            splatapus.interaction.activeMode.update((mode) => {
-                assert(mode.type === activeMode.type);
-                return update(mode);
-            }),
-        );
-
-        switch (activeMode.type) {
-            case ModeType.Draw:
-                return (
-                    <DrawMode.Overlay
-                        mode={activeMode}
-                        onUpdateMode={onUpdateMode}
-                        splatapus={splatapus}
-                    />
-                );
-            case ModeType.Rig:
-                return (
-                    <RigMode.Overlay
-                        mode={activeMode}
-                        onUpdateMode={onUpdateMode}
-                        splatapus={splatapus}
-                    />
-                );
-            case ModeType.Play:
-                return (
-                    <PlayMode.Overlay
-                        mode={activeMode}
-                        onUpdateMode={onUpdateMode}
-                        splatapus={splatapus}
-                    />
-                );
-            default:
-                exhaustiveSwitchError(activeMode);
-        }
+        return <>{activeMode.renderOverlay(splatapus)}</>;
     });
 }

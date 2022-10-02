@@ -15,21 +15,16 @@ export type TapGestureHandler<Args extends ReadonlyArray<unknown> = []> = (
 export type DragStartGestureHandler<Args extends ReadonlyArray<unknown> = []> = (
     event: PointerEvent,
     ...args: Args
-) => DragGestureHandler<Args>;
-export type DragGestureHandler<Args extends ReadonlyArray<unknown> = []> = {
+) => DragGestureHandler | null;
+export type DragGestureHandler = {
     couldBeTap: boolean;
-    onCancel: (event: PointerEvent, ...args: Args) => void;
-    onMove: (event: PointerEvent, ...args: Args) => void;
-    onEnd: (event: PointerEvent, ...args: Args) => void;
+    onCancel: (event: PointerEvent) => void;
+    onMove: (event: PointerEvent) => void;
+    onEnd: (event: PointerEvent) => void;
 };
 
 export const defaultTapGestureHandler: TapGestureHandler<Array<unknown>> = noop;
-export const defaultDragGestureHandler: DragStartGestureHandler<Array<unknown>> = () => ({
-    couldBeTap: true,
-    onCancel: noop,
-    onMove: noop,
-    onEnd: noop,
-});
+export const defaultDragGestureHandler: DragStartGestureHandler<Array<unknown>> = () => null;
 
 type State<Args extends ReadonlyArray<unknown>> =
     | {
@@ -39,12 +34,13 @@ type State<Args extends ReadonlyArray<unknown>> =
           readonly type: "dragUnconfirmed";
           readonly pointerId: PointerId;
           readonly startPosition: Vector2;
-          readonly dragHandler: DragGestureHandler<Args>;
+          readonly dragHandler: DragGestureHandler;
+          readonly args: Args;
       }
     | {
           readonly type: "dragConfirmed";
           readonly pointerId: PointerId;
-          readonly dragHandler: DragGestureHandler<Args>;
+          readonly dragHandler: DragGestureHandler;
       };
 
 export class GestureDetector<Args extends Array<unknown> = []> {
@@ -73,12 +69,16 @@ export class GestureDetector<Args extends Array<unknown> = []> {
         switch (this.state.type) {
             case "idle": {
                 const dragHandler = this.onDragStart(event, ...args);
+                if (!dragHandler) {
+                    return;
+                }
                 if (dragHandler.couldBeTap ?? true) {
                     this.state = {
                         type: "dragUnconfirmed",
                         pointerId: event.pointerId,
                         startPosition: Vector2.fromEvent(event),
                         dragHandler,
+                        args,
                     };
                 } else {
                     this.state = {
@@ -97,14 +97,14 @@ export class GestureDetector<Args extends Array<unknown> = []> {
         }
     }
 
-    onPointerMove(event: PointerEvent, ...args: Args) {
+    onPointerMove(event: PointerEvent) {
         this.lastEvent = event;
         switch (this.state.type) {
             case "idle":
                 return;
             case "dragUnconfirmed":
                 if (this.state.pointerId !== event.pointerId) return;
-                this.state.dragHandler.onMove(event, ...args);
+                this.state.dragHandler.onMove(event);
                 if (
                     this.state.startPosition.distanceTo(Vector2.fromEvent(event)) >=
                     MIN_DRAG_GESTURE_DISTANCE_PX
@@ -118,27 +118,27 @@ export class GestureDetector<Args extends Array<unknown> = []> {
                 return;
             case "dragConfirmed":
                 if (this.state.pointerId !== event.pointerId) return;
-                this.state.dragHandler.onMove(event, ...args);
+                this.state.dragHandler.onMove(event);
                 return;
             default:
                 exhaustiveSwitchError(this.state);
         }
     }
 
-    onPointerUp(event: PointerEvent, ...args: Args) {
+    onPointerUp(event: PointerEvent) {
         this.lastEvent = event;
         switch (this.state.type) {
             case "idle":
                 return;
             case "dragUnconfirmed":
                 if (this.state.pointerId !== event.pointerId) return;
-                this.state.dragHandler.onCancel(event, ...args);
-                this.onTap(event, ...args);
+                this.state.dragHandler.onCancel(event);
+                this.onTap(event, ...this.state.args);
                 this.state = { type: "idle" };
                 return;
             case "dragConfirmed":
                 if (this.state.pointerId !== event.pointerId) return;
-                this.state.dragHandler.onEnd(event, ...args);
+                this.state.dragHandler.onEnd(event);
                 this.state = { type: "idle" };
                 return;
             default:
@@ -146,7 +146,7 @@ export class GestureDetector<Args extends Array<unknown> = []> {
         }
     }
 
-    onPointerCancel(event: PointerEvent, ...args: Args) {
+    onPointerCancel(event: PointerEvent) {
         this.lastEvent = event;
         switch (this.state.type) {
             case "idle":
@@ -154,7 +154,7 @@ export class GestureDetector<Args extends Array<unknown> = []> {
             case "dragUnconfirmed":
             case "dragConfirmed":
                 if (this.state.pointerId !== event.pointerId) return;
-                this.state.dragHandler.onCancel(event, ...args);
+                this.state.dragHandler.onCancel(event);
                 this.state = { type: "idle" };
                 return;
             default:
@@ -162,31 +162,31 @@ export class GestureDetector<Args extends Array<unknown> = []> {
         }
     }
 
-    cancel(...args: Args) {
+    cancel() {
         switch (this.state.type) {
             case "idle":
                 return;
             case "dragUnconfirmed":
             case "dragConfirmed":
-                this.state.dragHandler.onCancel(assertExists(this.lastEvent), ...args);
+                this.state.dragHandler.onCancel(assertExists(this.lastEvent));
                 this.state = { type: "idle" };
                 return;
             default:
                 exhaustiveSwitchError(this.state);
         }
     }
-    end(...args: Args) {
+    end() {
         const event = assertExists(this.lastEvent);
         switch (this.state.type) {
             case "idle":
                 return;
             case "dragUnconfirmed":
-                this.state.dragHandler.onCancel(event, ...args);
-                this.onTap(event, ...args);
+                this.state.dragHandler.onCancel(event);
+                this.onTap(event, ...this.state.args);
                 this.state = { type: "idle" };
                 return;
             case "dragConfirmed":
-                this.state.dragHandler.onEnd(event, ...args);
+                this.state.dragHandler.onEnd(event);
                 this.state = { type: "idle" };
                 return;
             default:

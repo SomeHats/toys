@@ -1,14 +1,14 @@
 import { Interaction } from "@/splatapus/editor/Interaction";
 import { SplatLocation } from "@/splatapus/editor/SplatLocation";
 import { SplatapusState } from "@/splatapus/model/store";
-import { ModeType } from "@/splatapus/editor/modes/ModeType";
+import { ModeType } from "@/splatapus/editor/modes/Mode";
 import { OpOptions, UndoStack } from "@/splatapus/editor/UndoStack";
 import { Viewport } from "@/splatapus/editor/Viewport";
 import { PointerEvent, useEffect, useState } from "react";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { Vfx } from "@/splatapus/editor/Vfx";
 import { LiveValue, LiveMemo, LiveMemoWritable } from "@/lib/live";
-import { PointerEventType } from "@/splatapus/editor/lib/EventContext";
+import { PointerEventType } from "@/splatapus/editor/EventContext";
 import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 
 export class Splatapus {
@@ -58,10 +58,10 @@ export class Splatapus {
 
     previewPosition = new LiveMemo(() => {
         const location = this.location.live();
-        return (
-            this.interaction.getPreviewPositionLive(location.shapeId) ??
-            PreviewPosition.keyPointId(location.keyPointId, location.shapeId)
-        );
+        const interactionPosition = this.interaction.getPreviewPositionLive();
+        return interactionPosition
+            ? PreviewPosition.interpolated(interactionPosition, location.shapeId)
+            : PreviewPosition.keyPointId(location.keyPointId, location.shapeId);
     });
 }
 

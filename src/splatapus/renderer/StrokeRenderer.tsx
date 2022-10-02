@@ -9,8 +9,7 @@ import {
     getStrokePoints,
     getSvgPathFromStroke,
 } from "@/splatapus/model/perfectFreehand";
-import { DrawMode } from "@/splatapus/editor/modes/DrawMode";
-import { ModeType } from "@/splatapus/editor/modes/ModeType";
+import { ModeType } from "@/splatapus/editor/modes/Mode";
 import classNames from "classnames";
 import React from "react";
 import { useDebugSetting } from "@/splatapus/DebugSettings";
@@ -30,21 +29,17 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
             const activeMode = splatapus.interaction.activeMode.live();
             switch (activeMode.type) {
                 case ModeType.Draw: {
-                    const state = DrawMode.getState(activeMode);
-                    switch (state.state) {
-                        case "drawing":
-                            return normalizeCenterPointIntervalsQuadratic(
-                                getStrokeCenterPoints(
-                                    getStrokePoints(state.points, perfectFreehandOpts),
-                                    perfectFreehandOpts,
-                                ),
-                                perfectFreehandOpts.size,
-                            );
-                        case "idle":
-                            return null;
-                        default:
-                            throw exhaustiveSwitchError(state);
+                    const previewPoints = activeMode.previewPoints.live();
+                    if (previewPoints.length) {
+                        return normalizeCenterPointIntervalsQuadratic(
+                            getStrokeCenterPoints(
+                                getStrokePoints(previewPoints, perfectFreehandOpts),
+                                perfectFreehandOpts,
+                            ),
+                            perfectFreehandOpts.size,
+                        );
                     }
+                    return null;
                 }
                 case ModeType.Rig:
                 case ModeType.Play:

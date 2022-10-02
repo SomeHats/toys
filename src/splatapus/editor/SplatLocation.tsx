@@ -1,6 +1,6 @@
 import { createShapeParser, ParserType } from "@/lib/objectParser";
 import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
-import { parseModeType, ModeType } from "@/splatapus/editor/modes/ModeType";
+import { parseModeType, ModeType } from "@/splatapus/editor/modes/Mode";
 import { parseSerializedViewport, ViewportState } from "@/splatapus/editor/Viewport";
 import { applyUpdateWithin, UpdateAction } from "@/lib/utils";
 

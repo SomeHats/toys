@@ -114,7 +114,7 @@ export class Interaction {
             if (matchesKeyDown(ctx.event, `${i + 1}`)) {
                 const keyPointId = [...ctx.splatapus.document.getOnce().keyPoints][i]?.id;
                 if (keyPointId) {
-                    ctx.splatapus.location.update((location) => ({ ...location, keyPointId }));
+                    ctx.splatapus.location.keyPointId.update(keyPointId);
                     return;
                 }
             }

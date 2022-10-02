@@ -15,10 +15,12 @@ export class Splatapus {
     readonly undoStack: LiveValue<UndoStack>;
     readonly interaction: Interaction;
     readonly vfx = new Vfx();
-    readonly location = new LiveMemoWritable(
-        () => this.undoStack.live().current.location,
-        (update) =>
-            this.undoStack.update((undoStack) => UndoStack.updateLocation(undoStack, update)),
+    readonly location = new SplatLocation(
+        new LiveMemoWritable(
+            () => this.undoStack.live().current.location,
+            (update) =>
+                this.undoStack.update((undoStack) => UndoStack.updateLocation(undoStack, update)),
+        ),
     );
     readonly document = new LiveMemoWritable(
         () => this.undoStack.live().current.document,
@@ -30,11 +32,7 @@ export class Splatapus {
     readonly viewport = new Viewport(
         this.screenSize,
         new LiveMemo(() => this.interaction.isSidebarOpenLive()),
-        new LiveMemoWritable(
-            () => this.location.live().viewport,
-            (update) =>
-                this.location.update((location) => SplatLocation.updateViewport(location, update)),
-        ),
+        this.location.viewportState,
     );
 
     constructor(readonly screenSize: LiveValue<Vector2>, state: SplatapusState) {
@@ -57,11 +55,13 @@ export class Splatapus {
     onKeyUp = (event: KeyboardEvent) => this.interaction.onKeyUp({ event, splatapus: this });
 
     previewPosition = new LiveMemo(() => {
-        const location = this.location.live();
         const interactionPosition = this.interaction.getPreviewPositionLive();
         return interactionPosition
-            ? PreviewPosition.interpolated(interactionPosition, location.shapeId)
-            : PreviewPosition.keyPointId(location.keyPointId, location.shapeId);
+            ? PreviewPosition.interpolated(interactionPosition, this.location.shapeId.live())
+            : PreviewPosition.keyPointId(
+                  this.location.keyPointId.live(),
+                  this.location.shapeId.live(),
+              );
     });
 }
 

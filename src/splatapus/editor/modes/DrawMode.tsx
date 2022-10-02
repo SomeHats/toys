@@ -23,11 +23,14 @@ export class DrawMode implements Mode<ModeType.Draw> {
                         viewport.eventSceneCoords(event),
                     ]),
                 onEnd: (event) => {
-                    const { shapeId, keyPointId } = location.getOnce();
                     const points = this.previewPoints.getOnce();
                     this.previewPoints.update([]);
                     document.update((document) =>
-                        document.replacePointsForVersion(keyPointId, shapeId, points),
+                        document.replacePointsForVersion(
+                            location.keyPointId.getOnce(),
+                            location.shapeId.getOnce(),
+                            points,
+                        ),
                     );
                 },
                 onCancel: () => {

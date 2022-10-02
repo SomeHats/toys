@@ -64,7 +64,7 @@ function AppMain({ splatapus }: { splatapus: Splatapus }) {
         return runLive(LiveEffect.idle, () => {
             writeSavedDebounced("autosave", {
                 document: splatapus.document.live(),
-                location: splatapus.location.live(),
+                location: splatapus.location.state.live(),
             });
         });
     }, [splatapus]);

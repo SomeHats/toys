@@ -24,14 +24,14 @@ export class RigMode implements Mode<ModeType.Rig> {
             if (!keyPointId) {
                 return;
             }
-            location.update((loc) => ({ ...loc, keyPointId }));
+            location.keyPointId.update(keyPointId);
         },
         onDragStart: (event, { viewport, document, location }, keyPointId) => {
             if (!keyPointId) {
                 return null;
             }
 
-            location.update((loc) => ({ ...loc, keyPointId }));
+            location.keyPointId.update(keyPointId);
             const startingPosition = viewport.eventSceneCoords(event);
             return {
                 couldBeTap: true,
@@ -92,7 +92,7 @@ export class RigMode implements Mode<ModeType.Rig> {
     }) {
         const previewPosition = useLiveValue(mode.previewMovement);
         const keyPoints = useLive(() => splatapus.document.live().keyPoints, [splatapus]);
-        const selectedKeyPointId = useLive(() => splatapus.location.live().keyPointId, [splatapus]);
+        const selectedKeyPointId = useLiveValue(splatapus.location.keyPointId);
 
         return (
             <>

@@ -4,7 +4,7 @@ import { debounce, getLocalStorageItem, setLocalStorageItem } from "@/lib/utils"
 import { parseSplatDoc, SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
-import { SplatLocation, parseSerializedSplatLocation } from "@/splatapus/editor/SplatLocation";
+import { parseSerializedSplatLocation, SplatLocationState } from "@/splatapus/editor/SplatLocation";
 import { Vector2 } from "@/lib/geom/Vector2";
 
 export const parseSerializedSplatapusState = createShapeParser({
@@ -15,20 +15,20 @@ export type SerializedSplatapusState = ParserType<typeof parseSerializedSplatapu
 
 export type SplatapusState = {
     document: SplatDocModel;
-    location: SplatLocation;
+    location: SplatLocationState;
 };
 
 export function serializeSplatapusState(state: SplatapusState): SerializedSplatapusState {
     return {
         document: state.document.serialize(),
-        location: SplatLocation.serialize(state.location),
+        location: SplatLocationState.serialize(state.location),
     };
 }
 
 export function deserializeSplatapusState(state: SerializedSplatapusState): SplatapusState {
     return {
         document: SplatDocModel.deserialize(state.document),
-        location: SplatLocation.deserialize(state.location),
+        location: SplatLocationState.deserialize(state.location),
     };
 }
 
@@ -53,7 +53,7 @@ export const writeSavedDebounced = debounce(AUTOSAVE_DEBOUNCE_TIME_MS, writeSave
 export function getDefaultLocationForDocument(document: SplatDocModel, screenSize: Vector2) {
     const keyPointId = [...document.keyPoints][0].id;
     const shapeId = [...document.shapes][0].id;
-    return SplatLocation.initialize(keyPointId, shapeId);
+    return SplatLocationState.initialize(keyPointId, shapeId);
 }
 export function makeEmptySaveState(screenSize: Vector2): SplatapusState {
     const keyPointId = SplatKeyPointId.generate();

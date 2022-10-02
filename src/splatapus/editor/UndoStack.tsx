@@ -2,16 +2,16 @@ import { assert } from "@/lib/assert";
 import { UNDO_ACTIONS } from "@/splatapus/constants";
 import { deepEqual, UpdateAction, applyUpdate } from "@/lib/utils";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { SplatLocation } from "@/splatapus/editor/SplatLocation";
+import { SplatLocationState } from "@/splatapus/editor/SplatLocation";
 import { Vfx } from "@/splatapus/editor/Vfx";
 
 export type OpOptions = {
-    readonly lockstepLocation?: UpdateAction<SplatLocation>;
+    readonly lockstepLocation?: UpdateAction<SplatLocationState>;
 };
 
 type UndoEntry = {
     readonly document: SplatDocModel;
-    readonly location: SplatLocation;
+    readonly location: SplatLocationState;
     readonly options: OpOptions;
 };
 
@@ -184,7 +184,7 @@ export const UndoStack = {
             redoStates: redoStates.length === 0 ? null : redoStates,
         };
     },
-    updateLocation: (undoStack: UndoStack, action: UpdateAction<SplatLocation>): UndoStack => {
+    updateLocation: (undoStack: UndoStack, action: UpdateAction<SplatLocationState>): UndoStack => {
         return {
             ...undoStack,
             current: {

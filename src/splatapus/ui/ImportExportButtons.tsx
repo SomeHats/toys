@@ -2,7 +2,7 @@ import { assert } from "@/lib/assert";
 import { stringFromError } from "@/lib/utils";
 import { catExample } from "@/splatapus/catExample";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { SplatLocation } from "@/splatapus/editor/SplatLocation";
+import { SplatLocationState } from "@/splatapus/editor/SplatLocation";
 import {
     getDefaultLocationForDocument,
     makeEmptySaveState,
@@ -32,7 +32,7 @@ function ExportButton({ splatapus }: { splatapus: Splatapus }) {
                     JSON.stringify(
                         serializeSplatapusState({
                             document: splatapus.document.getOnce(),
-                            location: splatapus.location.getOnce(),
+                            location: splatapus.location.state.getOnce(),
                         }),
                     ),
                 );
@@ -79,7 +79,7 @@ function ImportButton({ splatapus }: { splatapus: Splatapus }) {
                                 () => SplatDocModel.deserialize(serialized.document),
                                 {
                                     lockstepLocation: (location) =>
-                                        SplatLocation.deserialize(serialized.location),
+                                        SplatLocationState.deserialize(serialized.location),
                                 },
                             );
                         } catch (err) {

@@ -7,14 +7,14 @@ import classNames from "classnames";
 import React from "react";
 import { useModeClassNames } from "@/splatapus/editor/modeClassNames";
 import { Splatapus } from "@/splatapus/editor/useEditor";
-import { useLive } from "@/lib/live";
+import { useLive, useLiveValue } from "@/lib/live";
 
 const WIDTH_PER_THUMB = 84;
 const HEIGHT_PER_THUMB = 80;
 
 export function RightBar({ splatapus }: { splatapus: Splatapus }) {
-    const keyPointId = useLive(() => splatapus.location.live().keyPointId, [splatapus]);
-    const shapeId = useLive(() => splatapus.location.live().shapeId, [splatapus]);
+    const keyPointId = useLiveValue(splatapus.location.keyPointId);
+    const shapeId = useLiveValue(splatapus.location.shapeId);
     const keyPoints = Array.from(useLive(() => splatapus.document.live().keyPoints, [splatapus]));
     const shapes = Array.from(useLive(() => splatapus.document.live().shapes, [splatapus]));
     const keyFrameIndex = Array.from(keyPoints).findIndex((keyPoint) => keyPointId === keyPoint.id);
@@ -50,11 +50,8 @@ export function RightBar({ splatapus }: { splatapus: Splatapus }) {
                                         : "border-stone-300 bg-white/25 hover:bg-white/50",
                                 )}
                                 onClick={() => {
-                                    splatapus.location.update((location) => ({
-                                        ...location,
-                                        shapeId: shape.id,
-                                        keyPointId: keyPoint.id,
-                                    }));
+                                    splatapus.location.shapeId.update(shape.id);
+                                    splatapus.location.keyPointId.update(keyPoint.id);
                                 }}
                             >
                                 <ShapeVersionPreview

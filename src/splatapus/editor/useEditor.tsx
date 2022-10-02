@@ -1,7 +1,6 @@
 import { Interaction } from "@/splatapus/editor/Interaction";
 import { SplatLocation } from "@/splatapus/editor/SplatLocation";
 import { SplatapusState } from "@/splatapus/model/store";
-import { ModeType } from "@/splatapus/editor/modes/Mode";
 import { OpOptions, UndoStack } from "@/splatapus/editor/UndoStack";
 import { Viewport } from "@/splatapus/editor/Viewport";
 import { PointerEvent, useEffect, useState } from "react";
@@ -37,7 +36,7 @@ export class Splatapus {
 
     constructor(readonly screenSize: LiveValue<Vector2>, state: SplatapusState) {
         this.undoStack = new LiveValue(UndoStack.initialize(state));
-        this.interaction = new Interaction(ModeType.Draw);
+        this.interaction = new Interaction(state.location.mode);
     }
 
     private onPointerEvent(eventType: PointerEventType, event: PointerEvent) {

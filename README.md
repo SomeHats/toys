@@ -42,7 +42,7 @@ rather focus my limited free time on actually making things with the tools.
     -   [x] import/export
     -   [ ] (P0) introduce new "draw" -> "rig" -> "play" modes
         -   [x] add basics
-        -   [ ] restore mode as part of location
+        -   [x] restore mode as part of location
         -   [ ] drag-preview in rig mode
     -   [ ] (P0) fix up new drawing for unplaced point - extrapolation produces bad onion skins
             currently

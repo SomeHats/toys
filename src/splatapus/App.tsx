@@ -61,12 +61,25 @@ function AppMain({ splatapus }: { splatapus: Splatapus }) {
     }, [splatapus]);
 
     useEffect(() => {
-        return runLive(LiveEffect.idle, () => {
-            writeSavedDebounced("autosave", {
-                document: splatapus.document.live(),
-                location: splatapus.location.state.live(),
-            });
-        });
+        const unsubscribes = [
+            runLive(LiveEffect.idle, () => {
+                writeSavedDebounced("autosave", {
+                    document: splatapus.document.live(),
+                    location: splatapus.location.state.live(),
+                });
+            }),
+            runLive(LiveEffect.eager, () => {
+                const activeMode = splatapus.interaction.activeMode.live().type;
+                if (splatapus.location.mode.live() !== activeMode) {
+                    splatapus.location.mode.update(activeMode);
+                }
+            }),
+        ];
+        return () => {
+            for (const unsubscribe of unsubscribes) {
+                unsubscribe();
+            }
+        };
     }, [splatapus]);
 
     return (

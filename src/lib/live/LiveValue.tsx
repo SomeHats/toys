@@ -28,7 +28,7 @@ export class LiveValue<T> implements LiveWritable<T> {
         this.isUpdating = false;
     }
 
-    getWithoutListening(): T {
+    getOnce(): T {
         this.updateIfNeeded();
         return this.value;
     }

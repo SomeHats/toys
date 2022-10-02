@@ -78,14 +78,14 @@ export function trackRead(liveValue: Live<unknown>) {
             ? computationContext.previousDependencies?.get(liveValue)?.unsubscribe ??
               liveValue.addEagerInvalidateListener(computationContext.invalidateListener)
             : null;
-        const value = liveValue.getWithoutListening();
+        const value = liveValue.getOnce();
         computationContext.nextDependencies.set(liveValue, { value, unsubscribe });
     }
 }
 
 function didAnyDependenciesChange(dependencies: DependencyMap) {
     for (const [liveValue, { value }] of dependencies) {
-        if (!Object.is(liveValue.getWithoutListening(), value)) {
+        if (!Object.is(liveValue.getOnce(), value)) {
             return true;
         }
     }

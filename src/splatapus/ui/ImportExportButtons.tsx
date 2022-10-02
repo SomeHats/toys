@@ -31,8 +31,8 @@ function ExportButton({ splatapus }: { splatapus: Splatapus }) {
                 const data = encodeURIComponent(
                     JSON.stringify(
                         serializeSplatapusState({
-                            document: splatapus.document.getWithoutListening(),
-                            location: splatapus.location.getWithoutListening(),
+                            document: splatapus.document.getOnce(),
+                            location: splatapus.location.getOnce(),
                         }),
                     ),
                 );

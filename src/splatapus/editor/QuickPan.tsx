@@ -14,7 +14,7 @@ export class QuickPan {
 
     private gesture = new SplatapusGestureDetector({
         onDragStart: (event, splatapus) => {
-            const initialPan = splatapus.viewport.pan.getWithoutListening();
+            const initialPan = splatapus.viewport.pan.getOnce();
             let previousScreenPoint = Vector2.fromEvent(event);
 
             return {
@@ -42,7 +42,7 @@ export class QuickPan {
         return false;
     }
     onKeyUp({ event, splatapus }: KeyboardEventContext): boolean {
-        if (this.isKeyDown.getWithoutListening() && matchesKey(event, " ")) {
+        if (this.isKeyDown.getOnce() && matchesKey(event, " ")) {
             this.isKeyDown.update(false);
             this.gesture.end(splatapus);
             return true;

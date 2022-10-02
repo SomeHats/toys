@@ -53,7 +53,7 @@ export class MultiTouchPan {
                         currentScreenPosition: Vector2.fromEvent(event),
                         startEvent: event,
                     },
-                    initialViewportState: splatapus.viewport.state.getWithoutListening(),
+                    initialViewportState: splatapus.viewport.state.getOnce(),
                 };
                 // we're now doing a proper pan gesture, so cancel
                 // any down stream gestures that might have been

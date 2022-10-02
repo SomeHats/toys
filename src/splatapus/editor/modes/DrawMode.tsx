@@ -22,7 +22,7 @@ const DrawGesture = createGestureDetector<IdleDrawMode, DrawingDrawMode>({
         points: [...state.points, splatapus.viewport.eventSceneCoords(event)],
     }),
     onDragEnd: ({ splatapus }, state) => {
-        const { shapeId, keyPointId } = splatapus.location.getWithoutListening();
+        const { shapeId, keyPointId } = splatapus.location.getOnce();
         splatapus.document.update((document) => {
             const shape = document.shapes.get(shapeId);
             return document.replacePointsForVersion(keyPointId, shape.id, state.points);

@@ -65,7 +65,7 @@ test("invalidates and recomputes lazily", () => {
     expect(invalidated).toHaveBeenCalledTimes(0);
 
     // set to same value means invalidate but no recomputation
-    v1.update(v1.getWithoutListening());
+    v1.update(v1.getOnce());
     expect(computation.isValid()).toBe(false);
     expect(computationFn).toHaveBeenCalledTimes(1);
     expect(invalidated).toHaveBeenCalledTimes(1);
@@ -103,7 +103,7 @@ test("invalidates and recomputes lazily event without invalidation fn", () => {
     expect(computationFn).toHaveBeenCalledTimes(1);
 
     // set to same value means invalidate but no recomputation
-    v1.update(v1.getWithoutListening());
+    v1.update(v1.getOnce());
     expect(computation.isValid()).toBe(false);
     expect(computationFn).toHaveBeenCalledTimes(1);
 
@@ -137,5 +137,5 @@ test("can write from computation", () => {
     expect(computation.isValid()).toBe(false);
     computation.computeIfNeeded();
     expect(computation.isValid()).toBe(true);
-    expect(value.getWithoutListening()).toBe(0);
+    expect(value.getOnce()).toBe(0);
 });

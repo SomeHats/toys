@@ -1,6 +1,6 @@
 import AABB from "@/lib/geom/AABB";
 import { Vector2, parseSerializedVector2 } from "@/lib/geom/Vector2";
-import { Live, LiveMemoWritable, LiveWritable, runLiveWithoutListening } from "@/lib/live";
+import { Live, LiveMemoWritable, LiveWritable, runOnce } from "@/lib/live";
 import { createShapeParser, parseNumber, ParserType } from "@/lib/objectParser";
 import { applyUpdateWithin } from "@/lib/utils";
 import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
@@ -93,7 +93,7 @@ export class Viewport {
     }
 
     eventSceneCoords(event: { clientX: number; clientY: number }): Vector2 {
-        return runLiveWithoutListening(() => this.screenToSceneLive(Vector2.fromEvent(event)));
+        return runOnce(() => this.screenToSceneLive(Vector2.fromEvent(event)));
     }
 
     getSceneTransformLive(): string {

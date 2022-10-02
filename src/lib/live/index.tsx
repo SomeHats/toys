@@ -7,10 +7,10 @@ import { useCallback, useDebugValue, useMemo, useRef, useSyncExternalStore } fro
 export { LiveValue } from "@/lib/live/LiveValue";
 export { LiveMemo, LiveMemoWritable } from "@/lib/live/LiveMemo";
 export { LiveEffect } from "@/lib/live/LiveEffect";
-export { runLiveWithoutListening } from "@/lib/live/LiveComputation";
+export { runLiveWithoutListening as runOnce } from "@/lib/live/LiveComputation";
 
 export interface Live<T> {
-    getWithoutListening(): T;
+    getOnce(): T;
     live(): T;
     addEagerInvalidateListener(callback: () => void): Unsubscribe;
     addBatchInvalidateListener(callback: () => void): Unsubscribe;
@@ -33,11 +33,11 @@ export function useLiveValue<T>(live: Live<T>): T {
             useCallback((onChange) => live.addBatchInvalidateListener(onChange), [live]),
             () => {
                 if (isRendering.current) {
-                    return live.getWithoutListening();
+                    return live.getOnce();
                 } else {
                     // when we get the value outside of a render, suppress errors to prevent zombie child issues
                     try {
-                        return live.getWithoutListening();
+                        return live.getOnce();
                     } catch (err) {
                         console.groupCollapsed("[useLiveValue caught error]");
                         console.log(err);

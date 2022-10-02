@@ -12,7 +12,7 @@ export class LiveMemo<T> implements Live<T> {
         this.computation = new LiveComputation(compute);
     }
 
-    getWithoutListening(): T {
+    getOnce(): T {
         this.completion = this.computation.computeIfNeeded();
         return this.completion.unwrap();
     }

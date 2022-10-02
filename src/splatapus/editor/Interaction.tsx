@@ -31,7 +31,7 @@ export class Interaction {
         this.activeMode = new LiveValue(SelectedMode.initialize(modeType));
 
         // hack: force evaluation of effects
-        this.activeMode.addBatchInvalidateListener(() => this.activeMode.getWithoutListening());
+        this.activeMode.addBatchInvalidateListener(() => this.activeMode.getOnce());
     }
     toDebugStringLive(): string {
         return (
@@ -51,7 +51,7 @@ export class Interaction {
         return this.activeMode.live().type !== ModeType.Play;
     }
     requestSetActiveMode(modeType: ModeType) {
-        if (this.quickPan.isKeyDown.getWithoutListening()) {
+        if (this.quickPan.isKeyDown.getOnce()) {
             return;
         }
         this.activeMode.update((activeMode) => {
@@ -62,13 +62,13 @@ export class Interaction {
         });
     }
     onKeyDown(ctx: KeyboardEventContext) {
-        const activeMode = this.activeMode.getWithoutListening();
+        const activeMode = this.activeMode.getOnce();
         if (SelectedMode.isIdle(activeMode)) {
             if (this.quickPan.onKeyDown(ctx)) {
                 return;
             }
 
-            if (this.quickPan.isKeyDown.getWithoutListening()) {
+            if (this.quickPan.isKeyDown.getOnce()) {
                 return;
             }
 
@@ -100,8 +100,7 @@ export class Interaction {
 
         for (let i = 0; i < 9; i++) {
             if (matchesKeyDown(ctx.event, `${i + 1}`)) {
-                const keyPointId = [...ctx.splatapus.document.getWithoutListening().keyPoints][i]
-                    ?.id;
+                const keyPointId = [...ctx.splatapus.document.getOnce().keyPoints][i]?.id;
                 if (keyPointId) {
                     ctx.splatapus.location.update((location) => ({ ...location, keyPointId }));
                     return;
@@ -119,7 +118,7 @@ export class Interaction {
             return;
         }
 
-        if (this.quickPan.isKeyDown.getWithoutListening()) {
+        if (this.quickPan.isKeyDown.getOnce()) {
             this.quickPan.onPointerEvent(ctx);
         } else {
             this.activeMode.update((mode) => SelectedMode.onPointerEvent(ctx, mode));

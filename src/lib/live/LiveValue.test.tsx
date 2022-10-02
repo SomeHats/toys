@@ -8,14 +8,14 @@ beforeEach(() => {
 
 test("read value", () => {
     const value = new LiveValue(1);
-    expect(value.getWithoutListening()).toBe(1);
+    expect(value.getOnce()).toBe(1);
 });
 
 test("can read written value", () => {
     const value = new LiveValue(1);
     value.update(2);
     value.update(addOne);
-    expect(value.getWithoutListening()).toBe(3);
+    expect(value.getOnce()).toBe(3);
 });
 
 test("lazily evaluates updates", () => {
@@ -24,7 +24,7 @@ test("lazily evaluates updates", () => {
     value.update(addOne);
     value.update(addOne);
     expect(addOne).toBeCalledTimes(0);
-    expect(value.getWithoutListening()).toBe(4);
+    expect(value.getOnce()).toBe(4);
     expect(addOne).toBeCalledTimes(3);
 });
 
@@ -38,7 +38,7 @@ test("notifies once of invalidation", () => {
     value.update(addOne);
     expect(listener).toBeCalledTimes(1);
 
-    value.getWithoutListening();
+    value.getOnce();
     expect(listener).toBeCalledTimes(1);
     value.update(addOne);
     expect(listener).toBeCalledTimes(2);

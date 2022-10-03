@@ -9,44 +9,55 @@ export class LiveValue<T> implements LiveWritable<T> {
     private pendingUpdates: Array<UpdateAction<T>> | null = null;
     private invalidation = new LiveInvalidation();
     private isUpdating = false;
+    private wasRead = true;
 
     constructor(initialValue: T) {
         this.value = initialValue;
     }
 
-    private updateIfNeeded() {
-        if (!this.pendingUpdates || this.isUpdating) {
-            return;
-        }
-
-        this.isUpdating = true;
-        for (let i = 0; i < this.pendingUpdates.length; i++) {
-            this.value = applyUpdate(this.value, this.pendingUpdates[i]);
-        }
-
-        this.pendingUpdates = null;
-        this.isUpdating = false;
+    private markRead() {
+        this.wasRead = true;
     }
 
     getOnce(): T {
-        this.updateIfNeeded();
+        this.markRead();
         return this.value;
     }
 
     live(): T {
-        this.updateIfNeeded();
+        this.markRead();
         trackRead(this);
         return this.value;
     }
 
     update(update: UpdateAction<T>): void {
-        if (!this.pendingUpdates) {
-            this.pendingUpdates = [];
+        if (this.isUpdating) {
+            if (!this.pendingUpdates) this.pendingUpdates = [];
+            this.pendingUpdates.push(update);
+            return;
         }
-        this.pendingUpdates.push(update);
-        if (this.pendingUpdates.length === 1) {
-            incrementGlobalVersion();
+
+        this.isUpdating = true;
+        try {
+            this.value = applyUpdate(this.value, update);
+            this.invalidate();
+            if (this.pendingUpdates) {
+                for (let i = 0; i < this.pendingUpdates.length; i++) {
+                    this.value = applyUpdate(this.value, update);
+                    this.invalidate();
+                }
+            }
+        } finally {
+            this.pendingUpdates = null;
+            this.isUpdating = false;
+        }
+    }
+
+    invalidate() {
+        if (this.wasRead) {
+            this.wasRead = false;
             this.invalidation.invalidate();
+            incrementGlobalVersion();
         }
     }
 

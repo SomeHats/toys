@@ -18,12 +18,12 @@ test("can read written value", () => {
     expect(value.getOnce()).toBe(3);
 });
 
-test("lazily evaluates updates", () => {
+test("eagerly evaluates updates", () => {
     const value = new LiveValue(1);
     value.update(addOne);
     value.update(addOne);
     value.update(addOne);
-    expect(addOne).toBeCalledTimes(0);
+    expect(addOne).toBeCalledTimes(3);
     expect(value.getOnce()).toBe(4);
     expect(addOne).toBeCalledTimes(3);
 });

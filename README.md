@@ -44,7 +44,7 @@ rather focus my limited free time on actually making things with the tools.
         -   [x] add basics
         -   [x] restore mode as part of location
         -   [x] drag-preview in rig mode
-    -   [ ] (P0) fix up new drawing for unplaced point - extrapolation produces bad onion skins
+    -   [x] (P0) fix up new drawing for unplaced point - extrapolation produces bad onion skins
             currently
     -   [ ] optimize for quickly drawing multiple shapes
     -   [ ] figure out proper workflow/right way to use the tool

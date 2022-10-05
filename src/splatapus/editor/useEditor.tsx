@@ -65,11 +65,8 @@ export class Splatapus {
     previewPosition = new LiveMemo(() => {
         const interactionPosition = this.interaction.getPreviewPositionLive();
         return interactionPosition
-            ? PreviewPosition.interpolated(interactionPosition, this.location.shapeId.live())
-            : PreviewPosition.keyPointId(
-                  this.location.keyPointId.live(),
-                  this.location.shapeId.live(),
-              );
+            ? PreviewPosition.interpolated(interactionPosition)
+            : PreviewPosition.keyPointId(this.location.keyPointId.live());
     }, "previewPosition");
 }
 

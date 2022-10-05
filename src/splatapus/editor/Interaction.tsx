@@ -13,9 +13,7 @@ import { QuickPan } from "@/splatapus/editor/QuickPan";
 import { ModeType } from "@/splatapus/editor/modes/Mode";
 import { UndoStack } from "@/splatapus/editor/UndoStack";
 import { PlayMode } from "@/splatapus/editor/modes/PlayMode";
-import React from "react";
-import { Splatapus } from "@/splatapus/editor/useEditor";
-import { LiveValue, runOnce, useLive } from "@/lib/live";
+import { LiveValue, runOnce } from "@/lib/live";
 
 type SpecificMode = DrawMode | RigMode | PlayMode;
 

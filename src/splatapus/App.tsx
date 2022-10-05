@@ -6,7 +6,6 @@ import { loadSaved, makeEmptySaveState, writeSavedDebounced } from "@/splatapus/
 import { ModePicker } from "@/splatapus/ui/ModePicker";
 import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
 import { Splatapus, useSplatapus } from "@/splatapus/editor/useEditor";
-import { Interaction } from "@/splatapus/editor/Interaction";
 import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 import { RightBar } from "@/splatapus/ui/RightBar";
 import { assertExists } from "@/lib/assert";

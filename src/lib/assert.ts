@@ -18,7 +18,7 @@ export function assertNumber(value: unknown): number {
 }
 
 export function assertExists<T>(value: T, message?: string): NonNullable<T> {
-    if (!value) {
+    if (value == null) {
         fail(message ?? "value must be defined");
     }
     return value as NonNullable<T>;

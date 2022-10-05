@@ -25,7 +25,7 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
 }) {
     const shouldShowPoints = useDebugSetting("shouldShowPoints");
     const previewPoints = useLive(() => {
-        if (splatapus.previewPosition.live().selectedShapeId === shapeId) {
+        if (splatapus.location.shapeId.live() === shapeId) {
             const activeMode = splatapus.interaction.activeMode.live();
             switch (activeMode.type) {
                 case ModeType.Draw: {
@@ -74,7 +74,7 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
     }, [shapeId, splatapus]);
 
     const isSelected = useLive(
-        () => splatapus.previewPosition.live().selectedShapeId === shapeId,
+        () => splatapus.location.shapeId.live() === shapeId,
         [splatapus, shapeId],
     );
 

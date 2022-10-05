@@ -1,21 +1,23 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 import { SplatKeyPoint, SplatKeyPointId } from "@/splatapus/model/SplatDoc";
-import { ScenePositionedDiv } from "@/splatapus/renderer/Positioned";
 import { Mode, ModeType } from "@/splatapus/editor/modes/Mode";
 import classNames from "classnames";
-import { LiveValue, runOnce, useLive, useLiveValue } from "@/lib/live";
+import { LiveValue, runOnce, useLive } from "@/lib/live";
 import {
     PointerEventContext,
     PointerEventType,
     SplatapusGestureDetector,
 } from "@/splatapus/editor/EventContext";
 import { debugStateToString } from "@/lib/debugPropsToString";
-import { ReactNode } from "react";
+import { PointerEvent, PointerEventHandler, ReactNode, useState } from "react";
 import { Splatapus } from "@/splatapus/editor/useEditor";
-import { partition } from "@/lib/utils";
+import { mapRange } from "@/lib/utils";
 import { Viewport } from "@/splatapus/editor/Viewport";
 import { assert, assertExists } from "@/lib/assert";
-import { should } from "vitest";
+import { Transition } from "@headlessui/react";
+import { KeyPointPreview } from "@/splatapus/ui/KeyPointPreview";
+import { useKeepNonNull } from "@/lib/hooks/useNonNull";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 
 type GestureArgs = [keyPoint?: { id: SplatKeyPointId; initialScenePosition: Vector2 }];
 
@@ -130,227 +132,333 @@ export class RigMode implements Mode<ModeType.Rig> {
         splatapus: Splatapus;
         mode: RigMode | null;
     }) {
-        const { points, pointsInDock, size, isAnyDragging } = useLive(() => {
-            const size = splatapus.viewport.screenSizeWithSidebarOpenLive();
-            const previewMovement = mode?.previewMovement.live();
-            const selectedKeyPointId = splatapus.location.keyPointId.live();
+        const { points, pointsInDock, size, isAnyDragging, maxScreenProgress, minScreenProgress } =
+            useLive(() => {
+                const size = splatapus.viewport.screenSizeWithSidebarOpenLive();
+                const previewMovement = mode?.previewMovement.live();
+                const selectedKeyPointId = splatapus.location.keyPointId.live();
 
-            let dockIndex = 0;
-            const points = Array.from(
-                splatapus.document.live().keyPoints,
-                (keyPoint, overallIndex) => {
-                    const draggingPosition =
-                        previewMovement?.keyPointId === keyPoint.id
-                            ? splatapus.viewport.sceneToScreenLive(previewMovement.scenePosition)
+                let dockIndex = 0;
+                let minScreenProgress = Infinity;
+                let maxScreenProgress = -Infinity;
+
+                const points = Array.from(
+                    splatapus.document.live().keyPoints,
+                    (keyPoint, overallIndex) => {
+                        const draggingPosition =
+                            previewMovement?.keyPointId === keyPoint.id
+                                ? splatapus.viewport.sceneToScreenLive(
+                                      previewMovement.scenePosition,
+                                  )
+                                : null;
+
+                        const keypointPosition = keyPoint.position
+                            ? splatapus.viewport.sceneToScreenLive(keyPoint.position)
                             : null;
 
-                    const keypointPosition = keyPoint.position
-                        ? splatapus.viewport.sceneToScreenLive(keyPoint.position)
-                        : null;
+                        const isInDock = draggingPosition
+                            ? isPointInDockLive(splatapus.viewport, draggingPosition)
+                            : !keyPoint.position;
 
-                    const isInDock = draggingPosition
-                        ? isPointInDockLive(splatapus.viewport, draggingPosition)
-                        : !keyPoint.position;
+                        let screenProgress = null;
+                        if (keypointPosition) {
+                            screenProgress = keypointPosition.dot(size) / size.dot(size);
+                            minScreenProgress = Math.min(minScreenProgress, screenProgress);
+                            maxScreenProgress = Math.max(maxScreenProgress, screenProgress);
+                        }
 
-                    return {
-                        dockIndex: isInDock ? dockIndex++ : null,
-                        keyPoint,
-                        overallIndex,
-                        isSelected: keyPoint.id === selectedKeyPointId,
-                        screenPosition: draggingPosition ?? keypointPosition,
-                        isDragging: !!draggingPosition,
-                    };
-                },
-            );
+                        return {
+                            dockIndex: isInDock ? dockIndex++ : null,
+                            keyPoint,
+                            overallIndex,
+                            isSelected: keyPoint.id === selectedKeyPointId,
+                            screenPosition: draggingPosition ?? keypointPosition,
+                            isDragging: !!draggingPosition,
+                            screenProgress,
+                        };
+                    },
+                );
 
-            return { points, pointsInDock: dockIndex, size, isAnyDragging: !!previewMovement };
-        }, [splatapus, mode]);
+                return {
+                    points,
+                    pointsInDock: dockIndex,
+                    size,
+                    isAnyDragging: !!previewMovement,
+                    minScreenProgress,
+                    maxScreenProgress,
+                };
+            }, [splatapus, mode]);
 
         const shouldShow = !!mode;
+        const [shouldShowDock, setShouldShowDock] = useState(shouldShow);
         const exitPosition = new Vector2(size.x / 2, size.y + 50);
 
+        const [hoveredId, setHoveredId] = useState<SplatKeyPointId | null>(null);
+        const dockedHovered = points.find(
+            (point) => point.dockIndex !== null && point.keyPoint.id === hoveredId,
+        );
+        const prevDockedHovered = useKeepNonNull(dockedHovered);
+        console.log({ dockedHovered, prevDockedHovered });
+
+        console.log("render");
         return (
             <>
-                <div
-                    className={classNames(
-                        "absolute left-0 right-0 bottom-0 z-10 h-24 bg-white/50 backdrop-blur-md transition duration-200",
-                        shouldShow ? "opacity-100" : "opacity-0",
-                    )}
+                <Transition
+                    show={shouldShow}
+                    className="absolute left-0 right-0 bottom-0 z-10 h-24 bg-white/50 backdrop-blur-md "
+                    enter="transition duration-200"
+                    enterFrom="opacity-0"
+                    enterTo="opacity-100"
+                    leave="transition duration-200"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                    beforeEnter={() => requestAnimationFrame(() => setShouldShowDock(true))}
+                    beforeLeave={() => setShouldShowDock(false)}
                 />
-                {points.map(
-                    ({
-                        dockIndex,
-                        keyPoint,
-                        overallIndex,
-                        isSelected,
-                        screenPosition,
-                        isDragging,
-                    }) => {
-                        if (!screenPosition) {
-                            assert(dockIndex !== null);
-                            screenPosition = shouldShow
-                                ? new Vector2(
-                                      size.x / 2 + (dockIndex - (pointsInDock - 1) / 2) * 56,
-                                      size.y - DOCK_CENTER_LINE_PX,
-                                  )
-                                : exitPosition;
-                        }
-                        return (
-                            <div
-                                key={keyPoint.id}
-                                className={classNames(
-                                    "absolute top-0 left-0 flex cursor-move items-center justify-center",
-                                    dockIndex === null
-                                        ? "-mt-5 -ml-5 h-10 w-10 rounded-full"
-                                        : "-mt-7 -ml-7 h-14 w-14",
-                                    isDragging ? "z-20" : dockIndex !== null && "z-10",
-                                    !isDragging &&
-                                        (shouldShow
-                                            ? dockIndex !== null &&
-                                              "transition duration-300 ease-out-back"
-                                            : dockIndex !== null &&
-                                              "transition duration-200 ease-in"),
-                                )}
-                                onPointerDown={(event) => {
-                                    if (!mode) return;
-                                    mode.gesture.onPointerEvent(
-                                        { event, eventType: "down", splatapus },
-                                        {
-                                            id: keyPoint.id,
-                                            initialScenePosition: runOnce(() =>
-                                                splatapus.viewport.screenToSceneLive(
-                                                    assertExists(screenPosition),
-                                                ),
-                                            ),
-                                        },
-                                    );
-                                }}
-                                style={{
-                                    transform: `translate(${screenPosition.x}px, ${screenPosition.y}px)`,
-                                    transitionDelay:
-                                        dockIndex === null || isAnyDragging
-                                            ? "0ms"
-                                            : `${dockIndex * 30}ms`,
-                                }}
-                            >
-                                <div
-                                    className={classNames(
-                                        "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shadow-md transition-transform duration-200",
-                                        shouldShow
-                                            ? dockIndex === null
-                                                ? "scale-100 ease-out-back-md"
-                                                : "scale-150 ease-out-back-md"
-                                            : dockIndex === null
-                                            ? "scale-0 ease-in-back-md"
-                                            : "scale-100",
-                                        isSelected
-                                            ? "bg-gradient-to-br from-cyan-400 to-blue-400 text-white"
-                                            : "border border-stone-200 bg-white text-stone-400",
-                                    )}
-                                >
-                                    {overallIndex + 1}
-                                </div>
-                            </div>
-                        );
-                    },
-                )}
-                <div
-                    className={classNames(
-                        "duration pointer-events-none absolute bottom-2 z-10 text-center font-semibold text-stone-400 transition",
-                        shouldShow && pointsInDock
-                            ? "opacity-100 duration-500"
-                            : "opacity-0 duration-75",
-                    )}
+                {points.map((props) => {
+                    return (
+                        <RigMode.KeyPoint
+                            key={props.keyPoint.id}
+                            shouldShow={shouldShow}
+                            shouldShowDock={shouldShowDock}
+                            splatapus={splatapus}
+                            mode={mode}
+                            screenSize={size}
+                            pointsInDock={pointsInDock}
+                            exitPosition={exitPosition}
+                            isAnyDragging={isAnyDragging}
+                            minScreenProgress={minScreenProgress}
+                            maxScreenProgress={maxScreenProgress}
+                            onPointerEnter={() => setHoveredId(props.keyPoint.id)}
+                            onPointerLeave={() => setHoveredId(null)}
+                            {...props}
+                        />
+                    );
+                })}
+                <Transition
+                    show={shouldShow}
+                    className="duration pointer-events-none absolute bottom-2 z-10 text-center font-semibold text-stone-400"
+                    enter="transition duration-500"
+                    enterFrom="opacity-0"
+                    enterTo="opacity-100"
+                    leave="transition duration-75"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
                     style={{
                         width: size.x,
                         transitionDelay: shouldShow ? `${pointsInDock * 30 + 400}ms` : "0ms",
                     }}
                 >
                     drag each key point into the canvas
-                </div>
+                </Transition>
+                {prevDockedHovered && (
+                    <Transition
+                        show={!isAnyDragging && !!dockedHovered}
+                        className="pointer-events-none absolute bottom-24 z-10 -mt-16 -ml-10 h-16 w-20 origin-bottom overflow-hidden rounded border border-stone-300 bg-stone-50 shadow-md transition"
+                        enter="ease-out"
+                        enterFrom="translate-y-4 opacity-0 scale-75"
+                        enterTo="translate-y-0 opacity-100 scale-100"
+                        leave="ease-in"
+                        leaveFrom="translate-y-0 opacity-100 scale-100"
+                        leaveTo="translate-y-4 opacity-0 scale-75"
+                        style={{
+                            left: size.x / 2,
+                            transform: `translateX(${
+                                (assertExists((dockedHovered ?? prevDockedHovered).dockIndex) -
+                                    (pointsInDock - 1) / 2) *
+                                56
+                            }px) translateY(var(--tw-translate-y)) scale(var(--tw-scale-x), var(--tw-scale-y))`,
+                        }}
+                    >
+                        <TransitionGroup>
+                            <CSSTransition
+                                key={prevDockedHovered.keyPoint.id}
+                                timeout={300}
+                                classNames={{
+                                    // ew gross i hate this
+                                    enter: "transition-opacity bg-stone-50 absolute",
+                                    enterActive: "transition-opacity bg-stone-50 absolute",
+                                    enterDone: "transition-opacity bg-stone-50 absolute",
+                                    exit: "transition-opacity opacity-0 bg-stone-50 absolute",
+                                    exitActive: "transition-opacity opacity-0 bg-stone-50 absolute",
+                                    exitDone: "transition-opacity opacity-0 bg-stone-50 absolute",
+                                }}
+                            >
+                                <KeyPointPreview
+                                    width={78}
+                                    height={62}
+                                    keyPointId={prevDockedHovered.keyPoint.id}
+                                    splatapus={splatapus}
+                                />
+                            </CSSTransition>
+                        </TransitionGroup>
+                    </Transition>
+                )}
             </>
         );
     };
 
-    // private static PendingKeyPoints = function PendingKeyPoints({
-    //     splatapus,
-    //     mode,
-    // }: {
-    //     splatapus: Splatapus;
-    //     mode: RigMode | null;
-    // }) {
-    //     const selectedKeyPointId = useLiveValue(splatapus.location.keyPointId);
-    //     const keyPoints = Array.from(
-    //         useLive(() => splatapus.document.live().keyPoints, [splatapus]),
-    //         (keyPoint, i): [SplatKeyPoint, number] => [keyPoint, i + 1],
-    //     ).filter(([kp]) => kp.position === null);
-    //     const size = useLive(() => splatapus.viewport.screenSizeWithSidebarOpenLive(), [splatapus]);
-    //     const previewMovement = useLive(() => {
-    //         const previewMovement = mode?.previewMovement.live();
-    //         if (!previewMovement) {
-    //             return null;
-    //         }
-    //         return {
-    //             keyPointId: previewMovement.keyPointId,
-    //             screenPosition: splatapus.viewport.sceneToScreenLive(previewMovement.scenePosition),
-    //         };
-    //     }, [mode, splatapus.viewport]);
+    private static KeyPoint = function RigMoreKeyPoint({
+        dockIndex,
+        screenPosition,
+        shouldShowDock,
+        shouldShow,
+        screenSize,
+        pointsInDock,
+        keyPoint,
+        exitPosition,
+        isDragging,
+        mode,
+        splatapus,
+        isSelected,
+        isAnyDragging,
+        overallIndex,
+        screenProgress,
+        minScreenProgress,
+        maxScreenProgress,
+        onPointerEnter,
+        onPointerLeave,
+    }: {
+        dockIndex: number | null;
+        screenPosition: Vector2 | null;
+        shouldShowDock: boolean;
+        shouldShow: boolean;
+        screenSize: Vector2;
+        pointsInDock: number;
+        keyPoint: SplatKeyPoint;
+        exitPosition: Vector2;
+        isDragging: boolean;
+        mode: RigMode | null;
+        splatapus: Splatapus;
+        isSelected: boolean;
+        isAnyDragging: boolean;
+        overallIndex: number;
+        screenProgress: number | null;
+        minScreenProgress: number;
+        maxScreenProgress: number;
+        onPointerEnter: PointerEventHandler;
+        onPointerLeave: PointerEventHandler;
+    }) {
+        const [isTransitionedIn, setIsTransitionedIn] = useState(!!mode);
+        const isDocked = dockIndex !== null;
+        if (!screenPosition) {
+            assert(dockIndex !== null);
+            screenPosition = shouldShowDock
+                ? new Vector2(
+                      screenSize.x / 2 + (dockIndex - (pointsInDock - 1) / 2) * 56,
+                      screenSize.y - DOCK_CENTER_LINE_PX,
+                  )
+                : exitPosition;
+        }
 
-    //     const exitPosition = new Vector2(size.x / 2, size.y + 50);
-    //     const show = !!mode;
+        const [isHovered, setIsHovered] = useState(false);
 
-    //     return (
-    //         <>
-    //             {keyPoints.map(([keyPoint, num], i) => {
-    //                 const isDragging = previewMovement?.keyPointId === keyPoint.id;
-    //                 const position = isDragging
-    //                     ? previewMovement.screenPosition
-    //                     : ;
-    //                 return (
-    //                     <div
-    //                         key={keyPoint.id}
-    //                         className={classNames(
-    //                             "absolute top-0 left-0 -mt-4 -ml-4 flex h-8 w-8 cursor-move items-center justify-center outline-1",
-    //                             isDragging
-    //                                 ? ""
-    //                                 : show
-    //                                 ? "transition duration-200 ease-out-back"
-    //                                 : "transition ease-in",
-    //                         )}
-    //                         style={{
-    //                             transform: `translate(${position.x}px, ${position.y}px) scale(${
-    //                                 show ? 1.5 : 1
-    //                             })`,
-    //                             transitionDelay: `${i * 30}ms`,
-    //                         }}
-    //                         onPointerDown={(event) => {
-    //                             if (!mode) return;
-    //                             mode.gesture.onPointerEvent(
-    //                                 { event, eventType: "down", splatapus },
-    //                                 {
-    //                                     id: keyPoint.id,
-    //                                     initialPosition: runOnce(() =>
-    //                                         splatapus.viewport.screenToSceneLive(position),
-    //                                     ),
-    //                                 },
-    //                             );
-    //                         }}
-    //                     >
-    //                         <div
-    //                             className={classNames(
-    //                                 "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shadow-md",
-    //                                 keyPoint.id === selectedKeyPointId
-    //                                     ? "bg-gradient-to-br from-cyan-400 to-blue-400 text-white"
-    //                                     : "border border-stone-200 bg-white text-stone-400",
-    //                             )}
-    //                         >
-    //                             {num}
-    //                         </div>
-    //                     </div>
-    //                 );
-    //             })}
-    //
-    //         </>
-    //     );
-    // };
+        return (
+            <>
+                <Transition
+                    key={keyPoint.id}
+                    show={shouldShow}
+                    className={classNames(
+                        "absolute top-0 left-0 flex cursor-move items-center justify-center",
+                        isDocked ? "-mt-7 -ml-7 h-14 w-14" : "-mt-5 -ml-5 h-10 w-10 rounded-full",
+                        isDragging ? "z-20" : isDocked ? "z-10" : "z-[5]",
+                        !isDragging &&
+                            (shouldShow
+                                ? dockIndex !== null && "transition duration-300 ease-out-back"
+                                : dockIndex !== null && "transition duration-200 ease-in"),
+                    )}
+                    enter={
+                        isDocked
+                            ? "transition-transform duration-300 ease-out-back"
+                            : "transition-transform duration-200 ease-out-back"
+                    }
+                    enterFrom={isDocked ? "scale-50" : "scale-0"}
+                    enterTo="scale-100"
+                    leave={
+                        isDocked
+                            ? "transition-transform duration-200 ease-in"
+                            : "transition-transform duration-200 ease-in-back"
+                    }
+                    leaveFrom="scale-100"
+                    leaveTo={isDocked ? "scale-50" : "scale-0"}
+                    afterEnter={() => setIsTransitionedIn(true)}
+                    beforeLeave={() => setIsTransitionedIn(false)}
+                    onPointerEnter={(event: PointerEvent) => {
+                        setIsHovered(true);
+                        onPointerEnter(event);
+                    }}
+                    onPointerLeave={(event: PointerEvent) => {
+                        setIsHovered(false);
+                        onPointerLeave(event);
+                    }}
+                    onPointerDown={(event: PointerEvent) => {
+                        if (!mode) return;
+                        mode.gesture.onPointerEvent(
+                            { event, eventType: "down", splatapus },
+                            {
+                                id: keyPoint.id,
+                                initialScenePosition: runOnce(() =>
+                                    splatapus.viewport.screenToSceneLive(
+                                        assertExists(screenPosition),
+                                    ),
+                                ),
+                            },
+                        );
+                    }}
+                    style={{
+                        transform: `translate(${screenPosition.x}px, ${screenPosition.y}px) scale(var(--tw-scale-x), var(--tw-scale-y))`,
+                        transitionDelay: isAnyDragging
+                            ? "0ms"
+                            : isDocked
+                            ? `${dockIndex * 25}ms`
+                            : isTransitionedIn
+                            ? "0ms"
+                            : `${mapRange(
+                                  minScreenProgress,
+                                  maxScreenProgress,
+                                  0,
+                                  200,
+                                  assertExists(screenProgress),
+                              )}ms`,
+                    }}
+                >
+                    <div
+                        className={classNames(
+                            "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shadow-md transition-transform duration-200 ease-out-back-md",
+                            isDocked ? "scale-150" : "scale-100",
+                            isSelected
+                                ? "bg-gradient-to-br from-cyan-400 to-blue-400 text-white"
+                                : "border border-stone-200 bg-white text-stone-400",
+                        )}
+                    >
+                        {overallIndex + 1}
+                    </div>
+                </Transition>
+                <Transition
+                    show={isHovered && !isDocked && !isAnyDragging}
+                    className="pointer-events-none absolute top-0 left-0 z-[4]"
+                    style={{
+                        transform: `translate(${screenPosition.x}px, ${screenPosition.y - 24}px)`,
+                    }}
+                >
+                    <Transition.Child
+                        className="-mt-16 -ml-10 h-16 w-20 origin-bottom rounded border border-stone-300 bg-stone-50 shadow-md"
+                        enter="transition ease-out"
+                        enterFrom="translate-y-4 opacity-0 scale-75"
+                        enterTo="translate-y-0 opacity-100 scale-100"
+                        leave="transition ease-in"
+                        leaveFrom="translate-y-0 opacity-100 scale-100"
+                        leaveTo="translate-y-4 opacity-0 scale-75"
+                    >
+                        <KeyPointPreview
+                            width={78}
+                            height={62}
+                            keyPointId={keyPoint.id}
+                            splatapus={splatapus}
+                        />
+                    </Transition.Child>
+                </Transition>
+            </>
+        );
+    };
 }

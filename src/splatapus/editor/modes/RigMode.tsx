@@ -236,7 +236,7 @@ export class RigMode implements Mode<ModeType.Rig> {
                     );
                 })}
                 <Transition
-                    show={shouldShow}
+                    show={shouldShow && pointsInDock > 0}
                     className="duration pointer-events-none absolute bottom-2 z-10 text-center font-semibold text-stone-400"
                     enter="transition duration-500"
                     enterFrom="opacity-0"

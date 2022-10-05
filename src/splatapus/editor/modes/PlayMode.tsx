@@ -8,7 +8,7 @@ import { ReactNode } from "react";
 
 export class PlayMode implements Mode<ModeType.Play> {
     readonly type = ModeType.Play;
-    readonly previewPosition = new LiveValue<null | Vector2>(null);
+    readonly previewPosition = new LiveValue<null | Vector2>(null, "PlayMode.previewPosition");
 
     isIdleLive(): boolean {
         return true;

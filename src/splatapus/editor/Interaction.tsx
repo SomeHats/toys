@@ -43,7 +43,7 @@ export class Interaction {
     readonly activeMode: LiveValue<SpecificMode>;
 
     constructor(modeType: ModeType) {
-        this.activeMode = new LiveValue(initializeModeForType(modeType));
+        this.activeMode = new LiveValue(initializeModeForType(modeType), "Interaction.activeMode");
 
         // hack: force evaluation of effects
         this.activeMode.addBatchInvalidateListener(() => this.activeMode.getOnce());
@@ -136,13 +136,4 @@ export class Interaction {
             this.activeMode.getOnce().onPointerEvent(ctx);
         }
     }
-
-    static Overlay = React.memo(function InteractionOverlay({
-        splatapus,
-    }: {
-        splatapus: Splatapus;
-    }) {
-        const activeMode = useLive(() => splatapus.interaction.activeMode.live(), [splatapus]);
-        return <>{activeMode.renderOverlay(splatapus)}</>;
-    });
 }

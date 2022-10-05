@@ -1,5 +1,6 @@
 import { Unsubscribe } from "@/lib/EventEmitter";
 import { LiveEffect, LiveEffectScheduleFn } from "@/lib/live/LiveEffect";
+import { getDebugLabel } from "@/lib/live/LiveInvalidation";
 import { LiveMemo } from "@/lib/live/LiveMemo";
 import { UpdateAction } from "@/lib/utils";
 import { useCallback, useDebugValue, useMemo, useRef, useSyncExternalStore } from "react";
@@ -14,6 +15,7 @@ export interface Live<T> {
     live(): T;
     addEagerInvalidateListener(callback: () => void): Unsubscribe;
     addBatchInvalidateListener(callback: () => void): Unsubscribe;
+    getDebugName(): string;
 }
 
 export interface LiveWritable<T> extends Live<T> {
@@ -56,8 +58,9 @@ export function useLiveValue<T>(live: Live<T>): T {
 }
 
 export function useLive<T>(compute: () => T, deps: ReadonlyArray<unknown>): T {
+    const debugLabel = process.env.NODE_ENV !== "production" ? getDebugLabel("useLive") : undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const liveMemo = useMemo(() => new LiveMemo(compute), deps);
+    const liveMemo = useMemo(() => new LiveMemo(compute, debugLabel), deps);
     const value = useLiveValue(liveMemo);
     useDebugValue(value);
     return value;

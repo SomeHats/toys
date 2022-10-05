@@ -86,7 +86,7 @@ function readDebugSettings(): DebugSettings {
     }
 }
 
-const debugSettings = new LiveValue(readDebugSettings());
+const debugSettings = new LiveValue(readDebugSettings(), "debugSettings");
 runLive(LiveEffect.idle, () => {
     setLocalStorageItem(STORAGE_KEY, JSON.stringify(debugSettings.live()));
 });

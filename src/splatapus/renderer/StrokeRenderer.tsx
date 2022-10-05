@@ -51,33 +51,49 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
         return null;
     }, [splatapus, shapeId]);
 
-    const centerPoints = useLive(
-        () =>
-            interpolationCache.getCenterPointsAtPosition(
-                splatapus.document.live(),
-                shapeId,
-                splatapus.previewPosition.live(),
-            ),
-        [shapeId, splatapus],
-    );
+    const centerPoints = useLive(() => {
+        const document = splatapus.document.live();
+        const previewPosition = splatapus.previewPosition.live();
+        const actualCenterPoints = interpolationCache.getCenterPointsAtPosition(
+            document,
+            shapeId,
+            previewPosition,
+        );
+        if (actualCenterPoints) {
+            return actualCenterPoints;
+        }
+
+        const keyPointIdHistory = splatapus.keyPointIdHistory.live();
+        for (let i = keyPointIdHistory.length - 1; i >= 0; i--) {
+            const previousShapeVersion = document.getShapeVersion(keyPointIdHistory[i], shapeId);
+            if (previousShapeVersion) {
+                return document.getNormalizedCenterPointsForShapeVersion(previousShapeVersion.id);
+            }
+        }
+        return null;
+    }, [shapeId, splatapus]);
 
     const isSelected = useLive(
         () => splatapus.previewPosition.live().selectedShapeId === shapeId,
         [splatapus, shapeId],
     );
 
+    const actualPoints = previewPoints || centerPoints;
+
     return (
         <>
-            <path
-                d={getSvgPathFromStroke(pathFromCenterPoints(centerPoints))}
-                className={classNames(
-                    previewPoints
-                        ? "fill-stone-300"
-                        : isSelected
-                        ? "fill-stone-800"
-                        : "fill-stone-600",
-                )}
-            />
+            {centerPoints && (
+                <path
+                    d={getSvgPathFromStroke(pathFromCenterPoints(centerPoints))}
+                    className={classNames(
+                        previewPoints
+                            ? "fill-stone-300"
+                            : isSelected
+                            ? "fill-stone-800"
+                            : "fill-stone-600",
+                    )}
+                />
+            )}
             {previewPoints && (
                 <path
                     d={getSvgPathFromStroke(pathFromCenterPoints(previewPoints))}
@@ -85,7 +101,8 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                 />
             )}
             {shouldShowPoints &&
-                (previewPoints || centerPoints).map((point, i) => (
+                actualPoints &&
+                actualPoints.map((point, i) => (
                     <circle
                         key={i}
                         cx={point.center.x}

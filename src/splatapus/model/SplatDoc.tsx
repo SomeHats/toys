@@ -2,6 +2,7 @@ import { Vector2 } from "@/lib/geom/Vector2";
 import {
     createArrayParser,
     createDictParser,
+    createNullableParser,
     createShapeParser,
     ParserType,
 } from "@/lib/objectParser";
@@ -11,7 +12,7 @@ export const SplatKeyPointId = new IdGenerator("key");
 export type SplatKeyPointId = typeof SplatKeyPointId["Id"];
 export const parseSplatKeyPoint = createShapeParser({
     id: SplatKeyPointId.parse,
-    position: Vector2.parse,
+    position: createNullableParser(Vector2.parse),
 });
 export type SplatKeyPoint = ParserType<typeof parseSplatKeyPoint>;
 

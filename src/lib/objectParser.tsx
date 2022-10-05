@@ -19,8 +19,11 @@ export class ParserError {
         public readonly path: ReadonlyArray<number | string> = [],
     ) {}
 
-    formatPath() {
-        let path = "ROOT";
+    formatPath(): string | null {
+        if (!this.path.length) {
+            return null;
+        }
+        let path = "";
         for (const item of this.path) {
             if (typeof item === "number") {
                 path += `[${item}]`;
@@ -32,7 +35,12 @@ export class ParserError {
     }
 
     toString() {
-        return `At ${this.formatPath()}: ${this.message}`;
+        const path = this.formatPath();
+        const indentedMessage = this.message
+            .split("\n")
+            .map((line, i) => (i === 0 ? line : `  ${line}`))
+            .join("\n");
+        return path ? `At ${path}: ${indentedMessage}` : indentedMessage;
     }
 }
 
@@ -73,6 +81,12 @@ function typeToString(value: unknown): string {
 export const parseString = createTypeofParser<string>("string");
 export const parseNumber = createTypeofParser<number>("number");
 export const parseBoolean = createTypeofParser<boolean>("boolean");
+export function parseNull(input: unknown): Result<null, ParserError> {
+    if (input === null || input === undefined) {
+        return Result.ok(null);
+    }
+    return Result.error(new ParserError(`Expected null or undefined, got ${typeToString(input)}`));
+}
 
 export function createArrayParser<T>(parseItem: Parser<T>): Parser<ReadonlyArray<T>> {
     return (input: unknown) => {
@@ -161,6 +175,34 @@ export function createEnumParser<
     };
 }
 
+export function createIntersectionParser<T extends Record<string, Parser<unknown>>>(
+    parsers: T,
+): Parser<ParserType<T[keyof T]>> {
+    const parserEntries = entries(parsers);
+    return (input) => {
+        const errors = [];
+        for (const [name, parse] of parserEntries) {
+            const result = parse(input) as Result<ParserType<T[keyof T]>, ParserError>;
+            if (result.isOk()) {
+                return result;
+            }
+            errors.push(`- ${name}: ${result.error.toString()}`);
+        }
+        return Result.error(
+            new ParserError(
+                `Expected one of the following to pass, but all errored:\n${errors.join("\n")}`,
+            ),
+        );
+    };
+}
+
 export function composeParsers<A, B, C>(parse: Parser<B, A>, validate: Parser<C, B>): Parser<C, A> {
     return (input) => parse(input).andThen(validate);
+}
+
+export function createNullableParser<O>(parser: Parser<O>): Parser<O | null> {
+    return createIntersectionParser({
+        value: parser,
+        null: parseNull,
+    });
 }

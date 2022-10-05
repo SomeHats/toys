@@ -68,14 +68,7 @@ export function RightBar({ splatapus }: { splatapus: Splatapus }) {
                             onClick={() => {
                                 const keyPointId = SplatKeyPointId.generate();
                                 splatapus.document.update(
-                                    (document) =>
-                                        document.addKeyPoint(
-                                            keyPointId,
-                                            findPositionForNewKeyPoint(
-                                                document,
-                                                splatapus.viewport,
-                                            ),
-                                        ),
+                                    (document) => document.addKeyPoint(keyPointId, null),
                                     {
                                         lockstepLocation: (location) => ({
                                             ...location,

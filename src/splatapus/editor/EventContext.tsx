@@ -46,7 +46,8 @@ export function applyPointerEvent<T>(
 }
 
 export class SplatapusGestureDetector<Args extends Array<unknown> = []> {
-    readonly isDragging = new LiveValue(false);
+    readonly isDragging = new LiveValue(false, "Gesture.isDragging");
+    readonly isDragConfirmed = new LiveValue(false, "Gesture.isDragConfirmed");
 
     private readonly gesture: GestureDetector<[splatapus: Splatapus, ...args: Args]>;
 
@@ -71,11 +72,19 @@ export class SplatapusGestureDetector<Args extends Array<unknown> = []> {
                     onMove: handler.onMove,
                     onEnd: (event) => {
                         this.isDragging.update(false);
+                        this.isDragConfirmed.update(false);
                         return handler.onEnd(event);
                     },
                     onCancel: (event) => {
                         this.isDragging.update(false);
+                        this.isDragConfirmed.update(false);
                         return handler.onCancel(event);
+                    },
+                    onConfirm: (event) => {
+                        this.isDragConfirmed.update(false);
+                        if (handler.onConfirm) {
+                            return handler.onConfirm(event);
+                        }
                     },
                 };
             },

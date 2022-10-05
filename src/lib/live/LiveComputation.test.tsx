@@ -15,7 +15,7 @@ function scenario() {
         }
     });
 
-    const computation = new LiveComputation(computationFn);
+    const computation = new LiveComputation(computationFn, undefined, "computation");
 
     return { v1, v2, vConditional, computation, computationFn };
 }
@@ -127,12 +127,16 @@ test("invalidates and recomputes lazily event without invalidation fn", () => {
 
 test("can write from computation", () => {
     const value = new LiveValue(2);
-    const computation = new LiveComputation(() => {
-        const v = value.live();
-        if (v % 3 !== 0) {
-            value.update(v - 1);
-        }
-    });
+    const computation = new LiveComputation(
+        () => {
+            const v = value.live();
+            if (v % 3 !== 0) {
+                value.update(v - 1);
+            }
+        },
+        undefined,
+        "computation",
+    );
 
     expect(computation.isValid()).toBe(false);
     computation.computeIfNeeded();

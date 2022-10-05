@@ -7,12 +7,17 @@ import { applyUpdate, UpdateAction } from "@/lib/utils";
 export class LiveValue<T> implements LiveWritable<T> {
     private value: T;
     private pendingUpdates: Array<UpdateAction<T>> | null = null;
-    private invalidation = new LiveInvalidation();
+    private invalidation: LiveInvalidation;
     private isUpdating = false;
     private wasRead = true;
 
-    constructor(initialValue: T) {
+    constructor(initialValue: T, debugName?: string) {
         this.value = initialValue;
+        this.invalidation = new LiveInvalidation(debugName, "LiveValue");
+    }
+
+    getDebugName(): string {
+        return this.invalidation.getDebugName();
     }
 
     private markRead() {
@@ -53,7 +58,7 @@ export class LiveValue<T> implements LiveWritable<T> {
         }
     }
 
-    invalidate() {
+    private invalidate() {
         if (this.wasRead) {
             this.wasRead = false;
             this.invalidation.invalidate();

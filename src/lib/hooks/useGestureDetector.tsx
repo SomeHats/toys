@@ -21,6 +21,7 @@ export type DragGestureHandler = {
     onCancel: (event: PointerEvent) => void;
     onMove: (event: PointerEvent) => void;
     onEnd: (event: PointerEvent) => void;
+    onConfirm?: (event: PointerEvent) => void;
 };
 
 export const defaultTapGestureHandler: TapGestureHandler<Array<unknown>> = noop;
@@ -86,6 +87,7 @@ export class GestureDetector<Args extends Array<unknown> = []> {
                         pointerId: event.pointerId,
                         dragHandler,
                     };
+                    dragHandler.onConfirm?.(event);
                 }
                 return;
             }
@@ -109,6 +111,7 @@ export class GestureDetector<Args extends Array<unknown> = []> {
                     this.state.startPosition.distanceTo(Vector2.fromEvent(event)) >=
                     MIN_DRAG_GESTURE_DISTANCE_PX
                 ) {
+                    this.state.dragHandler.onConfirm?.(event);
                     this.state = {
                         type: "dragConfirmed",
                         pointerId: this.state.pointerId,

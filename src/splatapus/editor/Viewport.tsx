@@ -49,9 +49,13 @@ export class Viewport {
         (update) => this.state.update((state) => applyUpdateWithin(state, "zoom", update)),
     );
 
+    screenSizeWithSidebarOpenLive(): Vector2 {
+        return this.screenSize.live().sub(new Vector2(SIDEBAR_WIDTH_PX, 0));
+    }
+
     canvasScreenSizeLive(): Vector2 {
         if (this.isSidebarOpen.live()) {
-            return this.screenSize.live().sub(new Vector2(SIDEBAR_WIDTH_PX, 0));
+            return this.screenSizeWithSidebarOpenLive();
         }
         return this.screenSize.live();
     }

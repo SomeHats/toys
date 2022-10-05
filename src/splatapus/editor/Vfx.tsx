@@ -8,7 +8,10 @@ export type VfxActionName = "undo" | "redo" | ModeType;
 let nextAnimationIdx = 1;
 
 export class Vfx {
-    activeAnimations = new LiveValue<ReadonlyObjectMap<VfxActionName, number>>({});
+    activeAnimations = new LiveValue<ReadonlyObjectMap<VfxActionName, number>>(
+        {},
+        "vfx.activeAnimations",
+    );
 
     triggerAnimation(name: VfxActionName) {
         this.activeAnimations.update((prev) => ({

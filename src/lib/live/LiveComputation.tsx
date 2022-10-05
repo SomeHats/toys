@@ -9,6 +9,8 @@ import {
 } from "@/lib/live/LiveInvalidation";
 import { Result } from "@/lib/Result";
 
+const PRINT_TRIGGER_LOG = false && process.env.NODE_ENV !== "production";
+
 let globalVersion = 0;
 export function incrementGlobalVersion() {
     globalVersion++;
@@ -83,9 +85,12 @@ export function trackRead(liveValue: Live<unknown>) {
     }
 }
 
-function didAnyDependenciesChange(dependencies: DependencyMap) {
+function didAnyDependenciesChange(dependencies: DependencyMap, debugName: string) {
     for (const [liveValue, { value }] of dependencies) {
         if (!Object.is(liveValue.getOnce(), value)) {
+            if (PRINT_TRIGGER_LOG) {
+                console.log(`recalculate ${debugName} because ${liveValue.getDebugName()} changed`);
+            }
             return true;
         }
     }
@@ -105,11 +110,17 @@ export class LiveComputation<T> {
     private _isValid = false;
     private validForGlobalVersion = -1;
     private dependencies: null | DependencyMap = null;
-    private invalidation = new LiveInvalidation();
+    private invalidation: LiveInvalidation;
     private isComputing = false;
     private completion: Result<T, unknown> | null = null;
 
-    constructor(private readonly compute: () => T) {}
+    constructor(private readonly compute: () => T, debugName: string | undefined, type: string) {
+        this.invalidation = new LiveInvalidation(debugName, type);
+    }
+
+    getDebugName() {
+        return this.invalidation.getDebugName();
+    }
 
     private invalidate = () => {
         assert(!this.isComputing, "cannot write whilst computing dependant live computation");
@@ -124,7 +135,10 @@ export class LiveComputation<T> {
             return assertExists(this.completion);
         }
 
-        if (this.dependencies && !didAnyDependenciesChange(this.dependencies)) {
+        if (
+            this.dependencies &&
+            !didAnyDependenciesChange(this.dependencies, this.getDebugName())
+        ) {
             this.makeValidAt(globalVersion);
             return assertExists(this.completion);
         }

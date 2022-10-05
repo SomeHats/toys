@@ -2,6 +2,7 @@ import {
     createArrayParser,
     createDictParser,
     createEnumParser,
+    createNullableParser,
     createShapeParser,
     parseString,
 } from "@/lib/objectParser";
@@ -17,12 +18,12 @@ test("createEnumParser", () => {
 
     expect(arrayParser(true).unwrap()).toBe(true);
     expect(arrayParser(false).unwrapError().toString()).toMatchInlineSnapshot(
-        '"At ROOT: Expected \\"one\\" or 2 or true, got false"',
+        '"Expected \\"one\\" or 2 or true, got false"',
     );
 
     expect(enumParser("one").unwrap()).toBe(TestEnum.One);
     expect(enumParser({ hello: "world" }).unwrapError().toString()).toMatchInlineSnapshot(
-        '"At ROOT: Expected \\"one\\" or \\"two\\", got an object"',
+        '"Expected \\"one\\" or \\"two\\", got an object"',
     );
 });
 
@@ -35,21 +36,32 @@ test("nested errors", () => {
     });
 
     expect(parse(false).unwrapError().toString()).toMatchInlineSnapshot(
-        '"At ROOT: Expected object, got a boolean"',
+        '"Expected object, got a boolean"',
     );
     expect(parse({ foo: false }).unwrapError().toString()).toMatchInlineSnapshot(
-        '"At ROOT.foo: Expected object, got a boolean"',
+        '"At .foo: Expected object, got a boolean"',
     );
     expect(
         parse({ foo: { four: "hi" } })
             .unwrapError()
             .toString(),
     ).toMatchInlineSnapshot(
-        '"At ROOT.foo.four: Expected \\"one\\" or \\"two\\" or \\"three\\", got \\"four\\""',
+        '"At .foo.four: Expected \\"one\\" or \\"two\\" or \\"three\\", got \\"four\\""',
     );
     expect(
         parse({ foo: { two: ["a", "b", 3, "d"] } })
             .unwrapError()
             .toString(),
-    ).toMatchInlineSnapshot('"At ROOT.foo.two[2]: Expected string, got number"');
+    ).toMatchInlineSnapshot('"At .foo.two[2]: Expected string, got number"');
+});
+
+test("createNullableParser", () => {
+    const parse = createNullableParser(parseString);
+    expect(parse(null).unwrap()).toBe(null);
+    expect(parse("hi").unwrap()).toBe("hi");
+    expect(parse(3).unwrapError().toString()).toMatchInlineSnapshot(`
+      "Expected one of the following to pass, but all errored:
+        - value: Expected string, got number
+        - null: Expected null or undefined, got a number"
+    `);
 });

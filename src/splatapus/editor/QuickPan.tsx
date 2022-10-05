@@ -10,7 +10,7 @@ import {
 } from "@/splatapus/editor/EventContext";
 
 export class QuickPan {
-    readonly isKeyDown = new LiveValue(false);
+    readonly isKeyDown = new LiveValue(false, "QuickPan.isKeyDown");
 
     private gesture = new SplatapusGestureDetector({
         onDragStart: (event, splatapus) => {

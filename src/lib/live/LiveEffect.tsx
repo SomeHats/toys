@@ -25,8 +25,12 @@ export class LiveEffect {
         return () => cancelIdleCallback(id);
     };
 
-    constructor(run: () => void, private readonly schedule: LiveEffectScheduleFn) {
-        this.computation = new LiveComputation(run);
+    constructor(
+        run: () => void,
+        private readonly schedule: LiveEffectScheduleFn,
+        debugName?: string,
+    ) {
+        this.computation = new LiveComputation(run, debugName, "LiveEffect");
         this.cancelScheduledCallback = schedule(() => {
             this.cancelScheduledCallback = null;
             this.unsubscribe = this.computation.addEagerInvalidateListener(this.invalidate);

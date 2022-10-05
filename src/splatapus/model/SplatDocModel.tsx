@@ -137,12 +137,12 @@ export class SplatDocModel {
         return this.with({ shapes });
     }
 
-    addKeyPoint(keyPointId: SplatKeyPointId, location: Vector2): SplatDocModel {
+    addKeyPoint(keyPointId: SplatKeyPointId, position: Vector2 | null): SplatDocModel {
         console.log("doc.addKeyPoint", keyPointId);
 
         const keyPoints = this.keyPoints.insert({
             id: keyPointId,
-            position: location,
+            position,
         });
 
         return this.with({ keyPoints });

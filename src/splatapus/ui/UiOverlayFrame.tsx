@@ -46,7 +46,7 @@ export function UiOverlayFrame({
     const isSidebarOpen = useLiveValue(splatapus.viewport.isSidebarOpen);
 
     return (
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-stretch">
+        <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-stretch">
             <div className="pointer-events-auto flex flex-none items-center justify-between gap-3 bg-stone-100 px-3 py-2">
                 <h1 className="order-1 flex-1 font-bold tracking-wide text-stone-600">splatapus</h1>
                 <div className="order-2 flex flex-1 items-center justify-center gap-2">

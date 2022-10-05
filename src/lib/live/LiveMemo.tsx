@@ -8,8 +8,12 @@ export class LiveMemo<T> implements Live<T> {
     private readonly computation: LiveComputation<T>;
     private completion: Result<T, unknown> | null = null;
 
-    constructor(compute: () => T) {
-        this.computation = new LiveComputation(compute);
+    constructor(compute: () => T, debugName?: string, __t = "LiveMemo") {
+        this.computation = new LiveComputation(compute, debugName, __t);
+    }
+
+    getDebugName(): string {
+        return this.computation.getDebugName();
     }
 
     getOnce(): T {
@@ -38,8 +42,9 @@ export class LiveMemoWritable<T, Args extends Array<unknown> = []>
     constructor(
         read: () => T,
         private readonly write: (update: UpdateAction<T>, ...args: Args | []) => void,
+        debugName?: string,
     ) {
-        super(read);
+        super(read, debugName, "LiveMemoWritable");
     }
 
     update(update: UpdateAction<T>, ...args: Args | []) {

@@ -19,7 +19,11 @@ export function findPositionForNewKeyPoint(document: SplatDocModel, viewport: Vi
 
     let candidate = idealBounds.getCenter();
     for (let i = 0; i < 500; i++) {
-        if (otherPoints.every((otherPoint) => otherPoint.distanceToSq(candidate) > threshold)) {
+        if (
+            otherPoints.every(
+                (otherPoint) => !otherPoint || otherPoint.distanceToSq(candidate) > threshold,
+            )
+        ) {
             return candidate;
         }
         candidate = new Vector2(

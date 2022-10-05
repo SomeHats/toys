@@ -1,5 +1,5 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import { exhaustiveSwitchError } from "@/lib/utils";
+import { compact, exhaustiveSwitchError } from "@/lib/utils";
 import { AutoInterpolator, Interpolator } from "@/splatapus/model/Interpolator";
 import {
     SplatKeyPoint,
@@ -18,7 +18,7 @@ type CachedValues = {
         x: Interpolator;
         y: Interpolator;
         r: Interpolator;
-    }>;
+    }> | null;
 };
 
 class InterpolationCache {
@@ -28,12 +28,15 @@ class InterpolationCache {
         document: SplatDocModel,
         shapeId: SplatShapeId,
         position: PreviewPosition,
-    ): ReadonlyArray<StrokeCenterPoint> {
+    ): ReadonlyArray<StrokeCenterPoint> | null {
         switch (position.type) {
             case "keyPointId": {
                 const shapeVersion = document.getShapeVersion(position.keyPointId, shapeId);
                 if (!shapeVersion) {
                     const keyPoint = document.keyPoints.get(position.keyPointId);
+                    if (!keyPoint.position) {
+                        return null;
+                    }
                     return this.getCenterPointsAtInterpolatedPosition(
                         document,
                         shapeId,
@@ -56,11 +59,11 @@ class InterpolationCache {
         document: SplatDocModel,
         shapeId: SplatShapeId,
         position: Vector2,
-    ): StrokeCenterPoint[] {
+    ): StrokeCenterPoint[] | null {
         const shape = document.shapes.get(shapeId);
         const shapeVersions = new Set(document.iterateShapeVersionsForShape(shapeId));
         if (!shapeVersions.size) {
-            return [];
+            return null;
         }
 
         const keyPoints = new Set<SplatKeyPoint>();
@@ -81,27 +84,44 @@ class InterpolationCache {
             });
         }
 
-        return interpolators.map(({ x, y, r }) => ({
-            center: new Vector2(x.interpolate(position), y.interpolate(position)),
-            radius: r.interpolate(position),
-        }));
+        return (
+            interpolators?.map(({ x, y, r }) => ({
+                center: new Vector2(x.interpolate(position), y.interpolate(position)),
+                radius: r.interpolate(position),
+            })) ?? null
+        );
     }
 
     private calculateInterpolators(document: SplatDocModel, shapeVersions: Set<SplatShapeVersion>) {
         console.time("calculatInterpolators");
-        const allNormalizedPoints = Array.from(shapeVersions, (version) => ({
-            normalizedCenterPoints: document.getNormalizedCenterPointsForShapeVersion(version.id),
-            version,
-            keyPoint: document.keyPoints.get(version.keyPointId),
-        }));
+        const allNormalizedPoints = compact(
+            Array.from(shapeVersions, (version) => {
+                const keyPoint = document.keyPoints.get(version.keyPointId);
+                if (!keyPoint.position) {
+                    return null;
+                }
+                return {
+                    normalizedCenterPoints: document.getNormalizedCenterPointsForShapeVersion(
+                        version.id,
+                    ),
+                    version,
+                    keyPointPosition: keyPoint.position,
+                };
+            }),
+        );
 
-        const centers = allNormalizedPoints.map(({ keyPoint }) => keyPoint.position);
+        if (!allNormalizedPoints.length) {
+            return null;
+        }
+
+        const centers = allNormalizedPoints.map(({ keyPointPosition }) => keyPointPosition);
 
         const minLength = Math.min(
             ...allNormalizedPoints.map(
                 ({ normalizedCenterPoints }) => normalizedCenterPoints.length,
             ),
         );
+        console.log({ minLength, allNormalizedPoints });
         const interpolators = [];
         for (let i = 0; i < minLength; i++) {
             const xs = allNormalizedPoints.map(

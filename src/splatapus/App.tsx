@@ -14,7 +14,9 @@ import { UiOverlayFrame } from "@/splatapus/ui/UiOverlayFrame";
 import { ImportExportButtons } from "@/splatapus/ui/ImportExportButtons";
 import { UndoRedoButtons } from "@/splatapus/ui/UndoRedoButtons";
 import { DebugSettingsMenu } from "@/splatapus/DebugSettings";
-import { LiveEffect, runLive, useLive } from "@/lib/live";
+import { LiveEffect, runLive, useLive, useLiveValue } from "@/lib/live";
+import { RigMode } from "@/splatapus/editor/modes/RigMode";
+import { ModeType } from "@/splatapus/editor/modes/Mode";
 
 function getInitialEditorState() {
     const screenSize = Vector2.UNIT;
@@ -61,26 +63,15 @@ function AppMain({ splatapus }: { splatapus: Splatapus }) {
     }, [splatapus]);
 
     useEffect(() => {
-        const unsubscribes = [
-            runLive(LiveEffect.idle, () => {
-                writeSavedDebounced("autosave", {
-                    document: splatapus.document.live(),
-                    location: splatapus.location.state.live(),
-                });
-            }),
-            runLive(LiveEffect.eager, () => {
-                const activeMode = splatapus.interaction.activeMode.live().type;
-                if (splatapus.location.mode.live() !== activeMode) {
-                    splatapus.location.mode.update(activeMode);
-                }
-            }),
-        ];
-        return () => {
-            for (const unsubscribe of unsubscribes) {
-                unsubscribe();
-            }
-        };
+        return runLive(LiveEffect.idle, () => {
+            writeSavedDebounced("autosave", {
+                document: splatapus.document.live(),
+                location: splatapus.location.state.live(),
+            });
+        });
     }, [splatapus]);
+
+    const activeMode = useLiveValue(splatapus.interaction.activeMode);
 
     return (
         <>
@@ -93,7 +84,10 @@ function AppMain({ splatapus }: { splatapus: Splatapus }) {
                 onPointerCancel={splatapus.onPointerCancel}
             >
                 <DocumentRenderer splatapus={splatapus} />
-                <Interaction.Overlay splatapus={splatapus} />
+                <RigMode.Overlay
+                    splatapus={splatapus}
+                    mode={activeMode.type === ModeType.Rig ? activeMode : null}
+                />
             </div>
             <UiOverlayFrame
                 topBarLeft={<ModePicker splatapus={splatapus} />}

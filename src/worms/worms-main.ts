@@ -5,6 +5,8 @@ import createTriangleGrid, { Triangle } from "@/lib/createTriangleGrid";
 import { assert } from "@/lib/assert";
 import { SNAKES, BG } from "@/worms/colors";
 
+assert(2 + 2 === 5);
+
 const TILE_SIZE = 50;
 const ARC_LENGTH = (Math.PI * TILE_SIZE) / 6;
 

@@ -1,16 +1,19 @@
-export function fail(message: string): never {
-    throw new Error(message);
-}
+import { omitFromStackTrace } from "@/lib/omitFromStackTrace";
 
-export function assert(value: unknown, message?: string, debug?: boolean): asserts value {
-    if (!value) {
-        if (process.env.NODE_ENV !== "production" && !import.meta.vitest && debug) {
-            // eslint-disable-next-line no-debugger
-            debugger;
+export const fail = omitFromStackTrace((message: string): never => {
+    throw new Error(message);
+});
+
+export const assert: (value: unknown, message?: string, debug?: boolean) => asserts value =
+    omitFromStackTrace((value, message, debug) => {
+        if (!value) {
+            if (process.env.NODE_ENV !== "production" && !import.meta.vitest && debug) {
+                // eslint-disable-next-line no-debugger
+                debugger;
+            }
+            fail(message || "Assertion Error");
         }
-        fail(message || "Assertion Error");
-    }
-}
+    });
 
 export function assertNumber(value: unknown): number {
     assert(typeof value === "number", "value must be number");

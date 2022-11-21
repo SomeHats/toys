@@ -2,6 +2,10 @@ import { defineConfig, PluginOption } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { glob } from "glob";
+import { PluginObj } from "@babel/core";
+import generate from "@babel/generator";
+import * as T from "@babel/types";
+import assert from "assert";
 
 const mainIndex = path.resolve(__dirname, "src/index.html");
 const roots = glob
@@ -19,7 +23,15 @@ const baseUrl = process.env.VITE_BASE || "./";
 export default defineConfig(async ({ mode }) => {
     const glsl = await import("vite-plugin-glsl");
     return {
-        plugins: [react(), glsl.default({ compress: mode === "production" }), resolveATags()],
+        plugins: [
+            react({
+                babel: {
+                    plugins: [createAssertPlugin()],
+                },
+            }),
+            glsl.default({ compress: mode === "production" }),
+            resolveATags(),
+        ],
         base: baseUrl,
         root: path.resolve(__dirname, "src"),
         publicDir: path.resolve(__dirname, "public"),
@@ -50,6 +62,40 @@ function resolveATags(): PluginOption {
             return html.replace(/(<a [^>]*?href=")([^"]+?)("[^>]*?>)/g, (_, pre, url, post) => {
                 return `${pre}${path.join(baseUrl, url)}${post}`;
             });
+        },
+    };
+}
+
+function createAssertPlugin(): PluginObj {
+    return {
+        visitor: {
+            CallExpression(path, state) {
+                if (path.node.callee.type !== "Identifier") {
+                    return;
+                }
+                const calleeName = path.node.callee.name;
+                if (calleeName !== "assert") return;
+                const binding = path.scope.getBinding(calleeName);
+
+                const importSpecifier = binding.path.node;
+                if (importSpecifier.type !== "ImportSpecifier") return;
+                const importDeclaration = binding.path.parent;
+                assert(importDeclaration.type === "ImportDeclaration");
+
+                if (importDeclaration.source.value !== "@/lib/assert") return;
+                if (importSpecifier.imported.type !== "Identifier") return;
+                if (
+                    importSpecifier.imported.name !== "assert" &&
+                    importSpecifier.imported.name !== "assertExists"
+                ) {
+                    return;
+                }
+
+                const args = path.node.arguments;
+                if (args.length !== 1) return;
+                const argString = generate(args[0]).code;
+                args.push(T.stringLiteral(`Assertion Error: ${argString}`));
+            },
         },
     };
 }

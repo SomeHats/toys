@@ -47,6 +47,7 @@ const possibleColors = [
     tailwindColors.cyberYellow,
     tailwindColors.cyberGreen,
     tailwindColors.cyberCyan,
+    tailwindColors.cyberBlue,
     tailwindColors.cyberIndigo,
     tailwindColors.cyberPurple,
     tailwindColors.cyberPink,
@@ -225,6 +226,10 @@ function startBlobFactory(
     );
     const hueBias = program.uniformFloat("u_hueBias", random(0, 360));
     let colorLevel = darkMode.value ? random(50, 95) : random(5, 50);
+    let forceChroma = false;
+    let forcedChroma = 0.5;
+    let forceLightness = false;
+    let forcedLightness = 0.5;
 
     const positionsVao = program.createAndBindVertexArray({
         name: "a_position",
@@ -341,6 +346,18 @@ function startBlobFactory(
                 step: 0.01,
             });
         }
+        forceChroma = controls.checkbox("force chroma", forceChroma);
+        if (forceChroma) {
+            forcedChroma = controls.range("chroma", forcedChroma, { min: 0, max: 1, step: 0.01 });
+        }
+        forceLightness = controls.checkbox("force lightness", forceLightness);
+        if (forceLightness) {
+            forcedLightness = controls.range("lightness", forcedLightness, {
+                min: 0,
+                max: 1,
+                step: 0.01,
+            });
+        }
 
         // draw actual:
         displayGl.clear();
@@ -348,7 +365,11 @@ function startBlobFactory(
         texture.update({
             width: blobs.length * 2,
             height: 1,
-            data: new Float32Array(blobs.flatMap((blob) => blob.toArray(colorLevel))),
+            data: new Float32Array(
+                blobs.flatMap((blob) =>
+                    blob.toArray(colorLevel, forceChroma ? forcedChroma : null, forceLightness ? forcedLightness : null),
+                ),
+            ),
         });
 
         program.use();
@@ -502,8 +523,15 @@ class Blob {
         public colorScale: CyberColorScale,
     ) {}
 
-    toArray(colorLevel: number) {
-        const color = interpolateScale(colorLevel, this.colorScale);
+    toArray(colorLevel: number, forceChroma: number | null, forceLightness: number | null) {
+        let color = interpolateScale(colorLevel, this.colorScale).lch();
+        if (forceChroma !== null) {
+            color = color.chroma(forceChroma * 100);
+        }
+        if (forceLightness !== null) {
+            color = color.lightness(forceLightness * 100)
+        }
+        color = color.rgb();
         return [
             this.center.x,
             this.center.y,

@@ -26,6 +26,7 @@ function camelCase(name) {
 
 const code = [
     "// GENERATED FILE, DO NOT EDIT DIRECTLY",
+    "// To edit, change `tailwind.config.js` and run `./scripts/writeTailwindConfig.mjs`.",
     "function makeColor<T extends Record<string, string>>(colors: T) {",
     "return function get<K extends keyof T>(key: K): T[K] {",
     "return colors[key];",

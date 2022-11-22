@@ -1,6 +1,6 @@
 import { omitFromStackTrace } from "@/lib/omitFromStackTrace";
 
-export const fail = omitFromStackTrace((message: string): never => {
+export const fail: (message: string) => never = omitFromStackTrace((message) => {
     throw new Error(message);
 });
 

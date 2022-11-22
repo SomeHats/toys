@@ -397,7 +397,7 @@ function startBlobFactory(
     window.addEventListener("keydown", onKeyDown);
 
     const destroy = () => {
-        displayGl.destory();
+        displayGl.destroy();
         window.removeEventListener("keydown", onKeyDown);
         isCancelled = true;
     };

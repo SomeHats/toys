@@ -37,7 +37,7 @@ export class Gl {
         this.gl = gl;
     }
 
-    destory() {
+    destroy() {
         this.shaders.destroyAll();
         this.programs.destroyAll();
         this.buffers.destroyAll();

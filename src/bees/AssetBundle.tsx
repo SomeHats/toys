@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseTexture } from "pixi.js";
 import { assert, assertExists } from "@/lib/assert";
 import { loadImage } from "@/lib/load";

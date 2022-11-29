@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import SceneObject from "@/lib/scene/SceneObject";
 import Component from "@/lib/scene/Component";
 import { assert } from "@/lib/assert";

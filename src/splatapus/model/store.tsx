@@ -1,51 +1,33 @@
-import { createShapeParser, ParserType } from "@/lib/objectParser";
 import { Result } from "@/lib/Result";
 import { debounce, getLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
-import { parseSplatDoc, SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
+import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
-import { parseSerializedSplatLocation, SplatLocationState } from "@/splatapus/editor/SplatLocation";
+import { SplatLocationState } from "@/splatapus/editor/SplatLocation";
 import { Vector2 } from "@/lib/geom/Vector2";
+import { Schema, SchemaType } from "@/lib/schema";
 
-export const parseSerializedSplatapusState = createShapeParser({
-    document: parseSplatDoc,
-    location: parseSerializedSplatLocation,
+export const splatapusStateSchema = Schema.object({
+    document: SplatDocModel.schema,
+    location: SplatLocationState.schema,
 });
-export type SerializedSplatapusState = ParserType<typeof parseSerializedSplatapusState>;
 
-export type SplatapusState = {
-    document: SplatDocModel;
-    location: SplatLocationState;
-};
-
-export function serializeSplatapusState(state: SplatapusState): SerializedSplatapusState {
-    return {
-        document: state.document.serialize(),
-        location: SplatLocationState.serialize(state.location),
-    };
-}
-
-export function deserializeSplatapusState(state: SerializedSplatapusState): SplatapusState {
-    return {
-        document: SplatDocModel.deserialize(state.document),
-        location: SplatLocationState.deserialize(state.location),
-    };
-}
+export type SplatapusState = SchemaType<typeof splatapusStateSchema>;
 
 export function loadSaved(key: string): Result<SplatapusState, string> {
     const item = getLocalStorageItem(`splatapus.${key}`);
     if (!item) {
         return Result.error("No saved data found");
     }
-    return parseSerializedSplatapusState(getLocalStorageItem(`splatapus.${key}`))
-        .mapErr((err) => err.toString())
-        .map((state) => deserializeSplatapusState(state));
+    return splatapusStateSchema
+        .parse(getLocalStorageItem(`splatapus.${key}`))
+        .mapErr((err) => err.toString());
 }
 
 export function writeSaved(key: string, state: SplatapusState) {
     // @ts-expect-error this is fine
     window.splatSerializedDoc = state;
-    setLocalStorageItem(`splatapus.${key}`, serializeSplatapusState(state));
+    setLocalStorageItem(`splatapus.${key}`, splatapusStateSchema.serialize(state));
 }
 
 export const writeSavedDebounced = debounce(AUTOSAVE_DEBOUNCE_TIME_MS, writeSaved);

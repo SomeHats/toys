@@ -1,47 +1,41 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import {
-    createArrayParser,
-    createDictParser,
-    createNullableParser,
-    createShapeParser,
-    ParserType,
-} from "@/lib/objectParser";
+import { Schema, SchemaType } from "@/lib/schema";
 import { IdGenerator } from "@/splatapus/model/Ids";
 
 export const SplatKeyPointId = new IdGenerator("key");
 export type SplatKeyPointId = typeof SplatKeyPointId["Id"];
-export const parseSplatKeyPoint = createShapeParser({
-    id: SplatKeyPointId.parse,
-    position: createNullableParser(Vector2.parse),
+export const splatKeyPointSchema = Schema.object({
+    id: SplatKeyPointId.schema,
+    position: Vector2.schema.nullable(),
 });
-export type SplatKeyPoint = ParserType<typeof parseSplatKeyPoint>;
+export type SplatKeyPoint = SchemaType<typeof splatKeyPointSchema>;
 
 export const SplatShapeId = new IdGenerator("shp");
 export type SplatShapeId = typeof SplatShapeId["Id"];
-export const parseSplatShape = createShapeParser({
-    id: SplatShapeId.parse,
+export const splatShapeSchema = Schema.object({
+    id: SplatShapeId.schema,
 });
-export type SplatShape = ParserType<typeof parseSplatShape>;
+export type SplatShape = SchemaType<typeof splatShapeSchema>;
 
 export const SplatShapeVersionId = new IdGenerator("shv");
 export type SplatShapeVersionId = typeof SplatShapeVersionId["Id"];
-export const parseSplatShapeVersion = createShapeParser({
-    id: SplatShapeVersionId.parse,
-    keyPointId: SplatKeyPointId.parse,
-    shapeId: SplatShapeId.parse,
-    rawPoints: createArrayParser(Vector2.parse),
+export const splatShapeVersionSchema = Schema.object({
+    id: SplatShapeVersionId.schema,
+    keyPointId: SplatKeyPointId.schema,
+    shapeId: SplatShapeId.schema,
+    rawPoints: Schema.arrayOf(Vector2.schema),
 });
-export type SplatShapeVersion = ParserType<typeof parseSplatShapeVersion>;
+export type SplatShapeVersion = SchemaType<typeof splatShapeVersionSchema>;
 
 export const SplatDocId = new IdGenerator("doc");
 export type SplatDocId = typeof SplatDocId["Id"];
-export const parseSplatDoc = createShapeParser({
-    id: SplatDocId.parse,
-    keyPoints: createDictParser(SplatKeyPointId.parse, parseSplatKeyPoint),
-    shapes: createDictParser(SplatShapeId.parse, parseSplatShape),
-    shapeVersions: createDictParser(SplatShapeVersionId.parse, parseSplatShapeVersion),
+export const splatDocSchema = Schema.object({
+    id: SplatDocId.schema,
+    keyPoints: Schema.objectMap(SplatKeyPointId.schema, splatKeyPointSchema),
+    shapes: Schema.objectMap(SplatShapeId.schema, splatShapeSchema),
+    shapeVersions: Schema.objectMap(SplatShapeVersionId.schema, splatShapeVersionSchema),
 });
-export type SplatDoc = ParserType<typeof parseSplatDoc>;
+export type SplatDoc = SchemaType<typeof splatDocSchema>;
 
 export function createSplatDoc(): SplatDoc {
     return {

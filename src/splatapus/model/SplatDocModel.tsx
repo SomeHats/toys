@@ -2,6 +2,7 @@ import { SplatDocData } from "@/splatapus/model/SplatDocData";
 import {
     createSplatDoc,
     SplatDoc,
+    splatDocSchema,
     SplatKeyPoint,
     SplatKeyPointId,
     SplatShape,
@@ -15,11 +16,17 @@ import { Vector2 } from "@/lib/geom/Vector2";
 import { deepEqual, identity, UpdateAction } from "@/lib/utils";
 import { fail } from "@/lib/assert";
 import { diffJson } from "diff";
+import { Result } from "@/lib/Result";
 
 export class SplatDocModel {
     static create(): SplatDocModel {
         return SplatDocModel.deserialize(createSplatDoc());
     }
+
+    static schema = splatDocSchema.transform(
+        (doc) => Result.ok(SplatDocModel.deserialize(doc)),
+        (doc) => doc.serialize(),
+    );
 
     static deserialize(data: SplatDoc, version = 0): SplatDocModel {
         const shapeVersions = new Table<SplatShapeVersion>(data.shapeVersions);

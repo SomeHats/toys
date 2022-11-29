@@ -1,5 +1,5 @@
 import { assert } from "@/lib/assert";
-import { Parser } from "@/lib/objectParser";
+import { Schema } from "@/lib/schema";
 import { promiseFromEvents } from "@/lib/utils";
 
 export async function loadImage(src: URL): Promise<HTMLImageElement> {
@@ -21,6 +21,6 @@ export async function loadJson(src: URL): Promise<unknown> {
     return response.json();
 }
 
-export async function loadAndParseJson<T>(src: URL, parse: Parser<T>): Promise<T> {
-    return parse(await loadJson(src)).unwrap(src.toString());
+export async function loadAndParseJson<T>(src: URL, schema: Schema<T>): Promise<T> {
+    return schema.parse(await loadJson(src)).unwrap(src.toString());
 }

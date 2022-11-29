@@ -1,14 +1,7 @@
 import { assert } from "@/lib/assert";
 import { stringFromError } from "@/lib/utils";
-import { catExample } from "@/splatapus/catExample";
-import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { SplatLocationState } from "@/splatapus/editor/SplatLocation";
-import {
-    getDefaultLocationForDocument,
-    makeEmptySaveState,
-    parseSerializedSplatapusState,
-    serializeSplatapusState,
-} from "@/splatapus/model/store";
+import catExample from "@/splatapus/examples/cat.json";
+import { makeEmptySaveState, splatapusStateSchema } from "@/splatapus/model/store";
 import { Button } from "@/splatapus/ui/Button";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { Splatapus } from "@/splatapus/editor/useEditor";
@@ -30,7 +23,7 @@ function ExportButton({ splatapus }: { splatapus: Splatapus }) {
             onClick={() => {
                 const data = encodeURIComponent(
                     JSON.stringify(
-                        serializeSplatapusState({
+                        splatapusStateSchema.serialize({
                             document: splatapus.document.getOnce(),
                             location: splatapus.location.state.getOnce(),
                         }),
@@ -69,19 +62,15 @@ function ImportButton({ splatapus }: { splatapus: Splatapus }) {
                         }
                         assert(typeof result === "string");
                         try {
-                            const parseResult = parseSerializedSplatapusState(JSON.parse(result));
+                            const parseResult = splatapusStateSchema.parse(JSON.parse(result));
                             if (parseResult.isError()) {
                                 alert(`cannot read splat doc: ${parseResult.error.message}`);
                                 return;
                             }
                             const serialized = parseResult.value;
-                            splatapus.document.update(
-                                () => SplatDocModel.deserialize(serialized.document),
-                                {
-                                    lockstepLocation: (location) =>
-                                        SplatLocationState.deserialize(serialized.location),
-                                },
-                            );
+                            splatapus.document.update(() => serialized.document, {
+                                lockstepLocation: (location) => serialized.location,
+                            });
                         } catch (err) {
                             alert(`could not parse json: ${stringFromError(err)}`);
                         }
@@ -110,16 +99,12 @@ function ResetButton({ splatapus }: { splatapus: Splatapus }) {
 }
 
 function CatExampleButton({ splatapus }: { splatapus: Splatapus }) {
-    if (!catExample.isOk()) {
-        return null;
-    }
     return (
         <Button
             onClick={() => {
-                const rawDoc = catExample.unwrap();
-                const document = SplatDocModel.deserialize(rawDoc);
-                splatapus.document.update(() => document, {
-                    lockstepLocation: getDefaultLocationForDocument(document, Vector2.UNIT),
+                const state = splatapusStateSchema.parse(catExample).unwrap();
+                splatapus.document.update(() => state.document, {
+                    lockstepLocation: state.location,
                 });
             }}
         >

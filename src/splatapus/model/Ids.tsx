@@ -1,6 +1,6 @@
-import { composeParsers, Parser, ParserError, parseString } from "@/lib/objectParser";
 import { Result } from "@/lib/Result";
-import { sample, times } from "@/lib/utils";
+import { Schema, SchemaParseError } from "@/lib/schema";
+import { identity, sample, times } from "@/lib/utils";
 
 const ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
 const USE_DEBUG_IDS = process.env.NODE_ENV !== "production";
@@ -14,13 +14,15 @@ export class IdGenerator<Prefix extends string> {
         this.prefix = prefix;
         this.Id = `${prefix}.SAMPLE`;
         const re = new RegExp(`^${this.prefix}\\.([a-zA-Z0-9_]+)$`);
-        this.parse = composeParsers(parseString, (input) => {
+        this.schema = Schema.string.transform((input) => {
             if (re.test(input)) {
                 return Result.ok(input as this["Id"]);
             } else {
-                return Result.error(new ParserError(`Expected ${this.prefix}.*, got ${input}`, []));
+                return Result.error(
+                    new SchemaParseError(`Expected ${this.prefix}.*, got ${input}`, []),
+                );
             }
-        });
+        }, identity);
     }
 
     generate(): this["Id"] {
@@ -35,5 +37,5 @@ export class IdGenerator<Prefix extends string> {
         return `${this.prefix}.${randomSection}`;
     }
 
-    parse: Parser<this["Id"]>;
+    schema: Schema<this["Id"]>;
 }

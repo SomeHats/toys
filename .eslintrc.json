@@ -24,6 +24,7 @@
             "warn",
             { "varsIgnorePattern": "^_", "args": "none" }
         ],
+        "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-empty-function": "off",
         "no-constant-condition": ["error", { "checkLoops": false }],
         "prefer-const": ["error", { "destructuring": "all" }],

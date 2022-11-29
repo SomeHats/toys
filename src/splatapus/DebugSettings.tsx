@@ -1,5 +1,5 @@
 import { LiveEffect, LiveValue, runLive, useLiveValue } from "@/lib/live";
-import { createShapeParser, parseBoolean, ParserType } from "@/lib/objectParser";
+import { Schema, SchemaType } from "@/lib/schema";
 import { getLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
 import { Button, PlainButton } from "@/splatapus/ui/Button";
 import { useSquircleClipPath } from "@/splatapus/ui/useSquircle";
@@ -9,11 +9,11 @@ import { ReactNode, useState } from "react";
 
 const STORAGE_KEY = "splatapus.debugSettings";
 
-const parseDebugSettings = createShapeParser({
-    shouldShowPoints: parseBoolean,
+const debugSettingsSchema = Schema.object({
+    shouldShowPoints: Schema.boolean,
 });
 
-type DebugSettings = ParserType<typeof parseDebugSettings>;
+type DebugSettings = SchemaType<typeof debugSettingsSchema>;
 const defaultDebugSettings: DebugSettings = {
     shouldShowPoints: false,
 };
@@ -80,7 +80,7 @@ function ToggleItem({
 function readDebugSettings(): DebugSettings {
     const contents = getLocalStorageItem(STORAGE_KEY);
     try {
-        return parseDebugSettings(JSON.parse(contents as string)).unwrap();
+        return debugSettingsSchema.parse(JSON.parse(contents as string)).unwrap();
     } catch (err) {
         return defaultDebugSettings;
     }

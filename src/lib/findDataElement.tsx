@@ -1,8 +1,8 @@
 import { assert } from "@/lib/assert";
-import { Parser } from "@/lib/objectParser";
+import { Schema } from "@/lib/schema";
 import { entries, ObjectMap } from "@/lib/utils";
 
-export function findDataElementParent<Props extends Record<string, string | Parser<unknown>>>(
+export function findDataElementParent<Props extends Record<string, string | Schema<unknown>>>(
     element: EventTarget,
     search: Props,
 ): null | {
@@ -10,7 +10,7 @@ export function findDataElementParent<Props extends Record<string, string | Pars
     data: {
         [K in keyof Props]: Props[K] extends string
             ? Props[K]
-            : Props[K] extends Parser<infer P>
+            : Props[K] extends Schema<infer P>
             ? P
             : never;
     };
@@ -29,7 +29,7 @@ export function findDataElementParent<Props extends Record<string, string | Pars
                 break;
             }
         } else {
-            const parsed = value(dataValue);
+            const parsed = value.parse(dataValue);
             if (parsed.isOk()) {
                 data[key] = parsed.value;
             } else {

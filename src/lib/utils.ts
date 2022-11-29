@@ -175,15 +175,19 @@ export function fromEntries<K extends PropertyKey, V>(entries: Iterable<[K, V]>)
     return result;
 }
 
-export function keys<K extends string, V>(object: ObjectMap<K, V>): Array<K> {
+export function keys<K extends string, V>(object: ReadonlyObjectMap<K, V>): Array<K> {
     return Object.keys(object) as K[];
 }
 
-export function values<K extends string, V>(object: Record<K, V>): Array<V> {
+export function values<K extends string, V>(object: ReadonlyRecord<K, V>): Array<V> {
     return Object.values(object) as V[];
 }
 
-export function entries<K extends string, V>(object: Record<K, V>): Array<[K, V]> {
+export function entries<K extends string, V>(object: ReadonlyRecord<K, V>): Array<[K, V]>;
+export function entries<K extends string, V>(
+    object: ReadonlyObjectMap<K, V>,
+): Array<[K, V | undefined]>;
+export function entries<K extends string, V>(object: ReadonlyRecord<K, V>): Array<[K, V]> {
     return Object.entries(object) as [K, V][];
 }
 

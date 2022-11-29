@@ -1,24 +1,17 @@
-import { createShapeParser, ParserType } from "@/lib/objectParser";
 import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
-import { parseModeType, ModeType } from "@/splatapus/editor/modes/Mode";
-import { parseSerializedViewport, ViewportState } from "@/splatapus/editor/Viewport";
+import { ModeType, modeTypeSchema } from "@/splatapus/editor/modes/Mode";
+import { ViewportState } from "@/splatapus/editor/Viewport";
 import { applyUpdateWithin } from "@/lib/utils";
 import { LiveMemoWritable, LiveWritable } from "@/lib/live";
+import { Schema, SchemaType } from "@/lib/schema";
 
-export const parseSerializedSplatLocation = createShapeParser({
-    keyPointId: SplatKeyPointId.parse,
-    shapeId: SplatShapeId.parse,
-    viewport: parseSerializedViewport,
-    mode: parseModeType,
+const splatLocationSchema = Schema.object({
+    keyPointId: SplatKeyPointId.schema,
+    shapeId: SplatShapeId.schema,
+    viewport: ViewportState.schema,
+    mode: modeTypeSchema,
 });
-export type SerializedSplatLocation = ParserType<typeof parseSerializedSplatLocation>;
-
-export type SplatLocationState = {
-    keyPointId: SplatKeyPointId;
-    shapeId: SplatShapeId;
-    mode: ModeType;
-    viewport: ViewportState;
-};
+export type SplatLocationState = SchemaType<typeof splatLocationSchema>;
 
 export const SplatLocationState = {
     initialize: (keyPointId: SplatKeyPointId, shapeId: SplatShapeId): SplatLocationState => ({
@@ -27,14 +20,7 @@ export const SplatLocationState = {
         mode: ModeType.Draw,
         viewport: ViewportState.initialize(),
     }),
-    deserialize: (serialized: SerializedSplatLocation): SplatLocationState => ({
-        ...serialized,
-        viewport: ViewportState.deserialize(serialized.viewport),
-    }),
-    serialize: (state: SplatLocationState): SerializedSplatLocation => ({
-        ...state,
-        viewport: ViewportState.serialize(state.viewport),
-    }),
+    schema: splatLocationSchema,
 };
 
 export class SplatLocation {

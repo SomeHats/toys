@@ -1,21 +1,21 @@
 import { BaseTexture, Rectangle, Texture } from "pixi.js";
 import { assert } from "@/lib/assert";
 import { loadAndParseJson } from "@/lib/load";
-import { createArrayParser, createShapeParser, parseNumber, ParserType } from "@/lib/objectParser";
 import { mapRange, normalizeAngle } from "@/lib/utils";
+import { Schema, SchemaType } from "@/lib/schema";
 
-const parseAnimatedSpriteStackGeometry = createShapeParser({
-    width: parseNumber,
-    height: parseNumber,
-    frames: parseNumber,
-    angles: parseNumber,
-    rows: parseNumber,
-    cols: parseNumber,
-    regions: createArrayParser(parseNumber),
-    trims: createArrayParser(parseNumber),
+const animatedSpriteStackGeometrySchema = Schema.object({
+    width: Schema.number,
+    height: Schema.number,
+    frames: Schema.number,
+    angles: Schema.number,
+    rows: Schema.number,
+    cols: Schema.number,
+    regions: Schema.arrayOf(Schema.number),
+    trims: Schema.arrayOf(Schema.number),
 });
 
-export type AnimatedSpriteStackGeometry = ParserType<typeof parseAnimatedSpriteStackGeometry>;
+export type AnimatedSpriteStackGeometry = SchemaType<typeof animatedSpriteStackGeometrySchema>;
 
 export type SpriteStackManifest = {
     geometry: URL;
@@ -31,7 +31,7 @@ export class AnimatedSpriteStackSheet {
     static async load(manifest: SpriteStackManifest): Promise<AnimatedSpriteStackSheet> {
         const geometry = await loadAndParseJson(
             manifest.geometry,
-            parseAnimatedSpriteStackGeometry,
+            animatedSpriteStackGeometrySchema,
         );
         return new AnimatedSpriteStackSheet(await manifest.baseTexture, geometry, manifest);
     }

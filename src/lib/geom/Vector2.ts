@@ -1,13 +1,23 @@
 import { normalizeAngle, lerp } from "@/lib/utils";
-import { composeParsers, createShapeParser, parseNumber, ParserType } from "@/lib/objectParser";
 import { Result } from "@/lib/Result";
+import { Schema } from "@/lib/schema";
 
 export type Vector2Ish = { readonly x: number; readonly y: number };
 
-export const parseSerializedVector2 = createShapeParser({ x: parseNumber, y: parseNumber });
-export type SerializedVector2 = ParserType<typeof parseSerializedVector2>;
+// export const parseSerializedVector2 = createShapeParser({ x: parseNumber, y: parseNumber });
+// export type SerializedVector2 = ParserType<typeof parseSerializedVector2>;
 
 export class Vector2 {
+    static readonly schema = Schema.object({
+        x: Schema.number,
+        y: Schema.number,
+    })
+        .indexed({ x: 0, y: 1 })
+        .transform<Vector2>(
+            ({ x, y }) => Result.ok(new Vector2(x, y)),
+            ({ x, y }) => ({ x, y }),
+        );
+
     static readonly ZERO = new Vector2(0, 0);
     static readonly UNIT = new Vector2(1, 1);
     static readonly X = new Vector2(1, 0);
@@ -32,10 +42,6 @@ export class Vector2 {
 
     static deserialize = Vector2.fromVectorLike;
 
-    static parse = composeParsers(parseSerializedVector2, (serialized) =>
-        Result.ok(Vector2.deserialize(serialized)),
-    );
-
     constructor(public readonly x: number, public readonly y: number) {}
 
     toString(fixedAmt?: number): string {
@@ -44,9 +50,9 @@ export class Vector2 {
         })`;
     }
 
-    serialize(): SerializedVector2 {
-        return { x: this.x, y: this.y };
-    }
+    // serialize(): SerializedVector2 {
+    //     return { x: this.x, y: this.y };
+    // }
 
     get magnitudeSquared(): number {
         return this.x * this.x + this.y * this.y;

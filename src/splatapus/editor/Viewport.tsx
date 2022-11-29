@@ -1,33 +1,21 @@
 import AABB from "@/lib/geom/AABB";
-import { Vector2, parseSerializedVector2 } from "@/lib/geom/Vector2";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { Live, LiveMemoWritable, LiveWritable, runOnce } from "@/lib/live";
-import { createShapeParser, parseNumber, ParserType } from "@/lib/objectParser";
+import { Schema, SchemaType } from "@/lib/schema";
 import { applyUpdateWithin } from "@/lib/utils";
 import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
 
-export const parseSerializedViewport = createShapeParser({
-    pan: parseSerializedVector2,
-    zoom: parseNumber,
+const viewportStateSchema = Schema.object({
+    pan: Vector2.schema,
+    zoom: Schema.number,
 });
-export type SerializedViewport = ParserType<typeof parseSerializedViewport>;
-
-export type ViewportState = {
-    readonly pan: Vector2;
-    readonly zoom: number;
-};
+export type ViewportState = SchemaType<typeof viewportStateSchema>;
 export const ViewportState = {
     initialize: (): ViewportState => ({
         pan: Vector2.ZERO,
         zoom: 1,
     }),
-    deserialize: ({ pan, zoom }: SerializedViewport): ViewportState => ({
-        pan: Vector2.deserialize(pan),
-        zoom,
-    }),
-    serialize: ({ pan, zoom }: ViewportState) => ({
-        pan: pan.serialize(),
-        zoom,
-    }),
+    schema: viewportStateSchema,
 };
 
 export class Viewport {

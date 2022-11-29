@@ -1,5 +1,5 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import { createEnumParser } from "@/lib/objectParser";
+import { Schema } from "@/lib/schema";
 import { PointerEventContext } from "@/splatapus/editor/EventContext";
 import { Splatapus } from "@/splatapus/editor/useEditor";
 import { ReactNode } from "react";
@@ -9,8 +9,7 @@ export enum ModeType {
     Rig = "rig",
     Play = "play",
 }
-
-export const parseModeType = createEnumParser(ModeType);
+export const modeTypeSchema = Schema.enum(ModeType);
 
 export interface Mode<Type extends ModeType> {
     readonly type: Type;

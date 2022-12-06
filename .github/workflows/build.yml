@@ -21,9 +21,9 @@ jobs:
         timeout-minutes: 30
         steps:
             - name: Setup Node
-              uses: actions/setup-node@v1
+              uses: actions/setup-node@v3
               with:
-                  node-version: "16.x"
+                  node-version: 16
 
             - name: Setup Rust
               uses: actions-rs/toolchain@v1

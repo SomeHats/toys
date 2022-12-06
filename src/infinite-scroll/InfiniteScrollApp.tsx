@@ -3,7 +3,7 @@ import {
     sizeFromContentRect,
     useResizeObserver,
 } from "@/lib/hooks/useResizeObserver";
-import React, { ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import foxUrl from "@/infinite-scroll/assets/fox.jpg";
 import frogUrl from "@/infinite-scroll/assets/frog.jpg";
 import { assertExists } from "@/lib/assert";

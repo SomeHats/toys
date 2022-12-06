@@ -37,8 +37,8 @@ function makeBee() {
     driver.addFixedUpdate({
         on() {},
         fixedUpdateTick() {
-            const beePosition = Vector2.fromVectorLike(bee.getGlobalPosition());
-            const mousePosition = Vector2.fromVectorLike(
+            const beePosition = Vector2.from(bee.getGlobalPosition());
+            const mousePosition = Vector2.from(
                 (
                     application.renderer.plugins.interaction as InteractionManager
                 ).mouse.getLocalPosition(application.stage),
@@ -48,9 +48,9 @@ function makeBee() {
             const targetVec = mousePosition.sub(beePosition).normalize();
             const newVec = headingVec.lerp(targetVec, rsp);
 
-            bee.heading = newVec.angle;
+            bee.heading = newVec.angle();
             bee.position.copyFrom(
-                Vector2.fromVectorLike(bee.position).add(Vector2.fromPolar(bee.heading, sp)),
+                Vector2.from(bee.position).add(Vector2.fromPolar(bee.heading, sp)),
             );
         },
     });

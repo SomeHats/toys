@@ -27,11 +27,11 @@ export default class StraightPathSegment implements PathSegment {
     }
 
     getLength(): number {
-        return this.delta.magnitude;
+        return this.delta.magnitude();
     }
 
-    get angle(): number {
-        return this.delta.angle;
+    angle(): number {
+        return this.delta.angle();
     }
 
     getPointAtPosition(position: number): Vector2 {
@@ -40,6 +40,6 @@ export default class StraightPathSegment implements PathSegment {
     }
 
     getAngleAtPosition(): number {
-        return this.delta.angle;
+        return this.delta.angle();
     }
 }

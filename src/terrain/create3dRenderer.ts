@@ -144,7 +144,7 @@ function create3dRenderer(terrain: Terrain) {
     directionalLight.position.x = 0.5;
     scene.add(directionalLight);
 
-    camera.position.z = new Vector2(SIZE, SIZE).magnitude * 0.4;
+    camera.position.z = new Vector2(SIZE, SIZE).magnitude() * 0.4;
     // camera.position.z = 700;
     // camera.position.x = window.innerWidth / 2;
     // camera.position.y = -window.innerHeight / 2;

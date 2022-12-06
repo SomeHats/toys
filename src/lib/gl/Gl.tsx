@@ -2,8 +2,20 @@ import { assert, assertExists } from "@/lib/assert";
 import { GlProgram } from "@/lib/gl/GlProgram";
 import { GlShader } from "@/lib/gl/GlShader";
 import { GlTexture2d } from "@/lib/gl/GlTexture2d";
-import { GlShaderType, GlTextureFormat } from "@/lib/gl/GlTypes";
+import { GlCapability, glEnum, GlShaderType, GlTextureFormat } from "@/lib/gl/GlTypes";
+import { GlVertexArray } from "@/lib/gl/GlVertexArray";
 import { get } from "@/lib/utils";
+
+export const glsl = (strings: TemplateStringsArray, ...values: any[]) => {
+    let result = "";
+    for (let i = 0; i < strings.length; i++) {
+        result += strings[i];
+        if (i < values.length) {
+            result += values[i];
+        }
+    }
+    return result;
+};
 
 export class Gl {
     readonly gl: WebGL2RenderingContext;
@@ -45,10 +57,9 @@ export class Gl {
         this.textures.destroyAll();
     }
 
-    createShader(type: GlShaderType, source: string): GlShader {
-        return this.shaders.create(type, source);
-    }
-    createProgram(vertexShader: GlShader, fragmentShader: GlShader): GlProgram {
+    createProgram({ vertex, fragment }: { vertex: string; fragment: string }): GlProgram {
+        const vertexShader = this.shaders.create(GlShaderType.Vertex, vertex);
+        const fragmentShader = this.shaders.create(GlShaderType.Fragment, fragment);
         return this.programs.create(vertexShader, fragmentShader);
     }
     createBuffer() {
@@ -68,7 +79,7 @@ export class Gl {
     clear() {
         const { gl } = this;
         gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     }
 
     enumToString(value: number) {
@@ -79,6 +90,16 @@ export class Gl {
             }
         }
         return keys.length ? keys.join(" | ") : `0x${value.toString(16)}`;
+    }
+
+    drawTriangles(program: GlProgram, positions: GlVertexArray, count: number) {
+        program.use();
+        positions.bindVao();
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, count);
+    }
+
+    enable(capability: GlCapability) {
+        this.gl.enable(glEnum(capability));
     }
 }
 

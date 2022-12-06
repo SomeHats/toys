@@ -21,7 +21,7 @@ export function findPositionForNewKeyPoint(document: SplatDocModel, viewport: Vi
     for (let i = 0; i < 500; i++) {
         if (
             otherPoints.every(
-                (otherPoint) => !otherPoint || otherPoint.distanceToSq(candidate) > threshold,
+                (otherPoint) => !otherPoint || otherPoint.distanceToSquared(candidate) > threshold,
             )
         ) {
             return candidate;

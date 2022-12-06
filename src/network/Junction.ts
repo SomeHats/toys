@@ -54,8 +54,8 @@ export default class Junction extends SceneObject {
                 const path = new Path(
                     Path.segmentAcrossCircle(
                         this._circle,
-                        this._circle.center.sub(intersection.position).angle,
-                        other.position.sub(this._circle.center).angle,
+                        this._circle.center.sub(intersection.position).angle(),
+                        other.position.sub(this._circle.center).angle(),
                     ),
                 );
 
@@ -66,8 +66,8 @@ export default class Junction extends SceneObject {
                 const path = new Path(
                     Path.segmentAcrossCircle(
                         this._circle,
-                        this._circle.center.sub(other.position).angle,
-                        intersection.position.sub(this._circle.center).angle,
+                        this._circle.center.sub(other.position).angle(),
+                        intersection.position.sub(this._circle.center).angle(),
                     ),
                 );
                 this._addRoad(new Road(other, intersection, { path }));

@@ -310,14 +310,14 @@ export function getStrokeOutlinePoints(
 
         tl = point.sub(offset);
 
-        if (i <= 1 || pl.distanceToSq(tl)) {
+        if (i <= 1 || pl.distanceToSquared(tl)) {
             leftPts.push(tl);
             pl = tl;
         }
 
         tr = point.add(offset);
 
-        if (i <= 1 || pr.distanceToSq(tr) > minDistance) {
+        if (i <= 1 || pr.distanceToSquared(tr) > minDistance) {
             rightPts.push(tr);
             pr = tr;
         }
@@ -661,7 +661,7 @@ export function getStrokeCenterPoints(
         // const offset = nextVector.lerp(vector, nextDpr).perpendicular().scale(radius);
 
         tc = point;
-        if (i <= 1 || pc.distanceToSq(tc) > minDistance) {
+        if (i <= 1 || pc.distanceToSquared(tc) > minDistance) {
             centerPts.push({ center: point, radius });
             pc = tc;
         }
@@ -718,7 +718,7 @@ export function getStrokePoints(
     type Pt = { point: Vector2; pressure?: number };
     let pts = points.map(
         (p): Pt => ({
-            point: Vector2.fromVectorLike(p),
+            point: Vector2.from(p),
             pressure: p.pressure,
         }),
     );

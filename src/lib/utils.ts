@@ -154,17 +154,20 @@ export function wait(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(() => resolve(), ms));
 }
 
-export async function frameLoop(cb: (time: number, cancel: () => void) => void) {
+export function frameLoop(cb: (time: number, cancel: () => void) => void): () => void {
     let shouldCancel = false;
     const cancel = () => {
         shouldCancel = true;
     };
-    while (true) {
-        cb(await frame(), cancel);
-        if (shouldCancel) {
-            return;
+    (async () => {
+        while (true) {
+            if (shouldCancel) {
+                return;
+            }
+            cb(await frame(), cancel);
         }
-    }
+    })();
+    return cancel;
 }
 
 export function fromEntries<K extends PropertyKey, V>(entries: Iterable<[K, V]>): Record<K, V> {
@@ -404,4 +407,12 @@ export function stringFromError(error: unknown) {
         }
     }
     return "unknown error";
+}
+
+export function degreesToRadians(degrees: number) {
+    return (degrees * Math.PI) / 180;
+}
+
+export function radiansToDegrees(radians: number) {
+    return (radians * 180) / Math.PI;
 }

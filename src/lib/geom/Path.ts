@@ -61,8 +61,8 @@ export default class Path implements PathSegment {
         return new CirclePathSegment(
             roadCircleCenter,
             roadCircleRadius,
-            entryPoint.sub(roadCircleCenter).angle,
-            exitPoint.sub(roadCircleCenter).angle,
+            entryPoint.sub(roadCircleCenter).angle(),
+            exitPoint.sub(roadCircleCenter).angle(),
         );
     }
 
@@ -140,8 +140,8 @@ export default class Path implements PathSegment {
 
             assert(lastSegment.getEnd().equals(segment.getStart()), "segments must join");
 
-            const entryAngle = lastSegment.angle;
-            const exitAngle = segment.angle;
+            const entryAngle = lastSegment.angle();
+            const exitAngle = segment.angle();
             const usableRadius = Math.min(
                 radius,
                 lastSegment.getLength() / 2,

@@ -181,3 +181,16 @@ export enum GlTextureWrap {
     ClampToEdge = "CLAMP_TO_EDGE",
     MirroredRepeat = "MIRRORED_REPEAT",
 }
+
+export enum GlCapability {
+    Blend = "BLEND",
+    CullFace = "CULL_FACE",
+    DepthTest = "DEPTH_TEST",
+    Dither = "DITHER",
+    PolygonOffsetFill = "POLYGON_OFFSET_FILL",
+    SampleAlphaToCoverage = "SAMPLE_ALPHA_TO_COVERAGE",
+    SampleCoverage = "SAMPLE_COVERAGE",
+    ScissorTest = "SCISSOR_TEST",
+    StencilTest = "STENCIL_TEST",
+    RasterizerDiscard = "RASTERIZER_DISCARD",
+}

@@ -8,7 +8,6 @@ import {
     GlBufferUsage,
     GlPixelType,
     GlPixelFormat,
-    GlShaderType,
     GlTextureInternalFormat,
     GlVertexAttribType,
 } from "@/lib/gl/GlTypes";
@@ -200,9 +199,10 @@ function startBlobFactory(
     const ui = new DebugDraw(uiCtx);
 
     const displayGl = new Gl(displayCanvas);
-    const fragShader = displayGl.createShader(GlShaderType.Fragment, shaderFragSrc);
-    const vertShader = displayGl.createShader(GlShaderType.Vertex, shaderVertSrc);
-    const program = displayGl.createProgram(vertShader, fragShader);
+    const program = displayGl.createProgram({
+        fragment: shaderFragSrc,
+        vertex: shaderVertSrc,
+    });
 
     const blobs = times(
         initialBlobCount,
@@ -231,7 +231,7 @@ function startBlobFactory(
     let forceLightness = false;
     let forcedLightness = 0.5;
 
-    const positionsVao = program.createAndBindVertexArray({
+    const positionsVao = program.createAndBindVertexArrayObject({
         name: "a_position",
         size: 2,
         type: GlVertexAttribType.Float,
@@ -266,7 +266,7 @@ function startBlobFactory(
         draw();
     };
 
-    const blobAtIndex = (index: number) => blobs[index] ?? null;
+    const blobAtIndex = (index: number): Blob | null => blobs[index] ?? null;
 
     const getHover = (): [Blob, number] | [null, null] => {
         switch (state.type) {
@@ -290,7 +290,7 @@ function startBlobFactory(
             }
             case "moving":
             case "resizing":
-                return [blobAtIndex(state.blobIndex), state.blobIndex];
+                return [assertExists(blobAtIndex(state.blobIndex)), state.blobIndex];
             default:
                 exhaustiveSwitchError(state);
         }
@@ -367,7 +367,11 @@ function startBlobFactory(
             height: 1,
             data: new Float32Array(
                 blobs.flatMap((blob) =>
-                    blob.toArray(colorLevel, forceChroma ? forcedChroma : null, forceLightness ? forcedLightness : null),
+                    blob.toArray(
+                        colorLevel,
+                        forceChroma ? forcedChroma : null,
+                        forceLightness ? forcedLightness : null,
+                    ),
                 ),
             ),
         });
@@ -529,7 +533,7 @@ class Blob {
             color = color.chroma(forceChroma * 100);
         }
         if (forceLightness !== null) {
-            color = color.lightness(forceLightness * 100)
+            color = color.lightness(forceLightness * 100);
         }
         color = color.rgb();
         return [

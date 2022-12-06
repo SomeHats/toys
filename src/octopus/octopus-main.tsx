@@ -349,7 +349,7 @@ function octopusScene(
                 avgTentacleEndX.read() - octopusXRoot,
                 avgTentacleEndY.read() - 400 - octopusYRoot,
             );
-            const octopusCenterAdjust = avgEndDelta.withMagnitude(avgEndDelta.magnitude ** 0.9);
+            const octopusCenterAdjust = avgEndDelta.withMagnitude(avgEndDelta.magnitude() ** 0.9);
             octopusXTarget.set(octopusXRoot + octopusCenterAdjust.x);
             octopusYTarget.set(octopusYRoot + octopusCenterAdjust.y);
         },

@@ -141,8 +141,8 @@ export class TerrainCell {
     }
 
     private applyPressureForDrift(pressure: Vector2) {
-        const magnitude = pressure.magnitude;
-        this.totalDriftPressure += pressure.magnitude;
+        const magnitude = pressure.magnitude();
+        this.totalDriftPressure += magnitude;
         if (magnitude < config.MIN_DRIFT_MAGNITUDE_TO_PROPAGATE) {
             return;
         }

@@ -70,31 +70,36 @@ function createAssertPlugin(): PluginObj {
     return {
         visitor: {
             CallExpression(path, state) {
-                if (path.node.callee.type !== "Identifier") {
-                    return;
+                try {
+                    if (path.node.callee.type !== "Identifier") {
+                        return;
+                    }
+                    const calleeName = path.node.callee.name;
+                    const binding = path.scope.getBinding(calleeName);
+                    if (!binding) return;
+
+                    const importSpecifier = binding.path.node;
+                    if (importSpecifier.type !== "ImportSpecifier") return;
+                    const importDeclaration = binding.path.parent;
+                    assert(importDeclaration.type === "ImportDeclaration");
+
+                    if (importDeclaration.source.value !== "@/lib/assert") return;
+                    if (importSpecifier.imported.type !== "Identifier") return;
+                    if (
+                        importSpecifier.imported.name !== "assert" &&
+                        importSpecifier.imported.name !== "assertExists"
+                    ) {
+                        return;
+                    }
+
+                    const args = path.node.arguments;
+                    if (args.length !== 1) return;
+                    const argString = generate(args[0]).code;
+                    args.push(T.stringLiteral(`Assertion Error: ${argString}`));
+                } catch (e) {
+                    console.log("err", e.stack);
+                    throw e;
                 }
-                const calleeName = path.node.callee.name;
-                if (calleeName !== "assert") return;
-                const binding = path.scope.getBinding(calleeName);
-
-                const importSpecifier = binding.path.node;
-                if (importSpecifier.type !== "ImportSpecifier") return;
-                const importDeclaration = binding.path.parent;
-                assert(importDeclaration.type === "ImportDeclaration");
-
-                if (importDeclaration.source.value !== "@/lib/assert") return;
-                if (importSpecifier.imported.type !== "Identifier") return;
-                if (
-                    importSpecifier.imported.name !== "assert" &&
-                    importSpecifier.imported.name !== "assertExists"
-                ) {
-                    return;
-                }
-
-                const args = path.node.arguments;
-                if (args.length !== 1) return;
-                const argString = generate(args[0]).code;
-                args.push(T.stringLiteral(`Assertion Error: ${argString}`));
             },
         },
     };

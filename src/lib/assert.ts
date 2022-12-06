@@ -20,9 +20,9 @@ export function assertNumber(value: unknown): number {
     return value;
 }
 
-export function assertExists<T>(value: T, message?: string): NonNullable<T> {
+export const assertExists = omitFromStackTrace(<T>(value: T, message?: string): NonNullable<T> => {
     if (value == null) {
         fail(message ?? "value must be defined");
     }
     return value as NonNullable<T>;
-}
+});

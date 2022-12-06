@@ -41,6 +41,9 @@ export function constrain(min: number, max: number, n: number): number {
 
 export function constrainWrapped(min: number, max: number, n: number): number {
     const size = max - min;
+    if (size < 0.0001) {
+        return min;
+    }
     n = n - min;
     while (n < 0) {
         n += size;
@@ -244,15 +247,23 @@ export function setLocalStorageItem(key: string, value: unknown) {
 export function debounce<Args extends Array<unknown>>(
     ms: number,
     fn: (...args: Args) => void,
-): (...args: Args) => void {
+): { (...args: Args): void; cancel: () => void } {
     let timeoutHandle: TimeoutId | undefined;
 
-    return (...args: Args) => {
+    const debounced = (...args: Args) => {
         if (timeoutHandle !== undefined) {
             clearTimeout(timeoutHandle);
         }
         timeoutHandle = setTimeout(() => fn(...args), ms);
     };
+
+    debounced.cancel = () => {
+        if (timeoutHandle !== undefined) {
+            clearTimeout(timeoutHandle);
+        }
+    };
+
+    return debounced;
 }
 
 export function exhaustiveSwitchError(value: never): never {

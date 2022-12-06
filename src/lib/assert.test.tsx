@@ -1,4 +1,4 @@
-import { assert } from "@/lib/assert";
+import { assert, assertExists } from "@/lib/assert";
 import { expect, test } from "vitest";
 
 test("normalizes stack traces", () => {
@@ -21,5 +21,9 @@ test("automatically inserts an error message", () => {
     // this is actually testing code in `vite.config.ts`
     expect(() => assert(2 + 2 === 5)).toThrowErrorMatchingInlineSnapshot(
         '"Assertion Error: 2 + 2 === 5"',
+    );
+
+    expect(() => assertExists((() => undefined)())).toThrowErrorMatchingInlineSnapshot(
+        '"Assertion Error: (() => undefined)()"',
     );
 });

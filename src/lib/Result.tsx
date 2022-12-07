@@ -35,6 +35,23 @@ export const Result = {
             object as { [K in keyof Results]: Results[K] extends Result<infer T, E> ? T : never },
         );
     },
+    fromFn<T>(fn: () => T): Result<T, unknown> {
+        try {
+            return Result.ok(fn());
+        } catch (error) {
+            return Result.error(error);
+        }
+    },
+    fromPromise<T>(promise: Promise<T>): Promise<Result<T, unknown>> {
+        return promise.then(Result.ok).catch(Result.error);
+    },
+    async fromAsyncFn<T>(fn: () => Promise<T>): Promise<Result<T, unknown>> {
+        try {
+            return Result.ok(await fn());
+        } catch (error) {
+            return Result.error(error);
+        }
+    },
 };
 
 export abstract class AbstractResult<T, E> {

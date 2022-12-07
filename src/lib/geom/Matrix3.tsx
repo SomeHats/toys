@@ -8,13 +8,13 @@ type Matrix3Data = Readonly<[
 ]>;
 
 const M_00 = 0;
-const M_01 = 1;
-const M_02 = 2;
-const M_10 = 3;
+const M_01 = 3;
+const M_02 = 6;
+const M_10 = 1;
 const M_11 = 4;
-const M_12 = 5;
-const M_20 = 6;
-const M_21 = 7;
+const M_12 = 7;
+const M_20 = 2;
+const M_21 = 5;
 const M_22 = 8;
 
 export class Matrix3 {
@@ -124,18 +124,41 @@ export class Matrix3 {
         const { x, y } = Vector2.fromArgs(args);
         return this.multiply(Matrix3.translate(x, y));
     }
+
     rotate(angle: number) {
         return this.multiply(Matrix3.rotate(angle));
     }
+
     scale(...args: Vector2Args) {
         const { x, y } = Vector2.fromArgs(args);
         return this.multiply(Matrix3.scale(x, y));
     }
+
     scaleUniform(s: number) {
         return this.scale(s, s);
     }
+
     projection(...args: Vector2Args) {
         const { x, y } = Vector2.fromArgs(args);
         return this.multiply(Matrix3.projection(x, y));
+    }
+
+    toString(precision = 2): string {
+        let numbers = this.data.map((n) => n.toFixed(precision));
+        const longest = Math.max(...numbers.map((n) => n.length));
+        numbers = numbers.map((n) => n.padStart(longest, " "));
+
+        return [
+            "Matrix3(",
+            `  ${numbers[M_00]}, ${numbers[M_01]}, ${numbers[M_02]},`,
+            `  ${numbers[M_10]}, ${numbers[M_11]}, ${numbers[M_12]},`,
+            `  ${numbers[M_20]}, ${numbers[M_21]}, ${numbers[M_22]},`,
+            ")",
+        ].join("\n");
+    }
+
+    toCss(): string {
+        // css matrix() is column-major and only accepts 6 values
+        return `matrix(${this.data[M_00]}, ${this.data[M_10]}, ${this.data[M_01]}, ${this.data[M_11]}, ${this.data[M_02]}, ${this.data[M_12]})`;
     }
 }

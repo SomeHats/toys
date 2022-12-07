@@ -30,7 +30,7 @@ export function App() {
 
 const screens = {
     Infinite: <InfiniteScroller />,
-    Caterpillar: <CaterpillarScroller />,
+    Worm: <CaterpillarScroller />,
 };
 type ScreenName = keyof typeof screens;
 

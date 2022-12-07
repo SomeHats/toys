@@ -136,13 +136,14 @@ function WrappingScrollBar({
     scrollAmount: number;
     onScroll?: (newPosition: number) => void;
 }) {
+    const containerHeightPx = targetHeightPx * scale;
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollBarHeightPx = Math.max(
         12,
-        ((targetHeightPx * scale) / contentHeightPx) * targetHeightPx,
+        (containerHeightPx / contentHeightPx) * containerHeightPx,
     );
 
-    const scrollBarTopPx = mapRange(0, contentHeightPx, 0, targetHeightPx * scale, scrollAmount);
+    const scrollBarTopPx = mapRange(0, contentHeightPx, 0, containerHeightPx, scrollAmount);
 
     const handleScroll = useEvent((yPosition: number) => {
         const container = assertExists(containerRef.current);

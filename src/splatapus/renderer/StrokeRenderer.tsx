@@ -15,6 +15,8 @@ import React from "react";
 import { useDebugSetting } from "@/splatapus/DebugSettings";
 import { useLive } from "@/lib/live";
 import { Splatapus } from "@/splatapus/editor/useEditor";
+import { Vector2 } from "@/lib/geom/Vector2";
+import { DebugCircle, DebugPointX } from "@/lib/DebugSvg";
 
 export const StrokeRenderer = React.memo(function StrokeRenderer({
     shapeId,
@@ -24,6 +26,8 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
     splatapus: Splatapus;
 }) {
     const shouldShowPoints = useDebugSetting("shouldShowPoints");
+    const shouldShowRawPoints = useDebugSetting("shouldShowRawPoints");
+
     const previewPoints = useLive(() => {
         if (splatapus.location.shapeId.live() === shapeId) {
             const activeMode = splatapus.interaction.activeMode.live();
@@ -31,13 +35,16 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                 case ModeType.Draw: {
                     const previewPoints = activeMode.previewPoints.live();
                     if (previewPoints.length) {
-                        return normalizeCenterPointIntervalsQuadratic(
-                            getStrokeCenterPoints(
-                                getStrokePoints(previewPoints, perfectFreehandOpts),
-                                perfectFreehandOpts,
+                        return {
+                            normalized: normalizeCenterPointIntervalsQuadratic(
+                                getStrokeCenterPoints(
+                                    getStrokePoints(previewPoints, perfectFreehandOpts),
+                                    perfectFreehandOpts,
+                                ),
+                                perfectFreehandOpts.size,
                             ),
-                            perfectFreehandOpts.size,
-                        );
+                            raw: previewPoints,
+                        };
                     }
                     return null;
                 }
@@ -54,23 +61,43 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
     const centerPoints = useLive(() => {
         const document = splatapus.document.live();
         const previewPosition = splatapus.previewPosition.live();
+
+        let rawPoints: ReadonlyArray<Vector2>;
+        switch (previewPosition.type) {
+            case "interpolated":
+                rawPoints = [];
+                break;
+            case "keyPointId": {
+                const shapeVersion = document.getShapeVersion(previewPosition.keyPointId, shapeId);
+                rawPoints = shapeVersion ? shapeVersion.rawPoints : [];
+                break;
+            }
+            default:
+                exhaustiveSwitchError(previewPosition);
+        }
+
         const actualCenterPoints = interpolationCache.getCenterPointsAtPosition(
             document,
             shapeId,
             previewPosition,
         );
         if (actualCenterPoints) {
-            return actualCenterPoints;
+            return { normalized: actualCenterPoints, raw: rawPoints };
         }
 
         const keyPointIdHistory = splatapus.keyPointIdHistory.live();
         for (let i = keyPointIdHistory.length - 1; i >= 0; i--) {
             const previousShapeVersion = document.getShapeVersion(keyPointIdHistory[i], shapeId);
             if (previousShapeVersion) {
-                return document.getNormalizedCenterPointsForShapeVersion(previousShapeVersion.id);
+                return {
+                    normalized: document.getNormalizedCenterPointsForShapeVersion(
+                        previousShapeVersion.id,
+                    ),
+                    raw: rawPoints,
+                };
             }
         }
-        return null;
+        return { normalized: null, raw: rawPoints };
     }, [shapeId, splatapus]);
 
     const isSelected = useLive(
@@ -82,9 +109,9 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
 
     return (
         <>
-            {centerPoints && (
+            {centerPoints.normalized && (
                 <path
-                    d={getSvgPathFromStroke(pathFromCenterPoints(centerPoints))}
+                    d={getSvgPathFromStroke(pathFromCenterPoints(centerPoints.normalized))}
                     className={classNames(
                         previewPoints
                             ? "fill-stone-300"
@@ -96,20 +123,19 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
             )}
             {previewPoints && (
                 <path
-                    d={getSvgPathFromStroke(pathFromCenterPoints(previewPoints))}
+                    d={getSvgPathFromStroke(pathFromCenterPoints(previewPoints.normalized))}
                     className={classNames(isSelected ? "fill-stone-800" : "fill-stone-600")}
                 />
             )}
             {shouldShowPoints &&
-                actualPoints &&
-                actualPoints.map((point, i) => (
-                    <circle
-                        key={i}
-                        cx={point.center.x}
-                        cy={point.center.y}
-                        r={point.radius}
-                        className="fill-transparent stroke-cyan-400"
-                    />
+                actualPoints.normalized &&
+                actualPoints.normalized.map((point, i) => (
+                    <DebugCircle center={point.center} radius={point.radius} key={i} />
+                ))}
+            {shouldShowRawPoints &&
+                actualPoints.raw &&
+                actualPoints.raw.map((point, i) => (
+                    <DebugPointX position={point} key={i} color="lime" />
                 ))}
         </>
     );

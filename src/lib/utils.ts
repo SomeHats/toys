@@ -235,10 +235,32 @@ export function getLocalStorageItem(key: string, fallback: unknown = null): unkn
     }
 }
 
+export function getSessionStorageItem(key: string, fallback: unknown = null): unknown {
+    try {
+        // Get from local storage by key
+        const item = window.sessionStorage.getItem(key);
+        // Parse stored json or if none return initialValue
+        return item ? JSON.parse(item) : fallback;
+    } catch (error) {
+        // If error also return initialValue
+        console.log(error);
+        return fallback;
+    }
+}
+
 export function setLocalStorageItem(key: string, value: unknown) {
     const stringified = JSON.stringify(value);
     try {
         window.localStorage.setItem(key, stringified);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export function setSessionStorageItem(key: string, value: unknown) {
+    const stringified = JSON.stringify(value);
+    try {
+        window.sessionStorage.setItem(key, stringified);
     } catch (error) {
         console.log(error);
     }

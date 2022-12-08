@@ -1,6 +1,6 @@
 import { LiveEffect, LiveValue, runLive, useLiveValue } from "@/lib/live";
 import { Schema, SchemaType } from "@/lib/schema";
-import { getLocalStorageItem, setLocalStorageItem } from "@/lib/utils";
+import { getSessionStorageItem, setSessionStorageItem } from "@/lib/utils";
 import { Button, PlainButton } from "@/splatapus/ui/Button";
 import { useSquircleClipPath } from "@/splatapus/ui/useSquircle";
 import { Popover, Transition, Switch } from "@headlessui/react";
@@ -11,11 +11,13 @@ const STORAGE_KEY = "splatapus.debugSettings";
 
 const debugSettingsSchema = Schema.object({
     shouldShowPoints: Schema.boolean,
+    shouldShowRawPoints: Schema.boolean,
 });
 
 type DebugSettings = SchemaType<typeof debugSettingsSchema>;
 const defaultDebugSettings: DebugSettings = {
     shouldShowPoints: false,
+    shouldShowRawPoints: false,
 };
 
 export function DebugSettingsMenu() {
@@ -45,6 +47,13 @@ export function DebugSettingsMenu() {
                         value={settings.shouldShowPoints}
                         onChange={(shouldShowPoints) =>
                             debugSettings.update({ ...settings, shouldShowPoints })
+                        }
+                    />
+                    <ToggleItem
+                        label="Show raw points"
+                        value={settings.shouldShowRawPoints}
+                        onChange={(shouldShowRawPoints) =>
+                            debugSettings.update({ ...settings, shouldShowRawPoints })
                         }
                     />
                 </Popover.Panel>
@@ -78,7 +87,7 @@ function ToggleItem({
 }
 
 function readDebugSettings(): DebugSettings {
-    const contents = getLocalStorageItem(STORAGE_KEY);
+    const contents = getSessionStorageItem(STORAGE_KEY);
     try {
         return debugSettingsSchema.parse(JSON.parse(contents as string)).unwrap();
     } catch (err) {
@@ -88,7 +97,7 @@ function readDebugSettings(): DebugSettings {
 
 const debugSettings = new LiveValue(readDebugSettings(), "debugSettings");
 runLive(LiveEffect.idle, () => {
-    setLocalStorageItem(STORAGE_KEY, JSON.stringify(debugSettings.live()));
+    setSessionStorageItem(STORAGE_KEY, JSON.stringify(debugSettings.live()));
 });
 
 export function useDebugSetting<K extends keyof DebugSettings>(key: K): DebugSettings[K] {

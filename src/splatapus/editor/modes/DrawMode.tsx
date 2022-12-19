@@ -14,9 +14,11 @@ export class DrawMode implements Mode<ModeType.Draw> {
     readonly previewPoints = new LiveValue<ReadonlyArray<Vector2>>([], "DrawMode.previewPoints");
     private readonly gesture = new SplatapusGestureDetector({
         onDragStart: (event, { viewport, location, document }) => {
+            event.preventDefault();
             this.previewPoints.update([viewport.eventSceneCoords(event)]);
             return {
                 couldBeTap: false,
+                pointerCapture: true,
                 onMove: (event) =>
                     this.previewPoints.update((prev) => [
                         ...prev,

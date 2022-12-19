@@ -69,6 +69,7 @@ export class SplatapusGestureDetector<Args extends Array<unknown> = []> {
                 this.isDragging.update(true);
                 return {
                     couldBeTap: handler.couldBeTap,
+                    pointerCapture: handler.pointerCapture,
                     onMove: handler.onMove,
                     onEnd: (event) => {
                         this.isDragging.update(false);

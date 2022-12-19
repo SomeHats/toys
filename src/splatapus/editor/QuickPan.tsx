@@ -19,6 +19,7 @@ export class QuickPan {
 
             return {
                 couldBeTap: false,
+                pointerCapture: true,
                 onMove: (event) => {
                     const screenPoint = Vector2.fromEvent(event);
                     const delta = previousScreenPoint.sub(screenPoint);

@@ -26,7 +26,8 @@ export const ShapeVersionPreview = React.memo(function ShapeVersionPreview({
         if (!shapeVersion) {
             return null;
         }
-        return document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id);
+        return document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id)
+            .normalizedCenterPoints;
     }, [keyPointId, shapeId, splatapus.document]);
     if (!centerPoints || centerPoints.length < 2) {
         return null;

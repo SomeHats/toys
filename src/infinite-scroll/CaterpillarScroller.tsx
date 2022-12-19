@@ -199,23 +199,16 @@ function WormyScrollbar({
     const gesture = useGestureDetector({
         onDragStart: (startEvent) => {
             startEvent.preventDefault();
-
-            const container = assertExists(containerRef.current);
-            container.setPointerCapture(startEvent.pointerId);
-
             handleScroll(startEvent.clientY);
 
             return {
                 couldBeTap: false,
+                pointerCapture: true,
                 onMove(event) {
                     handleScroll(event.clientY);
                 },
-                onEnd() {
-                    container.releasePointerCapture(startEvent.pointerId);
-                },
-                onCancel() {
-                    container.releasePointerCapture(startEvent.pointerId);
-                },
+                onEnd() {},
+                onCancel() {},
             };
         },
     });

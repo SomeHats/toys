@@ -53,6 +53,7 @@ export class RigMode implements Mode<ModeType.Rig> {
                 this.previewPosition.update(viewport.eventSceneCoords(event));
                 return {
                     couldBeTap: false,
+                    pointerCapture: true,
                     onMove: (event) =>
                         this.previewPosition.update(viewport.eventSceneCoords(event)),
                     onEnd: () => this.previewPosition.update(null),
@@ -65,6 +66,7 @@ export class RigMode implements Mode<ModeType.Rig> {
             const startingKeyPointScenePosition = keyPoint.initialScenePosition;
             return {
                 couldBeTap: true,
+                pointerCapture: true,
                 onMove: (event) => {
                     this.previewMovement.update({
                         keyPointId: keyPoint.id,

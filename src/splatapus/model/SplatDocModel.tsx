@@ -125,7 +125,7 @@ export class SplatDocModel {
     }
 
     getNormalizedCenterPointsForShapeVersion(shapeVersionId: SplatShapeVersionId) {
-        return this.data.normalizedShapeVersions.get(shapeVersionId).normalizedCenterPoints;
+        return this.data.normalizedShapeVersions.get(shapeVersionId);
     }
 
     *iterateShapeVersionsForShape(shapeId: SplatShapeId) {

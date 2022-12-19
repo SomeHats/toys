@@ -18,6 +18,7 @@ export type DragStartGestureHandler<Args extends ReadonlyArray<unknown> = []> = 
 ) => DragGestureHandler | null;
 export type DragGestureHandler = {
     couldBeTap: boolean;
+    pointerCapture: boolean;
     onCancel: (event: PointerEvent) => void;
     onMove: (event: PointerEvent) => void;
     onEnd: (event: PointerEvent) => void;
@@ -72,6 +73,9 @@ export class GestureDetector<Args extends Array<unknown> = []> {
                 const dragHandler = this.onDragStart(event, ...args);
                 if (!dragHandler) {
                     return;
+                }
+                if (dragHandler.pointerCapture) {
+                    event.currentTarget.setPointerCapture(event.pointerId);
                 }
                 if (dragHandler.couldBeTap ?? true) {
                     this.state = {
@@ -135,12 +139,18 @@ export class GestureDetector<Args extends Array<unknown> = []> {
                 return;
             case "dragUnconfirmed":
                 if (this.state.pointerId !== event.pointerId) return;
+                if (this.state.dragHandler.pointerCapture) {
+                    event.currentTarget.releasePointerCapture(event.pointerId);
+                }
                 this.state.dragHandler.onCancel(event);
                 this.onTap(event, ...this.state.args);
                 this.state = { type: "idle" };
                 return;
             case "dragConfirmed":
                 if (this.state.pointerId !== event.pointerId) return;
+                if (this.state.dragHandler.pointerCapture) {
+                    event.currentTarget.releasePointerCapture(event.pointerId);
+                }
                 this.state.dragHandler.onEnd(event);
                 this.state = { type: "idle" };
                 return;
@@ -157,6 +167,9 @@ export class GestureDetector<Args extends Array<unknown> = []> {
             case "dragUnconfirmed":
             case "dragConfirmed":
                 if (this.state.pointerId !== event.pointerId) return;
+                if (this.state.dragHandler.pointerCapture) {
+                    event.currentTarget.releasePointerCapture(event.pointerId);
+                }
                 this.state.dragHandler.onCancel(event);
                 this.state = { type: "idle" };
                 return;

@@ -11,6 +11,7 @@ import { Table } from "@/splatapus/model/Table";
 export type NormalizedShapeVersionState = {
     readonly id: SplatShapeVersionId;
     readonly length: number;
+    readonly smoothedCenterPoints: ReadonlyArray<StrokeCenterPoint>;
     readonly normalizedCenterPoints: ReadonlyArray<StrokeCenterPoint>;
 };
 export type NormalizedShapeState = {
@@ -38,14 +39,21 @@ export function calculateNormalizedShapePointsFromVersions(
 
     return {
         versions: Table.fromArray<NormalizedShapeVersionState>(
-            pointsWithStrokes.map(({ strokePoints, length, id }) => ({
-                id,
-                length,
-                normalizedCenterPoints: normalizeCenterPointIntervalsQuadratic(
-                    getStrokeCenterPoints(strokePoints, perfectFreehandOpts),
-                    length / targetPoints,
-                ),
-            })),
+            pointsWithStrokes.map(({ strokePoints, length, id }) => {
+                const smoothedCenterPoints = getStrokeCenterPoints(
+                    strokePoints,
+                    perfectFreehandOpts,
+                );
+                return {
+                    id,
+                    length,
+                    smoothedCenterPoints,
+                    normalizedCenterPoints: normalizeCenterPointIntervalsQuadratic(
+                        smoothedCenterPoints,
+                        length / targetPoints,
+                    ),
+                };
+            }),
         ),
     };
 }

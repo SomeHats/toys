@@ -58,7 +58,9 @@ export function DebugLabel({
         <text
             x={adjustedPosition.x}
             y={adjustedPosition.y}
-            className="font-sans text-xs"
+            className="font-sans"
+            textAnchor="middle"
+            fontSize={4}
             {...getFillProps({ fill: color ?? DebugDraw.DEFAULT_DEBUG_COLOR })}
         >
             {label}
@@ -69,7 +71,7 @@ export function DebugLabel({
 type DebugOptions = { color?: string; label?: string };
 
 export function DebugSvgPath({ color, path }: { color?: string; path: string }) {
-    return <path d={path} {...getStrokeProps(getDebugStrokeOptions(color))} />;
+    return <path d={path} {...getStrokeProps(getDebugStrokeOptions(color))} fill="transparent" />;
 }
 
 export function DebugPointX({ position, ...debugOpts }: { position: Vector2Ish } & DebugOptions) {

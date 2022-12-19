@@ -28,7 +28,10 @@ class InterpolationCache {
         document: SplatDocModel,
         shapeId: SplatShapeId,
         position: PreviewPosition,
-    ): ReadonlyArray<StrokeCenterPoint> | null {
+    ): {
+        normalized: ReadonlyArray<StrokeCenterPoint>;
+        smoothed: ReadonlyArray<StrokeCenterPoint> | null;
+    } | null {
         switch (position.type) {
             case "keyPointId": {
                 const shapeVersion = document.getShapeVersion(position.keyPointId, shapeId);
@@ -37,20 +40,30 @@ class InterpolationCache {
                     if (!keyPoint.position) {
                         return null;
                     }
-                    return this.getCenterPointsAtInterpolatedPosition(
+                    const interpolatedPoints = this.getCenterPointsAtInterpolatedPosition(
                         document,
                         shapeId,
                         keyPoint.position,
                     );
+                    if (!interpolatedPoints) return null;
+                    return { normalized: interpolatedPoints, smoothed: null };
                 }
-                return document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id);
+                return {
+                    normalized: document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id)
+                        .normalizedCenterPoints,
+                    smoothed: document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id)
+                        .smoothedCenterPoints,
+                };
             }
-            case "interpolated":
-                return this.getCenterPointsAtInterpolatedPosition(
+            case "interpolated": {
+                const points = this.getCenterPointsAtInterpolatedPosition(
                     document,
                     shapeId,
                     position.scenePosition,
                 );
+                if (!points) return null;
+                return { normalized: points, smoothed: null };
+            }
             default:
                 exhaustiveSwitchError(position);
         }
@@ -103,7 +116,7 @@ class InterpolationCache {
                 return {
                     normalizedCenterPoints: document.getNormalizedCenterPointsForShapeVersion(
                         version.id,
-                    ),
+                    ).normalizedCenterPoints,
                     version,
                     keyPointPosition: keyPoint.position,
                 };

@@ -12,12 +12,16 @@ const STORAGE_KEY = "splatapus.debugSettings";
 const debugSettingsSchema = Schema.object({
     shouldShowPoints: Schema.boolean,
     shouldShowRawPoints: Schema.boolean,
+    shouldShowSmoothPoints: Schema.boolean,
+    useSmartNormalization: Schema.boolean,
 });
 
 type DebugSettings = SchemaType<typeof debugSettingsSchema>;
 const defaultDebugSettings: DebugSettings = {
     shouldShowPoints: false,
     shouldShowRawPoints: false,
+    shouldShowSmoothPoints: false,
+    useSmartNormalization: true,
 };
 
 export function DebugSettingsMenu() {
@@ -54,6 +58,20 @@ export function DebugSettingsMenu() {
                         value={settings.shouldShowRawPoints}
                         onChange={(shouldShowRawPoints) =>
                             debugSettings.update({ ...settings, shouldShowRawPoints })
+                        }
+                    />
+                    <ToggleItem
+                        label="Smooth points"
+                        value={settings.shouldShowSmoothPoints}
+                        onChange={(shouldShowSmoothPoints) =>
+                            debugSettings.update({ ...settings, shouldShowSmoothPoints })
+                        }
+                    />
+                    <ToggleItem
+                        label="Smart normalization"
+                        value={settings.useSmartNormalization}
+                        onChange={(useSmartNormalization) =>
+                            debugSettings.update({ ...settings, useSmartNormalization })
                         }
                     />
                 </Popover.Panel>

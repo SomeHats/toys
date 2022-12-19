@@ -32,8 +32,8 @@ export function KeyPointPreview({
                 );
                 if (actualCenterPoints) {
                     return {
-                        centerPoints: actualCenterPoints,
-                        svg: svgPathFromCenterPoints(actualCenterPoints),
+                        centerPoints: actualCenterPoints.normalized,
+                        svg: svgPathFromCenterPoints(actualCenterPoints.normalized),
                         shapeId: shape.id,
                     };
                 }

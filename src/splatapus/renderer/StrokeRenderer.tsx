@@ -8,15 +8,17 @@ import {
     getStrokeCenterPoints,
     getStrokePoints,
     getSvgPathFromStroke,
+    StrokeCenterPoint,
 } from "@/splatapus/model/perfectFreehand";
 import { ModeType } from "@/splatapus/editor/modes/Mode";
 import classNames from "classnames";
-import React from "react";
+import React, { Fragment } from "react";
 import { useDebugSetting } from "@/splatapus/DebugSettings";
 import { useLive } from "@/lib/live";
 import { Splatapus } from "@/splatapus/editor/useEditor";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { DebugCircle, DebugPointX } from "@/lib/DebugSvg";
+import { DebugCircle, DebugLabel, DebugPointX, DebugVectorAtPoint } from "@/lib/DebugSvg";
+import { assert, assertExists } from "@/lib/assert";
 
 export const StrokeRenderer = React.memo(function StrokeRenderer({
     shapeId,
@@ -26,6 +28,7 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
     splatapus: Splatapus;
 }) {
     const shouldShowPoints = useDebugSetting("shouldShowPoints");
+    const shouldShowSmoothPoints = useDebugSetting("shouldShowSmoothPoints");
     const shouldShowRawPoints = useDebugSetting("shouldShowRawPoints");
 
     const previewPoints = useLive(() => {
@@ -35,14 +38,17 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                 case ModeType.Draw: {
                     const previewPoints = activeMode.previewPoints.live();
                     if (previewPoints.length) {
+                        const smoothed = getStrokeCenterPoints(
+                            getStrokePoints(previewPoints, perfectFreehandOpts),
+                            perfectFreehandOpts,
+                        );
                         return {
                             normalized: normalizeCenterPointIntervalsQuadratic(
-                                getStrokeCenterPoints(
-                                    getStrokePoints(previewPoints, perfectFreehandOpts),
-                                    perfectFreehandOpts,
-                                ),
+                                smoothed,
                                 perfectFreehandOpts.size,
                             ),
+                            reduced: reducePointsBasedOnCost(smoothed),
+                            smoothed,
                             raw: previewPoints,
                         };
                     }
@@ -82,17 +88,26 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
             previewPosition,
         );
         if (actualCenterPoints) {
-            return { normalized: actualCenterPoints, raw: rawPoints };
+            return {
+                normalized: actualCenterPoints.normalized,
+                smoothed: actualCenterPoints.smoothed,
+                reduced: actualCenterPoints.smoothed
+                    ? reducePointsBasedOnCost(actualCenterPoints.smoothed)
+                    : null,
+                raw: rawPoints,
+            };
         }
 
         const keyPointIdHistory = splatapus.keyPointIdHistory.live();
         for (let i = keyPointIdHistory.length - 1; i >= 0; i--) {
             const previousShapeVersion = document.getShapeVersion(keyPointIdHistory[i], shapeId);
             if (previousShapeVersion) {
+                const { normalizedCenterPoints, smoothedCenterPoints } =
+                    document.getNormalizedCenterPointsForShapeVersion(previousShapeVersion.id);
                 return {
-                    normalized: document.getNormalizedCenterPointsForShapeVersion(
-                        previousShapeVersion.id,
-                    ),
+                    normalized: normalizedCenterPoints,
+                    smoothed: smoothedCenterPoints,
+                    reduced: reducePointsBasedOnCost(smoothedCenterPoints),
                     raw: rawPoints,
                 };
             }
@@ -121,9 +136,34 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                     )}
                 />
             )}
+            {/* {centerPoints.reduced &&
+                pathFromCenterPoints(centerPoints.reduced.retainedPoints).map((point, i) => (
+                    <DebugPointX key={i} position={point} />
+                ))} */}
+            {/* {centerPoints.normalized && (
+                <path
+                    d={getSvgPathFromStroke(
+                        pathFromCenterPoints(
+                            centerPoints.normalized.map(({ center, radius }) => ({
+                                center: center.add(0, 100),
+                                radius,
+                            })),
+                        ),
+                    )}
+                    className={classNames(
+                        previewPoints
+                            ? "fill-stone-300"
+                            : isSelected
+                            ? "fill-stone-800"
+                            : "fill-stone-600",
+                    )}
+                />
+            )} */}
             {previewPoints && (
                 <path
-                    d={getSvgPathFromStroke(pathFromCenterPoints(previewPoints.normalized))}
+                    d={getSvgPathFromStroke(
+                        pathFromCenterPoints(previewPoints.reduced.retainedPoints),
+                    )}
                     className={classNames(isSelected ? "fill-stone-800" : "fill-stone-600")}
                 />
             )}
@@ -137,6 +177,93 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                 actualPoints.raw.map((point, i) => (
                     <DebugPointX position={point} key={i} color="lime" />
                 ))}
+            {shouldShowSmoothPoints &&
+                actualPoints.reduced &&
+                actualPoints.reduced.retainedPoints.map((point, i) => (
+                    <DebugCircle
+                        center={point.center}
+                        radius={point.radius}
+                        key={i}
+                        color="skyblue"
+                    />
+                ))}
         </>
     );
 });
+
+const bendWeight = 10;
+const sizeWeight = 10;
+
+function getCostAtIndex(points: ReadonlyArray<StrokeCenterPoint>, index: number): number | null {
+    if (index === 0 || index === points.length - 1) {
+        return null;
+    }
+
+    const previousPoint = points[index - 1];
+    const currentPoint = points[index];
+    const nextPoint = points[index + 1];
+
+    const bendFactor =
+        (Math.abs(
+            currentPoint.center
+                .sub(previousPoint.center)
+                .angleBetween(nextPoint.center.sub(currentPoint.center)),
+        ) /
+            Math.PI) *
+        bendWeight;
+
+    const sizeFactor =
+        (1 -
+            (currentPoint.radius < previousPoint.radius
+                ? currentPoint.radius / previousPoint.radius
+                : previousPoint.radius / currentPoint.radius)) *
+        sizeWeight;
+
+    return bendFactor + sizeFactor;
+}
+
+function reducePointsBasedOnCost(points: ReadonlyArray<StrokeCenterPoint>) {
+    const dbg: React.ReactNode[] = [];
+
+    let costRemaining = 1;
+    let totalCost = 0;
+    const retainedPoints = [points[0]];
+
+    for (let i = 1; i < points.length - 1; i++) {
+        const cost = assertExists(getCostAtIndex(points, i));
+        costRemaining -= cost;
+        totalCost += cost;
+
+        if (costRemaining < 0) {
+            retainedPoints.push(points[i]);
+            costRemaining = 1;
+        }
+    }
+
+    retainedPoints.push(points[points.length - 1]);
+
+    return {
+        retainedPoints,
+        totalCost,
+        dbg,
+    };
+}
+
+// function reducePointsForTargetCost(
+//     points: ReadonlyArray<StrokeCenterPoint>,
+//     naturalCost: number,
+//     costMultiplier: number,
+// ) {
+//     const dbg: React.ReactNode[] = [];
+//     const retainedPoints = [points[0]];
+
+//     let accumulatedCost = 0;
+//     let prevTracker = points[0];
+
+//     for (let i = 1; i < points.length - 1; i++) {
+//         const cost = assertExists(getCostAtIndex(points, i)) * costMultiplier;
+
+//         const trackerStart = prevTracker.center;
+//         const trackerEnd =
+//     }
+// }

@@ -1,6 +1,6 @@
 import { LiveEffect, LiveValue, runLive, useLiveValue } from "@/lib/live";
 import { Schema, SchemaType } from "@/lib/schema";
-import { getSessionStorageItem, setSessionStorageItem } from "@/lib/utils";
+import { getSessionStorageItemUnchecked, setSessionStorageItemUnchecked } from "@/lib/storage";
 import { Button, PlainButton } from "@/splatapus/ui/Button";
 import { useSquircleClipPath } from "@/splatapus/ui/useSquircle";
 import { Popover, Transition, Switch } from "@headlessui/react";
@@ -105,7 +105,7 @@ function ToggleItem({
 }
 
 function readDebugSettings(): DebugSettings {
-    const contents = getSessionStorageItem(STORAGE_KEY);
+    const contents = getSessionStorageItemUnchecked(STORAGE_KEY);
     try {
         return debugSettingsSchema.parse(JSON.parse(contents as string)).unwrap();
     } catch (err) {
@@ -115,7 +115,7 @@ function readDebugSettings(): DebugSettings {
 
 const debugSettings = new LiveValue(readDebugSettings(), "debugSettings");
 runLive(LiveEffect.idle, () => {
-    setSessionStorageItem(STORAGE_KEY, JSON.stringify(debugSettings.live()));
+    setSessionStorageItemUnchecked(STORAGE_KEY, JSON.stringify(debugSettings.live()));
 });
 
 export function useDebugSetting<K extends keyof DebugSettings>(key: K): DebugSettings[K] {

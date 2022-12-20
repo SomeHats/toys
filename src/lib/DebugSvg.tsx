@@ -1,7 +1,7 @@
 import { DebugDraw, FillOptions, StrokeAndFillOptions, StrokeOptions } from "@/lib/DebugDraw";
 import { Vector2, Vector2Ish } from "@/lib/geom/Vector2";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
-import { ComponentProps, ComponentType } from "react";
+import { ComponentProps } from "react";
 
 function asProps<El extends keyof JSX.IntrinsicElements>() {
     return <T extends ComponentProps<El>>(props: T) => props;

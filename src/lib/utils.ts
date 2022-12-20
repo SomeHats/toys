@@ -222,50 +222,6 @@ export function getId(prefix = ""): string {
     return `${prefix}${Math.random().toString(36).slice(1)}`;
 }
 
-export function getLocalStorageItem(key: string, fallback: unknown = null): unknown {
-    try {
-        // Get from local storage by key
-        const item = window.localStorage.getItem(key);
-        // Parse stored json or if none return initialValue
-        return item ? JSON.parse(item) : fallback;
-    } catch (error) {
-        // If error also return initialValue
-        console.log(error);
-        return fallback;
-    }
-}
-
-export function getSessionStorageItem(key: string, fallback: unknown = null): unknown {
-    try {
-        // Get from local storage by key
-        const item = window.sessionStorage.getItem(key);
-        // Parse stored json or if none return initialValue
-        return item ? JSON.parse(item) : fallback;
-    } catch (error) {
-        // If error also return initialValue
-        console.log(error);
-        return fallback;
-    }
-}
-
-export function setLocalStorageItem(key: string, value: unknown) {
-    const stringified = JSON.stringify(value);
-    try {
-        window.localStorage.setItem(key, stringified);
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export function setSessionStorageItem(key: string, value: unknown) {
-    const stringified = JSON.stringify(value);
-    try {
-        window.sessionStorage.setItem(key, stringified);
-    } catch (error) {
-        console.log(error);
-    }
-}
-
 export function debounce<Args extends Array<unknown>>(
     ms: number,
     fn: (...args: Args) => void,
@@ -365,11 +321,7 @@ export function* indexed<T>(iterable: Iterable<T>): Generator<[number, T], void>
     }
 }
 
-export function copyArrayAndInsert<T>(
-    array: ReadonlyArray<T>,
-    item: T,
-    index = array.length,
-): Array<T> {
+export function copyArrayAndInsert<T>(array: ReadonlyArray<T>, index: number, item: T): Array<T> {
     const copied = array.slice();
     copied.splice(index, 0, item);
     return copied;
@@ -429,6 +381,15 @@ export function applyUpdateWithin<T, Key extends keyof T>(
     };
 }
 
+export type Initializer<T> = T | (() => T);
+export function resolveInitializer<T>(initializer: Initializer<T>): T {
+    if (typeof initializer === "function") {
+        return (initializer as () => T)();
+    } else {
+        return initializer;
+    }
+}
+
 export function stringFromError(error: unknown) {
     if (typeof error === "string") {
         return error;
@@ -448,4 +409,12 @@ export function degreesToRadians(degrees: number) {
 
 export function radiansToDegrees(radians: number) {
     return (radians * 180) / Math.PI;
+}
+
+export function windows<T>(array: ReadonlyArray<T>, size: number): Array<Array<T>> {
+    const result = [];
+    for (let i = 0; i < array.length - size + 1; i++) {
+        result.push(array.slice(i, i + size));
+    }
+    return result;
 }

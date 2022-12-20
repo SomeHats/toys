@@ -1,16 +1,8 @@
 import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
 import { assert } from "@/lib/assert";
-import {
-    mapRange,
-    getLocalStorageItem,
-    debounce,
-    setLocalStorageItem,
-    clamp,
-    lerp,
-    ReadonlyRecord,
-    has,
-} from "@/lib/utils";
+import { mapRange, debounce, clamp, lerp, ReadonlyRecord, has } from "@/lib/utils";
 import RingBuffer from "@/lib/RingBuffer";
+import { getLocalStorageItemUnchecked, setLocalStorageItemUnchecked } from "@/lib/storage";
 
 export abstract class Signal {
     private currentValue: number | null = null;
@@ -68,7 +60,10 @@ export class ControllableSignal extends ControlledSignal {
     ) {
         super(
             manager,
-            _clamp(getLocalStorageItem(`signalSetting.${key}`, initialValue) as number, range),
+            _clamp(
+                getLocalStorageItemUnchecked(`signalSetting.${key}`, initialValue) as number,
+                range,
+            ),
         );
 
         this.range = range || null;
@@ -81,7 +76,7 @@ export class ControllableSignal extends ControlledSignal {
     }
 
     private saveDebounced = debounce(200, (newValue: number) =>
-        setLocalStorageItem(`signalSetting.${this.key}`, newValue),
+        setLocalStorageItemUnchecked(`signalSetting.${this.key}`, newValue),
     );
 }
 

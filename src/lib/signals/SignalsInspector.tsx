@@ -3,11 +3,12 @@ import * as React from "react";
 import { useSubscription } from "use-subscription";
 import { groupBy, sortBy, partition, mapRange } from "@/lib/utils";
 import { assert } from "@/lib/assert";
-import useLocalStorage from "@/lib/hooks/useLocalStorageState";
+import { useLocalStorageState } from "@/lib/hooks/useStoredState";
 import DragCover from "@/lib/DragCover";
 import cx from "classnames";
 import { ListenToMidiInputFn } from "@/lib/midi";
 import useSignal from "@/lib/signals/useSignal";
+import { Schema } from "@/lib/schema";
 
 const format = (value: number, significantFigures: number): string => {
     const valueParts = value.toString().split(".");
@@ -134,8 +135,9 @@ function SignalControl({
     listenToMidi: ListenToMidiInputFn;
 }) {
     const [isWaitingForMidi, setIsWaitingForMidi] = React.useState(false);
-    const [midiControlId, setMidiControlId] = useLocalStorage<string | null>(
+    const [midiControlId, setMidiControlId] = useLocalStorageState(
         `midiControlForSignal.${name}`,
+        Schema.string.nullable(),
         null,
     );
 
@@ -233,7 +235,11 @@ const SignalInspector = React.memo(function _SignalInspector({
     width: number;
     listenToMidi: ListenToMidiInputFn;
 }) {
-    const [isExpanded, setIsExpanded] = useLocalStorage(`signal.${name}`, false);
+    const [isExpanded, setIsExpanded] = useLocalStorageState(
+        `signal.${name}`,
+        Schema.boolean,
+        false,
+    );
     const controllableSignals = signals.filter(
         (s): s is ControllableSignal => s instanceof ControllableSignal,
     );
@@ -271,7 +277,11 @@ function SignalInspectorGroup({
     width: number;
     listenToMidi: ListenToMidiInputFn;
 }) {
-    const [isExpanded, setIsExpanded] = useLocalStorage(`group.${groupName}`, false);
+    const [isExpanded, setIsExpanded] = useLocalStorageState(
+        `group.${groupName}`,
+        Schema.boolean,
+        false,
+    );
     return (
         <div className="border-t border-gray-700 text-xs">
             <div

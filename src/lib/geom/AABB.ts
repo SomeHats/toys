@@ -5,6 +5,10 @@ export default class AABB {
         return new AABB(new Vector2(left, top), new Vector2(right - left, bottom - top));
     }
 
+    static fromLeftTopWidthHeight(left: number, top: number, width: number, height: number): AABB {
+        return new AABB(new Vector2(left, top), new Vector2(width, height));
+    }
+
     constructor(public readonly origin: Vector2, public readonly size: Vector2) {
         Object.freeze(this);
     }

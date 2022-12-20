@@ -549,7 +549,7 @@ function CatmullRomAnnotation({ line, showExtras, uiTarget }: LineAnnotationProp
                             y2={control.y}
                             className="stroke-purple-400"
                             fill="none"
-                            strokeWidth={3}
+                            strokeWidth={2}
                             strokeLinecap="round"
                             strokeLinejoin="round"
                         />
@@ -566,7 +566,7 @@ function CatmullRomAnnotation({ line, showExtras, uiTarget }: LineAnnotationProp
                 d={path.toString()}
                 className="stroke-fuchsia-500"
                 fill="none"
-                strokeWidth={2}
+                strokeWidth={3}
                 strokeLinecap="round"
                 strokeLinejoin="round"
             />

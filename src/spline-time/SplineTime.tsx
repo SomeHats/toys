@@ -16,13 +16,20 @@ import { createPortal } from "react-dom";
 const HOVER_RADIUS_PX = 10;
 const MID_POINT_MARKER_SIZE_PX = 8;
 
+const sampleLine = [
+    [-150, 75],
+    [0, -50],
+    [0, 50],
+    [150, -75],
+].map(([x, y]) => new Vector2(x, y));
+
 export function SplineTime() {
     const [container, setContainer] = useState<HTMLDivElement | null>(null);
     const size = useResizeObserver(container, sizeFromBorderBox);
     const [line, setLine] = useSessionStorageState(
         "splineTime.line",
         SplineTimeLine.schema,
-        () => new SplineTimeLine([]),
+        () => new SplineTimeLine(sampleLine),
     );
 
     return (

@@ -11,13 +11,14 @@ import { catmullRomLayer } from "@/spline-time/layers/catmullRomLayer";
 import { Layer } from "@/spline-time/layers/Layer";
 import { midPointBezierLayer } from "@/spline-time/layers/midPointBezierLayer";
 import { midPointMarkerLayer } from "@/spline-time/layers/midPointMarkerLayer";
-import { quadBezierLayer } from "@/spline-time/layers/quadBezierLayer";
+import { alexModeLayer } from "@/spline-time/layers/alexModeLayer";
 import { straightLineThroughPointsLayer } from "@/spline-time/layers/straightLineThroughPointsLayer";
 import { SplineTimeLine } from "@/spline-time/SplineTimeLine";
 import classNames from "classnames";
 import { Fragment, PointerEvent, useState } from "react";
+import { arcLayer } from "@/spline-time/layers/arcLayer";
 
-const HOVER_RADIUS_PX = 10;
+const HOVER_RADIUS_PX = 20;
 
 const sampleLine = [
     [-150, 75],
@@ -44,7 +45,7 @@ export function SplineTime() {
                 </div>
                 <Button onClick={() => setLine(new SplineTimeLine([]))}>reset</Button>
             </div>
-            <div className="relative flex-auto" ref={setContainer}>
+            <div className="relative flex-auto touch-none" ref={setContainer}>
                 {size && <SplineTimeMain size={size} line={line} setLine={setLine} />}
             </div>
         </div>
@@ -144,7 +145,10 @@ function SplineTimeMain({
         <>
             <RenderWindow
                 {...renderWindowProps}
-                layers={[straightLineThroughPointsLayer({ style: "final" }), midPointMarkerLayer]}
+                layers={[
+                    showExtras && straightLineThroughPointsLayer({ style: "dotted" }),
+                    arcLayer,
+                ]}
                 location={AABB.fromLeftTopWidthHeight(paddingPx, 0, previewWidth, previewHeight)}
             />
             <RenderWindow
@@ -173,7 +177,7 @@ function SplineTimeMain({
             />
             <RenderWindow
                 {...renderWindowProps}
-                layers={[quadBezierLayer]}
+                layers={[alexModeLayer]}
                 location={AABB.fromLeftTopWidthHeight(
                     previewWidth + paddingPx * 2,
                     previewHeight + paddingPx,

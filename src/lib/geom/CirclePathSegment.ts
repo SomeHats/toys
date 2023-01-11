@@ -3,6 +3,7 @@ import { constrain, mapRange } from "@/lib/utils";
 import { Vector2 } from "@/lib/geom/Vector2";
 import Circle from "@/lib/geom/Circle";
 import { PathSegment } from "@/lib/geom/Path";
+import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 
 export default class CirclePathSegment implements PathSegment {
     readonly circle: Circle;
@@ -75,5 +76,17 @@ export default class CirclePathSegment implements PathSegment {
                 Math.PI / 2
             );
         }
+    }
+
+    appendToSvgPathBuilder(pathBuilder: SvgPathBuilder): void {
+        pathBuilder.moveToIfNeeded(this.getStart());
+        pathBuilder.arcTo(
+            this.circle.radius,
+            this.circle.radius,
+            0,
+            0,
+            this.isAnticlockwise ? 0 : 1,
+            this.getEnd(),
+        );
     }
 }

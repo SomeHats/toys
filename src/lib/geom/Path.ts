@@ -6,6 +6,7 @@ import { Vector2 } from "@/lib/geom/Vector2";
 import StraightPathSegment from "@/lib/geom/StraightPathSegment";
 import CirclePathSegment from "@/lib/geom/CirclePathSegment";
 import Line2 from "@/lib/geom/Line2";
+import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 
 export interface PathSegment {
     getStart(): Vector2;
@@ -13,9 +14,17 @@ export interface PathSegment {
     getLength(): number;
     getPointAtPosition(position: number): Vector2;
     getAngleAtPosition(position: number): number;
+
+    appendToSvgPathBuilder(pathBuilder: SvgPathBuilder): void;
 }
 
-export default class Path implements PathSegment {
+export class Path implements PathSegment {
+    static segmentToSvgPath(segment: PathSegment): string {
+        const pathBuilder = new SvgPathBuilder();
+        segment.appendToSvgPathBuilder(pathBuilder);
+        return pathBuilder.toString();
+    }
+
     static straightThroughPoints(...points: ReadonlyArray<Vector2>): Path {
         let [lastPoint, ...remainingPoints] = points;
         const path = new Path();
@@ -82,6 +91,12 @@ export default class Path implements PathSegment {
 
     getLength(): number {
         return this.segments.reduce((length, segment) => length + segment.getLength(), 0);
+    }
+
+    appendToSvgPathBuilder(pathBuilder: SvgPathBuilder): void {
+        for (const segment of this.segments) {
+            segment.appendToSvgPathBuilder(pathBuilder);
+        }
     }
 
     getPointAtPosition(position: number): Vector2 {

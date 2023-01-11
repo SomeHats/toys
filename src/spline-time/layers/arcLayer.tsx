@@ -1,6 +1,6 @@
 import Circle from "@/lib/geom/Circle";
 import CirclePathSegment from "@/lib/geom/CirclePathSegment";
-import Path from "@/lib/geom/Path";
+import { Path } from "@/lib/geom/Path";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { FinalLine, LineMarker } from "@/spline-time/guides";
 import { LayerProps, LayerUi } from "@/spline-time/layers/Layer";

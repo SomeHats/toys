@@ -168,3 +168,13 @@ export function DebugCircle({
         </>
     );
 }
+
+export function DebugPolyline({ points, ...debugOpts }: { points: Vector2Ish[] } & DebugOptions) {
+    const path = new SvgPathBuilder();
+    if (points.length > 1) path.moveTo(points[0]);
+    for (let i = 1; i < points.length; i++) {
+        path.lineTo(points[i]);
+    }
+
+    return <DebugSvgPath {...debugOpts} path={path.toString()} />;
+}

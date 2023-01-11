@@ -3,6 +3,7 @@ import { constrain } from "@/lib/utils";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { PathSegment } from "@/lib/geom/Path";
 import Line2 from "@/lib/geom/Line2";
+import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 
 export default class StraightPathSegment implements PathSegment {
     readonly line: Line2;
@@ -41,5 +42,10 @@ export default class StraightPathSegment implements PathSegment {
 
     getAngleAtPosition(): number {
         return this.delta.angle();
+    }
+
+    appendToSvgPathBuilder(pathBuilder: SvgPathBuilder): void {
+        pathBuilder.moveToIfNeeded(this.line.start);
+        pathBuilder.lineTo(this.line.end);
     }
 }

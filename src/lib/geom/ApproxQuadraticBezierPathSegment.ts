@@ -1,6 +1,7 @@
-import Path, { PathSegment } from "@/lib/geom/Path";
+import { Path, PathSegment } from "@/lib/geom/Path";
 import { Vector2 } from "@/lib/geom/Vector2";
 import StraightPathSegment from "@/lib/geom/StraightPathSegment";
+import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 
 export default class ApproxQuadraticBezierPathSegment implements PathSegment {
     private readonly path: Path;
@@ -35,5 +36,9 @@ export default class ApproxQuadraticBezierPathSegment implements PathSegment {
 
     getAngleAtPosition(position: number): number {
         return this.path.getAngleAtPosition(position);
+    }
+
+    appendToSvgPathBuilder(pathBuilder: SvgPathBuilder): void {
+        this.path.appendToSvgPathBuilder(pathBuilder);
     }
 }

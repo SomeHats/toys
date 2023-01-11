@@ -1,5 +1,5 @@
 // @flow
-import Path from "@/lib/geom/Path";
+import { Path } from "@/lib/geom/Path";
 import StraightPathSegment from "@/lib/geom/StraightPathSegment";
 import CirclePathSegment from "@/lib/geom/CirclePathSegment";
 

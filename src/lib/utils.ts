@@ -418,3 +418,20 @@ export function windows<T>(array: ReadonlyArray<T>, size: number): Array<Array<T
     }
     return result;
 }
+
+export function maxBy<T>(array: ReadonlyArray<T>, fn: (item: T) => number): T | undefined {
+    let max: T | undefined;
+    let maxValue: number | undefined;
+    for (const item of array) {
+        const value = fn(item);
+        if (maxValue === undefined || value > maxValue) {
+            max = item;
+            maxValue = value;
+        }
+    }
+    return max;
+}
+
+export function minBy<T>(array: ReadonlyArray<T>, fn: (item: T) => number): T | undefined {
+    return maxBy(array, (item) => -fn(item));
+}

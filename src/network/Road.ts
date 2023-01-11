@@ -1,6 +1,6 @@
 // @flow
 import SceneObject from "@/lib/scene/SceneObject";
-import Path from "@/lib/geom/Path";
+import { Path } from "@/lib/geom/Path";
 import StraightPathSegment from "@/lib/geom/StraightPathSegment";
 import { Vector2 } from "@/lib/geom/Vector2";
 import * as ShapeHelpers from "@/lib/canvasShapeHelpers";

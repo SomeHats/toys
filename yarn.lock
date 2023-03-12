@@ -5138,6 +5138,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nan@npm:^2.12.1":
+  version: 2.17.0
+  resolution: "nan@npm:2.17.0"
+  dependencies:
+    node-gyp: latest
+  checksum: ec609aeaf7e68b76592a3ba96b372aa7f5df5b056c1e37410b0f1deefbab5a57a922061e2c5b369bae9c7c6b5e6eecf4ad2dac8833a1a7d3a751e0a7c7f849ed
+  languageName: node
+  linkType: hard
+
 "nanoid@npm:^3.3.4":
   version: 3.3.4
   resolution: "nanoid@npm:3.3.4"
@@ -6614,6 +6623,7 @@ __metadata:
     rimraf: ^3.0.2
     tailwindcss: ^3.1.8
     three: ^0.132.2
+    tree-sitter-cli: ^0.20.7
     typescript: ^4.9.3
     use-resize-observer: ^9.0.2
     use-subscription: ^1.8.0
@@ -6685,6 +6695,24 @@ __metadata:
   checksum: f76fa01b3d5be85db6a2a143e24df9f60dd047d151062d0ba3df62953f2f697b16fe5dad9b0ac6191c7efc7b1d9dcaa4b768174b7b29da89d4428e64bc0a20ed
   languageName: node
   linkType: hard
+
+"tree-sitter-cli@npm:^0.20.7":
+  version: 0.20.7
+  resolution: "tree-sitter-cli@npm:0.20.7"
+  bin:
+    tree-sitter: cli.js
+  checksum: 9a229195f53a87c08d5468845ef2c5add981f3058e4fe617e02b1e239dc3dcd3e34afd229cd519b8ebaa9ffd65ccc582ec1f7ff6dc5ffab5cf14a3b39ebfbc81
+  languageName: node
+  linkType: hard
+
+"tree-sitter-wtf@workspace:src/wtf/tree-sitter-wtf":
+  version: 0.0.0-use.local
+  resolution: "tree-sitter-wtf@workspace:src/wtf/tree-sitter-wtf"
+  dependencies:
+    nan: ^2.12.1
+    tree-sitter-cli: ^0.20.7
+  languageName: unknown
+  linkType: soft
 
 "ts-morph@npm:^16.0.0":
   version: 16.0.0

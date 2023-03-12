@@ -1,0 +1,22 @@
+================================================================================
+Hello
+================================================================================
+
+// here is a comment!
+hello world 1234 (1, 2, 3 4 hello)
+"a string"
+"a string
+that goes over multiple lines"
+
+--------------------------------------------------------------------------------
+
+(program
+  (identifier)
+  (identifier)
+  (number)
+  (tuple
+    (number)
+    (number)
+    (number)
+    (number)
+    (identifier)))

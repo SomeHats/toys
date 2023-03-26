@@ -5,7 +5,7 @@ import Circle from "@/lib/geom/Circle";
 import { Vector2 } from "@/lib/geom/Vector2";
 import StraightPathSegment from "@/lib/geom/StraightPathSegment";
 import CirclePathSegment from "@/lib/geom/CirclePathSegment";
-import Line2 from "@/lib/geom/Line2";
+import { Line2 } from "@/lib/geom/Line2";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 
 export interface PathSegment {

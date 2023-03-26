@@ -1,7 +1,7 @@
 // @flow
 import { Vector2 } from "@/lib/geom/Vector2";
 import AABB from "@/lib/geom/AABB";
-import Line2 from "@/lib/geom/Line2";
+import { Line2 } from "@/lib/geom/Line2";
 
 export default class Circle {
     static create(x: number, y: number, radius: number): Circle {

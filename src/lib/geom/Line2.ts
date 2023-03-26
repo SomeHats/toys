@@ -5,7 +5,7 @@ import { Vector2 } from "@/lib/geom/Vector2";
 
 const isSlopeVertical = (slope: number) => slope === Infinity || slope === -Infinity;
 
-export default class Line2 {
+export class Line2 {
     static fromSlopeAndDisplacement(slope: number, displacement: number) {
         assert(!isSlopeVertical(slope), "cannot create vertical line from displacement");
 
@@ -21,6 +21,11 @@ export default class Line2 {
 
         const displacement = point.y - point.x * slope;
         return Line2.fromSlopeAndDisplacement(slope, displacement);
+    }
+
+    static fromAngleAndPoint(angle: number, point: Vector2): Line2 {
+        const slope = Math.tan(angle);
+        return Line2.fromSlopeAndPoint(slope, point);
     }
 
     readonly start: Vector2;

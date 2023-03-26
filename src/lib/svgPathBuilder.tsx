@@ -4,6 +4,15 @@ export class SvgPathBuilder {
     private parts: string[] = [];
     private lastPoint: Vector2 | null = null;
 
+    static straightThroughPoints(points: Vector2Ish[]) {
+        const builder = new SvgPathBuilder();
+        builder.moveTo(points[0]);
+        for (let i = 1; i < points.length; i++) {
+            builder.lineTo(points[i]);
+        }
+        return builder;
+    }
+
     constructor() {}
 
     toString() {

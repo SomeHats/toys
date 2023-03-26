@@ -26,7 +26,10 @@ export default defineConfig(async ({ mode }) => {
         plugins: [
             react({
                 babel: {
-                    plugins: [createAssertPlugin()],
+                    plugins: [
+                        createAssertPlugin(),
+                        ["@babel/plugin-proposal-decorators", { version: "2023-01" }],
+                    ],
                 },
             }),
             glsl.default({ compress: mode === "production" }),

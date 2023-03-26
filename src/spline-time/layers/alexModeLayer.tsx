@@ -5,7 +5,6 @@ import { invLerp } from "@/lib/utils";
 import { BezierControlPoint, DottedGuideLine, FinalLine } from "@/spline-time/guides";
 import { LayerProps, LayerUi } from "@/spline-time/layers/Layer";
 import { Fragment, ReactNode, useState } from "react";
-import { e } from "vitest/dist/index-ea17aa0c";
 
 export function alexModeLayer(props: LayerProps) {
     return <AlexModeLayer {...props} />;

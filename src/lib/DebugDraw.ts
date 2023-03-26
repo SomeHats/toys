@@ -1,5 +1,5 @@
 import AABB from "@/lib/geom/AABB";
-import Line2 from "@/lib/geom/Line2";
+import { Line2 } from "@/lib/geom/Line2";
 import { Vector2, Vector2Ish } from "@/lib/geom/Vector2";
 
 export type StrokeOptions = {

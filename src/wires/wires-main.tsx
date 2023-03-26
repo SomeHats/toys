@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { assertExists } from "@/lib/assert";
-import { WiresApp } from "@/wires/WiresApp";
+import { WiresAppRenderer } from "@/wires/WiresApp2";
 
 if (import.meta.hot) {
     import.meta.hot.on("vite:beforeUpdate", () => {
@@ -12,6 +12,6 @@ if (import.meta.hot) {
 const root = assertExists(document.getElementById("root"));
 createRoot(root).render(
     <React.StrictMode>
-        <WiresApp />
+        <WiresAppRenderer />
     </React.StrictMode>,
 );

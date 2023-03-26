@@ -2,7 +2,7 @@
 import { constrain } from "@/lib/utils";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { PathSegment } from "@/lib/geom/Path";
-import Line2 from "@/lib/geom/Line2";
+import { Line2 } from "@/lib/geom/Line2";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 
 export default class StraightPathSegment implements PathSegment {

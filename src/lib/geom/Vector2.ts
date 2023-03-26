@@ -159,6 +159,11 @@ export class Vector2 {
         return new Vector2(this.x - other.x, this.y - other.y);
     }
 
+    mul(...args: Vector2Args): Vector2 {
+        const other = Vector2.fromArgs(args);
+        return new Vector2(this.x * other.x, this.y * other.y);
+    }
+
     floor(): Vector2 {
         return new Vector2(Math.floor(this.x), Math.floor(this.y));
     }
@@ -213,5 +218,35 @@ export class Vector2 {
     /** Project this point in the direction `direction` by scalar `distance` */
     project(direction: Vector2Ish, distance: number): Vector2 {
         return Vector2.from(direction).scale(distance).add(this);
+    }
+
+    nearestPointOnLineSegment(_lineStart: Vector2Ish, _lineEnd: Vector2Ish, clamp = true): Vector2 {
+        const lineStart = Vector2.from(_lineStart);
+        const lineEnd = Vector2.from(_lineEnd);
+        const u = lineEnd.tangent(lineStart);
+        const C = lineStart.add(u.scale(this.sub(lineStart).dot(u)));
+
+        // todo: fix error P is B or A, which leads to a NaN value
+
+        if (clamp) {
+            if (C.x < Math.min(lineStart.x, lineEnd.x))
+                return lineStart.x < lineEnd.x ? lineStart : lineEnd;
+            if (C.x > Math.max(lineStart.x, lineEnd.x))
+                return lineStart.x > lineEnd.x ? lineStart : lineEnd;
+            if (C.y < Math.min(lineStart.y, lineEnd.y))
+                return lineStart.y < lineEnd.y ? lineStart : lineEnd;
+            if (C.y > Math.max(lineStart.y, lineEnd.y))
+                return lineStart.y > lineEnd.y ? lineStart : lineEnd;
+        }
+
+        return C;
+    }
+
+    distanceToLineSegment(lineStart: Vector2Ish, lineEnd: Vector2Ish, clamp = true): number {
+        return this.nearestPointOnLineSegment(lineStart, lineEnd, clamp).distanceTo(this);
+    }
+
+    tangent(...other: Vector2Args): Vector2 {
+        return this.sub(...other).normalize();
     }
 }

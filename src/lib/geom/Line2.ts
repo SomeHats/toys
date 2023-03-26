@@ -48,6 +48,10 @@ export class Line2 {
         return this.start.angleTo(this.end);
     }
 
+    get direction(): Vector2 {
+        return this.end.sub(this.start).normalize();
+    }
+
     get length(): number {
         return this.start.distanceTo(this.end);
     }

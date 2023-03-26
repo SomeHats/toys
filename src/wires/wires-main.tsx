@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { assertExists } from "@/lib/assert";
-import { WiresAppRenderer } from "@/wires/WiresApp2";
+import { WiresAppRenderer } from "@/wires/WiresRenderer";
 
 if (import.meta.hot) {
     import.meta.hot.on("vite:beforeUpdate", () => {

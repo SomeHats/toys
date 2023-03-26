@@ -244,8 +244,12 @@ export function debounce<Args extends Array<unknown>>(
     return debounced;
 }
 
-export function exhaustiveSwitchError(value: never): never {
-    throw new Error(`Unknown switch case ${value}`);
+export function exhaustiveSwitchError(value: never, property?: string): never {
+    const debugValue =
+        property && value && typeof value === "object" && property in value
+            ? value[property]
+            : value;
+    throw new Error(`Unknown switch case ${debugValue}`);
 }
 
 export function has(obj: object, key: string): boolean {

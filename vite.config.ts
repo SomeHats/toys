@@ -29,6 +29,8 @@ export default defineConfig(async ({ mode }) => {
                     plugins: [
                         createAssertPlugin(),
                         ["@babel/plugin-proposal-decorators", { version: "2023-01" }],
+                        "@babel/plugin-proposal-class-properties",
+                        "@babel/plugin-proposal-class-static-block",
                     ],
                 },
             }),

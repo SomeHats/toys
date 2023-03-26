@@ -1,8 +1,22 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import { Wire, WiresApp } from "@/wires/wiresModel2";
+import { exhaustiveSwitchError } from "@/lib/utils";
+import { memo } from "@/wires/Model";
+import { Wire, WiresApp } from "@/wires/WiresApp";
 import { atom } from "signia";
 
 type ChildOf<S extends AnyState> = S extends State<any, any, infer C> ? C : never;
+
+type Hovered =
+    | { type: "none" }
+    | {
+          type: "handle";
+          wire: Wire;
+          handle: "start" | "end";
+      }
+    | {
+          type: "middleSection";
+          wire: Wire;
+      };
 
 type AnyState = State<string, any, any>;
 abstract class State<
@@ -54,6 +68,10 @@ abstract class State<
     onPointerCancel(event: React.PointerEvent) {
         this.state?.onPointerCancel(event);
     }
+
+    get hovered(): Hovered {
+        return this.state?.hovered ?? { type: "none" };
+    }
 }
 
 abstract class ChildState<
@@ -76,8 +94,10 @@ abstract class ChildState<
     }
 }
 
-export class RootNode extends State<"root", null, IdleNode | DraggingHandle> {
-    override name = "root" as const;
+const hoverRadius = 10;
+
+export class RootNode extends State<"<root>", null, IdleNode | DraggingHandle> {
+    override name = "<root>" as const;
 
     constructor(app: WiresApp) {
         super(null, app);
@@ -89,27 +109,81 @@ export class RootNode extends State<"root", null, IdleNode | DraggingHandle> {
     }
 }
 
-export class IdleNode extends ChildState<"idle", RootNode> {
-    override name = "idle" as const;
+export class IdleNode extends ChildState<"Idle", RootNode> {
+    override name = "Idle" as const;
 
     override onPointerDown(event: React.PointerEvent) {
-        const wire = this.app.createWire(Vector2.fromEvent(event));
-        this.transitionTo(DraggingHandle, "end", wire);
+        const hovered = this.parent.hovered;
+        switch (hovered.type) {
+            case "none": {
+                const wire = this.app.createWire(Vector2.fromEvent(event));
+                this.transitionTo(DraggingHandle, "end", wire);
+                return;
+            }
+            case "handle": {
+                this.transitionTo(DraggingHandle, hovered.handle, hovered.wire);
+                return;
+            }
+            case "middleSection": {
+                return;
+            }
+            default:
+                exhaustiveSwitchError(hovered, "type");
+        }
+    }
+
+    @memo override get hovered() {
+        let nearestHandleDistance = Infinity;
+        let nearestHandle: Hovered = { type: "none" };
+
+        for (const wire of this.app.wires) {
+            for (const handle of ["start", "end"] as const) {
+                const distance = wire[handle].distanceTo(this.app.inputs.pointer);
+                if (distance < hoverRadius && distance < nearestHandleDistance) {
+                    nearestHandleDistance = distance;
+                    nearestHandle = {
+                        type: "handle",
+                        wire,
+                        handle,
+                    };
+                }
+            }
+            const middleSection = wire.lineInfo.middleSection;
+            const distanceToMiddleSection = this.app.inputs.pointer.distanceToLineSegment(
+                middleSection[0],
+                middleSection[1],
+            );
+            if (distanceToMiddleSection < hoverRadius) {
+                nearestHandleDistance = distanceToMiddleSection;
+                nearestHandle = {
+                    type: "middleSection",
+                    wire,
+                };
+            }
+        }
+
+        return nearestHandle;
     }
 }
 
 export class DraggingHandle extends ChildState<"DraggingHandle", RootNode> {
     override name = "DraggingHandle" as const;
+    readonly offset: Vector2;
 
     constructor(parent: RootNode, readonly handle: "start" | "end", readonly wire: Wire) {
         super(parent);
+        this.offset = wire[handle].sub(this.app.inputs.pointer);
     }
 
     override onPointerMove(event: React.PointerEvent) {
-        this.wire.end = Vector2.fromEvent(event);
+        this.wire[this.handle] = Vector2.fromEvent(event).add(this.offset);
     }
 
     override onPointerUp(event: React.PointerEvent) {
         this.exit();
+    }
+
+    @memo override get hovered(): Hovered {
+        return { type: "handle", wire: this.wire, handle: this.handle };
     }
 }

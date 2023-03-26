@@ -3,13 +3,30 @@ import { Schema } from "@/lib/schema";
 import { ReadonlyRecord, entries, keys } from "@/lib/utils";
 import { Atom, Signal, atom as createAtom, computed as createComputed, transact } from "signia";
 
+// an autoaccessor decorator that wraps its value in an atom
+export function atom<This extends object, Value>(
+    target: ClassAccessorDecoratorTarget<This, Value>,
+    context: ClassAccessorDecoratorContext<This, Value>,
+): ClassAccessorDecoratorResult<This, Value> {
+    return {
+        init(value) {
+            return createAtom(String(context.name), value) as Value;
+        },
+        get() {
+            return (target.get.call(this) as Atom<Value>).value;
+        },
+        set(value) {
+            (target.get.call(this) as Atom<Value>).set(value);
+        },
+    };
+}
+
 export function memo<This extends object, Value>(
     compute: () => Value,
     context: ClassGetterDecoratorContext<This, Value>,
 ) {
     const computeds = new WeakMap<This, Signal<Value>>();
     context.addInitializer(function () {
-        console.log("createComputed", { this: this, compute, context });
         computeds.set(
             this,
             createComputed(String(context.name), () => {

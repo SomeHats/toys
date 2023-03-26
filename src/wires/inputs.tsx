@@ -1,23 +1,23 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import { atom } from "signia";
+import { atom } from "@/wires/Model";
 
 export class Inputs {
-    pointer = atom("Inputs.pointer", Vector2.ZERO);
+    @atom accessor pointer = Vector2.ZERO;
 
     events = {
         onPointerMove: (e: React.PointerEvent) => {
             if (e.isPrimary) {
-                this.pointer.set(Vector2.fromEvent(e));
+                this.pointer = Vector2.fromEvent(e);
             }
         },
         onPointerDown: (e: React.PointerEvent) => {
             if (e.isPrimary) {
-                this.pointer.set(Vector2.fromEvent(e));
+                this.pointer = Vector2.fromEvent(e);
             }
         },
         onPointerUp: (e: React.PointerEvent) => {
             if (e.isPrimary) {
-                this.pointer.set(Vector2.fromEvent(e));
+                this.pointer = Vector2.fromEvent(e);
             }
         },
     };

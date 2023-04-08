@@ -248,14 +248,14 @@ export interface WritableSignal<Value, Diff = unknown> extends Signal<Value, Dif
 }
 
 export class WritableMemo<Value, Diff = unknown> implements WritableSignal<Value, Diff> {
-    private readonly memo: Computed<Value, Diff>;
+    private readonly memo: Computed<Value, Dqiff>;
     constructor(
         name: string,
         compute: () => Value,
         private _write: (value: Value, diff?: Diff) => void,
         options?: ComputedOptions<Value, Diff>,
     ) {
-        this.memo = computed(name, compute, options);
+        this.memo = computed<Value, Diff>(name, compute, options);
     }
     get name() {
         return this.memo.name;

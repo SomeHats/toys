@@ -1,4 +1,10 @@
-import { Index, Table, UniqueIndex, WritableMemo } from "@/splatapus/model/Table";
+import {
+    Index,
+    Table,
+    UniqueIndex,
+    UnknownTableEntry,
+    WritableMemo,
+} from "@/splatapus/model/Table";
 import {
     SplatKeyPoint as SplatKeyPoint,
     SplatDocId,
@@ -32,7 +38,3 @@ export type SplatDocData = {
     readonly shapeVersionIdsByKeyPoint: ShapeVersionIdsByKeyPointIndex;
     readonly normalizedShapeVersions: Table<NormalizedShapeVersionState>;
 };
-
-export class TableView<T extends UnknownTableEntry> {
-    constructor(private readonly data: WritableMemo<Table<T>>) {}
-}

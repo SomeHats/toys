@@ -137,7 +137,7 @@ export class SplatDocModel {
     addShape(shapeId: SplatShapeId): SplatDocModel {
         console.log("doc.addShape", shapeId);
 
-        const shapes = this.shapes.insert({
+        const shapes = this.shapes.put({
             id: shapeId,
         });
 
@@ -147,7 +147,7 @@ export class SplatDocModel {
     addKeyPoint(keyPointId: SplatKeyPointId, position: Vector2 | null): SplatDocModel {
         console.log("doc.addKeyPoint", keyPointId);
 
-        const keyPoints = this.keyPoints.insert({
+        const keyPoints = this.keyPoints.put({
             id: keyPointId,
             position,
         });
@@ -171,7 +171,7 @@ export class SplatDocModel {
     ): SplatDocModel {
         const existingVersion = this.getShapeVersion(keyPointId, shapeId);
         if (existingVersion) {
-            const shapeVersions = this.shapeVersions.insert({
+            const shapeVersions = this.shapeVersions.put({
                 ...existingVersion,
                 rawPoints,
             });
@@ -187,7 +187,7 @@ export class SplatDocModel {
             shapeId,
             rawPoints,
         };
-        const shapeVersions = this.shapeVersions.insert(shapeVersion);
+        const shapeVersions = this.shapeVersions.put(shapeVersion);
         return this.with({
             shapeVersions,
             normalizedShapeVersions:

@@ -1,3 +1,4 @@
+import EventEmitter from "@/lib/EventEmitter";
 import { assert, assertExists } from "@/lib/assert";
 import {
     applyUpdate,
@@ -8,6 +9,8 @@ import {
     ReadonlyObjectMap,
     UpdateAction,
 } from "@/lib/utils";
+import { memo } from "@/wires/Model";
+import { Atom, Computed, ComputedOptions, RESET_VALUE, Signal, computed } from "signia";
 
 export type UnknownTableEntry = { readonly id: string };
 export type TableData<T extends UnknownTableEntry> = ReadonlyObjectMap<T["id"], T>;
@@ -41,15 +44,20 @@ export class Table<T extends UnknownTableEntry> implements Iterable<T> {
         return item;
     }
 
-    insert(item: T): Table<T> {
+    put(item: T): Table<T> {
         return new Table({ ...this.data, [item.id]: item });
+    }
+
+    insert(item: T): Table<T> {
+        assert(!this.has(item.id));
+        return this.put(item);
     }
 
     update(id: T["id"], update: UpdateAction<T>): Table<T> {
         const before = this.get(id);
         const after = applyUpdate(before, update);
         assert(before.id === after.id);
-        return this.insert(after);
+        return this.put(after);
     }
 
     delete(id: T["id"]): Table<T> {
@@ -220,5 +228,140 @@ export class Index<Entry, Value extends string, Lookup> {
 
     toJSON() {
         return fromEntries(this.index);
+    }
+}
+
+export interface WritableSignal<Value, Diff = unknown> extends Signal<Value, Diff> {
+    /**
+     * Sets the value of this atom to the given value. If the value is the same as the current value, this is a no-op.
+     *
+     * @param value - The new value to set.
+     * @param diff - The diff to use for the update. If not provided, the diff will be computed using [[AtomOptions.computeDiff]].
+     */
+    set(value: Value, diff?: Diff): Value;
+    /**
+     * Updates the value of this atom using the given updater function. If the returned value is the same as the current value, this is a no-op.
+     *
+     * @param updater - A function that takes the current value and returns the new value.
+     */
+    update(updater: (value: Value) => Value): Value;
+}
+
+export class WritableMemo<Value, Diff = unknown> implements WritableSignal<Value, Diff> {
+    private readonly memo: Computed<Value, Diff>;
+    constructor(
+        name: string,
+        compute: () => Value,
+        private _write: (value: Value, diff?: Diff) => void,
+        options?: ComputedOptions<Value, Diff>,
+    ) {
+        this.memo = computed(name, compute, options);
+    }
+    get name() {
+        return this.memo.name;
+    }
+    get value() {
+        return this.memo.value;
+    }
+    get lastChangedEpoch() {
+        return this.memo.lastChangedEpoch;
+    }
+    getDiffSince(epoch: number): typeof RESET_VALUE | Diff[] {
+        return this.memo.getDiffSince(epoch);
+    }
+    __unsafe__getWithoutCapture(): Value {
+        return this.memo.__unsafe__getWithoutCapture();
+    }
+    set(value: Value, diff?: Diff): Value {
+        this._write(value, diff);
+        return value;
+    }
+    update(updater: (value: Value) => Value): Value {
+        return this.set(updater(this.value));
+    }
+}
+
+export class TableView<T extends UnknownTableEntry> {
+    private insertEvent = new EventEmitter<[record: T]>();
+    private updateEvent = new EventEmitter<[before: T, after: T]>();
+    private deleteEvent = new EventEmitter<[deleted: T]>();
+
+    constructor(private readonly _data: WritableMemo<Table<T>>) {}
+
+    private get data(): Table<T> {
+        return this._data.value;
+    }
+
+    @memo get count(): number {
+        return this.data.count();
+    }
+
+    #records = new EntryCache(this._data, (entry) => entry);
+    has(id: T["id"]): boolean {
+        return !!this.#records.getIfExists(id);
+    }
+
+    get(id: T["id"]): T {
+        return this.#records.get(id);
+    }
+
+    getIfExists(id: T["id"]): T | null {
+        return this.#records.getIfExists(id);
+    }
+
+    insert(entry: T): this {
+        this._data.update((data) => data.insert(entry));
+        this.insertEvent.emit(entry);
+        return this;
+    }
+
+    update(id: T["id"], update: UpdateAction<T>): this {
+        const before = this.get(id);
+        const after = applyUpdate(before, update);
+        assert(before.id === after.id);
+        this._data.update((data) => data.put(after));
+        this.updateEvent.emit(before, after);
+        return this;
+    }
+
+    delete(id: T["id"]): this {
+        const entry = this.get(id);
+        this._data.update((data) => data.delete(id));
+        this.deleteEvent.emit(entry);
+        return this;
+    }
+}
+
+class EntryCache<T extends UnknownTableEntry, U> {
+    private cache = new Map<T["id"], Computed<{ value: U } | null>>();
+    constructor(private table: WritableMemo<Table<T>>, private compute: (entry: T) => U) {}
+
+    private read(id: T["id"]): { value: U } | null {
+        let entry = this.cache.get(id);
+        if (!entry) {
+            entry = computed<{ value: U } | null>(`entry ${id}`, () => {
+                const record = this.table.value.getIfExists(id);
+                if (!record) {
+                    this.cache.delete(id);
+                    return null;
+                }
+                return { value: this.compute(record) };
+            });
+            this.cache.set(id, entry);
+        }
+        return entry.value;
+    }
+
+    getIfExists(id: T["id"]): U | null {
+        const result = this.read(id);
+        return result ? result.value : null;
+    }
+
+    get(id: T["id"]): U {
+        const result = this.read(id);
+        if (!result) {
+            throw new Error(`No entry with id ${id}`);
+        }
+        return result.value;
     }
 }

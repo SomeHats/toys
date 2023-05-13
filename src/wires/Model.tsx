@@ -32,7 +32,7 @@ export function command<This, Args extends any[], Return>(
 }
 
 export function Model<Shape extends ReadonlyRecord<string, unknown>>(schema: {
-    [K in keyof Shape]: Schema<Shape[K]>;
+    [K in keyof Shape]-?: Schema<Shape[K]>;
 }) {
     class Model {
         static modelSchema: Schema<Shape>;

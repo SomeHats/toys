@@ -1,4 +1,4 @@
-import { assert } from "@/lib/assert";
+import { assert, fail } from "@/lib/assert";
 import { Result } from "@/lib/Result";
 import {
     entries,
@@ -112,6 +112,23 @@ export class Schema<Parsed> {
         );
     }
 
+    optional(): Schema<Parsed | undefined> {
+        return new Schema<Parsed | undefined>(
+            (input) => {
+                if (input == undefined) {
+                    return Result.ok(undefined);
+                }
+                return this.parse(input);
+            },
+            (input) => {
+                if (input == undefined) {
+                    return undefined;
+                }
+                return this.serialize(input);
+            },
+        );
+    }
+
     parseUnwrap(input: unknown): Parsed {
         return this.parse(input).unwrap();
     }
@@ -128,6 +145,12 @@ export class Schema<Parsed> {
     }
 
     static unknown = new Schema<unknown>((value) => Result.ok(value), identity);
+    static never = new Schema<undefined>(
+        () => Result.error(new SchemaParseError("Cannot parse never schema")),
+        () => {
+            fail("Cannot serialize never schema");
+        },
+    );
     static string = Schema.typeof<string>("string");
     static number = Schema.typeof<number>("number");
     static bigint = Schema.typeof<bigint>("bigint");
@@ -143,7 +166,7 @@ export class Schema<Parsed> {
         },
         () => null,
     );
-    static value<V extends string | number>(value: V): ValueSchema<V> {
+    static value<V extends string | number | boolean>(value: V): ValueSchema<V> {
         return new ValueSchema(value);
     }
 
@@ -167,7 +190,7 @@ export class Schema<Parsed> {
     }
 
     static object<Shape extends ReadonlyRecord<string, unknown>>(config: {
-        readonly [K in keyof Shape]: Schema<Shape[K]>;
+        readonly [K in keyof Shape]-?: Schema<Shape[K]>;
     }): ObjectSchema<Shape> {
         return new ObjectSchema(config);
     }
@@ -259,7 +282,7 @@ type EnumValues<
     ? Values
     : never;
 
-export class ValueSchema<Value extends string | number> extends Schema<Value> {
+export class ValueSchema<Value extends string | number | boolean> extends Schema<Value> {
     constructor(private readonly value: Value) {
         super((input) => {
             if (input === value) {
@@ -277,7 +300,7 @@ export class ValueSchema<Value extends string | number> extends Schema<Value> {
 }
 
 export class ObjectSchema<Shape extends ReadonlyRecord<string, unknown>> extends Schema<Shape> {
-    constructor(readonly config: { readonly [K in keyof Shape]: Schema<Shape[K]> }) {
+    constructor(readonly config: { readonly [K in keyof Shape]-?: Schema<Shape[K]> }) {
         super(
             (input) => {
                 if (typeof input !== "object" || input === null) {
@@ -417,7 +440,7 @@ export class UnionObjectSchema<
             },
             (object) => {
                 const type = object[key] as keyof Config;
-                const schema = has(config, key) ? this.config[type] : null;
+                const schema = has(config, type) ? this.config[type] : null;
                 assert(schema);
                 return schema.serialize(object);
             },
@@ -452,9 +475,10 @@ export class IndexedUnionObjectSchema<
                 }
 
                 const isArray = Array.isArray(input);
-                const variant: keyof Config | undefined = Array.isArray(input)
+                let variant: keyof Config | undefined = Array.isArray(input)
                     ? input[0]
                     : get(input, key);
+                if (typeof variant === "number") variant = String(variant) as keyof Config;
                 if (typeof variant !== "string") {
                     return Result.error(
                         new SchemaParseError(`Expected a string, got ${typeToString(variant)}`, [
@@ -477,11 +501,11 @@ export class IndexedUnionObjectSchema<
 
                 return matchingSchema
                     .parse(input)
-                    .mapErr((err) => prefixError(err, `(${key} = ${variant})`)) as any;
+                    .mapErr((err) => prefixError(err, `(${key} = ${String(variant)})`)) as any;
             },
             (object) => {
                 const type = object[key] as keyof Config;
-                const schema = has(config, key) ? this.config[type] : null;
+                const schema = has(config, type) ? this.config[type] : null;
                 assert(schema);
                 return schema.serialize(object);
             },

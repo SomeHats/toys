@@ -25,10 +25,11 @@ export class IdGenerator<Prefix extends string> {
         }, identity);
     }
 
-    generate(): this["Id"] {
+    generate(debugPrefix?: string): this["Id"] {
         const randomSection = times(this.randomLength, () => sample(ALPHABET)).join("");
         if (USE_DEBUG_IDS) {
-            const debugSection = `${this.debugIdCounter++}`;
+            let debugSection = debugPrefix ?? `${this.debugIdCounter++}`;
+            debugSection = debugSection.slice(0, this.randomLength - 5);
             return `${this.prefix}.${debugSection}_${randomSection.slice(
                 0,
                 this.randomLength - (debugSection.length + 1),

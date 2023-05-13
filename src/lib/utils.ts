@@ -248,7 +248,7 @@ export function exhaustiveSwitchError(value: never): never {
     throw new Error(`Unknown switch case ${value}`);
 }
 
-export function has(obj: object, key: string): boolean {
+export function has(obj: object, key: string | number | symbol): boolean {
     return Object.prototype.hasOwnProperty.call(obj, key);
 }
 
@@ -296,8 +296,16 @@ export function promiseFromEvents<T>(
 }
 
 export function mapObjectValues<K extends string, V, U>(
-    object: Record<K, V>,
-    fn: (value: V, key: K, obj: Record<K, V>) => U,
+    object: ReadonlyRecord<K, V>,
+    fn: (value: V, key: K, obj: ReadonlyRecord<K, V>) => U,
+): Record<K, U>;
+export function mapObjectValues<K extends string, V, U>(
+    object: ReadonlyObjectMap<K, V>,
+    fn: (value: V, key: K, obj: ReadonlyObjectMap<K, V>) => U,
+): ObjectMap<K, U>;
+export function mapObjectValues<K extends string, V, U>(
+    object: ReadonlyRecord<K, V>,
+    fn: (value: V, key: K, obj: ReadonlyRecord<K, V>) => U,
 ): Record<K, U> {
     const result = {} as Record<K, U>;
     for (const [k, v] of entries(object)) {

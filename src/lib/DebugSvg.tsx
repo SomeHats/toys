@@ -60,7 +60,7 @@ export function DebugLabel({
             y={adjustedPosition.y}
             className="font-sans"
             textAnchor="middle"
-            fontSize={4}
+            fontSize={8}
             {...getFillProps({ fill: color ?? DebugDraw.DEFAULT_DEBUG_COLOR })}
         >
             {label}

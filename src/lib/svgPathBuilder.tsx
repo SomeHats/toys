@@ -13,6 +13,23 @@ export class SvgPathBuilder {
         return builder;
     }
 
+    static midpointQuadraticViaPoints(points: readonly Vector2[]) {
+        const builder = new SvgPathBuilder();
+        if (points.length >= 2) {
+            builder.moveTo(points[0]);
+            builder.lineTo(points[0].lerp(points[1], 0.5));
+            let prevPoint = points[1];
+            for (let i = 2; i < points.length; i++) {
+                const nextPoint = points[i];
+                const midPoint = prevPoint.lerp(nextPoint, 0.5);
+                builder.quadraticCurveTo(prevPoint, midPoint);
+                prevPoint = nextPoint;
+            }
+            builder.lineTo(prevPoint);
+        }
+        return builder;
+    }
+
     constructor() {}
 
     toString() {

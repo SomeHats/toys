@@ -7,12 +7,14 @@ import type { Color, Lch, Oklch, P3, Rec2020, Rgb } from "culori/fn";
 
 import {
     clampChroma,
+    clampGamut,
     useMode as culoriUseMode,
     formatCss,
     formatRgb as formatRgbFast,
     modeHsl,
     modeLab,
     modeLch,
+    modeLrgb,
     modeOklab,
     modeOklch,
     modeP3,
@@ -32,6 +34,7 @@ export const oklch = culoriUseMode(modeOklch);
 export const oklab = culoriUseMode(modeOklab);
 export const xyz65 = culoriUseMode(modeXyz65);
 export const rgb = culoriUseMode(modeRgb);
+export const lrgb = culoriUseMode(modeLrgb);
 export const lch = culoriUseMode(modeLch);
 export const hsl = culoriUseMode(modeHsl);
 export const lab = culoriUseMode(modeLab);
@@ -56,6 +59,13 @@ export const ALPHA_STEP = 5;
 
 const GAMUT_MIN = -GAMUT_EPSILON;
 const GAMUT_MAX = 1 + GAMUT_EPSILON;
+
+// export const clampRgb = toGamut("rgb");
+// export const clampP3 = toGamut("p3");
+// export const clampRec2020 = toGamut("rec2020");
+export const clampRgb = clampGamut("rgb");
+export const clampP3 = clampGamut("p3");
+export const clampRec2020 = clampGamut("rec2020");
 
 export function inRGB(color: Color): boolean {
     const { r, g, b } = rgb(color);
@@ -139,6 +149,10 @@ export function parseAnything(value: string): Color | undefined {
 
 export function toRgb(color: Color): Rgb {
     return rgb(clampChroma(color, COLOR_FN));
+}
+
+export function toP3(color: Color): P3 {
+    return p3(clampChroma(color, COLOR_FN));
 }
 
 export function formatRgb(color: Rgb): string {

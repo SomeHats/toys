@@ -10,7 +10,11 @@ export const lchColorSchema = Schema.object({
     .indexed({ l: 0, c: 1, h: 2 })
     .transform<Oklch>(
         ({ l, c, h }) => Result.ok({ mode: "oklch", l, c, h }),
-        ({ l, c, h }) => ({ l, c, h }),
+        ({ l, c, h }) => ({
+            l: Number(l.toFixed(4)),
+            c: Number(c.toFixed(4)),
+            h: h != null ? Number(h.toFixed(2)) : h,
+        }),
     );
 
 export const paletteSchema = Schema.object({
@@ -22,3 +26,6 @@ export type Palette = SchemaType<typeof paletteSchema>;
 
 export const gamutSchema = Schema.valueUnion("srgb", "p3", "rec2020");
 export type Gamut = SchemaType<typeof gamutSchema>;
+
+export const axisSchema = Schema.valueUnion("shades", "families");
+export type Axis = SchemaType<typeof axisSchema>;

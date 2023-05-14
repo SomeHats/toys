@@ -356,6 +356,7 @@ export const IS_MAC = /(Mac|iPhone|iPod|iPad)/i.test(globalThis.navigator?.platf
 
 export type CallbackAction<T> = (state: T) => T;
 export type UpdateAction<T> = CallbackAction<T> | T;
+export type UpdateFn<T> = (update: UpdateAction<T>) => void;
 
 /**
  * Updates a `T` by either replacing it directly with a new `T` or calling a

@@ -77,3 +77,52 @@ export function getSessionStorageItem<T>(
 export function setSessionStorageItem<T>(key: string, schema: Schema<T>, value: T) {
     return setStorageItem(window.sessionStorage, key, schema, value);
 }
+
+export const urlStorage: Storage = {
+    get length(): number {
+        return Array.from(new URLSearchParams(window.location.search).keys()).length;
+    },
+    clear: function (): void {
+        window.history.replaceState(null, "", window.location.pathname);
+    },
+    getItem: function (key: string): string | null {
+        const rawValue = new URLSearchParams(window.location.search).get(key);
+        if (rawValue === null) {
+            return null;
+        }
+        return rawValue;
+    },
+    key: function (index: number): string | null {
+        const keys = Array.from(new URLSearchParams(window.location.search).keys());
+        if (index < 0 || index >= keys.length) {
+            return null;
+        }
+        return keys[index];
+    },
+    removeItem: function (key: string): void {
+        const params = new URLSearchParams(window.location.search);
+        params.delete(key);
+        window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+    },
+    setItem: function (key: string, value: string): void {
+        const params = new URLSearchParams(window.location.search);
+        params.set(key, value);
+        window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+    },
+};
+
+export function getUrlStorageItemUnchecked(key: string, fallback?: Initializer<unknown>): unknown {
+    return getStorageItemUnchecked(urlStorage, key, fallback);
+}
+
+export function setUrlStorageItemUnchecked(key: string, value: unknown) {
+    return setStorageItemUnchecked(urlStorage, key, value);
+}
+
+export function getUrlStorageItem<T>(key: string, schema: Schema<T>, fallback: Initializer<T>): T {
+    return getStorageItem(urlStorage, key, schema, fallback);
+}
+
+export function setUrlStorageItem<T>(key: string, schema: Schema<T>, value: T) {
+    return setStorageItem(urlStorage, key, schema, value);
+}

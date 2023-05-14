@@ -2184,6 +2184,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/culori@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@types/culori@npm:2.0.0"
+  checksum: a8228a54d8697e6dbdb288f663fee9c7e5498b5c504a7bc1bf00da0b28f3a4f402a291f740a993b232efa02a0c9169baf78e71d523152cc86f139980aa8f631f
+  languageName: node
+  linkType: hard
+
 "@types/d3-color@npm:*, @types/d3-color@npm:^3.1.0":
   version: 3.1.0
   resolution: "@types/d3-color@npm:3.1.0"
@@ -3374,6 +3381,13 @@ __metadata:
   version: 3.1.1
   resolution: "csstype@npm:3.1.1"
   checksum: 1f7b4f5fdd955b7444b18ebdddf3f5c699159f13e9cf8ac9027ae4a60ae226aef9bbb14a6e12ca7dba3358b007cee6354b116e720262867c398de6c955ea451d
+  languageName: node
+  linkType: hard
+
+"culori@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "culori@npm:3.1.0"
+  checksum: c23aa75ffab0862a57e5825206302ba24f788902002ed6eaed57bc1d9286c5250c7c3fd43dd7be480283653a11b2509bcacfca4ed94e52fdb88a63e25e5d0d12
   languageName: node
   linkType: hard
 
@@ -7173,6 +7187,7 @@ __metadata:
     "@types/babel__generator": ^7.6.4
     "@types/classnames": ^2.3.1
     "@types/color": ^3.0.3
+    "@types/culori": ^2.0.0
     "@types/d3-color": ^3.1.0
     "@types/d3-interpolate": ^3.0.1
     "@types/d3-quadtree": ^3.0.2
@@ -7194,6 +7209,7 @@ __metadata:
     autoprefixer: ^10.4.14
     classnames: ^2.3.2
     color: ^4.2.3
+    culori: ^3.1.0
     d3-color: ^3.1.0
     d3-interpolate: ^3.0.1
     d3-quadtree: ^3.0.1

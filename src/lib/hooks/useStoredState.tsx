@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { UpdateAction, Initializer, applyUpdate } from "@/lib/utils";
-import { getStorageItem, setStorageItem } from "@/lib/storage";
+import { getStorageItem, setStorageItem, urlStorage } from "@/lib/storage";
 import { Schema } from "@/lib/schema";
 
 export function useStorageState<T>(
@@ -45,4 +45,12 @@ export function useSessionStorageState<T>(
     initialValue: Initializer<T>,
 ): [T, (update: UpdateAction<T>) => void] {
     return useStorageState(window.sessionStorage, key, schema, initialValue);
+}
+
+export function useUrlStorageState<T>(
+    key: string,
+    schema: Schema<T>,
+    initialValue: Initializer<T>,
+): [T, (update: UpdateAction<T>) => void] {
+    return useStorageState(urlStorage, key, schema, initialValue);
 }

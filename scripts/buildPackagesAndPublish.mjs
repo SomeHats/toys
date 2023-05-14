@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-import fs from "fs/promises";
-import url from "url";
-import path from "path";
-import * as vite from "vite";
 import vitePluginReact from "@vitejs/plugin-react";
-import rimrafDefault from "rimraf";
-import vitePluginDts from "vite-plugin-dts";
-import { promisify } from "util";
 import { execFile } from "child_process";
+import fs from "fs/promises";
+import path from "path";
+import rimrafDefault from "rimraf";
+import url from "url";
+import { promisify } from "util";
+import * as vite from "vite";
+import vitePluginDts from "vite-plugin-dts";
 
 const rimraf = promisify(rimrafDefault);
 

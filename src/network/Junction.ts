@@ -1,13 +1,13 @@
 // @flow
-import { compact } from "@/lib/utils";
-import SceneObject from "@/lib/scene/SceneObject";
-import Scene from "@/lib/scene/Scene";
-import { Vector2 } from "@/lib/geom/Vector2";
 import Circle from "@/lib/geom/Circle";
 import { Path } from "@/lib/geom/Path";
+import { Vector2 } from "@/lib/geom/Vector2";
+import Scene from "@/lib/scene/Scene";
+import SceneObject from "@/lib/scene/SceneObject";
+import { compact } from "@/lib/utils";
+import ConnectionDirection from "@/network/ConnectionDirection";
 import Road from "@/network/Road";
 import Intersection from "@/network/networkNodes/Intersection";
-import ConnectionDirection from "@/network/ConnectionDirection";
 
 export default class Junction extends SceneObject {
     _circle: Circle;

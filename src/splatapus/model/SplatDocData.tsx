@@ -1,13 +1,13 @@
-import { Index, Table, UniqueIndex } from "@/splatapus/model/Table";
 import {
-    SplatKeyPoint as SplatKeyPoint,
     SplatDocId,
-    SplatShapeVersion,
+    SplatKeyPoint,
     SplatKeyPointId,
-    SplatShapeVersionId,
     SplatShape,
     SplatShapeId,
+    SplatShapeVersion,
+    SplatShapeVersionId,
 } from "@/splatapus/model/SplatDoc";
+import { Index, Table, UniqueIndex } from "@/splatapus/model/Table";
 import { NormalizedShapeVersionState } from "@/splatapus/model/normalizedShape";
 
 type ShapeVersionLookupIndex = UniqueIndex<

@@ -1,6 +1,6 @@
-import { mapRange, normalizeAngle } from "@/lib/utils";
 import { C, SpriteOpts } from "@/bees/C";
 import { loadImage } from "@/lib/load";
+import { mapRange, normalizeAngle } from "@/lib/utils";
 
 export type SpriteStackData = {
     width: number;

@@ -1,8 +1,8 @@
-import PalGeom from "@/pals/PalGeom";
-import { PalConfig } from "@/pals/PalConfig";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { PalControlData } from "@/pals/PalController";
 import { lerp } from "@/lib/utils";
+import { PalConfig } from "@/pals/PalConfig";
+import { PalControlData } from "@/pals/PalController";
+import PalGeom from "@/pals/PalGeom";
 
 const getLegRadius = ({ radius, hipHeight, legWidth }: PalConfig) =>
     Math.sqrt(radius * radius - (radius - hipHeight) * (radius - hipHeight)) - legWidth;

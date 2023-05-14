@@ -1,6 +1,6 @@
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
-import { LayerUi, LayerProps } from "@/spline-time/layers/Layer";
 import { FinalLine } from "@/spline-time/guides";
+import { LayerProps, LayerUi } from "@/spline-time/layers/Layer";
 
 export function midPointBezierLayer({ line, uiTarget }: LayerProps) {
     const path = new SvgPathBuilder();

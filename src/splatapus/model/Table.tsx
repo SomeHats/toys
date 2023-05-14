@@ -1,12 +1,12 @@
 import { assert, assertExists } from "@/lib/assert";
 import {
+    ReadonlyObjectMap,
+    UpdateAction,
     applyUpdate,
     fromEntries,
     get,
     has,
     keys,
-    ReadonlyObjectMap,
-    UpdateAction,
 } from "@/lib/utils";
 
 export type UnknownTableEntry = { readonly id: string };

@@ -6,15 +6,7 @@ import { inOutSin } from "@/lib/easings";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { useGestureDetector } from "@/lib/hooks/useGestureDetector";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
-import {
-    constrainWrapped,
-    exhaustiveSwitchError,
-    frameLoop,
-    invLerp,
-    lerp,
-    mapRange,
-    noop,
-} from "@/lib/utils";
+import { frameLoop, invLerp, lerp, mapRange, noop } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 export function CaterpillarScroller() {

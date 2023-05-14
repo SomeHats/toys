@@ -7,16 +7,16 @@ import { sizeFromBorderBox, useResizeObserver } from "@/lib/hooks/useResizeObser
 import { useSessionStorageState } from "@/lib/hooks/useStoredState";
 import { UpdateAction } from "@/lib/utils";
 import { Button } from "@/splatapus/ui/Button";
-import { catmullRomLayer } from "@/spline-time/layers/catmullRomLayer";
+import { SplineTimeLine } from "@/spline-time/SplineTimeLine";
 import { Layer } from "@/spline-time/layers/Layer";
+import { alexModeLayer } from "@/spline-time/layers/alexModeLayer";
+import { arcLayer } from "@/spline-time/layers/arcLayer";
+import { catmullRomLayer } from "@/spline-time/layers/catmullRomLayer";
 import { midPointBezierLayer } from "@/spline-time/layers/midPointBezierLayer";
 import { midPointMarkerLayer } from "@/spline-time/layers/midPointMarkerLayer";
-import { alexModeLayer } from "@/spline-time/layers/alexModeLayer";
 import { straightLineThroughPointsLayer } from "@/spline-time/layers/straightLineThroughPointsLayer";
-import { SplineTimeLine } from "@/spline-time/SplineTimeLine";
 import classNames from "classnames";
 import { Fragment, PointerEvent, useState } from "react";
-import { arcLayer } from "@/spline-time/layers/arcLayer";
 
 const HOVER_RADIUS_PX = 20;
 

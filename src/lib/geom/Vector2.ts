@@ -1,7 +1,7 @@
-import { normalizeAngle, lerp } from "@/lib/utils";
 import { Result } from "@/lib/Result";
-import { Schema } from "@/lib/schema";
 import { assert } from "@/lib/assert";
+import { Schema } from "@/lib/schema";
+import { lerp, normalizeAngle } from "@/lib/utils";
 
 export type Vector2Ish =
     | { readonly x: number; readonly y: number }

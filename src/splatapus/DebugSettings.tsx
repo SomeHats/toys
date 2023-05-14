@@ -3,7 +3,7 @@ import { Schema, SchemaType } from "@/lib/schema";
 import { getSessionStorageItemUnchecked, setSessionStorageItemUnchecked } from "@/lib/storage";
 import { Button, PlainButton } from "@/splatapus/ui/Button";
 import { useSquircleClipPath } from "@/splatapus/ui/useSquircle";
-import { Popover, Transition, Switch } from "@headlessui/react";
+import { Popover, Switch, Transition } from "@headlessui/react";
 import classNames from "classnames";
 import { ReactNode, useState } from "react";
 

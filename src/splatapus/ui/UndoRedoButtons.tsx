@@ -1,11 +1,11 @@
-import { Button } from "@/splatapus/ui/Button";
-import { UndoStack } from "@/splatapus/editor/UndoStack";
-import { Splatapus } from "@/splatapus/editor/useEditor";
-import classNames from "classnames";
-import { FaUndoAlt, FaRedoAlt } from "react-icons/fa";
-import { useVfxAnimation } from "@/splatapus/editor/Vfx";
-import { tailwindEasings } from "@/lib/theme";
 import { useLive } from "@/lib/live";
+import { tailwindEasings } from "@/lib/theme";
+import { UndoStack } from "@/splatapus/editor/UndoStack";
+import { useVfxAnimation } from "@/splatapus/editor/Vfx";
+import { Splatapus } from "@/splatapus/editor/useEditor";
+import { Button } from "@/splatapus/ui/Button";
+import classNames from "classnames";
+import { FaRedoAlt, FaUndoAlt } from "react-icons/fa";
 
 export function UndoRedoButtons({ splatapus }: { splatapus: Splatapus }) {
     const canUndo = useLive(() => UndoStack.canUndo(splatapus.undoStack.live()), [splatapus]);

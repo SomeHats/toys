@@ -1,24 +1,24 @@
-import { assert, assertExists } from "@/lib/assert";
-import { Vector2 } from "@/lib/geom/Vector2";
-import { Gl } from "@/lib/gl/Gl";
-import { useEffect, useRef } from "react";
 import shaderFragSrc from "@/blob-factory/shader.frag";
 import shaderVertSrc from "@/blob-factory/shader.vert";
+import { DebugDraw } from "@/lib/DebugDraw";
+import { InstantUi, useInstantUi } from "@/lib/InstantUi";
+import { assert, assertExists } from "@/lib/assert";
+import { debugStateToString } from "@/lib/debugPropsToString";
+import { Vector2 } from "@/lib/geom/Vector2";
+import { Gl } from "@/lib/gl/Gl";
 import {
     GlBufferUsage,
-    GlPixelType,
     GlPixelFormat,
+    GlPixelType,
     GlTextureInternalFormat,
     GlVertexAttribType,
 } from "@/lib/gl/GlTypes";
-import { exhaustiveSwitchError, frameLoop, invLerp, random, sample, times } from "@/lib/utils";
-import { DebugDraw } from "@/lib/DebugDraw";
 import { matchesKey } from "@/lib/hooks/useKeyPress";
-import { debugStateToString } from "@/lib/debugPropsToString";
-import { InstantUi, useInstantUi } from "@/lib/InstantUi";
 import { tailwindColors } from "@/lib/theme";
+import { exhaustiveSwitchError, frameLoop, invLerp, random, sample, times } from "@/lib/utils";
 import Color from "color";
 import { interpolateHcl } from "d3-interpolate";
+import { useEffect, useRef } from "react";
 
 type CyberColorScale = (level: 5 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90) => string;
 function interpolateScale(n: number, scale: CyberColorScale): Color {

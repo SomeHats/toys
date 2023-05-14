@@ -2,7 +2,7 @@ import { assert, assertExists } from "@/lib/assert";
 import { GlProgram } from "@/lib/gl/GlProgram";
 import { GlShader } from "@/lib/gl/GlShader";
 import { GlTexture2d } from "@/lib/gl/GlTexture2d";
-import { GlCapability, glEnum, GlShaderType, GlTextureFormat } from "@/lib/gl/GlTypes";
+import { GlCapability, GlShaderType, GlTextureFormat, glEnum } from "@/lib/gl/GlTypes";
 import { GlVertexArray } from "@/lib/gl/GlVertexArray";
 import { get } from "@/lib/utils";
 

@@ -1,9 +1,9 @@
+import { useLive } from "@/lib/live";
+import { Splatapus } from "@/splatapus/editor/useEditor";
 import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { pathFromCenterPoints } from "@/splatapus/model/pathFromCenterPoints";
 import { getSvgPathFromStroke } from "@/splatapus/model/perfectFreehand";
 import React from "react";
-import { Splatapus } from "@/splatapus/editor/useEditor";
-import { useLive } from "@/lib/live";
 
 export const ShapeVersionPreview = React.memo(function ShapeVersionPreview({
     width,

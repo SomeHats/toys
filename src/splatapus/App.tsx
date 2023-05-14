@@ -1,21 +1,21 @@
+import { assertExists } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { sizeFromContentRect, useResizeObserver } from "@/lib/hooks/useResizeObserver";
-import { useEffect, useRef, useState } from "react";
-import { LOAD_FROM_AUTOSAVE_ENABLED } from "@/splatapus/constants";
-import { loadSaved, makeEmptySaveState, writeSavedDebounced } from "@/splatapus/model/store";
-import { ModePicker } from "@/splatapus/ui/ModePicker";
-import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
-import { Splatapus, useSplatapus } from "@/splatapus/editor/useEditor";
-import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
-import { RightBar } from "@/splatapus/ui/RightBar";
-import { assertExists } from "@/lib/assert";
-import { UiOverlayFrame } from "@/splatapus/ui/UiOverlayFrame";
-import { ImportExportButtons } from "@/splatapus/ui/ImportExportButtons";
-import { UndoRedoButtons } from "@/splatapus/ui/UndoRedoButtons";
-import { DebugSettingsMenu } from "@/splatapus/DebugSettings";
 import { LiveEffect, runLive, useLive, useLiveValue } from "@/lib/live";
-import { RigMode } from "@/splatapus/editor/modes/RigMode";
+import { DebugSettingsMenu } from "@/splatapus/DebugSettings";
+import { LOAD_FROM_AUTOSAVE_ENABLED } from "@/splatapus/constants";
+import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 import { ModeType } from "@/splatapus/editor/modes/Mode";
+import { RigMode } from "@/splatapus/editor/modes/RigMode";
+import { Splatapus, useSplatapus } from "@/splatapus/editor/useEditor";
+import { loadSaved, makeEmptySaveState, writeSavedDebounced } from "@/splatapus/model/store";
+import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
+import { ImportExportButtons } from "@/splatapus/ui/ImportExportButtons";
+import { ModePicker } from "@/splatapus/ui/ModePicker";
+import { RightBar } from "@/splatapus/ui/RightBar";
+import { UiOverlayFrame } from "@/splatapus/ui/UiOverlayFrame";
+import { UndoRedoButtons } from "@/splatapus/ui/UndoRedoButtons";
+import { useEffect, useRef, useState } from "react";
 
 function getInitialEditorState() {
     const screenSize = Vector2.UNIT;

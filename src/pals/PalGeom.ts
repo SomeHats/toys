@@ -1,11 +1,11 @@
+import { assert } from "@/lib/assert";
+import Circle from "@/lib/geom/Circle";
 import Component from "@/lib/scene/Component";
 import Entity from "@/lib/scene/Entity";
-import Circle from "@/lib/geom/Circle";
-import { PalControlData } from "@/pals/PalController";
-import { shuffle, flatten, times, lerp } from "@/lib/utils";
+import { flatten, lerp, shuffle, times } from "@/lib/utils";
 import { PalConfig } from "@/pals/PalConfig";
+import { PalControlData } from "@/pals/PalController";
 import PalLegGeom, { PalLegGeomUpdate } from "@/pals/PalLegGeom";
-import { assert } from "@/lib/assert";
 
 const HALF_PI = Math.PI / 2;
 

@@ -1,6 +1,6 @@
-import * as React from "react";
-import cx from "classnames";
 import { times } from "@/lib/utils";
+import cx from "classnames";
+import * as React from "react";
 
 const STANDARD_KEY_SIZE = 45;
 const KEY_BORDER_SIZE = 1.5;

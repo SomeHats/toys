@@ -1,7 +1,7 @@
-import Component from "@/lib/scene/Component";
-import { constrain, normalizeAngle } from "@/lib/utils";
 import { Vector2 } from "@/lib/geom/Vector2";
+import Component from "@/lib/scene/Component";
 import Entity from "@/lib/scene/Entity";
+import { constrain, normalizeAngle } from "@/lib/utils";
 
 const MAX_SPEED = 80;
 const ACCELERATION = 200;

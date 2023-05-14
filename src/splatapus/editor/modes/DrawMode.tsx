@@ -6,7 +6,7 @@ import {
     PointerEventType,
     SplatapusGestureDetector,
 } from "@/splatapus/editor/EventContext";
-import { ModeType, Mode } from "@/splatapus/editor/modes/Mode";
+import { Mode, ModeType } from "@/splatapus/editor/modes/Mode";
 import { ReactNode } from "react";
 
 export class DrawMode implements Mode<ModeType.Draw> {

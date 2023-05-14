@@ -1,20 +1,20 @@
 import { assertExists } from "@/lib/assert";
+import { Path } from "@/lib/geom/Path";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { useGestureDetector } from "@/lib/hooks/useGestureDetector";
 import { sizeFromBorderBox, useResizeObserver } from "@/lib/hooks/useResizeObserver";
+import { useSessionStorageState } from "@/lib/hooks/useStoredState";
 import {
+    UpdateAction,
     degreesToRadians,
     exhaustiveSwitchError,
     minBy,
     normalizeAngle,
-    UpdateAction,
     values,
     windows,
 } from "@/lib/utils";
-import { Fragment, ReactNode, useMemo, useState } from "react";
-import { Path } from "@/lib/geom/Path";
-import { useSessionStorageState } from "@/lib/hooks/useStoredState";
 import { WiresModel, wiresModelSchema } from "@/wires/wiresModel";
+import { Fragment, ReactNode, useMemo, useState } from "react";
 
 export function WiresApp() {
     const [container, setContainer] = useState<HTMLDivElement | null>(null);

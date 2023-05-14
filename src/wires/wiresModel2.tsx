@@ -1,11 +1,10 @@
 import { Result } from "@/lib/Result";
-import { assertExists } from "@/lib/assert";
+import { Line2 } from "@/lib/geom/Line2";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { Schema } from "@/lib/schema";
-import { degreesToRadians, minBy, normalizeAngle, radiansToDegrees } from "@/lib/utils";
+import { degreesToRadians, radiansToDegrees } from "@/lib/utils";
 import { IdGenerator } from "@/splatapus/model/Ids";
 import { Model } from "@/wires/Model";
-import { Line2 } from "@/lib/geom/Line2";
 import { Inputs } from "@/wires/inputs";
 import { RootNode } from "@/wires/states";
 

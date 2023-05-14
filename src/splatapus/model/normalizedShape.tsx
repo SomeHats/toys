@@ -1,12 +1,12 @@
+import { perfectFreehandOpts } from "@/splatapus/constants";
 import { SplatShapeVersion, SplatShapeVersionId } from "@/splatapus/model/SplatDoc";
+import { Table } from "@/splatapus/model/Table";
+import { normalizeCenterPointIntervalsQuadratic } from "@/splatapus/model/normalizeCenterPointIntervals";
 import {
+    StrokeCenterPoint,
     getStrokeCenterPoints,
     getStrokePoints,
-    StrokeCenterPoint,
 } from "@/splatapus/model/perfectFreehand";
-import { perfectFreehandOpts } from "@/splatapus/constants";
-import { normalizeCenterPointIntervalsQuadratic } from "@/splatapus/model/normalizeCenterPointIntervals";
-import { Table } from "@/splatapus/model/Table";
 
 export type NormalizedShapeVersionState = {
     readonly id: SplatShapeVersionId;

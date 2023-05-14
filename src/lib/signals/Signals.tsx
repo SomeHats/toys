@@ -1,8 +1,8 @@
 import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
-import { assert } from "@/lib/assert";
-import { mapRange, debounce, clamp, lerp, ReadonlyRecord, has } from "@/lib/utils";
 import RingBuffer from "@/lib/RingBuffer";
+import { assert } from "@/lib/assert";
 import { getLocalStorageItemUnchecked, setLocalStorageItemUnchecked } from "@/lib/storage";
+import { ReadonlyRecord, clamp, debounce, has, lerp, mapRange } from "@/lib/utils";
 
 export abstract class Signal {
     private currentValue: number | null = null;

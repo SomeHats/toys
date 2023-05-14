@@ -1,7 +1,6 @@
 import { assert } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
-import { invLerp } from "@/lib/utils";
 import { BezierControlPoint, DottedGuideLine, FinalLine } from "@/spline-time/guides";
 import { LayerProps, LayerUi } from "@/spline-time/layers/Layer";
 import { Fragment, ReactNode, useState } from "react";

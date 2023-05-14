@@ -1,6 +1,5 @@
 import { assert, assertExists } from "@/lib/assert";
 import { DebugDraw3d } from "@/lib/DebugDraw3d";
-import { Matrix3 } from "@/lib/geom/Matrix3";
 import { Matrix4 } from "@/lib/geom/Matrix4";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { Vector3, Vector3Ish } from "@/lib/geom/Vector3";

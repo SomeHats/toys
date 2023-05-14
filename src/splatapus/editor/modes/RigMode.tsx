@@ -1,22 +1,22 @@
+import { assert, assertExists } from "@/lib/assert";
+import { debugStateToString } from "@/lib/debugPropsToString";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { SplatKeyPoint, SplatKeyPointId } from "@/splatapus/model/SplatDoc";
-import { Mode, ModeType } from "@/splatapus/editor/modes/Mode";
-import classNames from "classnames";
+import { useKeepNonNull } from "@/lib/hooks/useNonNull";
 import { LiveValue, runOnce, useLive } from "@/lib/live";
+import { mapRange } from "@/lib/utils";
 import {
     PointerEventContext,
     PointerEventType,
     SplatapusGestureDetector,
 } from "@/splatapus/editor/EventContext";
-import { debugStateToString } from "@/lib/debugPropsToString";
-import { PointerEvent, PointerEventHandler, ReactNode, useState } from "react";
-import { Splatapus } from "@/splatapus/editor/useEditor";
-import { mapRange } from "@/lib/utils";
 import { Viewport } from "@/splatapus/editor/Viewport";
-import { assert, assertExists } from "@/lib/assert";
-import { Transition } from "@headlessui/react";
+import { Mode, ModeType } from "@/splatapus/editor/modes/Mode";
+import { Splatapus } from "@/splatapus/editor/useEditor";
+import { SplatKeyPoint, SplatKeyPointId } from "@/splatapus/model/SplatDoc";
 import { KeyPointPreview } from "@/splatapus/ui/KeyPointPreview";
-import { useKeepNonNull } from "@/lib/hooks/useNonNull";
+import { Transition } from "@headlessui/react";
+import classNames from "classnames";
+import { PointerEvent, PointerEventHandler, ReactNode, useState } from "react";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 
 type GestureArgs = [keyPoint?: { id: SplatKeyPointId; initialScenePosition: Vector2 }];

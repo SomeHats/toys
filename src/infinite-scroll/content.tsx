@@ -1,6 +1,6 @@
-import React, { ReactNode } from "react";
 import foxUrl from "@/infinite-scroll/assets/fox.jpg";
 import frogUrl from "@/infinite-scroll/assets/frog.jpg";
+import React, { ReactNode } from "react";
 
 export const DummyContent = React.memo(function DummyContent() {
     return (

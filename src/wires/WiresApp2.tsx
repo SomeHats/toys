@@ -1,10 +1,9 @@
-import { DebugArrow, DebugPolyline } from "@/lib/DebugSvg";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { useGestureDetector } from "@/lib/hooks/useGestureDetector";
 import { getLocalStorageItem, setLocalStorageItem } from "@/lib/storage";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { Button } from "@/splatapus/ui/Button";
-import { WiresApp, Wire } from "@/wires/wiresModel2";
+import { Wire, WiresApp } from "@/wires/wiresModel2";
 import { useEffect } from "react";
 import { react } from "signia";
 import { track } from "signia-react";

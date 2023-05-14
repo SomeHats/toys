@@ -1,7 +1,7 @@
-import { ShapeVersionId } from "@/splatapus2/store/Records";
 import { HistoryEntryId, Splat } from "@/splatapus2/app/Splat";
-import { atom } from "signia";
 import { IncrementalArrayOfDiffType } from "@/splatapus2/store/Incremental";
+import { ShapeVersionId } from "@/splatapus2/store/Records";
+import { atom } from "signia";
 
 type ChildOf<S extends AnyState> = S extends State<any, any, infer C> ? C : never;
 

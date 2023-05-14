@@ -1,7 +1,7 @@
-import { BaseTexture } from "pixi.js";
 import { assert, assertExists } from "@/lib/assert";
 import { loadImage } from "@/lib/load";
 import { has, keys } from "@/lib/utils";
+import { BaseTexture } from "pixi.js";
 
 type Id<T> = T extends infer U ? { [K in keyof U]: U[K] } : never;
 

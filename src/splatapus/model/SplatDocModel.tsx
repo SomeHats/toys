@@ -1,4 +1,8 @@
-import { SplatDocData } from "@/splatapus/model/SplatDocData";
+import { fail } from "@/lib/assert";
+import { Vector2 } from "@/lib/geom/Vector2";
+import { Result } from "@/lib/Result";
+import { deepEqual, identity, UpdateAction } from "@/lib/utils";
+import { calculateNormalizedShapePointsFromVersions } from "@/splatapus/model/normalizedShape";
 import {
     createSplatDoc,
     SplatDoc,
@@ -10,13 +14,9 @@ import {
     SplatShapeVersion,
     SplatShapeVersionId,
 } from "@/splatapus/model/SplatDoc";
-import { UniqueIndex, Table, Index } from "@/splatapus/model/Table";
-import { calculateNormalizedShapePointsFromVersions } from "@/splatapus/model/normalizedShape";
-import { Vector2 } from "@/lib/geom/Vector2";
-import { deepEqual, identity, UpdateAction } from "@/lib/utils";
-import { fail } from "@/lib/assert";
+import { SplatDocData } from "@/splatapus/model/SplatDocData";
+import { Index, Table, UniqueIndex } from "@/splatapus/model/Table";
 import { diffJson } from "diff";
-import { Result } from "@/lib/Result";
 
 export class SplatDocModel {
     static create(): SplatDocModel {

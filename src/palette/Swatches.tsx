@@ -1,7 +1,6 @@
 import { Gamut, Palette } from "@/palette/schema";
 import { useSupport } from "@/palette/support";
 import { Oklch } from "culori";
-import { useMemo } from "react";
 
 export function Swatches({ palette, gamut }: { palette: Palette; gamut: Gamut }) {
     return (

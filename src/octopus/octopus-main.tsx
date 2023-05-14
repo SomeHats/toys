@@ -1,13 +1,13 @@
-import * as React from "react";
-import { SignalManager, Signal, ControlledSignal } from "@/lib/signals/Signals";
-import { times, varyAbsolute, shuffle, uniq, sample } from "@/lib/utils";
-import { assert } from "@/lib/assert";
 import { DebugDraw } from "@/lib/DebugDraw";
+import { assert } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
-import PianoKeyboard from "@/octopus/PianoKeyboard";
-import startSignalsApp from "@/lib/signals/startSignalsApp";
+import { ControlledSignal, Signal, SignalManager } from "@/lib/signals/Signals";
 import { CanvasSignals } from "@/lib/signals/SignalsCanvas";
+import startSignalsApp from "@/lib/signals/startSignalsApp";
 import useSignal from "@/lib/signals/useSignal";
+import { sample, shuffle, times, uniq, varyAbsolute } from "@/lib/utils";
+import PianoKeyboard from "@/octopus/PianoKeyboard";
+import * as React from "react";
 
 const WIDTH = 1300;
 const HEIGHT = 1300;

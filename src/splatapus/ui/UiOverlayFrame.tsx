@@ -1,8 +1,8 @@
-import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
-import { ReactNode } from "react";
-import { Transition } from "@headlessui/react";
-import { Splatapus } from "@/splatapus/editor/useEditor";
 import { useLiveValue } from "@/lib/live";
+import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
+import { Splatapus } from "@/splatapus/editor/useEditor";
+import { Transition } from "@headlessui/react";
+import { ReactNode } from "react";
 
 const rightBarStyle = {
     width: SIDEBAR_WIDTH_PX,

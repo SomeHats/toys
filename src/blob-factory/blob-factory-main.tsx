@@ -1,8 +1,8 @@
+import { BlobFactoryRenderer } from "@/blob-factory/BlobFactory";
 import { assertExists } from "@/lib/assert";
 import { sizeFromContentRect, useResizeObserver } from "@/lib/hooks/useResizeObserver";
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { BlobFactoryRenderer } from "@/blob-factory/BlobFactory";
 
 createRoot(assertExists(document.getElementById("root"))).render(<App />);
 

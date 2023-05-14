@@ -1,8 +1,8 @@
-import SceneObject from "@/lib/scene/SceneObject";
-import Component from "@/lib/scene/Component";
 import { assert } from "@/lib/assert";
-import SortOrderProvider from "@/lib/scene/SortOrderProvider";
+import Component from "@/lib/scene/Component";
 import Scene from "@/lib/scene/Scene";
+import SceneObject from "@/lib/scene/SceneObject";
+import SortOrderProvider from "@/lib/scene/SortOrderProvider";
 
 type ComponentClass<T extends Component, Args extends unknown[]> = {
     name: string;

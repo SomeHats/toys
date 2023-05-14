@@ -1,8 +1,8 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
 import { assertExists } from "@/lib/assert";
 import { PaletteApp } from "@/palette/PaletteApp";
 import { SupportProvider } from "@/palette/support";
+import React from "react";
+import { createRoot } from "react-dom/client";
 
 if (import.meta.hot) {
     import.meta.hot.on("vite:beforeUpdate", () => {

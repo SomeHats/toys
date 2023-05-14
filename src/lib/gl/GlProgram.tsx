@@ -7,7 +7,7 @@ import { Gl } from "@/lib/gl/Gl";
 import { GlBuffer } from "@/lib/gl/GlBuffer";
 import { GlShader } from "@/lib/gl/GlShader";
 import { GlTexture2d } from "@/lib/gl/GlTexture2d";
-import { glEnum, GlVertexAttribType } from "@/lib/gl/GlTypes";
+import { GlVertexAttribType, glEnum } from "@/lib/gl/GlTypes";
 import {
     GlUniform,
     GlUniformBool,

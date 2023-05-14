@@ -7,22 +7,13 @@ import { Inputs } from "@/splatapus2/app/Inputs";
 import { RootNode } from "@/splatapus2/states/State";
 import { appendIncrementalDiff } from "@/splatapus2/store/Incremental";
 import { Index } from "@/splatapus2/store/Index";
-import {
-    Doc,
-    DocDiff,
-    KeyPointId,
-    ShapeId,
-    ShapeVersionId,
-    ShapeVersion,
-} from "@/splatapus2/store/Records";
+import { Doc, DocDiff, KeyPointId, ShapeId, ShapeVersionId } from "@/splatapus2/store/Records";
 import {
     computedIncrementalObjectProperty,
     incrementalTableAccessor,
 } from "@/splatapus2/store/Signia";
-import { memo } from "@/wires/Model";
 import Immutable, { Stack } from "immutable";
-import { RESET_VALUE, react, transact, transaction } from "signia";
-import { Atom, atom, computed } from "signia";
+import { Atom, atom, transact } from "signia";
 
 export const HistoryEntryId = new IdGenerator("hst");
 export type HistoryEntryId = typeof HistoryEntryId.Id;

@@ -1,23 +1,23 @@
-import { DebugPointX } from "@/lib/DebugSvg";
+import { assertExists } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { sizeFromContentRect, useResizeObserver } from "@/lib/hooks/useResizeObserver";
 import { getLocalStorageItem, setLocalStorageItem } from "@/lib/storage";
-import { Shape } from "@/splatapus2/store/Records";
+import { SvgPathBuilder } from "@/lib/svgPathBuilder";
+import { perfectFreehandOpts } from "@/splatapus/constants";
+import { pathFromCenterPoints } from "@/splatapus/model/pathFromCenterPoints";
+import {
+    StrokeCenterPoint,
+    getStrokeCenterPoints,
+    getStrokePoints,
+    getSvgPathFromStroke,
+} from "@/splatapus/model/perfectFreehand";
 import { Splat } from "@/splatapus2/app/Splat";
+import { Shape } from "@/splatapus2/store/Records";
+import { idleScheduler } from "@/splatapus2/store/Signia";
 import classNames from "classnames";
 import { ReactNode, useEffect, useState } from "react";
 import { react } from "signia";
 import { track } from "signia-react";
-import { idleScheduler } from "@/splatapus2/store/Signia";
-import { SvgPathBuilder } from "@/lib/svgPathBuilder";
-import { mapRange } from "@/lib/utils";
-import { getStrokePoints } from "@/splatapus/model/perfectFreehand";
-import { perfectFreehandOpts } from "@/splatapus/constants";
-import { assertExists } from "@/lib/assert";
-import { StrokeCenterPoint } from "@/splatapus/model/perfectFreehand";
-import { getStrokeCenterPoints } from "@/splatapus/model/perfectFreehand";
-import { getSvgPathFromStroke } from "@/splatapus/model/perfectFreehand";
-import { pathFromCenterPoints } from "@/splatapus/model/pathFromCenterPoints";
 
 export const App = track(function App() {
     const [splat] = useState(() =>

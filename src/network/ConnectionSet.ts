@@ -1,6 +1,6 @@
 import { sample } from "@/lib/utils";
-import Road from "@/network/Road";
 import ConnectionDirection from "@/network/ConnectionDirection";
+import Road from "@/network/Road";
 
 export default class ConnectionSet {
     incoming: Road[] = [];

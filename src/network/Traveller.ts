@@ -1,16 +1,16 @@
 import { assert } from "@/lib/assert";
-import SceneObject from "@/lib/scene/SceneObject";
+import { inBack, outBack } from "@/lib/easings";
 import Circle from "@/lib/geom/Circle";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { outBack, inBack } from "@/lib/easings";
-import { sample, constrain, mapRange, random } from "@/lib/utils";
-import TravellerFinder from "@/network/TravellerFinder";
-import { NetworkNode } from "@/network/networkNodes/NetworkNode";
-import Intersection from "@/network/networkNodes/Intersection";
-import Road from "@/network/Road";
 import Entity from "@/lib/scene/Entity";
-import { makeAbsolutePal } from "@/pals/makePal";
+import SceneObject from "@/lib/scene/SceneObject";
+import { constrain, mapRange, random, sample } from "@/lib/utils";
+import Road from "@/network/Road";
+import TravellerFinder from "@/network/TravellerFinder";
+import Intersection from "@/network/networkNodes/Intersection";
+import { NetworkNode } from "@/network/networkNodes/NetworkNode";
 import { PalAbsoluteController } from "@/pals/PalController";
+import { makeAbsolutePal } from "@/pals/makePal";
 
 // const TRAVELLER_COLOR = BLUE.fade(0.4);
 // const TRAVELLER_RADIUS = 14;

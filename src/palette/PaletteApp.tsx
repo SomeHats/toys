@@ -1,13 +1,8 @@
-import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
-import { useStorageState, useUrlStorageState } from "@/lib/hooks/useStoredState";
-import { Schema, SchemaType } from "@/lib/schema";
+import { useUrlStorageState } from "@/lib/hooks/useStoredState";
 import { GamutPicker } from "@/palette/GamutPicker";
 import { Swatches } from "@/palette/Swatches";
 import { Palette, gamutSchema, paletteSchema } from "@/palette/schema";
 import { useSupport } from "@/palette/support";
-import { RadioGroup } from "@headlessui/react";
-import { useEffect } from "react";
-import { FaCheck, FaExclamationTriangle } from "react-icons/fa";
 
 const defaultPalette: Palette = {
     families: ["red", "green", "blue"],

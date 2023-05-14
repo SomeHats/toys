@@ -1,11 +1,11 @@
-import { defineConfig, PluginOption } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
-import { glob } from "glob";
 import { PluginObj } from "@babel/core";
 import generate from "@babel/generator";
 import * as T from "@babel/types";
+import react from "@vitejs/plugin-react";
 import assert from "assert";
+import { glob } from "glob";
+import path from "path";
+import { defineConfig, PluginOption } from "vite";
 
 const mainIndex = path.resolve(__dirname, "src/index.html");
 const roots = glob

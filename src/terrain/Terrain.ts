@@ -1,13 +1,13 @@
-import { Delaunay } from "@/terrain/Delaunay";
-import { TerrainCell } from "@/terrain/TerrainCell";
-import { Vector2 } from "@/lib/geom/Vector2";
-import { times, sample, removeFromArray, mapRange, shuffle } from "@/lib/utils";
 import RandomQueue from "@/lib/RandomQueue";
 import AABB from "@/lib/geom/AABB";
+import { Vector2 } from "@/lib/geom/Vector2";
+import { mapRange, removeFromArray, sample, shuffle, times } from "@/lib/utils";
+import { Delaunay } from "@/terrain/Delaunay";
 import { TectonicPlate } from "@/terrain/TectonicPlate";
+import { TerrainCell } from "@/terrain/TerrainCell";
 import * as config from "@/terrain/config";
 import { makeFractalNoise2d, mapNoise2d } from "@/terrain/fractalNoise";
-import { quadtree, Quadtree } from "d3-quadtree";
+import { Quadtree, quadtree } from "d3-quadtree";
 
 function assignPlates(plateCount: number, terrain: Terrain) {
     const remainingCellIds = new Set(terrain.activeCellIds);

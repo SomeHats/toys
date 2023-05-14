@@ -1,7 +1,7 @@
-import { test } from "vitest";
+import { splatapusStateSchema } from "@/splatapus/model/store";
 import { readFileSync, readdirSync } from "fs";
 import path from "path";
-import { splatapusStateSchema } from "@/splatapus/model/store";
+import { test } from "vitest";
 
 const exampleNames = readdirSync(__dirname).filter((file) => file.endsWith(".json"));
 

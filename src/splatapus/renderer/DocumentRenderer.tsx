@@ -1,9 +1,9 @@
-import { StrokeRenderer } from "@/splatapus/renderer/StrokeRenderer";
-import React, { useLayoutEffect, useState } from "react";
-import classNames from "classnames";
 import { usePrevious } from "@/lib/hooks/usePrevious";
-import { Splatapus } from "@/splatapus/editor/useEditor";
 import { useLive, useLiveValue } from "@/lib/live";
+import { Splatapus } from "@/splatapus/editor/useEditor";
+import { StrokeRenderer } from "@/splatapus/renderer/StrokeRenderer";
+import classNames from "classnames";
+import React, { useLayoutEffect, useState } from "react";
 
 export const DocumentRenderer = React.memo(function DocumentRenderer({
     splatapus,

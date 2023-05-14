@@ -1,6 +1,6 @@
 import { assert, assertExists } from "@/lib/assert";
 import { Gl } from "@/lib/gl/Gl";
-import { glEnum, GlTextureFilter, GlTextureFormat, GlTextureWrap } from "@/lib/gl/GlTypes";
+import { GlTextureFilter, GlTextureFormat, GlTextureWrap, glEnum } from "@/lib/gl/GlTypes";
 
 export type GlTexture2dData = {
     readonly data: ArrayBufferView;

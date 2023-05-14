@@ -1,8 +1,5 @@
-import { fail } from "@/lib/assert";
 import { Vector3, Vector3Args, Vector3Ish } from "@/lib/geom/Vector3";
-import { log9 } from "@/lib/logger";
 import { lerp } from "@/lib/utils";
-import { inverseLerp } from "three/src/math/MathUtils";
 
 // prettier-ignore
 type Matrix4Data = Readonly<[

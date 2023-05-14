@@ -1,5 +1,6 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 import { compact, exhaustiveSwitchError } from "@/lib/utils";
+import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 import { AutoInterpolator, Interpolator } from "@/splatapus/model/Interpolator";
 import {
     SplatKeyPoint,
@@ -9,7 +10,6 @@ import {
 } from "@/splatapus/model/SplatDoc";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { StrokeCenterPoint } from "@/splatapus/model/perfectFreehand";
-import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 
 type CachedValues = {
     keyPoints: ReadonlySet<SplatKeyPoint>;

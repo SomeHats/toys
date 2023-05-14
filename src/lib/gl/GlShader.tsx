@@ -1,6 +1,6 @@
 import { assertExists, fail } from "@/lib/assert";
 import { Gl } from "@/lib/gl/Gl";
-import { glEnum, GlShaderType } from "@/lib/gl/GlTypes";
+import { GlShaderType, glEnum } from "@/lib/gl/GlTypes";
 
 export class GlShader {
     readonly shader: WebGLShader;

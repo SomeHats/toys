@@ -1,10 +1,10 @@
 import { assert } from "@/lib/assert";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { stringFromError } from "@/lib/utils";
+import { Splatapus } from "@/splatapus/editor/useEditor";
 import catExample from "@/splatapus/examples/cat.json";
 import { makeEmptySaveState, splatapusStateSchema } from "@/splatapus/model/store";
 import { Button } from "@/splatapus/ui/Button";
-import { Vector2 } from "@/lib/geom/Vector2";
-import { Splatapus } from "@/splatapus/editor/useEditor";
 
 export function ImportExportButtons({ splatapus }: { splatapus: Splatapus }) {
     return (

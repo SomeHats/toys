@@ -6245,12 +6245,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-tailwindcss@npm:^0.2.5":
-  version: 0.2.5
-  resolution: "prettier-plugin-tailwindcss@npm:0.2.5"
+"prettier-plugin-organize-imports@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "prettier-plugin-organize-imports@npm:3.2.2"
+  peerDependencies:
+    "@volar/vue-language-plugin-pug": ^1.0.4
+    "@volar/vue-typescript": ^1.0.4
+    prettier: ">=2.0"
+    typescript: ">=2.9"
+  peerDependenciesMeta:
+    "@volar/vue-language-plugin-pug":
+      optional: true
+    "@volar/vue-typescript":
+      optional: true
+  checksum: 28620ea73a0a518c93200c7ea17d38a26132db3f55a75954983dff3422d4dd2155515518422b7a68935736aa333b0406a51778053bd30133a57718090272bb5d
+  languageName: node
+  linkType: hard
+
+"prettier-plugin-tailwindcss@npm:^0.2.8":
+  version: 0.2.8
+  resolution: "prettier-plugin-tailwindcss@npm:0.2.8"
   peerDependencies:
     "@ianvs/prettier-plugin-sort-imports": "*"
-    "@prettier/plugin-php": "*"
     "@prettier/plugin-pug": "*"
     "@shopify/prettier-plugin-liquid": "*"
     "@shufo/prettier-plugin-blade": "*"
@@ -6267,8 +6283,6 @@ __metadata:
     prettier-plugin-twig-melody: "*"
   peerDependenciesMeta:
     "@ianvs/prettier-plugin-sort-imports":
-      optional: true
-    "@prettier/plugin-php":
       optional: true
     "@prettier/plugin-pug":
       optional: true
@@ -6296,16 +6310,16 @@ __metadata:
       optional: true
     prettier-plugin-twig-melody:
       optional: true
-  checksum: 44ae325d40ad747dd8fb36e1d7986de1919b9bd912993628c18f4743c9287b1add6dd2d951ed336b1031a2ad49c7ba5eb50e4be6d3b9b37e0da7fd137d13ec53
+  checksum: 0c99295f1f47b4d35a3e19d88e6b1aac58a60479a4317fb3c3a6522b51f6b5a28cfd9c03545749354b01ca4f8ec3edf7ba2a34596c5cc58a7022b1d850bbe6be
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.8.4":
-  version: 2.8.4
-  resolution: "prettier@npm:2.8.4"
+"prettier@npm:^2.8.8":
+  version: 2.8.8
+  resolution: "prettier@npm:2.8.8"
   bin:
     prettier: bin-prettier.js
-  checksum: c173064bf3df57b6d93d19aa98753b9b9dd7657212e33b41ada8e2e9f9884066bb9ca0b4005b89b3ab137efffdf8fbe0b462785aba20364798ff4303aadda57e
+  checksum: b49e409431bf129dd89238d64299ba80717b57ff5a6d1c1a8b1a28b590d998a34e083fa13573bc732bb8d2305becb4c9a4407f8486c81fa7d55100eb08263cf8
   languageName: node
   linkType: hard
 
@@ -7230,8 +7244,9 @@ __metadata:
     open-simplex-noise: ^2.5.0
     pixi.js: ^6.5.1
     postcss: ^8.4.21
-    prettier: ^2.8.4
-    prettier-plugin-tailwindcss: ^0.2.5
+    prettier: ^2.8.8
+    prettier-plugin-organize-imports: ^3.2.2
+    prettier-plugin-tailwindcss: ^0.2.8
     react: ^18.2.0
     react-dom: ^18.2.0
     react-icons: ^4.8.0

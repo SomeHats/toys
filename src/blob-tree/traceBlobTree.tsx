@@ -1,7 +1,7 @@
+import { BlobTree, BlobTreeNode } from "@/blob-tree/BlobTree";
 import { DebugDraw } from "@/lib/DebugDraw";
 import { fakeConsole } from "@/lib/fakeConsole";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { BlobTree, BlobTreeNode } from "@/blob-tree/BlobTree";
 
 // interface TracerInterface {
 //   moveTo(x: number, y: number);

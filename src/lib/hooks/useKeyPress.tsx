@@ -1,8 +1,8 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { useEvent } from "@/lib/hooks/useEvent";
-import { IS_MAC } from "@/lib/utils";
 import { Unsubscribe } from "@/lib/EventEmitter";
 import { assert } from "@/lib/assert";
+import { useEvent } from "@/lib/hooks/useEvent";
+import { IS_MAC } from "@/lib/utils";
+import { createContext, useContext, useEffect, useState } from "react";
 
 export const ANY = Symbol();
 

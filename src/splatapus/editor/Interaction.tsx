@@ -1,19 +1,19 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 import { matchesKeyDown } from "@/lib/hooks/useKeyPress";
+import { LiveValue, runOnce } from "@/lib/live";
 import { entries, exhaustiveSwitchError } from "@/lib/utils";
-import { MultiTouchPan } from "@/splatapus/editor/MultiTouchPan";
-import { DrawMode } from "@/splatapus/editor/modes/DrawMode";
-import { RigMode } from "@/splatapus/editor/modes/RigMode";
 import {
-    applyPointerEvent,
     KeyboardEventContext,
     PointerEventContext,
+    applyPointerEvent,
 } from "@/splatapus/editor/EventContext";
+import { MultiTouchPan } from "@/splatapus/editor/MultiTouchPan";
 import { QuickPan } from "@/splatapus/editor/QuickPan";
-import { ModeType } from "@/splatapus/editor/modes/Mode";
 import { UndoStack } from "@/splatapus/editor/UndoStack";
+import { DrawMode } from "@/splatapus/editor/modes/DrawMode";
+import { ModeType } from "@/splatapus/editor/modes/Mode";
 import { PlayMode } from "@/splatapus/editor/modes/PlayMode";
-import { LiveValue, runOnce } from "@/lib/live";
+import { RigMode } from "@/splatapus/editor/modes/RigMode";
 
 type SpecificMode = DrawMode | RigMode | PlayMode;
 

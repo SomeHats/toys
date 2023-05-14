@@ -1,16 +1,16 @@
-import { Interaction } from "@/splatapus/editor/Interaction";
-import { SplatLocation } from "@/splatapus/editor/SplatLocation";
-import { SplatapusState } from "@/splatapus/model/store";
-import { OpOptions, UndoStack } from "@/splatapus/editor/UndoStack";
-import { Viewport } from "@/splatapus/editor/Viewport";
-import { PointerEvent, useEffect, useState } from "react";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { Vfx } from "@/splatapus/editor/Vfx";
-import { LiveValue, LiveMemo, LiveMemoWritable, runLive, LiveEffect } from "@/lib/live";
-import { PointerEventType } from "@/splatapus/editor/EventContext";
-import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
-import { SplatKeyPointId } from "@/splatapus/model/SplatDoc";
+import { LiveEffect, LiveMemo, LiveMemoWritable, LiveValue, runLive } from "@/lib/live";
 import { last } from "@/lib/utils";
+import { PointerEventType } from "@/splatapus/editor/EventContext";
+import { Interaction } from "@/splatapus/editor/Interaction";
+import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
+import { SplatLocation } from "@/splatapus/editor/SplatLocation";
+import { OpOptions, UndoStack } from "@/splatapus/editor/UndoStack";
+import { Vfx } from "@/splatapus/editor/Vfx";
+import { Viewport } from "@/splatapus/editor/Viewport";
+import { SplatKeyPointId } from "@/splatapus/model/SplatDoc";
+import { SplatapusState } from "@/splatapus/model/store";
+import { PointerEvent, useEffect, useState } from "react";
 
 export class Splatapus {
     readonly undoStack: LiveValue<UndoStack>;

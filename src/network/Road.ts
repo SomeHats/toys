@@ -1,14 +1,14 @@
 // @flow
-import SceneObject from "@/lib/scene/SceneObject";
+import * as ShapeHelpers from "@/lib/canvasShapeHelpers";
 import { Path } from "@/lib/geom/Path";
 import StraightPathSegment from "@/lib/geom/StraightPathSegment";
 import { Vector2 } from "@/lib/geom/Vector2";
-import * as ShapeHelpers from "@/lib/canvasShapeHelpers";
-import { YELLOW } from "@/network/colors";
+import SceneObject from "@/lib/scene/SceneObject";
 import ConnectionDirection from "@/network/ConnectionDirection";
-import { NetworkNode } from "@/network/networkNodes/NetworkNode";
 import Junction from "@/network/Junction";
 import Traveller from "@/network/Traveller";
+import { YELLOW } from "@/network/colors";
+import { NetworkNode } from "@/network/networkNodes/NetworkNode";
 
 // const ROAD_OUTER_COLOR = BLUE;
 // const ROAD_INNER_COLOR = LIGHT_BG;

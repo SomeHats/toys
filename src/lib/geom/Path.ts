@@ -1,12 +1,12 @@
 // @flow
 import { assert } from "@/lib/assert";
-import { constrain, compact } from "@/lib/utils";
 import Circle from "@/lib/geom/Circle";
-import { Vector2 } from "@/lib/geom/Vector2";
-import StraightPathSegment from "@/lib/geom/StraightPathSegment";
 import CirclePathSegment from "@/lib/geom/CirclePathSegment";
 import { Line2 } from "@/lib/geom/Line2";
+import StraightPathSegment from "@/lib/geom/StraightPathSegment";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
+import { compact, constrain } from "@/lib/utils";
 
 export interface PathSegment {
     getStart(): Vector2;

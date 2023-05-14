@@ -1,8 +1,8 @@
-import * as T from "three";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { frame, mapRange } from "@/lib/utils";
 import Terrain from "@/terrain/Terrain";
 import { SIZE } from "@/terrain/config";
-import { Vector2 } from "@/lib/geom/Vector2";
+import * as T from "three";
 
 function create3dRenderer(terrain: Terrain) {
     const scene = new T.Scene();

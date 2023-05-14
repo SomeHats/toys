@@ -1,8 +1,8 @@
+import RandomQueue from "@/lib/RandomQueue";
+import AABB from "@/lib/geom/AABB";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { random } from "@/lib/utils";
-import RandomQueue from "@/lib/RandomQueue";
 import { Grid2 } from "@/terrain/Grid2";
-import AABB from "@/lib/geom/AABB";
 
 export function generatePoisson(
     bounds: AABB,

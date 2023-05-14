@@ -1,10 +1,10 @@
-import Entity from "@/lib/scene/Entity";
-import { PalTargetController, PalAbsoluteController } from "@/pals/PalController";
 import { Vector2 } from "@/lib/geom/Vector2";
+import Entity from "@/lib/scene/Entity";
 import { generateRandomPalConfig } from "@/pals/PalConfig";
+import { PalAbsoluteController, PalTargetController } from "@/pals/PalController";
 import PalGeom from "@/pals/PalGeom";
-import PalWalkAnimationController from "@/pals/PalWalkAnimationController";
 import PalRenderer from "@/pals/PalRenderer";
+import PalWalkAnimationController from "@/pals/PalWalkAnimationController";
 
 export function makeTargetPal(position: Vector2): Entity {
     const pal = new Entity();

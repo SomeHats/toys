@@ -65,7 +65,9 @@ test("ObjectSchema.indexed", () => {
     // accepts an array
     expect(schema.parse([true, null, "hello"]).unwrap()).toEqual({ foo: true, bar: "hello" });
     // tags errors with the index
-    expect(schema.parse([true, null, 3]).unwrapError().toString()).toMatchInlineSnapshot('"At .bar(2): Expected string, got a number"');
+    expect(schema.parse([true, null, 3]).unwrapError().toString()).toMatchInlineSnapshot(
+        '"At .bar(2): Expected string, got a number"',
+    );
 });
 
 test("UnionSchema", () => {

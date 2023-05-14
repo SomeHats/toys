@@ -1,10 +1,10 @@
+import { assertExists } from "@/lib/assert";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { random } from "@/lib/utils";
 import Terrain from "@/terrain/Terrain";
-import { Vector2 } from "@/lib/geom/Vector2";
 import { TerrainCell } from "@/terrain/TerrainCell";
-import * as config from "@/terrain/config";
 import { canvas } from "@/terrain/canvas";
-import { assertExists } from "@/lib/assert";
+import * as config from "@/terrain/config";
 
 function findPlateEdges(
     currentPlateId: number,

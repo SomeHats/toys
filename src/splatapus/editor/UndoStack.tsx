@@ -1,9 +1,9 @@
 import { assert } from "@/lib/assert";
+import { UpdateAction, applyUpdate, deepEqual } from "@/lib/utils";
 import { UNDO_ACTIONS } from "@/splatapus/constants";
-import { deepEqual, UpdateAction, applyUpdate } from "@/lib/utils";
-import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { SplatLocationState } from "@/splatapus/editor/SplatLocation";
 import { Vfx } from "@/splatapus/editor/Vfx";
+import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 
 export type OpOptions = {
     readonly lockstepLocation?: UpdateAction<SplatLocationState>;

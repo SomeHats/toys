@@ -1,6 +1,6 @@
 import { Signal } from "@/lib/signals/Signals";
-import { useSubscription } from "use-subscription";
 import { useMemo } from "react";
+import { useSubscription } from "use-subscription";
 
 export default function useSignal(signal: Signal): number {
     return useSubscription(

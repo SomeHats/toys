@@ -2,7 +2,7 @@ import { Unsubscribe } from "@/lib/EventEmitter";
 import { LiveWritable } from "@/lib/live";
 import { incrementGlobalVersion, trackRead } from "@/lib/live/LiveComputation";
 import { LiveInvalidation } from "@/lib/live/LiveInvalidation";
-import { applyUpdate, UpdateAction } from "@/lib/utils";
+import { UpdateAction, applyUpdate } from "@/lib/utils";
 
 export class LiveValue<T> implements LiveWritable<T> {
     private value: T;

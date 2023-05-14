@@ -1,8 +1,8 @@
+import { BlobTree, BlobTreeNode } from "@/blob-tree/BlobTree";
+import { traceBlobTree } from "@/blob-tree/traceBlobTree";
 import { DebugDraw } from "@/lib/DebugDraw";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { exhaustiveSwitchError } from "@/lib/utils";
-import { BlobTree, BlobTreeNode } from "@/blob-tree/BlobTree";
-import { traceBlobTree } from "@/blob-tree/traceBlobTree";
 
 type EditorState =
     | {

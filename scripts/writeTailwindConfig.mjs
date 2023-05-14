@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /* eslint-disable no-relative-import-paths/no-relative-import-paths */
 
-import resolveConfig from "tailwindcss/resolveConfig.js";
-import tailwindConfig from "../tailwind.config.js";
-import prettier from "prettier";
 import fs from "fs";
 import path from "path";
+import prettier from "prettier";
+import resolveConfig from "tailwindcss/resolveConfig.js";
 import url from "url";
+import tailwindConfig from "../tailwind.config.js";
 
 const config = resolveConfig(tailwindConfig);
 const { colors, transitionTimingFunction: easings } = config.theme;

@@ -1,12 +1,12 @@
-import { generatePoisson } from "@/terrain/generatePoisson";
 import AABB from "@/lib/geom/AABB";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { Delaunay } from "@/terrain/Delaunay";
 import Terrain from "@/terrain/Terrain";
 import { canvas, ctx } from "@/terrain/canvas";
 import * as config from "@/terrain/config";
-import { interpolateMagma } from "d3-scale-chromatic";
 import create3dRenderer from "@/terrain/create3dRenderer";
+import { generatePoisson } from "@/terrain/generatePoisson";
+import { interpolateMagma } from "d3-scale-chromatic";
 
 const spaceVec = new Vector2(config.POINT_SPACING, config.POINT_SPACING);
 const sizeVec = new Vector2(config.SIZE, config.SIZE);

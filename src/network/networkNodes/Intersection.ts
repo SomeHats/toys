@@ -1,9 +1,9 @@
 // @flow
 import { assert } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { uniq, flatten } from "@/lib/utils";
-import ConnectionSet from "@/network/ConnectionSet";
+import { flatten, uniq } from "@/lib/utils";
 import ConnectionDirection from "@/network/ConnectionDirection";
+import ConnectionSet from "@/network/ConnectionSet";
 import PathFinder from "@/network/PathFinder";
 import Road from "@/network/Road";
 import Traveller from "@/network/Traveller";

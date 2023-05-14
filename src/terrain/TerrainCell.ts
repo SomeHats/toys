@@ -1,10 +1,10 @@
 import { Vector2 } from "@/lib/geom/Vector2";
+import { clamp, compact, fromEntries, mapRange } from "@/lib/utils";
 import { DelaunayCell } from "@/terrain/Delaunay";
-import Terrain from "@/terrain/Terrain";
-import { fromEntries, compact, mapRange, clamp } from "@/lib/utils";
-import { Noise2D } from "@/terrain/fractalNoise";
 import { TectonicPlate } from "@/terrain/TectonicPlate";
+import Terrain from "@/terrain/Terrain";
 import * as config from "@/terrain/config";
+import { Noise2D } from "@/terrain/fractalNoise";
 import makeInterpolateGradiant from "@/terrain/makeInterpolateGradient";
 
 const interpolateBiome = makeInterpolateGradiant([

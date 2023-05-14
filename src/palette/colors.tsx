@@ -3,23 +3,23 @@
  * Copyright 2022 Andrey Sitnik <andrey@sitnik.ru>, Roman Shamin <roma@evilmartians.com>.
  * @license MIT
  */
-import type { Color, Oklch, Rgb, Lch, P3, Rec2020 } from "culori/fn";
+import type { Color, Lch, Oklch, P3, Rec2020, Rgb } from "culori/fn";
 
 import {
-    formatRgb as formatRgbFast,
-    parse as originParse,
     clampChroma,
-    modeRec2020,
-    modeOklch,
-    modeOklab,
-    modeXyz65,
-    formatCss,
     useMode as culoriUseMode,
-    modeRgb,
+    formatCss,
+    formatRgb as formatRgbFast,
     modeHsl,
-    modeLch,
     modeLab,
+    modeLch,
+    modeOklab,
+    modeOklch,
     modeP3,
+    modeRec2020,
+    modeRgb,
+    modeXyz65,
+    parse as originParse,
 } from "culori/fn";
 
 export type { Rgb } from "culori/fn";

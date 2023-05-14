@@ -1,10 +1,10 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 import { Schema, SchemaType } from "@/lib/schema";
-import { applyUpdateWithin, ReadonlyObjectMap } from "@/lib/utils";
+import { applyUpdateWithin } from "@/lib/utils";
 import { IdGenerator } from "@/splatapus/model/Ids";
 
 export const WireNodeId = new IdGenerator("node");
-export type WireNodeId = typeof WireNodeId["Id"];
+export type WireNodeId = (typeof WireNodeId)["Id"];
 export const outWireNodeSchema = Schema.object({
     type: Schema.value("out"),
     id: WireNodeId.schema,
@@ -34,7 +34,7 @@ export const wireNodeSchema = Schema.union("type", {
 export type WireNode = SchemaType<typeof wireNodeSchema>;
 
 export const WireId = new IdGenerator("wire");
-export type WireId = typeof WireId["Id"];
+export type WireId = (typeof WireId)["Id"];
 export const wireSchema = Schema.object({
     id: WireId.schema,
     startNodeId: WireNodeId.schema,

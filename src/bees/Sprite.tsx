@@ -1,5 +1,5 @@
-import { loadImage } from "@/lib/load";
 import { C, SpriteOpts } from "@/bees/C";
+import { loadImage } from "@/lib/load";
 
 export type SpriteManifest = {
     src: URL;

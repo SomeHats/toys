@@ -1,12 +1,12 @@
 import { Result } from "@/lib/Result";
-import { debounce } from "@/lib/utils";
-import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
-import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
-import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
-import { SplatLocationState } from "@/splatapus/editor/SplatLocation";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { Schema, SchemaType } from "@/lib/schema";
 import { getLocalStorageItemUnchecked, setLocalStorageItemUnchecked } from "@/lib/storage";
+import { debounce } from "@/lib/utils";
+import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
+import { SplatLocationState } from "@/splatapus/editor/SplatLocation";
+import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
+import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 
 export const splatapusStateSchema = Schema.object({
     document: SplatDocModel.schema,

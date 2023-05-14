@@ -1,9 +1,9 @@
-import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
-import { ModeType, modeTypeSchema } from "@/splatapus/editor/modes/Mode";
-import { ViewportState } from "@/splatapus/editor/Viewport";
-import { applyUpdateWithin } from "@/lib/utils";
 import { LiveMemoWritable, LiveWritable } from "@/lib/live";
 import { Schema, SchemaType } from "@/lib/schema";
+import { applyUpdateWithin } from "@/lib/utils";
+import { ViewportState } from "@/splatapus/editor/Viewport";
+import { ModeType, modeTypeSchema } from "@/splatapus/editor/modes/Mode";
+import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
 
 const splatLocationSchema = Schema.object({
     keyPointId: SplatKeyPointId.schema,

@@ -5,10 +5,10 @@ import { LiveMemo } from "@/lib/live/LiveMemo";
 import { UpdateAction } from "@/lib/utils";
 import { useCallback, useDebugValue, useMemo, useRef, useSyncExternalStore } from "react";
 
-export { LiveValue } from "@/lib/live/LiveValue";
-export { LiveMemo, LiveMemoWritable } from "@/lib/live/LiveMemo";
-export { LiveEffect } from "@/lib/live/LiveEffect";
 export { runLiveWithoutListening as runOnce } from "@/lib/live/LiveComputation";
+export { LiveEffect } from "@/lib/live/LiveEffect";
+export { LiveMemo, LiveMemoWritable } from "@/lib/live/LiveMemo";
+export { LiveValue } from "@/lib/live/LiveValue";
 
 export interface Live<T> {
     getOnce(): T;

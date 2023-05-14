@@ -1,7 +1,7 @@
-import { canvas, width, height } from "@/wiggle-gradient/canvas";
-import { sample } from "@/lib/utils";
-import createTriangleGrid, { Triangle } from "@/lib/createTriangleGrid";
 import { assert } from "@/lib/assert";
+import createTriangleGrid, { Triangle } from "@/lib/createTriangleGrid";
+import { sample } from "@/lib/utils";
+import { canvas, height, width } from "@/wiggle-gradient/canvas";
 
 const TILE_SIZE = 5;
 

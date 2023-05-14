@@ -1,7 +1,13 @@
+import { assertExists } from "@/lib/assert";
+import { DebugCircle, DebugPointX } from "@/lib/DebugSvg";
+import { Vector2 } from "@/lib/geom/Vector2";
+import { useLive } from "@/lib/live";
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { perfectFreehandOpts } from "@/splatapus/constants";
+import { useDebugSetting } from "@/splatapus/DebugSettings";
+import { ModeType } from "@/splatapus/editor/modes/Mode";
+import { Splatapus } from "@/splatapus/editor/useEditor";
 import { interpolationCache } from "@/splatapus/model/InterpolationCache";
-import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import { normalizeCenterPointIntervalsQuadratic } from "@/splatapus/model/normalizeCenterPointIntervals";
 import { pathFromCenterPoints } from "@/splatapus/model/pathFromCenterPoints";
 import {
@@ -10,15 +16,9 @@ import {
     getSvgPathFromStroke,
     StrokeCenterPoint,
 } from "@/splatapus/model/perfectFreehand";
-import { ModeType } from "@/splatapus/editor/modes/Mode";
+import { SplatShapeId } from "@/splatapus/model/SplatDoc";
 import classNames from "classnames";
-import React, { Fragment } from "react";
-import { useDebugSetting } from "@/splatapus/DebugSettings";
-import { useLive } from "@/lib/live";
-import { Splatapus } from "@/splatapus/editor/useEditor";
-import { Vector2 } from "@/lib/geom/Vector2";
-import { DebugCircle, DebugLabel, DebugPointX, DebugVectorAtPoint } from "@/lib/DebugSvg";
-import { assert, assertExists } from "@/lib/assert";
+import React from "react";
 
 export const StrokeRenderer = React.memo(function StrokeRenderer({
     shapeId,

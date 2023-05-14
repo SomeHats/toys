@@ -1,10 +1,10 @@
-import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
-import { Button } from "@/splatapus/ui/Button";
-import classNames from "classnames";
+import { useLive, useLiveValue } from "@/lib/live";
 import { useModeClassNames } from "@/splatapus/editor/modeClassNames";
 import { Splatapus } from "@/splatapus/editor/useEditor";
-import { useLive, useLiveValue } from "@/lib/live";
+import { SplatKeyPointId, SplatShapeId } from "@/splatapus/model/SplatDoc";
+import { Button } from "@/splatapus/ui/Button";
 import { ShapeVersionPreview } from "@/splatapus/ui/ShapeVersionPreview";
+import classNames from "classnames";
 
 const WIDTH_PER_THUMB = 84;
 const HEIGHT_PER_THUMB = 80;

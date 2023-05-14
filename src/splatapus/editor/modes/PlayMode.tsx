@@ -1,9 +1,9 @@
+import { debugStateToString } from "@/lib/debugPropsToString";
 import { Vector2 } from "@/lib/geom/Vector2";
+import { LiveValue } from "@/lib/live";
 import { exhaustiveSwitchError } from "@/lib/utils";
 import { PointerEventContext, PointerEventType } from "@/splatapus/editor/EventContext";
 import { Mode, ModeType } from "@/splatapus/editor/modes/Mode";
-import { LiveValue } from "@/lib/live";
-import { debugStateToString } from "@/lib/debugPropsToString";
 import { ReactNode } from "react";
 
 export class PlayMode implements Mode<ModeType.Play> {

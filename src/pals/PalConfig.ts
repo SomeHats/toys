@@ -1,6 +1,6 @@
-import Color from "color";
-import { varyRelative, varyAbsolute, random, randomInt } from "@/lib/utils";
+import { random, randomInt, varyAbsolute, varyRelative } from "@/lib/utils";
 import { BLUE } from "@/pals/colors";
+import Color from "color";
 
 export type PalConfig = {
     radius: number;

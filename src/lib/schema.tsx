@@ -169,13 +169,17 @@ export class Schema<Parsed> {
     static value<V extends string | number | boolean>(value: V): ValueSchema<V> {
         return new ValueSchema(value);
     }
-    static valueUnion<const V extends ReadonlyArray<string | number | boolean>>(...values: V): Schema<V[number]> {
+    static valueUnion<const V extends ReadonlyArray<string | number | boolean>>(
+        ...values: V
+    ): Schema<V[number]> {
         return new Schema<V[number]>((input) => {
             if (values.includes(input as any)) {
                 return Result.ok(input as V[number]);
             }
             return Result.error(
-                new SchemaParseError(`Expected one of ${values.join(" or ")}, got ${typeToString(input)}`),
+                new SchemaParseError(
+                    `Expected one of ${values.join(" or ")}, got ${typeToString(input)}`,
+                ),
             );
         }, identity);
     }

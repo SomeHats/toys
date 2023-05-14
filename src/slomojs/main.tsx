@@ -1,7 +1,7 @@
-import "regenerator-runtime/runtime";
 import { assertExists } from "@/lib/assert";
 import { has } from "@/lib/utils";
 import initSlomojs, * as slomojs from "@/slomojs/crate/pkg/slomojs";
+import "regenerator-runtime/runtime";
 
 // Chrome does not seem to expose the Animation constructor globally
 if (typeof Animation === "undefined") {

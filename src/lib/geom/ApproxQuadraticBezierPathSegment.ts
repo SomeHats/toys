@@ -1,6 +1,6 @@
 import { Path, PathSegment } from "@/lib/geom/Path";
-import { Vector2 } from "@/lib/geom/Vector2";
 import StraightPathSegment from "@/lib/geom/StraightPathSegment";
+import { Vector2 } from "@/lib/geom/Vector2";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 
 export default class ApproxQuadraticBezierPathSegment implements PathSegment {

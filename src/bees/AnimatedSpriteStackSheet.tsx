@@ -1,8 +1,8 @@
-import { BaseTexture, Rectangle, Texture } from "pixi.js";
 import { assert } from "@/lib/assert";
 import { loadAndParseJson } from "@/lib/load";
-import { mapRange, normalizeAngle } from "@/lib/utils";
 import { Schema, SchemaType } from "@/lib/schema";
+import { mapRange, normalizeAngle } from "@/lib/utils";
+import { BaseTexture, Rectangle, Texture } from "pixi.js";
 
 const animatedSpriteStackGeometrySchema = Schema.object({
     width: Schema.number,

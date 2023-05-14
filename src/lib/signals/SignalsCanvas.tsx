@@ -1,11 +1,11 @@
-import * as React from "react";
+import DragCover from "@/lib/DragCover";
+import { assert } from "@/lib/assert";
+import { ListenToMidiInputFn } from "@/lib/midi";
+import { Signal, SignalManager } from "@/lib/signals/Signals";
 import SignalsInspector from "@/lib/signals/SignalsInspector";
 import { frameLoop } from "@/lib/utils";
-import DragCover from "@/lib/DragCover";
 import { ResizeObserver } from "@juggle/resize-observer";
-import { assert } from "@/lib/assert";
-import { Signal, SignalManager } from "@/lib/signals/Signals";
-import { ListenToMidiInputFn } from "@/lib/midi";
+import * as React from "react";
 
 const INSPECTOR_WIDTH = 300;
 

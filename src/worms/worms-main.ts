@@ -1,9 +1,9 @@
-import { canvas, width, height } from "@/worms/canvas";
-import { Vector2 } from "@/lib/geom/Vector2";
-import { sample, times, randomInt, frameLoop, uniq, random } from "@/lib/utils";
-import createTriangleGrid, { Triangle } from "@/lib/createTriangleGrid";
 import { assert } from "@/lib/assert";
-import { SNAKES, BG } from "@/worms/colors";
+import createTriangleGrid, { Triangle } from "@/lib/createTriangleGrid";
+import { Vector2 } from "@/lib/geom/Vector2";
+import { frameLoop, random, randomInt, sample, times, uniq } from "@/lib/utils";
+import { canvas, height, width } from "@/worms/canvas";
+import { BG, SNAKES } from "@/worms/colors";
 
 const TILE_SIZE = 50;
 const ARC_LENGTH = (Math.PI * TILE_SIZE) / 6;

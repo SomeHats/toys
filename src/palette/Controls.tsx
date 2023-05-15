@@ -1,11 +1,12 @@
 import { assertExists } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { clamp, invLerp, mapRange } from "@/lib/utils";
-import { inP3, inRGB, inRec2020, p3 } from "@/palette/colors";
+import { inP3, inRGB, inRec2020, p3, toP3, toRgb } from "@/palette/colors";
 import { Gamut } from "@/palette/schema";
 import classNames from "classnames";
-import { Color, Oklch, formatCss, formatHex8 } from "culori";
-import { memo, useMemo, useRef, useState } from "react";
+import { Color, Oklch, formatCss, formatHex } from "culori";
+import { ReactNode, memo, useEffect, useMemo, useRef, useState } from "react";
+import { FaCompressAlt } from "react-icons/fa";
 
 export const Controls = memo(function Controls({
     color,
@@ -17,7 +18,7 @@ export const Controls = memo(function Controls({
     gamut: Gamut;
 }) {
     return (
-        <div className="grid h-32 w-full grid-cols-2 grid-rows-2 gap-1 p-1">
+        <div className="grid h-32 w-full grid-cols-2 grid-rows-2 gap-3 p-1 px-4">
             <Slider
                 color={color}
                 onChange={onChange}
@@ -48,13 +49,25 @@ export const Controls = memo(function Controls({
                 resolution={1}
                 gamut={gamut}
             />
+            <div className="grid grid-cols-2 grid-rows-2 gap-2 text-sm">
+                <CopyButton value={format(color)} label="Copy CSS" />
+                <CopyButton value={formatCss(color)} label="Copy raw" />
+                <CopyButton
+                    value={formatCss(toP3(color))}
+                    label={<>{!inP3(color) && <FaCompressAlt className="mr-1" />} Copy P3</>}
+                />
+                <CopyButton
+                    value={formatHex(toRgb(color))}
+                    label={<>{!inRGB(color) && <FaCompressAlt className="mr-1" />} Copy srgb</>}
+                />
+            </div>
         </div>
     );
 });
 
 function format(color: Color) {
     if (inRGB(color)) {
-        return formatHex8(color);
+        return formatHex(color);
     } else if (inP3(color)) {
         return formatCss(p3(color));
     } else {
@@ -228,5 +241,30 @@ function Slider({
                 </div>
             </div>
         </div>
+    );
+}
+
+function CopyButton({ value, label }: { value: string; label: ReactNode }) {
+    const [didCopy, setDidCopy] = useState(false);
+
+    useEffect(() => {
+        if (didCopy) {
+            const timeout = setTimeout(() => setDidCopy(false), 1000);
+            return () => clearTimeout(timeout);
+        }
+    }, [didCopy]);
+
+    function onClick() {
+        navigator.clipboard.writeText(value);
+        setDidCopy(true);
+    }
+
+    return (
+        <button
+            className="flex items-center justify-center rounded bg-neutral-700 px-2 py-1 text-sm text-neutral-300 hover:bg-neutral-600"
+            onClick={onClick}
+        >
+            {didCopy ? "Copied!" : label}
+        </button>
     );
 }

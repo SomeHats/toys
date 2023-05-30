@@ -1,5 +1,16 @@
 import { UpdateFn, copyArrayAndReplace } from "@/lib/utils";
-import { clampP3, clampRec2020, clampRgb, inP3, inRGB, inRec2020, lrgb } from "@/palette/colors";
+import {
+    clampP3,
+    clampRec2020,
+    clampRgb,
+    formatP3AsCss,
+    formatRec2020AsCss,
+    formatRgbAsCss,
+    inP3,
+    inRGB,
+    inRec2020,
+    lrgb,
+} from "@/palette/colors";
 import { Axis, Palette } from "@/palette/schema";
 import { useSupport } from "@/palette/support";
 import classNames from "classnames";
@@ -117,17 +128,17 @@ export const Swatch = memo(function Swatch({ color = black }: { color?: Oklch })
             isLight,
             bestSupportedColor,
             srgb: {
-                color: formatCss(clampRgb(color)),
+                color: formatRgbAsCss(color),
                 isClamped: !isInRgb,
                 isSupported: true,
             },
             p3: {
-                color: formatCss(clampP3(color)),
+                color: formatP3AsCss(color),
                 isClamped: !isInP3,
                 isSupported: isSupported || support.p3Gamut,
             },
             rec2020: {
-                color: formatCss(clampRec2020(color)),
+                color: formatRec2020AsCss(color),
                 isClamped: !isInRec2020,
                 isSupported: isSupported || support.rec2020Gamut,
             },

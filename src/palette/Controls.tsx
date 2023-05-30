@@ -1,10 +1,18 @@
 import { assertExists } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { clamp, invLerp, mapRange } from "@/lib/utils";
-import { inP3, inRGB, inRec2020, p3, toP3, toRgb } from "@/palette/colors";
+import {
+    formatP3AsCss,
+    formatRec2020AsCss,
+    formatRgbAsCss,
+    inP3,
+    inRGB,
+    inRec2020,
+    p3,
+} from "@/palette/colors";
 import { Gamut } from "@/palette/schema";
 import classNames from "classnames";
-import { Color, Oklch, P3, formatCss, formatHex } from "culori";
+import { Color, Oklch, formatCss } from "culori";
 import { ReactNode, memo, useEffect, useMemo, useRef, useState } from "react";
 import { FaCompressAlt } from "react-icons/fa";
 
@@ -53,11 +61,11 @@ export const Controls = memo(function Controls({
                 <CopyButton value={format(color)} label="Copy CSS" />
                 <CopyButton value={formatCss(color)} label="Copy raw" />
                 <CopyButton
-                    value={p3ToCssFixed(toP3(color))}
+                    value={formatP3AsCss(color)}
                     label={<>{!inP3(color) && <FaCompressAlt className="mr-1" />} Copy P3</>}
                 />
                 <CopyButton
-                    value={formatHex(toRgb(color))}
+                    value={formatRgbAsCss(color)}
                     label={<>{!inRGB(color) && <FaCompressAlt className="mr-1" />} Copy srgb</>}
                 />
             </div>
@@ -65,20 +73,13 @@ export const Controls = memo(function Controls({
     );
 });
 
-function p3ToCssFixed(color: P3) {
-    return formatCss({
-        ...color,
-        r: Number(color.r.toFixed(4)),
-        g: Number(color.g.toFixed(4)),
-        b: Number(color.b.toFixed(4)),
-    });
-}
-
 function format(color: Color) {
     if (inRGB(color)) {
-        return formatHex(color);
+        return formatRgbAsCss(color);
     } else if (inP3(color)) {
-        return p3ToCssFixed(p3(color));
+        return formatP3AsCss(p3(color));
+    } else if (inRec2020(color)) {
+        return formatRec2020AsCss(color);
     } else {
         return formatCss(color);
     }

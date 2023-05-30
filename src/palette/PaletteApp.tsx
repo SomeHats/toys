@@ -68,7 +68,9 @@ function PaletteAppInner() {
         if (support.p3Gamut) return "p3";
         return "srgb";
     });
-    const [palette, setPalette] = useUrlStorageState("palette", paletteSchema, defaultPalette);
+    const [palette, setPalette] = useUrlStorageState("palette", paletteSchema, defaultPalette, {
+        delayMs: 1000,
+    });
     const [axis, setAxis] = useUrlStorageState("axis", axisSchema, "shades");
     const [rawSelectedIndex, setSelectedIndex] = useUrlStorageState("selected", Schema.number, 0);
     const selectedIndex = clamp(0, palette[axis].length - 1, rawSelectedIndex);
@@ -220,25 +222,21 @@ function PaletteAppInner() {
                         <div
                             key={xIndex}
                             className={classNames(
-                                "flex p-1",
+                                "flex w-32  items-center justify-center p-1",
                                 xIndex === selectedIndex && "bg-neutral-700",
                             )}
+                            onClick={() => {
+                                setPalette((p) => ({
+                                    ...p,
+                                    [xAxis]: copyAndRemove(p[xAxis], xIndex),
+                                    colors:
+                                        xAxis === "families"
+                                            ? copyAndRemove(p.colors, xIndex)
+                                            : p.colors.map((row) => copyAndRemove(row, xIndex)),
+                                }));
+                            }}
                         >
-                            <div
-                                className="flex w-32 items-center justify-center"
-                                onClick={() => {
-                                    setPalette((p) => ({
-                                        ...p,
-                                        [xAxis]: copyAndRemove(p[xAxis], xIndex),
-                                        colors:
-                                            xAxis === "families"
-                                                ? copyAndRemove(p.colors, xIndex)
-                                                : p.colors.map((row) => copyAndRemove(row, xIndex)),
-                                    }));
-                                }}
-                            >
-                                <FaTrash />
-                            </div>
+                            <FaTrash />
                         </div>
                     ))}
                 </div>

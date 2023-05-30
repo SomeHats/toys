@@ -3,7 +3,7 @@
  * Copyright 2022 Andrey Sitnik <andrey@sitnik.ru>, Roman Shamin <roma@evilmartians.com>.
  * @license MIT
  */
-import type { Color, Lch, Oklch, P3, Rec2020, Rgb } from "culori/fn";
+import { Color, Lch, Oklch, P3, Rec2020, Rgb, formatHex } from "culori/fn";
 
 import {
     clampChroma,
@@ -155,6 +155,10 @@ export function toP3(color: Color): P3 {
     return p3(clampChroma(color, COLOR_FN));
 }
 
+export function toRec2020(color: Color): P3 {
+    return p3(clampChroma(color, COLOR_FN));
+}
+
 export function formatRgb(color: Rgb): string {
     const r = Math.round(25500 * color.r) / 100;
     const g = Math.round(25500 * color.g) / 100;
@@ -204,4 +208,32 @@ export function getSpace(color: Color): Space {
     } else {
         return Space.Out;
     }
+}
+
+export function formatRgbAsCss(color: Color): string {
+    if (!inRGB(color)) return formatRgbAsCss(clampRgb(color));
+    const asRgb = rgb(color);
+    return formatHex(asRgb);
+}
+
+export function formatP3AsCss(color: Color): string {
+    if (!inP3(color)) return formatP3AsCss(clampP3(color));
+    const asP3 = p3(color);
+    return formatCss({
+        ...asP3,
+        r: Number(asP3.r.toFixed(4)),
+        g: Number(asP3.g.toFixed(4)),
+        b: Number(asP3.b.toFixed(4)),
+    });
+}
+
+export function formatRec2020AsCss(color: Color): string {
+    if (!inRec2020(color)) return formatRec2020AsCss(clampRec2020(color));
+    const asRec2020 = rec2020(color);
+    return formatCss({
+        ...asRec2020,
+        r: Number(asRec2020.r.toFixed(4)),
+        g: Number(asRec2020.g.toFixed(4)),
+        b: Number(asRec2020.b.toFixed(4)),
+    });
 }

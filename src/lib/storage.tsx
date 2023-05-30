@@ -1,5 +1,10 @@
+import { Unsubscribe } from "@/lib/EventEmitter";
 import { Schema } from "@/lib/schema";
 import { Initializer, resolveInitializer } from "@/lib/utils";
+
+export interface WatchableStorage extends Storage {
+    watchItem(key: string, callback: () => void): Unsubscribe;
+}
 
 export function getStorageItem<T>(
     storage: Storage,
@@ -78,7 +83,8 @@ export function setSessionStorageItem<T>(key: string, schema: Schema<T>, value: 
     return setStorageItem(window.sessionStorage, key, schema, value);
 }
 
-export const urlStorage: Storage = {
+let lastUrlSearchParams: URLSearchParams | null = null;
+export const urlStorage: WatchableStorage = {
     get length(): number {
         return Array.from(new URLSearchParams(window.location.search).keys()).length;
     },
@@ -102,12 +108,24 @@ export const urlStorage: Storage = {
     removeItem: function (key: string): void {
         const params = new URLSearchParams(window.location.search);
         params.delete(key);
-        window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+        window.history.pushState(null, "", `${window.location.pathname}?${params.toString()}`);
     },
     setItem: function (key: string, value: string): void {
         const params = new URLSearchParams(window.location.search);
         params.set(key, value);
-        window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+        window.history.pushState(null, "", `${window.location.pathname}?${params.toString()}`);
+    },
+    watchItem(key, callback) {
+        const onUrlStateChange = () => {
+            const searchParams = new URLSearchParams(window.location.search);
+            if (lastUrlSearchParams && searchParams.get(key) === lastUrlSearchParams.get(key)) {
+                return;
+            }
+            lastUrlSearchParams = searchParams;
+            callback();
+        };
+        window.addEventListener("popstate", onUrlStateChange);
+        return () => window.removeEventListener("popstate", onUrlStateChange);
     },
 };
 

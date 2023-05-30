@@ -1,7 +1,7 @@
 import { assertExists } from "@/lib/assert";
 import { useUrlStorageState } from "@/lib/hooks/useStoredState";
 import { Schema } from "@/lib/schema";
-import { clamp, copyArrayAndReplace } from "@/lib/utils";
+import { clamp, copyAndRemove, copyArrayAndReplace } from "@/lib/utils";
 import { Controls } from "@/palette/Controls";
 import { GamutPicker } from "@/palette/GamutPicker";
 import { Swatch, XAxisName, YAxisName } from "@/palette/Swatches";
@@ -9,7 +9,7 @@ import { Palette, axisSchema, gamutSchema, paletteSchema } from "@/palette/schem
 import { useSupport } from "@/palette/support";
 import classNames from "classnames";
 import { oklch } from "culori";
-import { FaPlus, FaSync } from "react-icons/fa";
+import { FaPlus, FaSync, FaTrash } from "react-icons/fa";
 
 const defaultPalette: Palette = {
     families: [
@@ -213,6 +213,34 @@ function PaletteAppInner() {
                     >
                         <FaPlus />
                     </button>
+                </div>
+                {/* delete column (2,3) */}
+                <div className="sticky bottom-0 z-30 flex gap-2 bg-neutral-800">
+                    {palette[xAxis].map((_, xIndex) => (
+                        <div
+                            key={xIndex}
+                            className={classNames(
+                                "flex p-1",
+                                xIndex === selectedIndex && "bg-neutral-700",
+                            )}
+                        >
+                            <div
+                                className="flex w-32 items-center justify-center"
+                                onClick={() => {
+                                    setPalette((p) => ({
+                                        ...p,
+                                        [xAxis]: copyAndRemove(p[xAxis], xIndex),
+                                        colors:
+                                            xAxis === "families"
+                                                ? copyAndRemove(p.colors, xIndex)
+                                                : p.colors.map((row) => copyAndRemove(row, xIndex)),
+                                    }));
+                                }}
+                            >
+                                <FaTrash />
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

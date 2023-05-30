@@ -4,7 +4,7 @@ import { clamp, invLerp, mapRange } from "@/lib/utils";
 import { inP3, inRGB, inRec2020, p3, toP3, toRgb } from "@/palette/colors";
 import { Gamut } from "@/palette/schema";
 import classNames from "classnames";
-import { Color, Oklch, formatCss, formatHex } from "culori";
+import { Color, Oklch, P3, formatCss, formatHex } from "culori";
 import { ReactNode, memo, useEffect, useMemo, useRef, useState } from "react";
 import { FaCompressAlt } from "react-icons/fa";
 
@@ -53,7 +53,7 @@ export const Controls = memo(function Controls({
                 <CopyButton value={format(color)} label="Copy CSS" />
                 <CopyButton value={formatCss(color)} label="Copy raw" />
                 <CopyButton
-                    value={formatCss(toP3(color))}
+                    value={p3ToCssFixed(toP3(color))}
                     label={<>{!inP3(color) && <FaCompressAlt className="mr-1" />} Copy P3</>}
                 />
                 <CopyButton
@@ -65,11 +65,20 @@ export const Controls = memo(function Controls({
     );
 });
 
+function p3ToCssFixed(color: P3) {
+    return formatCss({
+        ...color,
+        r: Number(color.r.toFixed(4)),
+        g: Number(color.g.toFixed(4)),
+        b: Number(color.b.toFixed(4)),
+    });
+}
+
 function format(color: Color) {
     if (inRGB(color)) {
         return formatHex(color);
     } else if (inP3(color)) {
-        return formatCss(p3(color));
+        return p3ToCssFixed(p3(color));
     } else {
         return formatCss(color);
     }

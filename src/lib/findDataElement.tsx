@@ -30,7 +30,7 @@ export function findDataElementParent<Props extends Record<string, string | Sche
             }
         } else {
             const parsed = value.parse(dataValue);
-            if (parsed.isOk()) {
+            if (parsed.ok) {
                 data[key] = parsed.value;
             } else {
                 failed = true;

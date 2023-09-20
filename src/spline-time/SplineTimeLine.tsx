@@ -6,6 +6,7 @@ import { copyArrayAndInsert, copyArrayAndReplace } from "@/lib/utils";
 export class SplineTimeLine {
     static schema = Schema.arrayOf(Vector2.schema).transform(
         (points) => Result.ok(new SplineTimeLine(points)),
+        Schema.cannotValidate("SplineTimeLine"),
         (line) => line.points,
     );
 

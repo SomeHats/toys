@@ -1,7 +1,13 @@
 import { assertExists } from "@/lib/assert";
 import { Schema } from "@/lib/schema";
 import { ReadonlyRecord, entries, keys } from "@/lib/utils";
-import { Atom, Signal, atom as createAtom, computed as createComputed, transact } from "signia";
+import {
+    Atom,
+    Signal,
+    atom as createAtom,
+    computed as createComputed,
+    transact,
+} from "@tldraw/state";
 
 export function memo<This extends object, Value>(
     compute: () => Value,

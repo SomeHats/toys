@@ -4,9 +4,8 @@ import { getLocalStorageItem, setLocalStorageItem } from "@/lib/storage";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { Button } from "@/splatapus/ui/Button";
 import { Wire, WiresApp } from "@/wires/wiresModel2";
+import { react, track } from "@tldraw/state";
 import { useEffect } from "react";
-import { react } from "signia";
-import { track } from "signia-react";
 
 const ACTION_GRADIENT = "action-gradient";
 

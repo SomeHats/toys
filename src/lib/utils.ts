@@ -15,6 +15,8 @@ export type ReadonlyObjectMap<K extends PropertyKey, T> = {
     readonly [P in K]?: T;
 };
 
+export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
+
 export function times<T>(n: number, fn: (idx: number) => T): Array<T> {
     const result = [];
     for (let i = 0; i < n; i++) {

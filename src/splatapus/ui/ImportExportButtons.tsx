@@ -63,7 +63,7 @@ function ImportButton({ splatapus }: { splatapus: Splatapus }) {
                         assert(typeof result === "string");
                         try {
                             const parseResult = splatapusStateSchema.parse(JSON.parse(result));
-                            if (parseResult.isError()) {
+                            if (!parseResult.ok) {
                                 alert(`cannot read splat doc: ${parseResult.error.message}`);
                                 return;
                             }

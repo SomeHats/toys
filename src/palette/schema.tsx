@@ -10,6 +10,7 @@ export const lchColorSchema = Schema.object({
     .indexed({ l: 0, c: 1, h: 2 })
     .transform<Oklch>(
         ({ l, c, h }) => Result.ok({ mode: "oklch", l, c, h }),
+        Schema.cannotValidate("Oklch"),
         ({ l, c, h }) => ({
             l: Number(l.toFixed(4)),
             c: Number(c.toFixed(4)),

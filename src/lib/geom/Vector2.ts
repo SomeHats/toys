@@ -16,7 +16,8 @@ export class Vector2 {
         y: Schema.number,
     })
         .indexed({ x: 0, y: 1 })
-        .transform<Vector2>(
+        .instance(
+            Vector2,
             ({ x, y }) => Result.ok(new Vector2(x, y)),
             ({ x, y }) => ({ x, y }),
         );

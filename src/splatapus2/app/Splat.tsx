@@ -12,8 +12,8 @@ import {
     computedIncrementalObjectProperty,
     incrementalTableAccessor,
 } from "@/splatapus2/store/Signia";
+import { Atom, atom, transact } from "@tldraw/state";
 import Immutable, { Stack } from "immutable";
-import { Atom, atom, transact } from "signia";
 
 export const HistoryEntryId = new IdGenerator("hst");
 export type HistoryEntryId = typeof HistoryEntryId.Id;
@@ -35,6 +35,7 @@ export class Splat {
         history: Schema.arrayOf(historyEntrySchema),
     }).transform(
         ({ doc, history }) => Result.ok(new Splat(doc, Stack(history))),
+        Schema.cannotValidate("Splat"),
         (splat) => ({
             doc: splat.doc.value,
             history: splat.history.value.toArray(),

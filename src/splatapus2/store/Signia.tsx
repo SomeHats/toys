@@ -8,7 +8,7 @@ import {
     IncrementalTable,
     IncrementalTableDiff,
 } from "@/splatapus2/store/Incremental";
-import { RESET_VALUE, computed, isUninitialized, withDiff } from "signia";
+import { RESET_VALUE, computed, isUninitialized, withDiff } from "@tldraw/state";
 
 export function computedIncrementalObjectProperty<
     Config extends IncrementalObjectConfig,

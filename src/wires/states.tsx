@@ -1,6 +1,6 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 import { Wire, WiresApp } from "@/wires/wiresModel2";
-import { atom } from "signia";
+import { atom } from "@tldraw/state";
 
 type ChildOf<S extends AnyState> = S extends State<any, any, infer C> ? C : never;
 

@@ -17,7 +17,8 @@ export class Vector3 {
         z: Schema.number,
     })
         .indexed({ x: 0, y: 1, z: 2 })
-        .transform<Vector3>(
+        .instance(
+            Vector3,
             ({ x, y, z }) => Result.ok(new Vector3(x, y, z)),
             ({ x, y, z }) => ({ x, y, z }),
         );

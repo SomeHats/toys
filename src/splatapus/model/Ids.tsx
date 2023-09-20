@@ -5,7 +5,7 @@ import { identity, sample, times } from "@/lib/utils";
 const ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
 const USE_DEBUG_IDS = process.env.NODE_ENV !== "production";
 
-export class IdGenerator<Prefix extends string> {
+export class IdGenerator<const Prefix extends string> {
     private readonly prefix: Prefix;
     readonly Id: `${Prefix}.${string}`;
     private debugIdCounter = 0;
@@ -14,7 +14,7 @@ export class IdGenerator<Prefix extends string> {
         this.prefix = prefix;
         this.Id = `${prefix}.SAMPLE`;
         const re = new RegExp(`^${this.prefix}\\.([a-zA-Z0-9_]+)$`);
-        this.schema = Schema.string.transform((input) => {
+        const validate = (input: string) => {
             if (re.test(input)) {
                 return Result.ok(input as this["Id"]);
             } else {
@@ -22,7 +22,8 @@ export class IdGenerator<Prefix extends string> {
                     new SchemaParseError(`Expected ${this.prefix}.*, got ${input}`, []),
                 );
             }
-        }, identity);
+        };
+        this.schema = Schema.string.transform(validate, validate, identity);
     }
 
     generate(debugPrefix?: string): this["Id"] {

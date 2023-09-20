@@ -1,8 +1,8 @@
 import { assert, assertExists } from "@/lib/assert";
 import { entries, keys } from "@/lib/utils";
 import { IncrementalSignal, IncrementalTable } from "@/splatapus2/store/Incremental";
+import { Computed, RESET_VALUE, computed, isUninitialized } from "@tldraw/state";
 import Immutable from "immutable";
-import { Computed, RESET_VALUE, computed, isUninitialized } from "signia";
 
 export class Index<Id extends string, Value extends { readonly id: Id }, Diff, Field> {
     private readonly result: Computed<{

@@ -1,6 +1,7 @@
 import { fail } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { Result } from "@/lib/Result";
+import { Schema } from "@/lib/schema";
 import { deepEqual, identity, UpdateAction } from "@/lib/utils";
 import { calculateNormalizedShapePointsFromVersions } from "@/splatapus/model/normalizedShape";
 import {
@@ -25,6 +26,7 @@ export class SplatDocModel {
 
     static schema = splatDocSchema.transform(
         (doc) => Result.ok(SplatDocModel.deserialize(doc)),
+        Schema.cannotValidate("SplatDocModel"),
         (doc) => doc.serialize(),
     );
 

@@ -10,8 +10,8 @@ import {
     keys,
     mapObjectValues,
 } from "@/lib/utils";
+import { Signal } from "@tldraw/state";
 import Immutable from "immutable";
-import { Signal } from "signia";
 
 export interface Incremental<Value, Diff> {
     readonly valueSchema: Schema<Value>;
@@ -287,6 +287,7 @@ export function incrementalTable<Id extends string, Value extends { readonly id:
         record,
         valueSchema: Schema.arrayOf(record.valueSchema).transform(
             (array) => Result.ok(Immutable.Map(array.map((value) => [value.id, value]))),
+            Schema.cannotValidate("IncrementalTable"),
             (table) => table.valueSeq().toArray(),
         ),
         diffSchema: incrementalTableDiffSchema(idSchema, record),

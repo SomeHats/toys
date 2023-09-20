@@ -21,7 +21,7 @@ function getInitialEditorState() {
     const screenSize = Vector2.UNIT;
     if (LOAD_FROM_AUTOSAVE_ENABLED) {
         const save = loadSaved("autosave");
-        if (save.isOk()) {
+        if (save.ok) {
             return save.value;
         }
         console.error(`Error loading autosave: ${save.error}`);
@@ -103,7 +103,7 @@ function AppMain({ splatapus }: { splatapus: Splatapus }) {
 
 function DebugInfo({ splatapus }: { splatapus: Splatapus }) {
     return (
-        <div className="pointer-events-none absolute top-14 left-3 text-xs">
+        <div className="pointer-events-none absolute left-3 top-14 text-xs">
             {useLive(
                 () => PreviewPosition.toDebugString(splatapus.previewPosition.live()),
                 [splatapus],

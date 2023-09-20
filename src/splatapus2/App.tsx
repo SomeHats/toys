@@ -14,10 +14,9 @@ import {
 import { Splat } from "@/splatapus2/app/Splat";
 import { Shape } from "@/splatapus2/store/Records";
 import { idleScheduler } from "@/splatapus2/store/Signia";
+import { react, track } from "@tldraw/state";
 import classNames from "classnames";
 import { ReactNode, useEffect, useState } from "react";
-import { react } from "signia";
-import { track } from "signia-react";
 
 export const App = track(function App() {
     const [splat] = useState(() =>
@@ -61,7 +60,7 @@ const Canvas = track(function Canvas({ splat, screenSize }: { splat: Splat; scre
     return (
         <svg
             viewBox={`0 0 ${screenSize.x} ${screenSize.y}`}
-            className={classNames("absolute top-0 left-0")}
+            className={classNames("absolute left-0 top-0")}
         >
             {Array.from(splat.shapes, ([shapeId, shape]) => (
                 <ShapeRenderer key={shapeId} splat={splat} shape={shape} />

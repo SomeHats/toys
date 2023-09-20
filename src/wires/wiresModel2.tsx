@@ -19,6 +19,7 @@ export class Wire extends Model({
 }) {
     static schema = super.modelSchema.transform(
         (props) => Result.ok(new Wire(props)),
+        Schema.cannotValidate("Wire"),
         (wire) => wire.serialized,
     );
 
@@ -73,6 +74,7 @@ export class WiresApp extends Model({
 }) {
     static schema = super.modelSchema.transform(
         (props) => Result.ok(new WiresApp(props)),
+        Schema.cannotValidate("WiresApp"),
         (app) => app.serialized,
     );
 

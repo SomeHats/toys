@@ -12,7 +12,7 @@ export const Result = {
     collect<T, E>(results: Array<Result<T, E>>): Result<Array<T>, E> {
         const arr: Array<T> = [];
         for (const result of results) {
-            if (result.isOk()) {
+            if (result.ok) {
                 arr.push(result.value);
             } else {
                 return result;
@@ -25,7 +25,7 @@ export const Result = {
     ): Result<{ [K in keyof Results]: Results[K] extends Result<infer T, E> ? T : never }, E> {
         const object: ObjectMap<string, unknown> = {};
         for (const [key, result] of entries(results)) {
-            if (result.isOk()) {
+            if (result.ok) {
                 object[key] = result.value;
             } else {
                 return result;
@@ -57,8 +57,7 @@ export const Result = {
 export abstract class AbstractResult<T, E> {
     constructor() {}
 
-    abstract isOk(): this is OkResult<T>;
-    abstract isError(): this is ErrorResult<E>;
+    abstract readonly ok: boolean;
     abstract unwrap(message?: string): T;
     abstract unwrapError(message?: string): E;
     abstract map<T2>(map: (value: T) => T2): Result<T2, E>;
@@ -71,12 +70,7 @@ export class OkResult<T> extends AbstractResult<T, never> {
         super();
     }
 
-    isOk(): this is OkResult<T> {
-        return true;
-    }
-    isError(): false {
-        return false;
-    }
+    ok = true as const;
     unwrap() {
         return this.value;
     }
@@ -99,12 +93,7 @@ export class ErrorResult<E> extends AbstractResult<never, E> {
         super();
     }
 
-    isOk(): false {
-        return false;
-    }
-    isError(): this is ErrorResult<E> {
-        return true;
-    }
+    ok = false as const;
     unwrap(message?: string): never {
         if (this.error instanceof Error) {
             throw this.error;

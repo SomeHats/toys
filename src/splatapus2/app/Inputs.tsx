@@ -1,5 +1,5 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import { atom } from "signia";
+import { atom } from "@tldraw/state";
 
 export class Inputs {
     private readonly _pointer = atom("Inputs.pointer", Vector2.ZERO);

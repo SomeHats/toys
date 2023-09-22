@@ -145,6 +145,9 @@ export class Vector2 {
     scale(scale: number): Vector2 {
         return new Vector2(this.x * scale, this.y * scale);
     }
+    mul(scale: number): Vector2 {
+        return this.scale(scale);
+    }
 
     negate(): Vector2 {
         return this.scale(-1);

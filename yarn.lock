@@ -5827,59 +5827,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-tailwindcss@npm:^0.5.3":
-  version: 0.5.3
-  resolution: "prettier-plugin-tailwindcss@npm:0.5.3"
-  peerDependencies:
-    "@ianvs/prettier-plugin-sort-imports": "*"
-    "@prettier/plugin-pug": "*"
-    "@shopify/prettier-plugin-liquid": "*"
-    "@shufo/prettier-plugin-blade": "*"
-    "@trivago/prettier-plugin-sort-imports": "*"
-    prettier: ^3.0
-    prettier-plugin-astro: "*"
-    prettier-plugin-css-order: "*"
-    prettier-plugin-import-sort: "*"
-    prettier-plugin-jsdoc: "*"
-    prettier-plugin-organize-attributes: "*"
-    prettier-plugin-organize-imports: "*"
-    prettier-plugin-style-order: "*"
-    prettier-plugin-svelte: "*"
-  peerDependenciesMeta:
-    "@ianvs/prettier-plugin-sort-imports":
-      optional: true
-    "@prettier/plugin-pug":
-      optional: true
-    "@shopify/prettier-plugin-liquid":
-      optional: true
-    "@shufo/prettier-plugin-blade":
-      optional: true
-    "@trivago/prettier-plugin-sort-imports":
-      optional: true
-    prettier-plugin-astro:
-      optional: true
-    prettier-plugin-css-order:
-      optional: true
-    prettier-plugin-import-sort:
-      optional: true
-    prettier-plugin-jsdoc:
-      optional: true
-    prettier-plugin-marko:
-      optional: true
-    prettier-plugin-organize-attributes:
-      optional: true
-    prettier-plugin-organize-imports:
-      optional: true
-    prettier-plugin-style-order:
-      optional: true
-    prettier-plugin-svelte:
-      optional: true
-    prettier-plugin-twig-melody:
-      optional: true
-  checksum: c20843d9739bf8ac4608166841484276dc73040ba02fef5dfee2f78f6e10957ad09c161fefb01e120fec24c0f982a34339212ad1fa70ec2b75472f6f853667d9
-  languageName: node
-  linkType: hard
-
 "prettier@npm:^2.8.8":
   version: 2.8.8
   resolution: "prettier@npm:2.8.8"
@@ -6808,7 +6755,6 @@ __metadata:
     postcss: ^8.4.29
     prettier: ^2.8.8
     prettier-plugin-organize-imports: ^3.2.3
-    prettier-plugin-tailwindcss: ^0.5.3
     react: ^18.2.0
     react-dom: ^18.2.0
     react-icons: ^4.10.1

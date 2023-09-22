@@ -611,7 +611,7 @@ export class UnionObjectSchema<
             (object) => {
                 const type = object[key] as keyof Config;
                 const schema = has(config, type) ? this.config[type] : null;
-                assert(schema);
+                assert(schema, `schema type ${String(type)} must exist`);
                 return schema.serialize(object);
             },
         );

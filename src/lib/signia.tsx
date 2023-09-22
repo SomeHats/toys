@@ -1,5 +1,5 @@
 import { assert, assertExists } from "@/lib/assert";
-import { Atom, Signal, atom, computed as createComputed } from "@tldraw/state";
+import { Atom, Signal, atom, computed as createComputed, transact } from "@tldraw/state";
 
 export function memo<This extends object, Value>(
     compute: () => Value,
@@ -7,7 +7,6 @@ export function memo<This extends object, Value>(
 ) {
     const computeds = new WeakMap<This, Signal<Value>>();
     context.addInitializer(function () {
-        console.log("createComputed", { this: this, compute, context });
         computeds.set(
             this,
             createComputed(String(context.name), () => {
@@ -35,5 +34,16 @@ export function reactive<This, Value>(
         init(initialValue) {
             return atom(String(ctx.name), initialValue) as any;
         },
+    };
+}
+
+export function action<This, Value extends (this: This, ...args: any) => any>(
+    value: Value,
+    context: ClassMethodDecoratorContext<This, Value>,
+) {
+    return function (this: This, ...args: Parameters<Value>) {
+        return transact(() => {
+            return value.apply(this, args);
+        });
     };
 }

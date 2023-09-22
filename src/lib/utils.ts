@@ -446,3 +446,30 @@ export function maxBy<T>(array: ReadonlyArray<T>, fn: (item: T) => number): T | 
 export function minBy<T>(array: ReadonlyArray<T>, fn: (item: T) => number): T | undefined {
     return maxBy(array, (item) => -fn(item));
 }
+
+/**
+ * A binary search implementation that returns the index if a match is found.
+ * If no match is found, then the left-index (the index associated with the item that comes just
+ * before the desired index) is returned. To maintain proper sort order, a splice would happen at
+ * the next index:
+ */
+export function binarySearch(
+    haystack: number[],
+    needle: number,
+    low = 0,
+    high = haystack.length - 1,
+) {
+    while (low <= high) {
+        const mid = low + ((high - low) >> 1);
+        const cmp = haystack[mid] - needle;
+        if (cmp === 0) {
+            return mid;
+        }
+        if (cmp < 0) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+    return low - 1;
+}

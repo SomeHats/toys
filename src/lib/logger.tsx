@@ -5,3 +5,10 @@ export function log9(...args: ReadonlyArray<unknown>) {
         console.log(`[log9 ${callCount}]`, ...args);
     }
 }
+
+export function trace9(...args: ReadonlyArray<unknown>) {
+    callCount++;
+    if (callCount < 10) {
+        console.trace(`[trace9 ${callCount}]`, ...args);
+    }
+}

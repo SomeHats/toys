@@ -1,1 +1,0 @@
-const n=c=>e=>c(1-e),i=c=>c;i.cubicBezier="cubic-bezier(0.5, 0.5, 0.5, 0.5)";const r=c=>Math.sin(c*Math.PI*.5);r.cubicBezier="cubic-bezier(0.61, 1, 0.88, 1)";const a=c=>-1/2*(Math.cos(Math.PI*c)-1);a.cubicBezier="cubic-bezier(0.37, 0, 0.63, 1)";const s=(c=1.70158)=>e=>1*e*e*((c+1)*e-c),o=(c=1.70158)=>e=>(e=e-1,1*(e*e*((c+1)*e+c)+1));export{s as a,r as b,a as i,i as l,o,n as r};

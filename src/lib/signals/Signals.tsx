@@ -85,7 +85,7 @@ export class ControllableSignal extends ControlledSignal {
             ),
         );
 
-        this.range = range || null;
+        this.range = range ?? null;
     }
 
     override set(newValue: number) {
@@ -113,8 +113,7 @@ export class ComputedSignal extends Signal {
 }
 
 export class SignalManager {
-    public debugSignalsByName: ReadonlyRecord<string, ReadonlyArray<Signal>> =
-        {};
+    public debugSignalsByName: ReadonlyRecord<string, readonly Signal[]> = {};
     private readonly debugSignalsChangeEvent = new EventEmitter();
     private readonly updateEvent = new EventEmitter();
     private readonly signals = new Set<Signal>();

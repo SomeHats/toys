@@ -26,7 +26,7 @@ type ShapeVersionIdsByKeyPointIndex = Index<
     SplatKeyPointId
 >;
 
-export type SplatDocData = {
+export interface SplatDocData {
     readonly id: SplatDocId;
     readonly keyPoints: Table<SplatKeyPoint>;
     readonly shapes: Table<SplatShape>;
@@ -35,4 +35,4 @@ export type SplatDocData = {
     readonly shapeVersionIdsByShape: ShapeVersionIdsByShapeIndex;
     readonly shapeVersionIdsByKeyPoint: ShapeVersionIdsByKeyPointIndex;
     readonly normalizedShapeVersions: Table<NormalizedShapeVersionState>;
-};
+}

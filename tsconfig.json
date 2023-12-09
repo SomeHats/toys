@@ -18,6 +18,11 @@
         },
         "types": ["vitest/importMeta", "webgl-strict-types"]
     },
-    "include": ["src/**/*", "types/**/*"],
-    "references": [{ "path": "./tsconfig.node.json" }]
+    "include": [
+        "src/**/*",
+        "types/**/*",
+        "vite.config.ts",
+        "tailwind.config.js",
+        "scripts/**/*"
+    ]
 }

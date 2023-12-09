@@ -5,7 +5,7 @@ import {
 } from "@/splatapus/model/perfectFreehand";
 
 export function pathFromCenterPoints(
-    path: ReadonlyArray<StrokeCenterPoint>,
+    path: readonly StrokeCenterPoint[],
 ): Vector2[] {
     const leftPoints: Vector2[] = [];
     const rightPoints: Vector2[] = [];
@@ -59,7 +59,7 @@ export function pathFromCenterPoints(
 }
 
 export function svgPathFromCenterPoints(
-    path: ReadonlyArray<StrokeCenterPoint>,
+    path: readonly StrokeCenterPoint[],
 ): string {
     return getSvgPathFromStroke(pathFromCenterPoints(path));
 }

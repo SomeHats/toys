@@ -231,7 +231,7 @@ function RenderWindow({
     line: SplineTimeLine;
     hoveredPointIdx: number | null;
     activePointIdx: number | null;
-    layers?: Array<Layer | null | false>;
+    layers?: (Layer | null | false)[];
     showExtras: boolean;
     onPointerDown: (event: PointerEvent) => void;
     onPointerMove: (event: PointerEvent) => void;

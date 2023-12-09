@@ -7,13 +7,13 @@ import {
     glEnum,
 } from "@/lib/gl/GlTypes";
 
-export type GlTexture2dData = {
+export interface GlTexture2dData {
     readonly data: ArrayBufferView;
     readonly width: number;
     readonly height: number;
-};
+}
 
-export type GlTextureParams = {
+export interface GlTextureParams {
     /** Texture magnification filter */
     magFilter: GlTextureFilter.Nearest | GlTextureFilter.Linear;
     /** Texture minification filter */
@@ -22,7 +22,7 @@ export type GlTextureParams = {
     wrapS: GlTextureWrap;
     /** Wrapping function for texture coordinate t */
     wrapT: GlTextureWrap;
-};
+}
 
 export class GlTexture2d {
     readonly level: number;

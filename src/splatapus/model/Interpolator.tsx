@@ -40,8 +40,8 @@ class TwoInterpolator implements Interpolator {
 
 class TpsInterpolator extends Tps implements Interpolator {
     constructor(
-        centers: ReadonlyArray<Vector2>,
-        values: ReadonlyArray<number>,
+        centers: readonly Vector2[],
+        values: readonly number[],
     ) {
         super(
             centers.map(({ x, y }) => [x, y]),
@@ -57,8 +57,8 @@ export class AutoInterpolator implements Interpolator {
     private readonly interpolator: Interpolator;
 
     constructor(
-        centers: ReadonlyArray<Vector2>,
-        values: ReadonlyArray<number>,
+        centers: readonly Vector2[],
+        values: readonly number[],
     ) {
         assert(centers.length === values.length);
         switch (centers.length) {

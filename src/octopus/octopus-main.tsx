@@ -21,7 +21,7 @@ const INNER_THICKNESS = THICKNESS - 12;
 
 const CENTER_X = WIDTH / 2;
 
-const noteNumberByKeyCode: { [keyCode: string]: number | undefined } = {
+const noteNumberByKeyCode: Record<string, number | undefined> = {
     // O3:
     KeyA: 33,
     KeyS: 34,
@@ -63,21 +63,21 @@ const noteNumberByKeyCode: { [keyCode: string]: number | undefined } = {
     Equal: 68,
 };
 
-type TentaclePoint = {
+interface TentaclePoint {
     start: [Signal, Signal];
     end: [Signal, Signal];
     leftInner: [Signal, Signal];
     rightInner: [Signal, Signal];
     leftOuter: [Signal, Signal];
     rightOuter: [Signal, Signal];
-};
+}
 
-type Tentacle = {
+interface Tentacle {
     isActive: ControlledSignal;
     activeTargetX: ControlledSignal;
     activeTargetY: ControlledSignal;
-    points: Array<TentaclePoint>;
-};
+    points: TentaclePoint[];
+}
 
 function _signalsToVector(signals: [Signal, Signal]): Vector2 {
     return new Vector2(signals[0].read(), signals[1].read());
@@ -441,21 +441,9 @@ function octopusScene(
             ctx.fillStyle = "#FF709D";
             ctx.fill();
 
-            for (let i = 0; i < zOrderedTentacles.length; i++) {
-                drawTentacle(
-                    ctx,
-                    zOrderedTentacles[i],
-                    "#FF709D",
-                    THICKNESS,
-                    0,
-                );
-                drawTentacle(
-                    ctx,
-                    zOrderedTentacles[i],
-                    "#FF4782",
-                    INNER_THICKNESS,
-                    3,
-                );
+            for (const tentacle of zOrderedTentacles) {
+                drawTentacle(ctx, tentacle, "#FF709D", THICKNESS, 0);
+                drawTentacle(ctx, tentacle, "#FF4782", INNER_THICKNESS, 3);
             }
 
             draw.ellipse(octopusHead, 250, 200, {
@@ -546,7 +534,7 @@ function OctopusUi({
     const canvasTranslateX = useSignal(canvasTranslateXSignal);
     const canvasTranslateY = useSignal(canvasTranslateYSignal);
 
-    const [notesDown, setNotesDown] = React.useState<Array<number>>([]);
+    const [notesDown, setNotesDown] = React.useState<number[]>([]);
     console.log(notesDown);
 
     const setRefForKey = React.useCallback(
@@ -649,4 +637,4 @@ function OctopusUi({
     );
 }
 
-startSignalsApp(octopusScene, DEBUGGER_ENABLED);
+void startSignalsApp(octopusScene, DEBUGGER_ENABLED);

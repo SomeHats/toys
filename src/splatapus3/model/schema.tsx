@@ -45,8 +45,7 @@ export const KeyPoint = createRecordType("keyPoint", {
     validator: KeyPointSchema.asValidator(),
 });
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Shape extends BaseRecord<"shape", RecordId<Shape>> {}
+export type Shape = BaseRecord<"shape", RecordId<Shape>>
 export const ShapeSchema = Schema.object<Shape>({
     typeName: Schema.value("shape"),
     id: idSchema<ShapeId>("shape"),

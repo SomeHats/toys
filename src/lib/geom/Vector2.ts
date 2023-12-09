@@ -42,7 +42,7 @@ export class Vector2 {
         return new Vector2(radius * Math.cos(angle), radius * Math.sin(angle));
     }
 
-    static average(points: ReadonlyArray<Vector2>): Vector2 {
+    static average(points: readonly Vector2[]): Vector2 {
         const sum = points.reduce((memo, p) => memo.add(p), Vector2.ZERO);
         return sum.div(points.length);
     }
@@ -91,7 +91,7 @@ export class Vector2 {
         return Math.atan2(this.y, this.x);
     }
 
-    isInPolygon(polygon: ReadonlyArray<Vector2>): boolean {
+    isInPolygon(polygon: readonly Vector2[]): boolean {
         // ray-casting algorithm based on
         // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
 

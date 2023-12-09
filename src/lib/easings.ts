@@ -5,10 +5,10 @@ type CubicBezier = `cubic-bezier(${number}, ${number}, ${number}, ${number})`;
 /** n should be between 0 and 1 */
 export type EasingFn = (n: number) => number;
 /** n should be between 0 and 1 */
-export type Easing = {
+export interface Easing {
     (n: number): number;
     cubicBezier: CubicBezier;
-};
+}
 
 // based on https://github.com/servo/servo/blob/0d0cfd030347ab0711b3c0607a9ee07ffe7124cf/components/style/bezier.rs
 class UnitBezier {

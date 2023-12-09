@@ -3,14 +3,14 @@ import { entries, ObjectMap, ReadonlyRecord } from "@/lib/utils";
 
 export type Result<T, E> = OkResult<T> | ErrorResult<E>;
 export const Result = {
-    ok<T>(value: T): OkResult<T> {
+    ok: <T>(value: T): OkResult<T> => {
         return new OkResult(value);
     },
-    error<E>(error: E): ErrorResult<E> {
+    error: <E>(error: E): ErrorResult<E> => {
         return new ErrorResult(error);
     },
-    collect<T, E>(results: Array<Result<T, E>>): Result<Array<T>, E> {
-        const arr: Array<T> = [];
+    collect: <T, E>(results: Result<T, E>[]): Result<T[], E> => {
+        const arr: T[] = [];
         for (const result of results) {
             if (result.ok) {
                 arr.push(result.value);
@@ -20,7 +20,7 @@ export const Result = {
         }
         return Result.ok(arr);
     },
-    collectObject<
+    collectObject: <
         E,
         Results extends ReadonlyRecord<string, Result<unknown, E>>,
     >(
@@ -31,7 +31,7 @@ export const Result = {
             :   never;
         },
         E
-    > {
+    > => {
         const object: ObjectMap<string, unknown> = {};
         for (const [key, result] of entries(results)) {
             if (result.ok) {
@@ -47,17 +47,19 @@ export const Result = {
             },
         );
     },
-    fromFn<T>(fn: () => T): Result<T, unknown> {
+    fromFn: <T>(fn: () => T): Result<T, unknown> => {
         try {
             return Result.ok(fn());
         } catch (error) {
             return Result.error(error);
         }
     },
-    fromPromise<T>(promise: Promise<T>): Promise<Result<T, unknown>> {
+    fromPromise: <T>(promise: Promise<T>): Promise<Result<T, unknown>> => {
         return promise.then(Result.ok).catch(Result.error);
     },
-    async fromAsyncFn<T>(fn: () => Promise<T>): Promise<Result<T, unknown>> {
+    fromAsyncFn: async <T>(
+        fn: () => Promise<T>,
+    ): Promise<Result<T, unknown>> => {
         try {
             return Result.ok(await fn());
         } catch (error) {

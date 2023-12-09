@@ -8,7 +8,7 @@ export function generatePoisson(
     bounds: AABB,
     minimumDistance: number,
     pointCount: number,
-): Array<Vector2> {
+): Vector2[] {
     const boundsAtZero = new AABB(Vector2.ZERO, bounds.size);
     const cellSize = minimumDistance / Math.SQRT2;
 

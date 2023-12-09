@@ -27,7 +27,7 @@ const application = new Application({
 
 document.body.appendChild(application.view);
 
-assets.loadAll().then(() => {
+void assets.loadAll().then(() => {
     times(20, makeBee);
 });
 

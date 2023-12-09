@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Result } from "@/lib/Result";
 import { assert, assertExists, fail } from "@/lib/assert";
 import { Schema } from "@/lib/schema";
@@ -271,24 +270,24 @@ export type IncrementalTableValue<
     Id extends string,
     Value extends { readonly id: Id },
 > = Immutable.Map<Id, Value>;
-export type IncrementalTableDiff<
+export interface IncrementalTableDiff<
     Id extends string,
     Value extends { readonly id: Id },
     Diff,
-> = {
+> {
     readonly insert?: ReadonlyObjectMap<Id, Value> | undefined;
     readonly update?: ReadonlyObjectMap<Id, readonly Diff[]> | undefined;
     readonly delete?: ReadonlyObjectMap<Id, 1> | undefined;
-};
-type MutableIncrementalTableDiff<
+}
+interface MutableIncrementalTableDiff<
     Id extends string,
     Value extends { id: Id },
     Diff,
-> = {
+> {
     insert?: ObjectMap<Id, Value> | undefined;
     update?: ObjectMap<Id, Diff[]> | undefined;
     delete?: ObjectMap<Id, 1> | undefined;
-};
+}
 
 function incrementalTableDiffSchema<
     Id extends string,
@@ -475,7 +474,7 @@ export function incrementalTable<
                                 existingUpdates.push(...updates.slice(1));
                             }
                         } else {
-                            result.update![id] = updates.slice();
+                            result.update[id] = updates.slice();
                         }
                     }
                 }

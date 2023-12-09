@@ -24,10 +24,10 @@ import Immutable, { Stack } from "immutable";
 export const HistoryEntryId = new IdGenerator("hst");
 export type HistoryEntryId = typeof HistoryEntryId.Id;
 
-type HistoryEntry = {
+interface HistoryEntry {
     readonly id: HistoryEntryId;
     readonly inverse: readonly DocDiff[];
-};
+}
 const historyEntrySchema = Schema.object({
     id: HistoryEntryId.schema,
     inverse: Schema.arrayOf(Doc.diffSchema),

@@ -2,23 +2,23 @@ import { Vector2 } from "@/lib/geom/Vector2";
 import { compact, getId, intersection } from "@/lib/utils";
 
 type TriangleGeom = [Vector2, Vector2, Vector2];
-type IntermediateTriangle = {
+interface IntermediateTriangle {
     id: string;
     points: TriangleGeom;
-};
+}
 
-export type TriangleNeighbour = {
+export interface TriangleNeighbour {
     triangle: Triangle;
     sharedPoints: [Vector2, Vector2];
-};
-export type Triangle = {
+}
+export interface Triangle {
     id: string;
     center: Vector2;
     points: TriangleGeom;
     neighbours: TriangleNeighbour[];
     ix: number;
     iy: number;
-};
+}
 
 export default function createTriangleGrid(
     tileSize: number,

@@ -122,8 +122,8 @@ export class Gl {
     }
 }
 
-class GlResources<T, Args extends Array<unknown>> {
-    private resources: Array<T> = [];
+class GlResources<T, Args extends unknown[]> {
+    private resources: T[] = [];
 
     constructor(
         private readonly initializeResource: (...args: Args) => T,

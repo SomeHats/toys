@@ -14,7 +14,7 @@ function CatmullRomLayer({ line, showExtras, uiTarget }: LayerProps) {
         return null;
     }
 
-    const controlPoints: Array<{ target: Vector2; control: Vector2 }> = [];
+    const controlPoints: { target: Vector2; control: Vector2 }[] = [];
     const path = new SvgPathBuilder();
 
     path.moveTo(line.points[0]);

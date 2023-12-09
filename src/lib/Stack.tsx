@@ -3,7 +3,7 @@ import { EMPTY_ARRAY } from "@tldraw/state";
 
 export type Stack<T> = StackItem<T> | EmptyStackItem<T>;
 
-export function stack<T>(items?: Array<T>): Stack<T> {
+export function stack<T>(items?: T[]): Stack<T> {
     if (items) {
         let result = EMPTY_STACK_ITEM as Stack<T>;
         while (items.length) {

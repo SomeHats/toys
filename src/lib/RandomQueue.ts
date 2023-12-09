@@ -2,9 +2,9 @@ import { assert } from "@/lib/assert";
 import { random } from "@/lib/utils";
 
 export default class RandomQueue<T> {
-    private items: Array<T> = [];
+    private items: T[] = [];
 
-    constructor(items: Array<T> = []) {
+    constructor(items: T[] = []) {
         this.items = items.slice();
     }
 

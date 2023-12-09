@@ -18,7 +18,7 @@ export type SchemaType<S extends Schema<any>> =
 export class SchemaParseError {
     constructor(
         public readonly message: string,
-        public readonly path: ReadonlyArray<number | string> = [],
+        public readonly path: readonly (number | string)[] = [],
     ) {}
 
     formatPath(): string | null {
@@ -54,7 +54,7 @@ export class SchemaParseError {
 
 function prefixError(
     error: SchemaParseError,
-    ...within: ReadonlyArray<string | number>
+    ...within: readonly (string | number)[]
 ): SchemaParseError {
     return new SchemaParseError(error.message, [...within, ...error.path]);
 }
@@ -111,7 +111,7 @@ export class Schema<Parsed> {
         );
     }
 
-    instance<Ctor extends { new (...args: any[]): InstanceType<Ctor> }>(
+    instance<Ctor extends new (...args: any[]) => InstanceType<Ctor>>(
         ctor: Ctor,
         parse: (input: Parsed) => Result<InstanceType<Ctor>, SchemaParseError>,
         serialize: (input: InstanceType<Ctor>) => Parsed,
@@ -252,7 +252,7 @@ export class Schema<Parsed> {
     ): ValueSchema<V> {
         return new ValueSchema(value);
     }
-    static valueUnion<const V extends ReadonlyArray<string | number | boolean>>(
+    static valueUnion<const V extends readonly (string | number | boolean)[]>(
         ...values: V
     ): Schema<V[number]> {
         const validate = (input: unknown) => {
@@ -272,8 +272,8 @@ export class Schema<Parsed> {
 
     static arrayOf<Item>(
         itemSchema: Schema<Item>,
-    ): Schema<ReadonlyArray<Item>> {
-        return new Schema<ReadonlyArray<Item>>(
+    ): Schema<readonly Item[]> {
+        return new Schema<readonly Item[]>(
             (input) => {
                 if (!Array.isArray(input)) {
                     return Result.error(
@@ -393,10 +393,10 @@ export class Schema<Parsed> {
 
     static enum<
         T extends
-            | ReadonlyArray<string | number | boolean>
+            | readonly (string | number | boolean)[]
             | ReadonlyRecord<string, string | number | boolean>,
     >(rawItems: T): Schema<EnumValues<T>> {
-        const enumValues: Set<EnumValues<T>> = new Set(
+        const enumValues = new Set<EnumValues<T>>(
             Array.isArray(rawItems) ? rawItems : (
                 values(rawItems as Record<string, EnumValues<T>>)
             ),
@@ -412,7 +412,7 @@ export class Schema<Parsed> {
                     :   typeToString(input);
 
                 const expected = Array.from(enumValues, (value) =>
-                    typeof value === "string" ? `"${value}"` : `${value}`,
+                    typeof value === "string" ? `"${value}"` : String(value),
                 ).join(" or ");
 
                 return Result.error(
@@ -444,10 +444,10 @@ export class Schema<Parsed> {
 
 type EnumValues<
     T extends
-        | ReadonlyArray<string | number | boolean>
+        | readonly (string | number | boolean)[]
         | ReadonlyRecord<string, string | number | boolean>,
 > =
-    T extends ReadonlyArray<infer Values> ? Values
+    T extends readonly (infer Values)[] ? Values
     : T extends Record<string, infer Values> ? Values
     : never;
 
@@ -462,7 +462,7 @@ export class ValueSchema<
             return Result.error(
                 new SchemaParseError(
                     `Expected ${
-                        typeof value === "string" ? `"${value}"` : value
+                        typeof value === "string" ? `"${value}"` : String(value)
                     }, got ${typeToString(input)}`,
                 ),
             );
@@ -547,12 +547,12 @@ export class ObjectSchema<Shape extends object> extends Schema<Shape> {
 }
 
 export class IndexedObjectSchema<Shape extends object> extends Schema<Shape> {
-    readonly keyByIndex: ReadonlyArray<string | undefined>;
+    readonly keyByIndex: readonly (string | undefined)[];
     constructor(
         readonly objectSchema: ObjectSchema<Shape>,
         readonly indexByKey: { readonly [K in keyof Shape]: number },
     ) {
-        const keyByIndex: Array<string | undefined> = [];
+        const keyByIndex: (string | undefined)[] = [];
         for (const [key, index] of entries(indexByKey)) {
             assert(
                 keyByIndex[index] === undefined,

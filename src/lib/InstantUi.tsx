@@ -8,7 +8,7 @@ import {
 import classNames from "classnames";
 import { useId, useMemo, useRef, useState } from "react";
 
-type RangeUiEntry = {
+interface RangeUiEntry {
     readonly type: "range";
     readonly label: string;
     readonly min: number;
@@ -16,30 +16,30 @@ type RangeUiEntry = {
     readonly step: number;
     readonly value: number;
     readonly oldValue: number;
-};
+}
 
-type CheckboxUiEntry = {
+interface CheckboxUiEntry {
     readonly type: "checkbox";
     readonly label: string;
     readonly value: boolean;
     readonly oldValue: boolean;
-};
+}
 
-type ColorPickerUiEntry<T> = {
+interface ColorPickerUiEntry<T> {
     readonly type: "colorPicker";
     readonly label: string;
     readonly value: T;
     readonly oldValue: T;
-    readonly options: ReadonlyArray<{ value: T; color: string }>;
-};
+    readonly options: readonly { value: T; color: string }[];
+}
 
-type SegmentedControlEntry<T> = {
+interface SegmentedControlEntry<T> {
     readonly type: "segmentedControl";
     readonly label: string;
     readonly value: T;
     readonly oldValue: T;
-    readonly options: ReadonlyArray<{ label: string; value: T }>;
-};
+    readonly options: readonly { label: string; value: T }[];
+}
 
 type UiEntry =
     | RangeUiEntry
@@ -48,8 +48,8 @@ type UiEntry =
     | SegmentedControlEntry<unknown>;
 
 export function useInstantUi() {
-    const [state, setState] = useState<ReadonlyArray<UiEntry>>([]);
-    const pendingUiRef = useRef<Array<UiEntry>>([]);
+    const [state, setState] = useState<readonly UiEntry[]>([]);
+    const pendingUiRef = useRef<UiEntry[]>([]);
 
     const range = useEvent(
         (
@@ -77,7 +77,7 @@ export function useInstantUi() {
     const colorPicker = useEvent(function colorPicker<T>(
         label: string,
         value: T,
-        options: ReadonlyArray<{ value: T; color: string }>,
+        options: readonly { value: T; color: string }[],
     ): unknown {
         pendingUiRef.current.push({
             type: "colorPicker",
@@ -98,7 +98,7 @@ export function useInstantUi() {
     const segmentedControl = useEvent(function segmentedControl<T>(
         label: string,
         value: T,
-        options: ReadonlyArray<{ value: T; label: string }>,
+        options: readonly { value: T; label: string }[],
     ) {
         pendingUiRef.current.push({
             type: "segmentedControl",
@@ -154,8 +154,8 @@ function InstantUiRenderer({
     state,
     onChange,
 }: {
-    state: ReadonlyArray<UiEntry>;
-    onChange: (update: UpdateAction<ReadonlyArray<UiEntry>>) => void;
+    state: readonly UiEntry[];
+    onChange: (update: UpdateAction<readonly UiEntry[]>) => void;
 }) {
     return (
         <>
@@ -310,7 +310,7 @@ function ColorPickerInput({
     label: string;
     value: unknown;
     onChange: (newValue: unknown) => void;
-    options: ReadonlyArray<{ value: unknown; color: string }>;
+    options: readonly { value: unknown; color: string }[];
 }) {
     return (
         <div className="flex-col gap-3 p-3">
@@ -342,7 +342,7 @@ function SegmentedControlInput({
     label: string;
     value: unknown;
     onChange: (newValue: unknown) => void;
-    options: ReadonlyArray<{ value: unknown; label: string }>;
+    options: readonly { value: unknown; label: string }[];
 }) {
     return (
         <div className="flex-col gap-3 p-3">

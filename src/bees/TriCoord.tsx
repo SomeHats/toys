@@ -34,8 +34,8 @@ export class TriCoord {
     }
 
     /** Returns the tris that intersect the rectangle specified in cartesian co-ordinates */
-    static intersectingAABB(aabb: AABB, scale = 1): Array<TriCoord> {
-        const results: Array<TriCoord> = [];
+    static intersectingAABB(aabb: AABB, scale = 1): TriCoord[] {
+        const results: TriCoord[] = [];
 
         // For consistency, we treat the triangles as exclusive of their border, and the rect as inclusive
         const x = aabb.origin.x / scale;

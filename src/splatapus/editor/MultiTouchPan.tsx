@@ -4,12 +4,12 @@ import { PointerEventContext } from "@/splatapus/editor/EventContext";
 import { ViewportState } from "@/splatapus/editor/Viewport";
 import { PointerEvent } from "react";
 
-type ActivePointer = {
+interface ActivePointer {
     id: number;
     startScreenPosition: Vector2;
     currentScreenPosition: Vector2;
     startEvent: PointerEvent;
-};
+}
 
 export type MultiTouchPanState =
     | {

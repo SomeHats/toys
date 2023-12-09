@@ -1,24 +1,24 @@
 export type ScalarGlslTypeName = "bool" | "int" | "uint" | "float" | "double";
-type JsTypeByScalarGlslTypeName = {
+interface JsTypeByScalarGlslTypeName {
     bool: boolean;
     int: number;
     uint: number;
     float: number;
     double: number;
-};
-export type ScalarGlslType = {
+}
+export interface ScalarGlslType {
     readonly type: "scalar";
     readonly name: ScalarGlslTypeName;
-};
+}
 
-export type BoolGlslType = { readonly type: "scalar"; readonly name: "bool" };
-export type IntGlslType = { readonly type: "scalar"; readonly name: "int" };
-export type UintGlslType = { readonly type: "scalar"; readonly name: "uint" };
-export type FloatGlslType = { readonly type: "scalar"; readonly name: "float" };
-export type DoubleGlslType = {
+export interface BoolGlslType { readonly type: "scalar"; readonly name: "bool" }
+export interface IntGlslType { readonly type: "scalar"; readonly name: "int" }
+export interface UintGlslType { readonly type: "scalar"; readonly name: "uint" }
+export interface FloatGlslType { readonly type: "scalar"; readonly name: "float" }
+export interface DoubleGlslType {
     readonly type: "scalar";
     readonly name: "double";
-};
+}
 
 export type GlslType = ScalarGlslType;
 

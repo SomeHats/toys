@@ -2,9 +2,9 @@ import { unstable_batchedUpdates } from "react-dom";
 
 export type Unsubscribe = () => void;
 
-type Listener<Args extends Array<unknown>> = (...args: Args) => void;
+type Listener<Args extends unknown[]> = (...args: Args) => void;
 
-export default class EventEmitter<Args extends Array<unknown> = []> {
+export default class EventEmitter<Args extends unknown[] = []> {
     private handlers = new Set<Listener<Args>>();
 
     listen(listener: Listener<Args>) {

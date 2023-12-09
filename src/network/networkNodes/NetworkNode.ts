@@ -6,9 +6,9 @@ import Traveller from "@/network/Traveller";
 
 export interface NetworkNode {
     readonly canConsumeTraveller: boolean;
-    readonly incomingConnections: ReadonlyArray<Road>;
+    readonly incomingConnections: readonly Road[];
     readonly isDestination: boolean;
-    readonly outgoingConnections: ReadonlyArray<Road>;
+    readonly outgoingConnections: readonly Road[];
     readonly position: Vector2;
     connectTo(target: Road, direction: ConnectionDirection): void;
     consumeTraveller(traveller: Traveller): void;

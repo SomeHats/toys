@@ -11,15 +11,15 @@ import {
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 import { StrokeCenterPoint } from "@/splatapus/model/perfectFreehand";
 
-type CachedValues = {
+interface CachedValues {
     keyPoints: ReadonlySet<SplatKeyPoint>;
     versions: ReadonlySet<SplatShapeVersion>;
-    interpolators: ReadonlyArray<{
+    interpolators: readonly {
         x: Interpolator;
         y: Interpolator;
         r: Interpolator;
-    }> | null;
-};
+    }[] | null;
+}
 
 class InterpolationCache {
     private cache = new Map<SplatShape, CachedValues>();
@@ -29,8 +29,8 @@ class InterpolationCache {
         shapeId: SplatShapeId,
         position: PreviewPosition,
     ): {
-        normalized: ReadonlyArray<StrokeCenterPoint>;
-        smoothed: ReadonlyArray<StrokeCenterPoint> | null;
+        normalized: readonly StrokeCenterPoint[];
+        smoothed: readonly StrokeCenterPoint[] | null;
     } | null {
         switch (position.type) {
             case "keyPointId": {

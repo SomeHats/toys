@@ -31,7 +31,7 @@ function create3dRenderer(terrain: Terrain) {
         z += seaLevelAdjust;
         return z ** 1.3 * 30;
     };
-    const _allPoints: Array<T.Vector3> = [];
+    const _allPoints: T.Vector3[] = [];
     const addTriangle = (
         a: T.Vector3,
         b: T.Vector3,
@@ -181,7 +181,7 @@ function create3dRenderer(terrain: Terrain) {
         }
     };
 
-    startRenderLoopAsync();
+    void startRenderLoopAsync();
 
     document.addEventListener("mousemove", (e) => {
         cube.rotation.x = mapRange(

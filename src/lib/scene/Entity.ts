@@ -4,10 +4,10 @@ import Scene from "@/lib/scene/Scene";
 import SceneObject from "@/lib/scene/SceneObject";
 import SortOrderProvider from "@/lib/scene/SortOrderProvider";
 
-type ComponentClass<T extends Component, Args extends unknown[]> = {
+interface ComponentClass<T extends Component, Args extends unknown[]> {
     name: string;
     new (entity: Entity, ...args: Args): T;
-};
+}
 
 export default class Entity extends SceneObject {
     private componentInstances = new Map<

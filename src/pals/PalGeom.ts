@@ -9,22 +9,22 @@ import PalLegGeom, { PalLegGeomUpdate } from "@/pals/PalLegGeom";
 
 const HALF_PI = Math.PI / 2;
 
-export type PalGeomUpdate = {
+export interface PalGeomUpdate {
     bobAmount: number;
-    legs: Array<PalLegGeomUpdate>;
-};
+    legs: PalLegGeomUpdate[];
+}
 
 export interface PalAnimationController {
     update(
         dtMilliseconds: number,
         controlData: PalControlData,
-        legs: Array<PalLegGeom>,
+        legs: PalLegGeom[],
     ): PalGeomUpdate;
 }
 
 export default class PalGeom extends Component {
     private controlData: PalControlData;
-    legs: Array<PalLegGeom>;
+    legs: PalLegGeom[];
     private animationController: PalAnimationController | null = null;
     private bobAmount = 0;
 

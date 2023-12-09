@@ -2,7 +2,7 @@ import { C, SpriteOpts } from "@/bees/C";
 import { loadImage } from "@/lib/load";
 import { mapRange, normalizeAngle } from "@/lib/utils";
 
-export type SpriteStackData = {
+export interface SpriteStackData {
     width: number;
     height: number;
     frames: number;
@@ -11,9 +11,9 @@ export type SpriteStackData = {
     cols: number;
     regions: number[];
     trims: number[];
-};
+}
 
-export type SpriteStackManifest = {
+export interface SpriteStackManifest {
     geometry: Promise<{ default: SpriteStackData }>;
     url: URL;
     scale: number;
@@ -21,7 +21,7 @@ export type SpriteStackManifest = {
     originX: number;
     originY: number;
     angleOffset: number;
-};
+}
 
 export class SpriteStack {
     static async load(manifest: SpriteStackManifest) {

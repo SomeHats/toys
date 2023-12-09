@@ -23,12 +23,10 @@ const interpolateBiome = makeInterpolateGradiant([
 
 export class TerrainCell {
     public readonly position: Vector2;
-    public readonly neighbourCellIds: ReadonlyArray<number>;
-    public readonly neighbourCellIdsByEdgeIndex: ReadonlyArray<number | null>;
-    public readonly edgeIndexByNeighbourCellId: {
-        [cellId: number]: number | undefined;
-    };
-    public readonly polygon: ReadonlyArray<Vector2>;
+    public readonly neighbourCellIds: readonly number[];
+    public readonly neighbourCellIdsByEdgeIndex: readonly (number | null)[];
+    public readonly edgeIndexByNeighbourCellId: Record<number, number | undefined>;
+    public readonly polygon: readonly Vector2[];
     private readonly noiseHeight: number;
     private heightAdjustment = 0;
     public totalDriftPressure = 0;
@@ -104,8 +102,8 @@ export class TerrainCell {
         );
     }
 
-    findConnectedCellsInRadius(radius: number): Array<TerrainCell> {
-        const toVisit: Array<TerrainCell> = [this];
+    findConnectedCellsInRadius(radius: number): TerrainCell[] {
+        const toVisit: TerrainCell[] = [this];
         const result = new Set<TerrainCell>([this]);
 
         let cell;
@@ -158,7 +156,7 @@ export class TerrainCell {
             return;
         }
 
-        const neighboursToPropagateTo: Array<[TerrainCell, Vector2]> = [];
+        const neighboursToPropagateTo: [TerrainCell, Vector2][] = [];
         for (const neighbourId of this.neighbourCellIds) {
             const neighbour = this.terrain.cellsById[neighbourId];
             const neighbourPressure = this.getPressureForNeighbour(
@@ -181,7 +179,7 @@ export class TerrainCell {
 
     propagateTectonicDrift() {
         const drift = this.getPlate().drift;
-        const neighboursToPropagateTo: Array<[TerrainCell, Vector2]> = [];
+        const neighboursToPropagateTo: [TerrainCell, Vector2][] = [];
         for (const neighbourId of this.neighbourCellIds) {
             const neighbour = this.terrain.cellsById[neighbourId];
             const neighbourDrift = neighbour.getPlate().drift;

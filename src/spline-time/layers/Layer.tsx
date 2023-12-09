@@ -2,11 +2,11 @@ import { SplineTimeLine } from "@/spline-time/SplineTimeLine";
 import { ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-export type LayerProps = {
+export interface LayerProps {
     line: SplineTimeLine;
     showExtras: boolean;
     uiTarget: HTMLDivElement;
-};
+}
 export type Layer = (props: LayerProps) => ReactNode;
 
 export function LayerUi({

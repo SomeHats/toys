@@ -39,7 +39,7 @@ export function useVfxAnimation<T extends HTMLElement>(
     vfx: Vfx,
     name: VfxActionName,
     animate: () => KeyframeAnimationOptions & {
-        keyFrames: Array<Keyframe> | PropertyIndexedKeyframes;
+        keyFrames: Keyframe[] | PropertyIndexedKeyframes;
     },
 ): React.RefObject<T> {
     const ref = useRef<T | null>(null);

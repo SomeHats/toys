@@ -8,7 +8,7 @@ import {
 import { Initializer, UpdateAction, applyUpdate } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
 
-type Opts = { delayMs?: number | null };
+interface Opts { delayMs?: number | null }
 
 export function useStorageState<T>(
     storage: Storage | WatchableStorage,

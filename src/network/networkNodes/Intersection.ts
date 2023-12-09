@@ -18,17 +18,15 @@ export default class Intersection implements NetworkNode {
         this.position = new Vector2(x, y);
     }
 
-    get incomingConnections(): ReadonlyArray<Road> {
+    get incomingConnections(): readonly Road[] {
         return this._connectionSet.incoming;
     }
 
-    get outgoingConnections(): ReadonlyArray<Road> {
+    get outgoingConnections(): readonly Road[] {
         return this._connectionSet.outgoing;
     }
 
-    get canConsumeTraveller(): boolean {
-        return true;
-    }
+    readonly canConsumeTraveller = true;
 
     consumeTraveller(traveller: Traveller) {
         const destination = traveller.destination;
@@ -44,7 +42,7 @@ export default class Intersection implements NetworkNode {
         nextRoad.addTravellerAtStart(traveller);
     }
 
-    getAllReachableNodes(visited: Set<NetworkNode> = new Set()): NetworkNode[] {
+    getAllReachableNodes(visited = new Set<NetworkNode>()): NetworkNode[] {
         visited.add(this);
         return uniq(
             flatten(

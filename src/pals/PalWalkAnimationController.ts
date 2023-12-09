@@ -6,13 +6,13 @@ import { PalControlData } from "@/pals/PalController";
 import { PalAnimationController, PalGeomUpdate } from "@/pals/PalGeom";
 import PalLegGeom, { PalLegGeomUpdate } from "@/pals/PalLegGeom";
 
-type LegState = {
+interface LegState {
     lastFootOnFloorXY: Vector2;
     lastFootOnFloorPalPosition: Vector2;
     stepProgress: number;
     restTimer: number;
     currentStepMaxLift: number;
-};
+}
 
 function isStepping({ stepProgress }: LegState): boolean {
     return stepProgress > 0;
@@ -32,7 +32,7 @@ export default class PalWalkAnimationController
     update(
         dtMilliseconds: number,
         pal: PalControlData,
-        legs: Array<PalLegGeom>,
+        legs: PalLegGeom[],
     ): PalGeomUpdate {
         const dtSeconds = dtMilliseconds / 1000;
 
@@ -55,7 +55,7 @@ export default class PalWalkAnimationController
 
     private canLiftLeg(
         pal: PalControlData,
-        legs: Array<PalLegGeom>,
+        legs: PalLegGeom[],
         leg: PalLegGeom,
     ): boolean {
         assert(legs.includes(leg), "whos leg even is this");
@@ -78,7 +78,7 @@ export default class PalWalkAnimationController
     private updateLegState(
         dtSeconds: number,
         pal: PalControlData,
-        legs: Array<PalLegGeom>,
+        legs: PalLegGeom[],
         leg: PalLegGeom,
     ) {
         const state = this.getLegState(pal, leg);

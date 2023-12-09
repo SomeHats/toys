@@ -18,13 +18,13 @@ import { degreesToRadians, frameLoop } from "@/lib/utils";
 import { useControls } from "leva";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type Controls = {
+interface Controls {
     size: Vector2;
     fieldOfView: number;
     spin: number;
     radius: number;
     cameraTranslate: Vector3Ish;
-};
+}
 const controlsSchema = {
     fieldOfView: {
         value: 60,

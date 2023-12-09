@@ -75,7 +75,7 @@ export function DebugLabel({
     );
 }
 
-type DebugOptions = { color?: string; label?: string };
+interface DebugOptions { color?: string; label?: string }
 
 export function DebugSvgPath({
     color,

@@ -46,7 +46,7 @@ export class DebugDraw3d {
         );
     }
 
-    projectArray(points: ReadonlyArray<Vector3Ish>): Array<Vector2> {
+    projectArray(points: readonly Vector3Ish[]): Vector2[] {
         return points.map((point) => this.project(point));
     }
 
@@ -152,25 +152,25 @@ export class DebugDraw3d {
     }
 
     public polygon(
-        polygon: ReadonlyArray<Vector3Ish>,
+        polygon: readonly Vector3Ish[],
         options?: StrokeAndFillOptions,
     ) {
         this.dbg.polygon(this.projectArray(polygon), options);
     }
 
-    public polyLine(points: ReadonlyArray<Vector3Ish>, options: StrokeOptions) {
+    public polyLine(points: readonly Vector3Ish[], options: StrokeOptions) {
         this.dbg.polyLine(this.projectArray(points), options);
     }
 
     public debugPolygon(
-        polygon: ReadonlyArray<Vector3Ish>,
+        polygon: readonly Vector3Ish[],
         options?: DebugOptions,
     ) {
         this.dbg.debugPolygon(this.projectArray(polygon), options);
     }
 
     public debugPolyLine(
-        polyLine: ReadonlyArray<Vector3Ish>,
+        polyLine: readonly Vector3Ish[],
         options?: DebugOptions,
     ) {
         this.dbg.debugPolyLine(this.projectArray(polyLine), options);

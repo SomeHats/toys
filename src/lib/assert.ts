@@ -20,7 +20,7 @@ export const assert: (
             // eslint-disable-next-line no-debugger
             debugger;
         }
-        fail(message || "Assertion Error");
+        fail(message ?? "Assertion Error");
     }
 });
 
@@ -34,6 +34,6 @@ export const assertExists = omitFromStackTrace(
         if (value == null) {
             fail(message ?? "value must be defined");
         }
-        return value as NonNullable<T>;
+        return value;
     },
 );

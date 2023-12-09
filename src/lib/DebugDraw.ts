@@ -2,23 +2,23 @@ import AABB from "@/lib/geom/AABB";
 import { Line2 } from "@/lib/geom/Line2";
 import { Vector2, Vector2Ish } from "@/lib/geom/Vector2";
 
-export type StrokeOptions = {
+export interface StrokeOptions {
     strokeWidth?: number;
     stroke?: string;
     strokeCap?: "butt" | "round" | "square";
     strokeDash?: number[];
     strokeDashOffset?: number;
     strokeJoin?: "bevel" | "round" | "miter";
-};
+}
 
-export type FillOptions = {
+export interface FillOptions {
     fill?: string;
-};
+}
 
-export type DebugOptions = {
+export interface DebugOptions {
     color?: string;
     label?: string;
-};
+}
 
 export type StrokeAndFillOptions = StrokeOptions & FillOptions;
 
@@ -291,7 +291,7 @@ export class DebugDraw {
     }
 
     public polygon(
-        polygon: ReadonlyArray<Vector2>,
+        polygon: readonly Vector2[],
         options: StrokeAndFillOptions = {},
     ) {
         this.beginPath();
@@ -302,10 +302,7 @@ export class DebugDraw {
         this.strokeAndFill(options);
     }
 
-    public polyLine(
-        points: ReadonlyArray<Vector2>,
-        options: StrokeOptions = {},
-    ) {
+    public polyLine(points: readonly Vector2[], options: StrokeOptions = {}) {
         this.beginPath();
         this.moveTo(points[0]);
         for (let i = 1; i < points.length; i++) {
@@ -315,7 +312,7 @@ export class DebugDraw {
     }
 
     public debugPolygon(
-        polygon: ReadonlyArray<Vector2>,
+        polygon: readonly Vector2[],
         {
             color = DebugDraw.DEFAULT_DEBUG_COLOR,
             label = undefined,
@@ -326,7 +323,7 @@ export class DebugDraw {
     }
 
     public debugPolyLine(
-        polyLine: ReadonlyArray<Vector2>,
+        polyLine: readonly Vector2[],
         {
             color = DebugDraw.DEFAULT_DEBUG_COLOR,
             label = undefined,
@@ -385,7 +382,7 @@ export class DebugDraw {
             this.debugLabel(
                 opts.debug.label,
                 aabb.origin,
-                opts.debug.color || DebugDraw.DEFAULT_DEBUG_COLOR,
+                opts.debug.color ?? DebugDraw.DEFAULT_DEBUG_COLOR,
             );
         }
         this.ctx.beginPath();

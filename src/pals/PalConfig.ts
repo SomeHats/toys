@@ -2,7 +2,7 @@ import { random, randomInt, varyAbsolute, varyRelative } from "@/lib/utils";
 import { BLUE } from "@/pals/colors";
 import Color from "color";
 
-export type PalConfig = {
+export interface PalConfig {
     radius: number;
     bodHeight: number;
     bodBob: number;
@@ -27,7 +27,7 @@ export type PalConfig = {
     fullStepDistance: number;
     legWidth: number;
     legPairs: number;
-};
+}
 
 export const classicPalConfig: PalConfig = {
     radius: 14,

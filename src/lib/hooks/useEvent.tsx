@@ -1,7 +1,7 @@
 import { assert } from "@/lib/assert";
 import { useCallback, useDebugValue, useLayoutEffect, useRef } from "react";
 
-export function useEvent<Args extends Array<unknown>, Result>(
+export function useEvent<Args extends unknown[], Result>(
     handler: (...args: Args) => Result,
 ): (...args: Args) => Result {
     const handlerRef = useRef<(...args: Args) => Result>();

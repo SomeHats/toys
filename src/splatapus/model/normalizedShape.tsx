@@ -11,15 +11,15 @@ import {
     getStrokePoints,
 } from "@/splatapus/model/perfectFreehand";
 
-export type NormalizedShapeVersionState = {
+export interface NormalizedShapeVersionState {
     readonly id: SplatShapeVersionId;
     readonly length: number;
-    readonly smoothedCenterPoints: ReadonlyArray<StrokeCenterPoint>;
-    readonly normalizedCenterPoints: ReadonlyArray<StrokeCenterPoint>;
-};
-export type NormalizedShapeState = {
+    readonly smoothedCenterPoints: readonly StrokeCenterPoint[];
+    readonly normalizedCenterPoints: readonly StrokeCenterPoint[];
+}
+export interface NormalizedShapeState {
     versions: Table<NormalizedShapeVersionState>;
-};
+}
 
 export function calculateNormalizedShapePointsFromVersions(
     _shapeVersions: Iterable<SplatShapeVersion>,

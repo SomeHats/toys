@@ -14,12 +14,12 @@ const trianglesById = createTriangleGrid(TILE_SIZE, width, height);
 //   canvas.debugPolygon(triangle.points, { color: 'lime' });
 // }
 
-type Palatte = {
-    palette: Array<string>;
+interface Palatte {
+    palette: string[];
     current(): string;
     next(): string;
     reset(idx?: number): void;
-};
+}
 const makeColorPalette = (): Palatte => {
     const palette = times(randomInt(2, 6), () => sample(SNAKES).string());
     if (uniq(palette).length === 1) return makeColorPalette();
@@ -47,18 +47,18 @@ function getSharedPoints(a: Triangle, b: Triangle) {
 }
 
 const occupied = new Set<Triangle>();
-type Snake = {
-    triangles: Array<Triangle>;
+interface Snake {
+    triangles: Triangle[];
     palette: ReturnType<typeof makeColorPalette>;
     speed: number;
     base: number;
     offset: number;
     length: number;
     isDead: boolean;
-};
+}
 
 const makeSnake = () => {
-    const triangles: Array<Triangle> = [];
+    const triangles: Triangle[] = [];
     const palette = makeColorPalette();
     let neighbours = [...trianglesById.values()];
     for (let i = 0; i < 2; i++) {

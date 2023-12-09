@@ -22,18 +22,18 @@ type DependencyMap = Map<
     Live<unknown>,
     { value: unknown; unsubscribe: Unsubscribe | null }
 >;
-type NonTrackingContext = {
+interface NonTrackingContext {
     previous: ComputationContext | null;
     shouldTrack: false;
-};
-type TrackingContext = {
+}
+interface TrackingContext {
     shouldTrack: true;
     previousDependencies: DependencyMap | null;
     nextDependencies: DependencyMap;
     previous: ComputationContext | null;
     invalidateListener: () => void;
     shouldListen: boolean;
-};
+}
 type ComputationContext = TrackingContext | NonTrackingContext;
 
 function beginTracking(

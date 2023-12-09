@@ -20,11 +20,11 @@ const ROAD_IDEAL_DASH = [5, 10];
 const ROAD_IDEAL_DASH_LENGTH = ROAD_IDEAL_DASH.reduce((a, b) => a + b, 0);
 const ROAD_DASH_SPEED = 0.05;
 
-export type RoadOptions = {
+export interface RoadOptions {
     autoRound?: number;
-    points?: Array<Vector2>;
+    points?: Vector2[];
     path?: Path;
-};
+}
 
 export default class Road extends SceneObject {
     isNode = false;
@@ -147,8 +147,8 @@ export default class Road extends SceneObject {
         return traveller;
     }
 
-    getAllReachableNodes(visited: Set<NetworkNode> = new Set()): NetworkNode[] {
-        const nodes = [] as Array<NetworkNode>;
+    getAllReachableNodes(visited = new Set<NetworkNode>()): NetworkNode[] {
+        const nodes = [] as NetworkNode[];
         if (visited.has(this.to)) return nodes;
         return [...this.to.getAllReachableNodes(visited), this.to];
     }

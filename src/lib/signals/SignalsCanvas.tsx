@@ -9,14 +9,14 @@ import * as React from "react";
 
 const INSPECTOR_WIDTH = 300;
 
-export type CanvasSignals = {
+export interface CanvasSignals {
     width: Signal;
     height: Signal;
     devicePixelRatio: Signal;
     mouseX: Signal;
     mouseY: Signal;
     mouseDown: Signal;
-};
+}
 
 export type SignalsCanvasScene = (
     signalManager: SignalManager,

@@ -2,13 +2,13 @@
 
 type MouseEventHandler = (event: MouseEvent) => void;
 
-type DragCoverOptions = {
+interface DragCoverOptions {
     down?: MouseEventHandler;
     move?: MouseEventHandler;
     up?: MouseEventHandler;
     debug?: boolean;
     cursor?: string;
-};
+}
 
 const dragCoverStyle = {
     position: "fixed",

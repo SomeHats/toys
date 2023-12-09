@@ -89,7 +89,7 @@ export enum GlTextureInternalFormat {
     Rgba8ui = "RGBA8UI",
 }
 
-export type GlPixelFormatByInternalFormat = {
+export interface GlPixelFormatByInternalFormat {
     [GlTextureInternalFormat.Rgb]: GlPixelFormat.Rgb;
     [GlTextureInternalFormat.Rgba]: GlPixelFormat.Rgba;
     [GlTextureInternalFormat.LuminanceAlpha]: GlPixelFormat.LuminanceAlpha;
@@ -119,9 +119,9 @@ export type GlPixelFormatByInternalFormat = {
     [GlTextureInternalFormat.Rgba16f]: GlPixelFormat.Rgba;
     [GlTextureInternalFormat.Rgba32f]: GlPixelFormat.Rgba;
     [GlTextureInternalFormat.Rgba8ui]: GlPixelFormat.RgbaInteger;
-};
+}
 
-export type GlPixelTypeByInternalFormat = {
+export interface GlPixelTypeByInternalFormat {
     [GlTextureInternalFormat.Rgb]:
         | GlPixelType.UnsignedByte
         | GlPixelType.UnsignedShort565;
@@ -167,7 +167,7 @@ export type GlPixelTypeByInternalFormat = {
         | GlPixelType.Float;
     [GlTextureInternalFormat.Rgba32f]: GlPixelType.Float;
     [GlTextureInternalFormat.Rgba8ui]: GlPixelType.UnsignedByte;
-};
+}
 
 export type GlTextureFormat = {
     [InternalFormat in GlTextureInternalFormat]: {

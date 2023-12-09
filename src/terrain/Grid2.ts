@@ -3,7 +3,7 @@ import { times } from "@/lib/utils";
 
 export class Grid2<T> {
     public size: Vector2;
-    private rows: Array<Array<T | undefined>>;
+    private rows: (T | undefined)[][];
 
     constructor(size: Vector2) {
         this.size = size.floor();
@@ -33,7 +33,7 @@ export class Grid2<T> {
         this.rows[y][x] = item;
     }
 
-    squareAroundCell(cell: Vector2, size: number): Array<Vector2> {
+    squareAroundCell(cell: Vector2, size: number): Vector2[] {
         const result = [];
 
         const squareOrigin = cell.sub(new Vector2(size, size).div(2)).round();

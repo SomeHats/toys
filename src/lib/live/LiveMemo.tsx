@@ -35,7 +35,7 @@ export class LiveMemo<T> implements Live<T> {
     }
 }
 
-export class LiveMemoWritable<T, Args extends Array<unknown> = []>
+export class LiveMemoWritable<T, Args extends unknown[] = []>
     extends LiveMemo<T>
     implements LiveWritable<T>
 {

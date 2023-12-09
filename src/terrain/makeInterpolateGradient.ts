@@ -2,7 +2,7 @@ import { invLerp } from "@/lib/utils";
 import { interpolate } from "d3-interpolate";
 
 export default function makeInterpolateGradient(
-    stops: Array<{ color: string; stop: number }>,
+    stops: { color: string; stop: number }[],
 ) {
     return (n: number): string => {
         if (n <= 0) {

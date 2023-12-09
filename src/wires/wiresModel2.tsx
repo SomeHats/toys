@@ -86,7 +86,7 @@ export class WiresApp extends Model({
         (app) => app.serialized,
     );
 
-    static createEmpty() {
+    static createEmpty(this: void) {
         return new WiresApp({ wires: [] });
     }
 

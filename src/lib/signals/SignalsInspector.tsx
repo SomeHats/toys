@@ -48,7 +48,7 @@ const SignalGraph = React.memo(function _SignalGraph({
     signals,
     width,
 }: {
-    signals: ReadonlyArray<Signal>;
+    signals: readonly Signal[];
     width: number;
 }) {
     const pad = 8;
@@ -250,7 +250,7 @@ const SignalInspector = React.memo(function _SignalInspector({
     width,
     listenToMidi,
 }: {
-    signals: ReadonlyArray<Signal>;
+    signals: readonly Signal[];
     name: string;
     displayName?: string;
     width: number;
@@ -294,7 +294,7 @@ function SignalInspectorGroup({
     listenToMidi,
 }: {
     groupName: string;
-    signalNamePairs: ReadonlyArray<readonly [string, ReadonlyArray<Signal>]>;
+    signalNamePairs: readonly (readonly [string, readonly Signal[]])[];
     width: number;
     listenToMidi: ListenToMidiInputFn;
 }) {

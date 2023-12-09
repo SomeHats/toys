@@ -152,7 +152,7 @@ function LineRenderer({ points }: { points: Vector2[] }) {
 }
 
 const windowDistance = 15;
-function segmentifyPoints(points: ReadonlyArray<Vector2>): Array<Vector2> {
+function segmentifyPoints(points: readonly Vector2[]): Vector2[] {
     let windowStart = 0;
     let windowEnd = 1;
     let currentRun = null;
@@ -200,7 +200,7 @@ function segmentifyPoints(points: ReadonlyArray<Vector2>): Array<Vector2> {
         direction: Vector2.fromPolar(currentRun.direction, 1),
     });
 
-    const result: Array<Vector2> = [points[0]];
+    const result: Vector2[] = [points[0]];
     for (const [prev, next] of windows(runs, 2)) {
         // intersect the lines from the two runs
         const denominator =

@@ -6,10 +6,10 @@ const speed = 1;
 const scale = 1;
 const repeatUpdate = 1;
 
-type SystemClass<T extends SceneSystem = SceneSystem> = {
+interface SystemClass<T extends SceneSystem = SceneSystem> {
     systemName: string;
     new (): T;
-};
+}
 
 export default class Scene {
     canvas: HTMLCanvasElement;

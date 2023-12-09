@@ -49,7 +49,7 @@ export class Index<
         };
 
         this.result = computed(
-            `${tableSignal.name}.${getField + ""}`,
+            `${tableSignal.name}.${String(getField)}`,
             (previousValue, lastComputedEpoch) => {
                 if (isUninitialized(previousValue)) {
                     return computeFromScratch();

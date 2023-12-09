@@ -33,7 +33,7 @@ export function path(ctx: CanvasRenderingContext2D, path: Path) {
                 segment.isAnticlockwise,
             );
         } else {
-            throw new Error(`Unknown path segment type: ${segment.toString()}`);
+            throw new Error(`Unknown path segment type: ${String(segment)}`);
         }
     }
 }

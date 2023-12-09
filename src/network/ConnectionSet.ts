@@ -1,4 +1,4 @@
-import { sample } from "@/lib/utils";
+import { exhaustiveSwitchError, sample } from "@/lib/utils";
 import ConnectionDirection from "@/network/ConnectionDirection";
 import Road from "@/network/Road";
 
@@ -15,7 +15,7 @@ export default class ConnectionSet {
                 this.addOutgoing(target);
                 break;
             default:
-                throw new Error(`unknow connection direction ${direction}`);
+                exhaustiveSwitchError(direction);
         }
     }
 

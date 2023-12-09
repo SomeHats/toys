@@ -26,7 +26,7 @@ import { GlVertexArray } from "@/lib/gl/GlVertexArray";
 export class GlProgram {
     readonly program: WebGLProgram;
     private readonly gl: Gl;
-    private readonly uniforms: Array<GlUniform<unknown>> = [];
+    private readonly uniforms: GlUniform<unknown>[] = [];
 
     constructor(
         _gl: Gl,
@@ -128,14 +128,12 @@ export class GlProgram {
         );
     }
     private addUniform<T, Uniform extends GlUniform<T>>(
-        GlUniformType: {
-            new (
+        GlUniformType: new (
                 gl: Gl,
                 name: string,
                 location: WebGLUniformLocation,
                 initialValue: GlUniformInitialValue<T>,
-            ): Uniform;
-        },
+            ) => Uniform,
         name: string,
         initialValue: GlUniformInitialValue<T>,
     ): Uniform {

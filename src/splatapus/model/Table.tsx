@@ -9,7 +9,7 @@ import {
     keys,
 } from "@/lib/utils";
 
-export type UnknownTableEntry = { readonly id: string };
+export interface UnknownTableEntry { readonly id: string }
 export type TableData<T extends UnknownTableEntry> = ReadonlyObjectMap<
     T["id"],
     T
@@ -18,7 +18,7 @@ export type TableData<T extends UnknownTableEntry> = ReadonlyObjectMap<
 export class Table<T extends UnknownTableEntry> implements Iterable<T> {
     readonly data: TableData<T>;
 
-    static fromArray<T extends UnknownTableEntry>(entries: Array<T>): Table<T> {
+    static fromArray<T extends UnknownTableEntry>(entries: T[]): Table<T> {
         return new Table(
             fromEntries(entries.map((item) => [item.id, item] as [T["id"], T])),
         );

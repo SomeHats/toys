@@ -12,7 +12,7 @@ import { Quadtree, quadtree } from "d3-quadtree";
 function assignPlates(plateCount: number, terrain: Terrain) {
     const remainingCellIds = new Set(terrain.activeCellIds);
     const queue = new RandomQueue(terrain.activeCellIds);
-    const plateIdByCellId: Array<number> = new Array(
+    const plateIdByCellId = new Array<number>(
         terrain.activeCellIds.length,
     );
 
@@ -93,12 +93,12 @@ function assignPlates(plateCount: number, terrain: Terrain) {
 }
 
 export default class Terrain {
-    public readonly isActiveByCellId: Array<boolean>;
-    public readonly activeCellIds: Array<number>;
-    public readonly allCellIds: Array<number>;
-    public readonly cellsById: Array<TerrainCell>;
-    public readonly plateIdByCellId: Array<number>;
-    public readonly platesById: Array<TectonicPlate>;
+    public readonly isActiveByCellId: boolean[];
+    public readonly activeCellIds: number[];
+    public readonly allCellIds: number[];
+    public readonly cellsById: TerrainCell[];
+    public readonly plateIdByCellId: number[];
+    public readonly platesById: TectonicPlate[];
     public readonly cellsQuadTree: Quadtree<TerrainCell>;
 
     constructor(delaunay: Delaunay, activeBounds: AABB) {

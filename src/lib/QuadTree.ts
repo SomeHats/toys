@@ -79,7 +79,7 @@ export default class QuadTree<T> {
     }
 
     findItemsInRect(rect: AABB): T[] {
-        const foundItems = [] as Array<T>;
+        const foundItems = [] as T[];
 
         if (!this.boundary.intersects(rect)) return foundItems;
 

@@ -8,12 +8,12 @@ const TILE_SIZE = 5;
 const trianglesById = createTriangleGrid(TILE_SIZE, width, height);
 
 const occupied = new Set<Triangle>();
-type Snake = {
-    triangles: Array<Triangle>;
-};
+interface Snake {
+    triangles: Triangle[];
+}
 
 const makeSnake = () => {
-    const triangles: Array<Triangle> = [];
+    const triangles: Triangle[] = [];
     let triangle = sample(
         [...trianglesById.values()].filter((t) => !occupied.has(t)),
     );

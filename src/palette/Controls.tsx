@@ -312,7 +312,7 @@ function CopyButton({ value, label }: { value: string; label: ReactNode }) {
     }, [didCopy]);
 
     function onClick() {
-        navigator.clipboard.writeText(value);
+        void navigator.clipboard.writeText(value);
         setDidCopy(true);
     }
 

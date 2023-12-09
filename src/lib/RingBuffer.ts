@@ -3,7 +3,7 @@ import { times } from "@/lib/utils";
 export default class RingBuffer<T> {
     private start = 0;
     private end = 0;
-    private buffer: Array<T | null>;
+    private buffer: (T | null)[];
 
     constructor(size = 32) {
         this.buffer = times(Math.max(size, 1), () => null);

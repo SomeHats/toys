@@ -17,7 +17,7 @@ export async function loadJson(src: URL): Promise<unknown> {
     console.log("url");
     const response = await fetch(src.toString());
     console.log({ src, response });
-    assert(response.ok, `${src} OK`);
+    assert(response.ok, `${src.toString()} OK`);
     return response.json();
 }
 

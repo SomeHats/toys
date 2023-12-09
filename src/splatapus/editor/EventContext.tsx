@@ -46,7 +46,7 @@ export function applyPointerEvent<T>(
     }
 }
 
-export class SplatapusGestureDetector<Args extends Array<unknown> = []> {
+export class SplatapusGestureDetector<Args extends unknown[] = []> {
     readonly isDragging = new LiveValue(false, "Gesture.isDragging");
     readonly isDragConfirmed = new LiveValue(false, "Gesture.isDragConfirmed");
 

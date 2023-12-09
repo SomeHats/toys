@@ -6,14 +6,14 @@ const STANDARD_KEY_SIZE = 45;
 const KEY_BORDER_SIZE = 1.5;
 const PIANO_BORDER_SIZE = 8;
 
-type KeyRenderStyles = {
+interface KeyRenderStyles {
     standardWidth: number;
     standardHeight: number;
     accidentalWidth: number;
     accidentalHeight: number;
     scale: number;
     totalWidth: number;
-};
+}
 
 function isNoteAccidental(note: number): boolean {
     const noteWithoutOctave = note % 12;
@@ -89,7 +89,7 @@ function _PianoKeyboard({
     scale: number;
     top: number;
     left: number;
-    notesDown: Array<number>;
+    notesDown: number[];
     setRefForKey: (key: HTMLDivElement | null, note: number) => void;
 }) {
     const styles = React.useMemo((): KeyRenderStyles => {

@@ -48,7 +48,7 @@ export class Splatapus {
         ),
         this.location.viewportState,
     );
-    readonly keyPointIdHistory: LiveValue<ReadonlyArray<SplatKeyPointId>>;
+    readonly keyPointIdHistory: LiveValue<readonly SplatKeyPointId[]>;
 
     constructor(
         readonly screenSize: LiveValue<Vector2>,
@@ -59,7 +59,7 @@ export class Splatapus {
             "undoStack",
         );
         this.interaction = new Interaction(state.location.mode);
-        this.keyPointIdHistory = new LiveValue<ReadonlyArray<SplatKeyPointId>>(
+        this.keyPointIdHistory = new LiveValue<readonly SplatKeyPointId[]>(
             Array.from(this.document.getOnce().keyPoints, (point) => point.id),
             "keyPointIdHistory",
         );

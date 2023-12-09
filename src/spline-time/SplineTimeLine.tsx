@@ -10,7 +10,7 @@ export class SplineTimeLine {
         (line) => line.points,
     );
 
-    constructor(readonly points: ReadonlyArray<Vector2>) {}
+    constructor(readonly points: readonly Vector2[]) {}
 
     insertPointAtIndex(index: number, point: Vector2) {
         return new SplineTimeLine(

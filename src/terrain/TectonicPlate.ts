@@ -9,9 +9,9 @@ import * as config from "@/terrain/config";
 function findPlateEdges(
     currentPlateId: number,
     terrain: Terrain,
-    cellIds: ReadonlyArray<number>,
-    plateIdByCellId: ReadonlyArray<number>,
-): { edgeCellIds: Set<number>; polygon: Array<Vector2> } {
+    cellIds: readonly number[],
+    plateIdByCellId: readonly number[],
+): { edgeCellIds: Set<number>; polygon: Vector2[] } {
     const isNeighbourCellIdInOtherPlate = (neighbourCellId: number | null) =>
         neighbourCellId === null ||
         plateIdByCellId[neighbourCellId] !== currentPlateId;
@@ -92,7 +92,7 @@ export class TectonicPlate {
     // public readonly color = randomColor();
     // public readonly baseHeight = rand(-0.7, 0.5);
     public readonly edgeCellIds: ReadonlySet<number>;
-    public readonly polygon: ReadonlyArray<Vector2>;
+    public readonly polygon: readonly Vector2[];
     public readonly cellIds: ReadonlySet<number>;
     public readonly drift: Vector2 = Vector2.fromPolar(
         random(-Math.PI, Math.PI),
@@ -103,8 +103,8 @@ export class TectonicPlate {
         public readonly id: number,
         private readonly terrain: Terrain,
         public readonly baseHeight: number,
-        cellIds: ReadonlyArray<number>,
-        plateIdByCellId: ReadonlyArray<number>,
+        cellIds: readonly number[],
+        plateIdByCellId: readonly number[],
     ) {
         this.cellIds = new Set(cellIds);
         console.time("plate.findPlateEdges");

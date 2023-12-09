@@ -60,7 +60,7 @@ export default class Producer extends SceneObject implements NetworkNode {
         return this._connectionSet.outgoing;
     }
 
-    getAllReachableNodes(visited: Set<NetworkNode> = new Set()) {
+    getAllReachableNodes(visited = new Set<NetworkNode>()) {
         visited.add(this);
         return uniq(
             flatten(

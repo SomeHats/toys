@@ -5,26 +5,26 @@ import { SplatLocationState } from "@/splatapus/editor/SplatLocation";
 import { Vfx } from "@/splatapus/editor/Vfx";
 import { SplatDocModel } from "@/splatapus/model/SplatDocModel";
 
-export type OpOptions = {
+export interface OpOptions {
     readonly lockstepLocation?: UpdateAction<SplatLocationState>;
-};
+}
 
-type UndoEntry = {
+interface UndoEntry {
     readonly document: SplatDocModel;
     readonly location: SplatLocationState;
     readonly options: OpOptions;
-};
+}
 
-export type UndoStack = {
-    undoStates: ReadonlyArray<UndoEntry>;
-    redoStates: ReadonlyArray<UndoEntry> | null;
+export interface UndoStack {
+    undoStates: readonly UndoEntry[];
+    redoStates: readonly UndoEntry[] | null;
     pendingOp: null | {
         txId: number;
         initialDoc: SplatDocModel;
         initialOptions: OpOptions;
     };
     current: UndoEntry;
-};
+}
 
 export const UndoStack = {
     initialize: (entry: Omit<UndoEntry, "options">): UndoStack => ({

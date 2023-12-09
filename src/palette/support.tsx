@@ -2,11 +2,11 @@ import { assertExists } from "@/lib/assert";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { createContext, useContext } from "react";
 
-type Support = {
+interface Support {
     p3Gamut: boolean;
     rec2020Gamut: boolean;
     oklchSyntax: boolean;
-};
+}
 
 const SupportContext = createContext<Support | null>(null);
 

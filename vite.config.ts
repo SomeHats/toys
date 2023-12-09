@@ -17,7 +17,7 @@ const roots = glob
         path.resolve(__dirname, root),
     ]);
 
-const baseUrl = process.env.VITE_BASE || "./";
+const baseUrl = process.env.VITE_BASE ?? "./";
 
 // https://vitejs.dev/config/
 export default defineConfig(async ({ mode }) => {
@@ -64,7 +64,7 @@ export default defineConfig(async ({ mode }) => {
 function resolveATags(): PluginOption {
     return {
         name: "resolve-a-tags",
-        transformIndexHtml: async (html, ctx) => {
+        transformIndexHtml: (html, ctx) => {
             return html.replace(
                 /(<a [^>]*?href=")([^"]+?)("[^>]*?>)/g,
                 (_, pre, url, post) => {
@@ -106,7 +106,7 @@ function createAssertPlugin(): PluginObj {
                     if (args.length !== 1) return;
                     const argString = generate(args[0]).code;
                     args.push(T.stringLiteral(`Assertion Error: ${argString}`));
-                } catch (e) {
+                } catch (e: any) {
                     console.log("err", e.stack);
                     throw e;
                 }

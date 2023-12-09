@@ -1,9 +1,9 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 
-export type SpriteOpts = {
+export interface SpriteOpts {
     pixelScale?: number;
     opacity?: number;
-};
+}
 
 export class C {
     constructor(public readonly ctx: CanvasRenderingContext2D) {}

@@ -7,12 +7,12 @@ import { createContext, useContext, useEffect, useState } from "react";
 export const ANY = Symbol();
 
 export type Key = string;
-export type KeyObj = {
+export interface KeyObj {
     key: Key;
     command?: boolean | typeof ANY;
     shift?: boolean | typeof ANY;
     alt?: boolean | typeof ANY;
-};
+}
 export type TargetKey = Key | KeyObj;
 
 function isCommandKeyPressed(event: KeyboardEvent): boolean {

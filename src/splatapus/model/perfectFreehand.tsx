@@ -150,12 +150,12 @@ export function getStrokeOutlinePoints(
     const taperStart =
         start.taper === false ? 0
         : start.taper === true ? Math.max(size, totalLength)
-        : (start.taper as number);
+        : start.taper!;
 
     const taperEnd =
         end.taper === false ? 0
         : end.taper === true ? Math.max(size, totalLength)
-        : (end.taper as number);
+        : end.taper!;
 
     // The minimum allowed distance between points (squared)
     const minDistance = Math.pow(size * smoothing, 2);
@@ -373,7 +373,7 @@ export function getStrokeOutlinePoints(
         if (!(taperStart || taperEnd) || isComplete) {
             const start = firstPoint.project(
                 firstPoint.sub(lastPoint).perpendicular().normalize(),
-                -(firstRadius || radius),
+                -(firstRadius ?? radius),
             );
             const dotPts: Vector2[] = [];
             for (let step = 1 / 13, t = step; t <= 1; t += step) {
@@ -505,12 +505,12 @@ export function getStrokeCenterPoints(
     const taperStart =
         start.taper === false ? 0
         : start.taper === true ? Math.max(size, totalLength)
-        : (start.taper as number);
+        : start.taper!;
 
     const taperEnd =
         end.taper === false ? 0
         : end.taper === true ? Math.max(size, totalLength)
-        : (end.taper as number);
+        : end.taper!;
 
     // The minimum allowed distance between points (squared)
     const minDistance = Math.pow(size * smoothing, 2);
@@ -732,7 +732,7 @@ export function getStrokeCenterPoints(
  * @param options.last Whether to handle the points as a completed stroke.
  */
 export function getStrokePoints(
-    points: ReadonlyArray<{ x: number; y: number; pressure?: number }>,
+    points: readonly { x: number; y: number; pressure?: number }[],
     options = {} as StrokeOptions,
 ): StrokePoint[] {
     const { streamline = 0.5, size = 16, last: isComplete = false } = options;
@@ -744,7 +744,10 @@ export function getStrokePoints(
     const t = 0.15 + (1 - streamline) * 0.85;
 
     // Whatever the input is, make sure that the points are in Point[].
-    type Pt = { point: Vector2; pressure?: number };
+    interface Pt {
+        point: Vector2;
+        pressure?: number;
+    }
     let pts = points.map(
         (p): Pt => ({
             point: Vector2.from(p),

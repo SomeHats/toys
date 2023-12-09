@@ -3,17 +3,17 @@ import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
 import { KeyCode } from "@/lib/KeyCode";
 import { entries } from "@/lib/utils";
 
-type ActionInfo = {
+interface ActionInfo {
     downEvent: EventEmitter;
     upEvent: EventEmitter;
     isDown: boolean;
-};
+}
 
 export class ButtonMapping<Actions extends string> {
     private readonly keyCodeToAction: ReadonlyMap<KeyCode, Actions>;
     private readonly actionInfo: ReadonlyMap<Actions, ActionInfo>;
 
-    constructor(actionMappings: Record<Actions, Array<KeyCode>>) {
+    constructor(actionMappings: Record<Actions, KeyCode[]>) {
         const keyCodeToAction = new Map<KeyCode, Actions>();
         const actionInfo = new Map<Actions, ActionInfo>();
 

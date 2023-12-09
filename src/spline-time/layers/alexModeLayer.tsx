@@ -14,8 +14,8 @@ export function alexModeLayer(props: LayerProps) {
 }
 function AlexModeLayer({ line, showExtras, uiTarget }: LayerProps) {
     const [slop, setSlop] = useState(0.333);
-    const controlPoints: Array<{ target: Vector2; control: Vector2 }> = [];
-    const debug: Array<ReactNode> = [];
+    const controlPoints: { target: Vector2; control: Vector2 }[] = [];
+    const debug: ReactNode[] = [];
     const path = new SvgPathBuilder();
 
     switch (line.points.length) {

@@ -17,7 +17,7 @@ export type ReadonlyObjectMap<K extends PropertyKey, T> = {
 
 export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
 
-export function times<T>(n: number, fn: (idx: number) => T): Array<T> {
+export function times<T>(n: number, fn: (idx: number) => T): T[] {
     const result = [];
     for (let i = 0; i < n; i++) {
         result.push(fn(i));
@@ -83,15 +83,15 @@ export function varyRelative(base: number, amount: number): number {
     return varyAbsolute(base, base * amount);
 }
 
-export function sample<T>(arr: ReadonlyArray<T>): T {
+export function sample<T>(arr: readonly T[]): T {
     return arr[Math.floor(random(arr.length))];
 }
 
-export function flatten<T>(arr: ReadonlyArray<ReadonlyArray<T>>): Array<T> {
-    return arr.reduce<Array<T>>((a, b) => a.concat(b), []);
+export function flatten<T>(arr: readonly (readonly T[])[]): T[] {
+    return arr.reduce<T[]>((a, b) => a.concat(b), []);
 }
 
-export function uniq<T>(arr: T[]): Array<T> {
+export function uniq<T>(arr: T[]): T[] {
     return Array.from(new Set(arr));
 }
 
@@ -107,9 +107,9 @@ export function intersection<T>(a1: T[], a2: T[]): T[] {
 }
 
 export function groupBy<T, Key>(
-    items: ReadonlyArray<T>,
+    items: readonly T[],
     getKey: (item: T) => Key,
-): Map<Key, Array<T>> {
+): Map<Key, T[]> {
     const groups = new Map<Key, T[]>();
     for (const item of items) {
         const key = getKey(item);
@@ -125,14 +125,14 @@ export function groupBy<T, Key>(
 }
 
 export function sortBy<T, Key extends number | string>(
-    items: ReadonlyArray<T>,
+    items: readonly T[],
     getKey: (item: T) => Key,
-): Array<T> {
+): T[] {
     return items.slice().sort((a, b) => (getKey(a) < getKey(b) ? -1 : 1));
 }
 
 export function partition<T>(
-    items: ReadonlyArray<T>,
+    items: readonly T[],
     condition: (item: T) => boolean,
 ): [T[], T[]] {
     const pass = [];
@@ -153,7 +153,7 @@ export function randomColor(): string {
     )},${Math.floor(random(256))})`;
 }
 
-export function removeFromArray<T>(array: Array<T>, item: T) {
+export function removeFromArray<T>(array: T[], item: T) {
     const idx = array.indexOf(item);
     if (idx !== -1) {
         array.splice(idx, 1);
@@ -177,7 +177,7 @@ export function frameLoop(
     const cancel = () => {
         shouldCancel = true;
     };
-    (async () => {
+    void (async () => {
         while (true) {
             if (shouldCancel) {
                 return;
@@ -200,29 +200,29 @@ export function fromEntries<K extends PropertyKey, V>(
 
 export function keys<K extends string, V>(
     object: ReadonlyObjectMap<K, V>,
-): Array<K> {
+): K[] {
     return Object.keys(object) as K[];
 }
 
 export function values<K extends string, V>(
     object: ReadonlyRecord<K, V>,
-): Array<V> {
-    return Object.values(object) as V[];
+): V[] {
+    return Object.values(object);
 }
 
 export function entries<K extends string, V>(
     object: ReadonlyRecord<K, V>,
-): Array<[K, V]>;
+): [K, V][];
 export function entries<K extends string, V>(
     object: ReadonlyObjectMap<K, V>,
-): Array<[K, V | undefined]>;
+): [K, V | undefined][];
 export function entries<K extends string, V>(
     object: ReadonlyRecord<K, V>,
-): Array<[K, V]> {
+): [K, V][] {
     return Object.entries(object) as [K, V][];
 }
 
-export function compact<T>(arr: ReadonlyArray<T>): Array<NonNullable<T>> {
+export function compact<T>(arr: readonly T[]): NonNullable<T>[] {
     return arr.filter(
         (item): item is NonNullable<T> => item !== null && item !== undefined,
     );
@@ -236,7 +236,7 @@ export function clamp(a: number, b: number, n: number): number {
     return Math.max(Math.min(a, b), Math.min(Math.max(a, b), n));
 }
 
-export function shuffle<T>(arr: ReadonlyArray<T>): Array<T> {
+export function shuffle<T>(arr: readonly T[]): T[] {
     const newArr = arr.slice();
     for (let i = newArr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -249,7 +249,7 @@ export function getId(prefix = ""): string {
     return `${prefix}${Math.random().toString(36).slice(1)}`;
 }
 
-export function debounce<Args extends Array<unknown>>(
+export function debounce<Args extends unknown[]>(
     ms: number,
     fn: (...args: Args) => void,
 ): { (...args: Args): void; cancel: () => void } {
@@ -272,6 +272,7 @@ export function debounce<Args extends Array<unknown>>(
 }
 
 export function exhaustiveSwitchError(value: never): never {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     throw new Error(`Unknown switch case ${value}`);
 }
 
@@ -344,7 +345,7 @@ export function mapObjectValues<K extends string, V, U>(
     return result;
 }
 
-export function last<T>(arr: ReadonlyArray<T>): T | undefined {
+export function last<T>(arr: readonly T[]): T | undefined {
     if (!arr.length) {
         return undefined;
     }
@@ -362,29 +363,29 @@ export function* indexed<T>(
 }
 
 export function copyArrayAndInsert<T>(
-    array: ReadonlyArray<T>,
+    array: readonly T[],
     index: number,
     item: T,
-): Array<T> {
+): T[] {
     const copied = array.slice();
     copied.splice(index, 0, item);
     return copied;
 }
 
 export function copyArrayAndReplace<T>(
-    array: ReadonlyArray<T>,
+    array: readonly T[],
     index: number,
     item: T,
-): Array<T> {
+): T[] {
     const copied = array.slice();
     copied[index] = item;
     return copied;
 }
 
 export function copyAndRemove<T>(
-    array: ReadonlyArray<T>,
+    array: readonly T[],
     index: number,
-): Array<T> {
+): T[] {
     const copied = array.slice();
     copied.splice(index, 1);
     return copied;
@@ -444,13 +445,13 @@ export function resolveInitializer<T>(initializer: Initializer<T>): T {
     }
 }
 
-export function stringFromError(error: unknown) {
+export function stringFromError(error: unknown): string {
     if (typeof error === "string") {
         return error;
     }
     if (typeof error === "object" && error !== null) {
         const message = get(error, "message");
-        if (message) {
+        if (message && typeof message === "string") {
             return message;
         }
     }
@@ -466,9 +467,9 @@ export function radiansToDegrees(radians: number) {
 }
 
 export function windows<T>(
-    array: ReadonlyArray<T>,
+    array: readonly T[],
     size: number,
-): Array<Array<T>> {
+): T[][] {
     const result = [];
     for (let i = 0; i < array.length - size + 1; i++) {
         result.push(array.slice(i, i + size));
@@ -477,7 +478,7 @@ export function windows<T>(
 }
 
 export function maxBy<T>(
-    array: ReadonlyArray<T>,
+    array: readonly T[],
     fn: (item: T) => number,
 ): T | undefined {
     let max: T | undefined;
@@ -493,7 +494,7 @@ export function maxBy<T>(
 }
 
 export function minBy<T>(
-    array: ReadonlyArray<T>,
+    array: readonly T[],
     fn: (item: T) => number,
 ): T | undefined {
     return maxBy(array, (item) => -fn(item));

@@ -7,7 +7,7 @@ import { LayerProps, LayerUi } from "@/spline-time/layers/Layer";
 import { Fragment, ReactNode } from "react";
 
 export function arcLayer({ line, uiTarget, showExtras }: LayerProps) {
-    const pathMarkers: Array<ReactNode> = [];
+    const pathMarkers: ReactNode[] = [];
 
     const path = new SvgPathBuilder();
     switch (line.points.length) {

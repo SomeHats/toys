@@ -5,7 +5,7 @@ import SceneObject from "@/lib/scene/SceneObject";
 import { lerp } from "@/lib/utils";
 import Color from "color";
 
-type PulseOptions = {
+interface PulseOptions {
     x: number;
     y: number;
     startRadius: number;
@@ -15,7 +15,7 @@ type PulseOptions = {
     easeRadius?: EasingFn;
     easeOpacity?: EasingFn;
     removeOnComplete?: boolean;
-};
+}
 
 export default class Pulse extends SceneObject {
     _circle: Circle;

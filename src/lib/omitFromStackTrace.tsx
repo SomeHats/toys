@@ -6,7 +6,7 @@
  *
  * Only works in platforms that support `Error.captureStackTrace` (ie v8).
  */
-export function omitFromStackTrace<Args extends Array<unknown>, Return>(
+export function omitFromStackTrace<Args extends unknown[], Return>(
     fn: (...args: Args) => Return,
 ): (...args: Args) => Return {
     const wrappedFn = (...args: Args) => {

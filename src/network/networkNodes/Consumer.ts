@@ -65,7 +65,7 @@ export default class Consumer extends SceneObject implements NetworkNode {
         return this._visualConnectionCircle.pointOnCircumference(radians);
     }
 
-    getAllReachableNodes(visited: Set<NetworkNode> = new Set()): NetworkNode[] {
+    getAllReachableNodes(visited = new Set<NetworkNode>()): NetworkNode[] {
         visited.add(this);
         return [this];
     }

@@ -6,7 +6,7 @@ import { UpdateAction, applyUpdate } from "@/lib/utils";
 
 export class LiveValue<T> implements LiveWritable<T> {
     private value: T;
-    private pendingUpdates: Array<UpdateAction<T>> | null = null;
+    private pendingUpdates: UpdateAction<T>[] | null = null;
     private invalidation: LiveInvalidation;
     private isUpdating = false;
     private wasRead = true;
@@ -47,6 +47,7 @@ export class LiveValue<T> implements LiveWritable<T> {
             this.value = applyUpdate(this.value, update);
             this.invalidate();
             if (this.pendingUpdates) {
+                // eslint-disable-next-line @typescript-eslint/prefer-for-of
                 for (let i = 0; i < this.pendingUpdates.length; i++) {
                     this.value = applyUpdate(this.value, update);
                     this.invalidate();

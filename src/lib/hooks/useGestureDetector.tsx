@@ -8,27 +8,27 @@ const MIN_DRAG_GESTURE_DISTANCE_PX = 10;
 
 type PointerId = PointerEvent["pointerId"];
 
-export type TapGestureHandler<Args extends ReadonlyArray<unknown> = []> = (
+export type TapGestureHandler<Args extends readonly unknown[] = []> = (
     event: PointerEvent,
     ...args: Args
 ) => void;
-export type DragStartGestureHandler<Args extends ReadonlyArray<unknown> = []> =
+export type DragStartGestureHandler<Args extends readonly unknown[] = []> =
     (event: PointerEvent, ...args: Args) => DragGestureHandler | null;
-export type DragGestureHandler = {
+export interface DragGestureHandler {
     couldBeTap: boolean;
     pointerCapture: boolean;
     onCancel: (event: PointerEvent) => void;
     onMove: (event: PointerEvent) => void;
     onEnd: (event: PointerEvent) => void;
     onConfirm?: (event: PointerEvent) => void;
-};
+}
 
-export const defaultTapGestureHandler: TapGestureHandler<Array<unknown>> = noop;
+export const defaultTapGestureHandler: TapGestureHandler<unknown[]> = noop;
 export const defaultDragGestureHandler: DragStartGestureHandler<
-    Array<unknown>
+    unknown[]
 > = () => null;
 
-type State<Args extends ReadonlyArray<unknown>> =
+type State<Args extends readonly unknown[]> =
     | {
           readonly type: "idle";
       }
@@ -45,7 +45,7 @@ type State<Args extends ReadonlyArray<unknown>> =
           readonly dragHandler: DragGestureHandler;
       };
 
-export class GestureDetector<Args extends Array<unknown> = []> {
+export class GestureDetector<Args extends unknown[] = []> {
     private state: State<Args> = { type: "idle" };
     private readonly onTap: TapGestureHandler<Args>;
     private readonly onDragStart: DragStartGestureHandler<Args>;

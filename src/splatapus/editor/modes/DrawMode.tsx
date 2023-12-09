@@ -11,7 +11,7 @@ import { ReactNode } from "react";
 
 export class DrawMode implements Mode<ModeType.Draw> {
     readonly type = ModeType.Draw;
-    readonly previewPoints = new LiveValue<ReadonlyArray<Vector2>>(
+    readonly previewPoints = new LiveValue<readonly Vector2[]>(
         [],
         "DrawMode.previewPoints",
     );

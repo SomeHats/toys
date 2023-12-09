@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/prefer-for-of */
 import { assert, fail } from "@/lib/assert";
 import { times } from "@/lib/utils";
 
-type VectorN = ReadonlyArray<number>;
-type MutVectorN = Array<number>;
+type VectorN = readonly number[];
+type MutVectorN = number[];
 
 export class Tps {
     private static distance(pnt1: VectorN, pnt2: VectorN) {
@@ -22,10 +23,10 @@ export class Tps {
         return Math.pow(r, 2) * Math.log(r);
     }
 
-    private centers: ReadonlyArray<VectorN>;
+    private centers: readonly VectorN[];
     private ws: Matrix;
 
-    constructor(centers: ReadonlyArray<VectorN>, rawYs: ReadonlyArray<number>) {
+    constructor(centers: readonly VectorN[], rawYs: readonly number[]) {
         if (centers.length === 0) {
             fail("bad centers array :/");
         }

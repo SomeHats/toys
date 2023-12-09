@@ -25,7 +25,7 @@ export class Path implements PathSegment {
         return pathBuilder.toString();
     }
 
-    static straightThroughPoints(...points: ReadonlyArray<Vector2>): Path {
+    static straightThroughPoints(...points: readonly Vector2[]): Path {
         let [lastPoint, ...remainingPoints] = points;
         const path = new Path();
 

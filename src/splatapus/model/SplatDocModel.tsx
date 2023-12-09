@@ -186,7 +186,7 @@ export class SplatDocModel {
     replacePointsForVersion(
         keyPointId: SplatKeyPointId,
         shapeId: SplatShapeId,
-        rawPoints: ReadonlyArray<Vector2>,
+        rawPoints: readonly Vector2[],
     ): SplatDocModel {
         const existingVersion = this.getShapeVersion(keyPointId, shapeId);
         if (existingVersion) {

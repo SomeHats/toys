@@ -66,7 +66,7 @@ export function useLiveValue<T>(live: Live<T>): T {
     }
 }
 
-export function useLive<T>(compute: () => T, deps: ReadonlyArray<unknown>): T {
+export function useLive<T>(compute: () => T, deps: readonly unknown[]): T {
     const debugLabel =
         process.env.NODE_ENV !== "production" ?
             getDebugLabel("useLive")
@@ -83,5 +83,5 @@ export function runLive(
     run: () => void,
 ): Unsubscribe {
     const effect = new LiveEffect(run, schedule);
-    return () => effect.cancel;
+    return () => effect.cancel();
 }

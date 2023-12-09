@@ -11,9 +11,9 @@ import Intersection from "@/network/networkNodes/Intersection";
 
 export default class Junction extends SceneObject {
     _circle: Circle;
-    _intersectionsByAngle: { [angleString: string]: Intersection } = {};
-    _incomingIntersections: Set<Intersection> = new Set();
-    _outgoingIntersections: Set<Intersection> = new Set();
+    _intersectionsByAngle: Record<string, Intersection> = {};
+    _incomingIntersections = new Set<Intersection>();
+    _outgoingIntersections = new Set<Intersection>();
     _roads: Road[] = [];
 
     constructor(x: number, y: number, radius: number) {

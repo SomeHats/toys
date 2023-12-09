@@ -23,7 +23,7 @@ export class BlobTreeNode {
 
 export class BlobTree {
     private nodesById = new Map<string, BlobTreeNode>();
-    private childrenById = new Map<string, Array<string>>();
+    private childrenById = new Map<string, string[]>();
     private parentById = new Map<string, string>();
 
     constructor() {}

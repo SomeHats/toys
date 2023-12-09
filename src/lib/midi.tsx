@@ -7,10 +7,10 @@ export async function enableMidi(): Promise<typeof WebMidi> {
     return await WebMidi.enable();
 }
 
-export type MidiInputChangeEvent = {
+export interface MidiInputChangeEvent {
     id: string;
     value: number;
-};
+}
 export type ListenToMidiInputFn = (
     cb: (event: MidiInputChangeEvent) => void,
 ) => Unsubscribe;

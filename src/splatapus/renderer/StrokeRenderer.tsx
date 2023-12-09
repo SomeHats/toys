@@ -68,7 +68,7 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
         const document = splatapus.document.live();
         const previewPosition = splatapus.previewPosition.live();
 
-        let rawPoints: ReadonlyArray<Vector2>;
+        let rawPoints: readonly Vector2[];
         switch (previewPosition.type) {
             case "interpolated":
                 rawPoints = [];
@@ -129,7 +129,7 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
         [splatapus, shapeId],
     );
 
-    const actualPoints = previewPoints || centerPoints;
+    const actualPoints = previewPoints ?? centerPoints;
 
     return (
         <>
@@ -181,8 +181,7 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                 />
             )}
             {shouldShowPoints &&
-                actualPoints.normalized &&
-                actualPoints.normalized.map((point, i) => (
+                actualPoints.normalized?.map((point, i) => (
                     <DebugCircle
                         center={point.center}
                         radius={point.radius}
@@ -190,13 +189,11 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                     />
                 ))}
             {shouldShowRawPoints &&
-                actualPoints.raw &&
-                actualPoints.raw.map((point, i) => (
+                actualPoints.raw?.map((point, i) => (
                     <DebugPointX position={point} key={i} color="lime" />
                 ))}
             {shouldShowSmoothPoints &&
-                actualPoints.reduced &&
-                actualPoints.reduced.retainedPoints.map((point, i) => (
+                actualPoints.reduced?.retainedPoints.map((point, i) => (
                     <DebugCircle
                         center={point.center}
                         radius={point.radius}
@@ -212,7 +209,7 @@ const bendWeight = 10;
 const sizeWeight = 10;
 
 function getCostAtIndex(
-    points: ReadonlyArray<StrokeCenterPoint>,
+    points: readonly StrokeCenterPoint[],
     index: number,
 ): number | null {
     if (index === 0 || index === points.length - 1) {
@@ -242,7 +239,7 @@ function getCostAtIndex(
     return bendFactor + sizeFactor;
 }
 
-function reducePointsBasedOnCost(points: ReadonlyArray<StrokeCenterPoint>) {
+function reducePointsBasedOnCost(points: readonly StrokeCenterPoint[]) {
     const dbg: React.ReactNode[] = [];
 
     let costRemaining = 1;

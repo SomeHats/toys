@@ -7,8 +7,8 @@ function nextHalfedge(edgeId: number) {
 
 function getTriangleCenters(
     { triangles }: Delaunator<Vector2>,
-    points: Array<Vector2>,
-): Array<Vector2> {
+    points: Vector2[],
+): Vector2[] {
     const result = [];
     for (let t = 0; t < triangles.length; t += 3) {
         const p1 = points[triangles[t]];
@@ -23,17 +23,17 @@ function getTriangleCenters(
     return result;
 }
 
-export type DelaunayCellEdge = {
+export interface DelaunayCellEdge {
     neighbourCellId: number;
     leadingPoint: Vector2;
-};
-export type DelaunayCell = Array<DelaunayCellEdge>;
+}
+export type DelaunayCell = DelaunayCellEdge[];
 
 function getCellsByPointId(
     { triangles, halfedges }: Delaunator<Vector2>,
-    triangleCenters: Array<Vector2>,
-): Array<DelaunayCell> {
-    const cellsByPointId: Array<DelaunayCell> = [];
+    triangleCenters: Vector2[],
+): DelaunayCell[] {
+    const cellsByPointId: DelaunayCell[] = [];
     const visitedPointIds = new Set();
     for (let edgeId = 0; edgeId < triangles.length; edgeId++) {
         const pointId = triangles[nextHalfedge(edgeId)];
@@ -63,10 +63,10 @@ export class Delaunay {
     // triangleId = Math.floor(halfEdgeId / 3)
     // [halfEdge1, halfEdge2, halfEdge3] = [triangleId * 3, triangleId * 3 + 1, triangleId * 3 + 2]
     public readonly delaunator: Delaunator<Vector2>;
-    public readonly triangleCenters: Array<Vector2>;
-    public readonly cellsByPointId: Array<DelaunayCell>;
+    public readonly triangleCenters: Vector2[];
+    public readonly cellsByPointId: DelaunayCell[];
 
-    constructor(public readonly points: Array<Vector2>) {
+    constructor(public readonly points: Vector2[]) {
         console.time("delauney.delaunator");
         this.delaunator = Delaunator.from(
             points,

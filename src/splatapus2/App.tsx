@@ -166,7 +166,7 @@ const bendWeight = 10;
 const sizeWeight = 10;
 
 function getCostAtIndex(
-    points: ReadonlyArray<StrokeCenterPoint>,
+    points: readonly StrokeCenterPoint[],
     index: number,
 ): number | null {
     if (index === 0 || index === points.length - 1) {
@@ -196,7 +196,7 @@ function getCostAtIndex(
     return bendFactor + sizeFactor;
 }
 
-function reducePointsBasedOnCost(points: ReadonlyArray<StrokeCenterPoint>) {
+function reducePointsBasedOnCost(points: readonly StrokeCenterPoint[]) {
     const dbg: React.ReactNode[] = [];
 
     let costRemaining = 1;

@@ -1,12 +1,12 @@
 import { C, SpriteOpts } from "@/bees/C";
 import { loadImage } from "@/lib/load";
 
-export type SpriteManifest = {
+export interface SpriteManifest {
     src: URL;
     scale: number;
     originX: number;
     originY: number;
-};
+}
 
 export class Sprite {
     static async load(manifest: SpriteManifest) {

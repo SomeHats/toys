@@ -19,7 +19,7 @@ export type AnimatedSpriteStackGeometry = SchemaType<
     typeof animatedSpriteStackGeometrySchema
 >;
 
-export type SpriteStackManifest = {
+export interface SpriteStackManifest {
     geometry: URL;
     baseTexture: Promise<BaseTexture>;
     resolution: number;
@@ -27,7 +27,7 @@ export type SpriteStackManifest = {
     originX: number;
     originY: number;
     angleOffset: number;
-};
+}
 
 export class AnimatedSpriteStackSheet {
     static async load(

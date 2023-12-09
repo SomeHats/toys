@@ -8,11 +8,11 @@ const getLegRadius = ({ radius, hipHeight, legWidth }: PalConfig) =>
     Math.sqrt(radius * radius - (radius - hipHeight) * (radius - hipHeight)) -
     legWidth;
 
-export type PalLegGeomUpdate = {
+export interface PalLegGeomUpdate {
     footXY: Vector2;
     footProjectionOrigin: Vector2;
     liftAmount: number;
-};
+}
 
 export default class PalLegGeom {
     hipRadius: number;

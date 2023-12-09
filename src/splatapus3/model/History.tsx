@@ -9,10 +9,10 @@ import { transact } from "@tldraw/state";
 export const HistoryEntryId = new IdGenerator("undo");
 export type HistoryEntryId = typeof HistoryEntryId.Id;
 
-type HistoryEntry = {
+interface HistoryEntry {
     readonly id: HistoryEntryId;
     readonly store: SplatSerializedStore;
-};
+}
 
 export class SplatHistory {
     @reactive private accessor undos = [] as readonly HistoryEntry[];

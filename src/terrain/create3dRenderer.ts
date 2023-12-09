@@ -6,7 +6,12 @@ import * as T from "three";
 
 function create3dRenderer(terrain: Terrain) {
     const scene = new T.Scene();
-    const camera = new T.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+    const camera = new T.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        10000,
+    );
 
     const renderer = new T.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -27,7 +32,12 @@ function create3dRenderer(terrain: Terrain) {
         return z ** 1.3 * 30;
     };
     const _allPoints: Array<T.Vector3> = [];
-    const addTriangle = (a: T.Vector3, b: T.Vector3, c: T.Vector3, color: string) => {
+    const addTriangle = (
+        a: T.Vector3,
+        b: T.Vector3,
+        c: T.Vector3,
+        color: string,
+    ) => {
         a.setX(SIZE / 2 - a.x);
         a.setY(-(SIZE / 2 - a.y));
         a.setZ(adjustZ(a.z));
@@ -51,9 +61,15 @@ function create3dRenderer(terrain: Terrain) {
             const nextEdgeIndex = (edgeIndex + 1) % cell.polygon.length;
             const nextNextEdgeIndex = (nextEdgeIndex + 1) % cell.polygon.length;
             const neighbourId1 = cell.neighbourCellIdsByEdgeIndex[edgeIndex];
-            const neighbourId2 = cell.neighbourCellIdsByEdgeIndex[nextEdgeIndex];
-            const neighbourId3 = cell.neighbourCellIdsByEdgeIndex[nextNextEdgeIndex];
-            if (neighbourId1 !== null && neighbourId2 !== null && neighbourId3 !== null) {
+            const neighbourId2 =
+                cell.neighbourCellIdsByEdgeIndex[nextEdgeIndex];
+            const neighbourId3 =
+                cell.neighbourCellIdsByEdgeIndex[nextNextEdgeIndex];
+            if (
+                neighbourId1 !== null &&
+                neighbourId2 !== null &&
+                neighbourId3 !== null
+            ) {
                 const neighbour1 = terrain.cellsById[neighbourId1];
                 const neighbour2 = terrain.cellsById[neighbourId2];
                 const neighbour3 = terrain.cellsById[neighbourId3];
@@ -64,7 +80,11 @@ function create3dRenderer(terrain: Terrain) {
                 const neighbour3Height = neighbour3.get3dHeight();
 
                 addTriangle(
-                    new T.Vector3(cell.position.x, cell.position.y, cell.get3dHeight()),
+                    new T.Vector3(
+                        cell.position.x,
+                        cell.position.y,
+                        cell.get3dHeight(),
+                    ),
                     new T.Vector3(
                         cell.polygon[nextEdgeIndex].x,
                         cell.polygon[nextEdgeIndex].y,
@@ -164,7 +184,13 @@ function create3dRenderer(terrain: Terrain) {
     startRenderLoopAsync();
 
     document.addEventListener("mousemove", (e) => {
-        cube.rotation.x = mapRange(0, window.innerHeight, -0.4, -1.5, e.clientY);
+        cube.rotation.x = mapRange(
+            0,
+            window.innerHeight,
+            -0.4,
+            -1.5,
+            e.clientY,
+        );
     });
 }
 

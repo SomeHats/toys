@@ -41,7 +41,10 @@ export class LiveMemoWritable<T, Args extends Array<unknown> = []>
 {
     constructor(
         read: () => T,
-        private readonly write: (update: UpdateAction<T>, ...args: Args | []) => void,
+        private readonly write: (
+            update: UpdateAction<T>,
+            ...args: Args | []
+        ) => void,
         debugName?: string,
     ) {
         super(read, debugName, "LiveMemoWritable");

@@ -26,8 +26,12 @@ export function LayerUi({
             onPointerUp={(e) => e.stopPropagation()}
             onPointerCancel={(e) => e.stopPropagation()}
         >
-            <div className="flex-auto p-3 font-semibold text-stone-500">{label}</div>
-            <div className="flex flex-none items-center justify-center gap-3 p-3">{children}</div>
+            <div className="flex-auto p-3 font-semibold text-stone-500">
+                {label}
+            </div>
+            <div className="flex flex-none items-center justify-center gap-3 p-3">
+                {children}
+            </div>
         </div>,
         uiTarget,
     );

@@ -42,8 +42,13 @@ export const ShapeVersion = incrementalObject({
 });
 export type ShapeVersion = SchemaType<typeof ShapeVersion.valueSchema>;
 
-export const ShapeVersionTable = incrementalTable(ShapeVersionId.schema, ShapeVersion);
-export type ShapeVersionTable = SchemaType<typeof ShapeVersionTable.valueSchema>;
+export const ShapeVersionTable = incrementalTable(
+    ShapeVersionId.schema,
+    ShapeVersion,
+);
+export type ShapeVersionTable = SchemaType<
+    typeof ShapeVersionTable.valueSchema
+>;
 
 export const Doc = incrementalObject({
     keyPoints: KeyPointTable,

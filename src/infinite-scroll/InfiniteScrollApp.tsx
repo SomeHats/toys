@@ -2,7 +2,10 @@ import { CaterpillarScroller } from "@/infinite-scroll/CaterpillarScroller";
 import { InfiniteScroller } from "@/infinite-scroll/InfiniteScroller";
 import { breakpointPx } from "@/infinite-scroll/contants";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { sizeFromBorderBox, useResizeObserver } from "@/lib/hooks/useResizeObserver";
+import {
+    sizeFromBorderBox,
+    useResizeObserver,
+} from "@/lib/hooks/useResizeObserver";
 import { entries } from "@/lib/utils";
 import { Button } from "@/splatapus/ui/Button";
 import classNames from "classnames";

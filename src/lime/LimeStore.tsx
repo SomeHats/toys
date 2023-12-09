@@ -13,13 +13,20 @@ import {
     createRecordType,
 } from "@tldraw/store";
 
-function idSchema<Id extends RecordId<any>>(typeName: Id["__type__"]["typeName"]) {
+function idSchema<Id extends RecordId<any>>(
+    typeName: Id["__type__"]["typeName"],
+) {
     const re = new RegExp(`^${typeName}\\:([a-zA-Z0-9_-]+)$`);
     const validate = (input: string) => {
         if (re.test(input)) {
             return Result.ok(input as Id);
         } else {
-            return Result.error(new SchemaParseError(`Expected ${typeName}:*, got ${input}`, []));
+            return Result.error(
+                new SchemaParseError(
+                    `Expected ${typeName}:*, got ${input}`,
+                    [],
+                ),
+            );
         }
     };
     return Schema.string.transform<Id>(validate, validate, identity);

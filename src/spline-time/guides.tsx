@@ -2,7 +2,13 @@ import { Vector2 } from "@/lib/geom/Vector2";
 
 const MID_POINT_MARKER_SIZE_PX = 8;
 
-export function BezierControlPoint({ control, target }: { control: Vector2; target: Vector2 }) {
+export function BezierControlPoint({
+    control,
+    target,
+}: {
+    control: Vector2;
+    target: Vector2;
+}) {
     return (
         <>
             <line
@@ -76,8 +82,12 @@ export function LineMarker({
     const lineNormal = to.sub(from).normalize().perpendicular();
     const markerPoint = from.lerp(to, progress);
 
-    const markerStart = markerPoint.add(lineNormal.scale(MID_POINT_MARKER_SIZE_PX / 2));
-    const markerEnd = markerPoint.add(lineNormal.scale(-MID_POINT_MARKER_SIZE_PX / 2));
+    const markerStart = markerPoint.add(
+        lineNormal.scale(MID_POINT_MARKER_SIZE_PX / 2),
+    );
+    const markerEnd = markerPoint.add(
+        lineNormal.scale(-MID_POINT_MARKER_SIZE_PX / 2),
+    );
     return (
         <line
             x1={markerStart.x}

@@ -12,7 +12,10 @@ export function assignRef<T>(ref: Ref<T>, instance: T) {
     }
 }
 
-export function useMergedRefs<T>(a: Ref<T>, b: Ref<T>): (instance: T | null) => void {
+export function useMergedRefs<T>(
+    a: Ref<T>,
+    b: Ref<T>,
+): (instance: T | null) => void {
     return useCallback(
         (instance) => {
             assignRef(a, instance);

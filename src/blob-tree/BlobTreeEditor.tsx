@@ -34,7 +34,10 @@ export class BlobTreeEditor {
     private mousePosition = Vector2.ZERO;
     private state: EditorState = { type: "idle" };
 
-    constructor(private readonly canvas: DebugDraw, public readonly blobTree: BlobTree) {}
+    constructor(
+        private readonly canvas: DebugDraw,
+        public readonly blobTree: BlobTree,
+    ) {}
 
     private getSelectedNode() {
         switch (this.state.type) {
@@ -67,10 +70,16 @@ export class BlobTreeEditor {
             return null;
         }
 
-        const hoverEdgeSize = Math.min(nearestNode.radius * 0.1, HOVER_EDGE_SIZE);
+        const hoverEdgeSize = Math.min(
+            nearestNode.radius * 0.1,
+            HOVER_EDGE_SIZE,
+        );
         return {
             node: nearestNode,
-            mode: nearestDistance < nearestNode.radius - hoverEdgeSize ? "center" : "edge",
+            mode:
+                nearestDistance < nearestNode.radius - hoverEdgeSize ?
+                    "center"
+                :   "edge",
         };
     }
 
@@ -89,7 +98,9 @@ export class BlobTreeEditor {
                             this.state = {
                                 type: "moveNode",
                                 node: hover.node,
-                                offset: hover.node.position.sub(this.mousePosition),
+                                offset: hover.node.position.sub(
+                                    this.mousePosition,
+                                ),
                             };
                             return;
                         case "edge":
@@ -98,7 +109,9 @@ export class BlobTreeEditor {
                                 node: hover.node,
                                 offset:
                                     hover.node.radius -
-                                    hover.node.position.distanceTo(this.mousePosition),
+                                    hover.node.position.distanceTo(
+                                        this.mousePosition,
+                                    ),
                             };
                             return;
                         default:
@@ -108,9 +121,13 @@ export class BlobTreeEditor {
                 this.state = {
                     type: "createNode",
                     node:
-                        this.state.type === "idle"
-                            ? this.blobTree.createNewRoot(position, 1)
-                            : this.blobTree.createNewChild(this.state.node, position, 1),
+                        this.state.type === "idle" ?
+                            this.blobTree.createNewRoot(position, 1)
+                        :   this.blobTree.createNewChild(
+                                this.state.node,
+                                position,
+                                1,
+                            ),
                 };
                 return;
             }
@@ -150,14 +167,19 @@ export class BlobTreeEditor {
             case "idle":
                 return;
             case "createNode":
-                this.state.node.radius = this.state.node.position.distanceTo(this.mousePosition);
+                this.state.node.radius = this.state.node.position.distanceTo(
+                    this.mousePosition,
+                );
                 return;
             case "moveNode":
-                this.state.node.position = this.mousePosition.add(this.state.offset);
+                this.state.node.position = this.mousePosition.add(
+                    this.state.offset,
+                );
                 return;
             case "resizeNode":
                 this.state.node.radius =
-                    this.mousePosition.distanceTo(this.state.node.position) + this.state.offset;
+                    this.mousePosition.distanceTo(this.state.node.position) +
+                    this.state.offset;
                 return;
             case "selectedIdle":
                 return;
@@ -181,11 +203,10 @@ export class BlobTreeEditor {
 
         for (const node of this.blobTree.iterateNodes()) {
             const style =
-                node === this.getSelectedNode()
-                    ? { stroke: "lime", strokeWidth: 2 }
-                    : node === hover?.node
-                    ? { stroke: "lime", strokeWidth: 1 }
-                    : { stroke: "magenta", strokeWidth: 1 };
+                node === this.getSelectedNode() ?
+                    { stroke: "lime", strokeWidth: 2 }
+                : node === hover?.node ? { stroke: "lime", strokeWidth: 1 }
+                : { stroke: "magenta", strokeWidth: 1 };
             this.canvas.circle(node.position, node.radius, style);
 
             for (const child of this.blobTree.iterateChildNodes(node)) {

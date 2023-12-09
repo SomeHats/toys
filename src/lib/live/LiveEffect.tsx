@@ -4,8 +4,10 @@ import { noop } from "@/lib/utils";
 
 export type LiveEffectScheduleFn = (callback: () => void) => Unsubscribe;
 
-const requestIdleCallback = globalThis.requestIdleCallback ?? globalThis.requestAnimationFrame;
-const cancelIdleCallback = globalThis.cancelIdleCallback ?? globalThis.cancelAnimationFrame;
+const requestIdleCallback =
+    globalThis.requestIdleCallback ?? globalThis.requestAnimationFrame;
+const cancelIdleCallback =
+    globalThis.cancelIdleCallback ?? globalThis.cancelAnimationFrame;
 
 export class LiveEffect {
     private readonly computation: LiveComputation<void>;
@@ -33,7 +35,9 @@ export class LiveEffect {
         this.computation = new LiveComputation(run, debugName, "LiveEffect");
         this.cancelScheduledCallback = schedule(() => {
             this.cancelScheduledCallback = null;
-            this.unsubscribe = this.computation.addEagerInvalidateListener(this.invalidate);
+            this.unsubscribe = this.computation.addEagerInvalidateListener(
+                this.invalidate,
+            );
         });
     }
 

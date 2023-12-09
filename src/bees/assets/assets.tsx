@@ -3,7 +3,9 @@ import { AssetBundle } from "@/bees/AssetBundle";
 
 export const assets = new AssetBundle()
     .add("beeOutlineBaseTexture", () =>
-        AssetBundle.loadBaseTexture(new URL("./bee-outline.png", import.meta.url)),
+        AssetBundle.loadBaseTexture(
+            new URL("./bee-outline.png", import.meta.url),
+        ),
     )
     .add("beeOutlined", (dependency) =>
         AnimatedSpriteStackSheet.load({

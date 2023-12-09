@@ -34,14 +34,19 @@ export function CaterpillarScroller() {
                 const containerWidthPx = targetWidthPx * scale;
                 const containerHeightPx = targetHeightPx * scale;
                 const scrollHeightPx =
-                    Math.ceil((contentHeightPx - containerHeightPx) / squelchDistancePx) *
+                    Math.ceil(
+                        (contentHeightPx - containerHeightPx) /
+                            squelchDistancePx,
+                    ) *
                         squelchDistancePx +
                     containerHeightPx;
 
                 let transform: string[] = [];
                 // each squelch is made up of 2 parts:
                 // growing out from the bottom of the screen, then shrinking back in to the top.
-                const baseDistance = Math.floor(scrollTop / squelchDistancePx) * squelchDistancePx;
+                const baseDistance =
+                    Math.floor(scrollTop / squelchDistancePx) *
+                    squelchDistancePx;
                 const wrappedDistance = scrollTop - baseDistance;
 
                 const scrollBarBaseHeightPx = Math.max(
@@ -57,13 +62,16 @@ export function CaterpillarScroller() {
                     const easedDistance = lerp(
                         0,
                         squelchDistancePx,
-                        inOutSin(invLerp(0, squelchDistancePx / 2, wrappedDistance)),
+                        inOutSin(
+                            invLerp(0, squelchDistancePx / 2, wrappedDistance),
+                        ),
                     );
 
                     const scrollScaleFactor =
                         containerHeightPx / (containerHeightPx - easedDistance);
 
-                    scrollBarActualHeightPx = scrollBarBaseHeightPx / scrollScaleFactor;
+                    scrollBarActualHeightPx =
+                        scrollBarBaseHeightPx / scrollScaleFactor;
                     scrollBarTopPx = mapRange(
                         0,
                         scrollHeightPx,
@@ -73,7 +81,9 @@ export function CaterpillarScroller() {
                     );
 
                     transform = [
-                        `translate(${containerWidthPx / 2}px, ${containerHeightPx}px)`,
+                        `translate(${
+                            containerWidthPx / 2
+                        }px, ${containerHeightPx}px)`,
                         `scale(${
                             1 / mapRange(1, 2, 1, 1.5, scrollScaleFactor)
                         }, ${scrollScaleFactor})`,
@@ -87,14 +97,19 @@ export function CaterpillarScroller() {
                         squelchDistancePx,
                         0,
                         inOutSin(
-                            invLerp(squelchDistancePx / 2, squelchDistancePx, wrappedDistance),
+                            invLerp(
+                                squelchDistancePx / 2,
+                                squelchDistancePx,
+                                wrappedDistance,
+                            ),
                         ),
                     );
 
                     const scrollScaleFactor =
                         containerHeightPx / (containerHeightPx - easedDistance);
 
-                    scrollBarActualHeightPx = scrollBarBaseHeightPx / scrollScaleFactor;
+                    scrollBarActualHeightPx =
+                        scrollBarBaseHeightPx / scrollScaleFactor;
                     scrollBarTopPx = mapRange(
                         0,
                         scrollHeightPx,
@@ -110,7 +125,9 @@ export function CaterpillarScroller() {
                         `scale(${
                             1 / mapRange(1, 2, 1, 1.5, scrollScaleFactor)
                         }, ${scrollScaleFactor})`,
-                        `translate(${-containerWidthPx / 2}px, ${-baseDistance}px)`,
+                        `translate(${
+                            -containerWidthPx / 2
+                        }px, ${-baseDistance}px)`,
                     ];
                 }
                 return (
@@ -124,10 +141,15 @@ export function CaterpillarScroller() {
                             <DeviceContent
                                 scale={scale}
                                 className="p-6"
-                                onSizeChange={(size) => setContentHeightPx(size.y)}
+                                onSizeChange={(size) =>
+                                    setContentHeightPx(size.y)
+                                }
                             >
                                 <H1>Wormy Scroll</H1>
-                                <Lead>Hey babe would you still scroll me if I were a worm?</Lead>
+                                <Lead>
+                                    Hey babe would you still scroll me if I were
+                                    a worm?
+                                </Lead>
                                 <DummyContent />
                             </DeviceContent>
                         </div>
@@ -145,7 +167,9 @@ export function CaterpillarScroller() {
                             contentHeightPx={contentHeightPx}
                             containerHeightPx={containerHeightPx}
                             onScroll={(newScrollTop) => {
-                                assertExists(scrollContainerRef.current).scrollTop = newScrollTop;
+                                assertExists(
+                                    scrollContainerRef.current,
+                                ).scrollTop = newScrollTop;
                             }}
                         />
                     </>
@@ -228,15 +252,26 @@ function WormyScrollbar({
                     d={new SvgPathBuilder()
                         .moveTo(lineBasePx, effectiveTopPx)
                         .bezierCurveTo(
-                            [lineBasePx, effectiveTopPx + effectiveHeightPx * curvyness],
+                            [
+                                lineBasePx,
+                                effectiveTopPx + effectiveHeightPx * curvyness,
+                            ],
                             [
                                 lineBasePx - squishAmountPx,
-                                effectiveTopPx + effectiveHeightPx * (0.5 - curvyness),
+                                effectiveTopPx +
+                                    effectiveHeightPx * (0.5 - curvyness),
                             ],
-                            [lineBasePx - squishAmountPx, effectiveTopPx + effectiveHeightPx * 0.5],
+                            [
+                                lineBasePx - squishAmountPx,
+                                effectiveTopPx + effectiveHeightPx * 0.5,
+                            ],
                         )
                         .smoothBezierCurveTo(
-                            [lineBasePx, effectiveTopPx + effectiveHeightPx * (1 - curvyness)],
+                            [
+                                lineBasePx,
+                                effectiveTopPx +
+                                    effectiveHeightPx * (1 - curvyness),
+                            ],
                             [lineBasePx, effectiveTopPx + effectiveHeightPx],
                         )
                         .toString()}
@@ -274,7 +309,10 @@ function WormyScrollbar({
                     fill="none"
                     strokeLinecap="round"
                     d={new SvgPathBuilder()
-                        .moveTo(lineBasePx - 5, effectiveTopPx + effectiveHeightPx + 2)
+                        .moveTo(
+                            lineBasePx - 5,
+                            effectiveTopPx + effectiveHeightPx + 2,
+                        )
                         .arcTo(
                             3.5,
                             2,

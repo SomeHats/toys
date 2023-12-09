@@ -129,9 +129,15 @@ export function getStrokeOutlinePoints(
         last: isComplete = false,
     } = options;
 
-    const { cap: capStart = true, easing: taperStartEase = (t) => t * (2 - t) } = start;
+    const {
+        cap: capStart = true,
+        easing: taperStartEase = (t) => t * (2 - t),
+    } = start;
 
-    const { cap: capEnd = true, easing: taperEndEase = (t) => --t * t * t + 1 } = end;
+    const {
+        cap: capEnd = true,
+        easing: taperEndEase = (t) => --t * t * t + 1,
+    } = end;
 
     // We can't do anything with an empty array or a stroke with negative size.
     if (points.length === 0 || size <= 0) {
@@ -142,18 +148,14 @@ export function getStrokeOutlinePoints(
     const totalLength = points[points.length - 1].runningLength;
 
     const taperStart =
-        start.taper === false
-            ? 0
-            : start.taper === true
-            ? Math.max(size, totalLength)
-            : (start.taper as number);
+        start.taper === false ? 0
+        : start.taper === true ? Math.max(size, totalLength)
+        : (start.taper as number);
 
     const taperEnd =
-        end.taper === false
-            ? 0
-            : end.taper === true
-            ? Math.max(size, totalLength)
-            : (end.taper as number);
+        end.taper === false ? 0
+        : end.taper === true ? Math.max(size, totalLength)
+        : (end.taper as number);
 
     // The minimum allowed distance between points (squared)
     const minDistance = Math.pow(size * smoothing, 2);
@@ -174,14 +176,22 @@ export function getStrokeOutlinePoints(
             // Rate of change - how much of a change is there?
             const rp = min(1, 1 - sp);
             // Accelerate the pressure
-            pressure = min(1, acc + (rp - acc) * (sp * RATE_OF_PRESSURE_CHANGE));
+            pressure = min(
+                1,
+                acc + (rp - acc) * (sp * RATE_OF_PRESSURE_CHANGE),
+            );
         }
 
         return (acc + pressure) / 2;
     }, points[0].pressure);
 
     // The current radius
-    let radius = getStrokeRadius(size, thinning, points[points.length - 1].pressure, easing);
+    let radius = getStrokeRadius(
+        size,
+        thinning,
+        points[points.length - 1].pressure,
+        easing,
+    );
 
     // The radius of the first saved point
     let firstRadius: number | undefined = undefined;
@@ -229,7 +239,8 @@ export function getStrokeOutlinePoints(
                 const rp = min(1, 1 - sp);
                 pressure = min(
                     1,
-                    prevPressure + (rp - prevPressure) * (sp * RATE_OF_PRESSURE_CHANGE),
+                    prevPressure +
+                        (rp - prevPressure) * (sp * RATE_OF_PRESSURE_CHANGE),
                 );
             }
 
@@ -248,12 +259,15 @@ export function getStrokeOutlinePoints(
             the smaller of the two taper strengths to the radius.
         */
 
-        const ts = runningLength < taperStart ? taperStartEase(runningLength / taperStart) : 1;
+        const ts =
+            runningLength < taperStart ?
+                taperStartEase(runningLength / taperStart)
+            :   1;
 
         const te =
-            totalLength - runningLength < taperEnd
-                ? taperEndEase((totalLength - runningLength) / taperEnd)
-                : 1;
+            totalLength - runningLength < taperEnd ?
+                taperEndEase((totalLength - runningLength) / taperEnd)
+            :   1;
 
         radius = Math.max(0.01, radius * Math.min(ts, te));
 
@@ -306,7 +320,10 @@ export function getStrokeOutlinePoints(
             side's points array.
         */
 
-        const offset = nextVector.lerp(vector, nextDpr).perpendicular().scale(radius);
+        const offset = nextVector
+            .lerp(vector, nextDpr)
+            .perpendicular()
+            .scale(radius);
 
         tl = point.sub(offset);
 
@@ -336,7 +353,9 @@ export function getStrokeOutlinePoints(
     const firstPoint = points[0].point;
 
     const lastPoint =
-        points.length > 1 ? points[points.length - 1].point : firstPoint.add(Vector2.UNIT);
+        points.length > 1 ?
+            points[points.length - 1].point
+        :   firstPoint.add(Vector2.UNIT);
 
     const startCap: Vector2[] = [];
 
@@ -402,7 +421,9 @@ export function getStrokeOutlinePoints(
             turns.
         */
 
-        const direction = points[points.length - 1].vector.negate().perpendicular();
+        const direction = points[points.length - 1].vector
+            .negate()
+            .perpendicular();
 
         if (taperEnd || (taperStart && points.length === 1)) {
             // Tapered end - push the last point to the line
@@ -482,18 +503,14 @@ export function getStrokeCenterPoints(
     const totalLength = points[points.length - 1].runningLength;
 
     const taperStart =
-        start.taper === false
-            ? 0
-            : start.taper === true
-            ? Math.max(size, totalLength)
-            : (start.taper as number);
+        start.taper === false ? 0
+        : start.taper === true ? Math.max(size, totalLength)
+        : (start.taper as number);
 
     const taperEnd =
-        end.taper === false
-            ? 0
-            : end.taper === true
-            ? Math.max(size, totalLength)
-            : (end.taper as number);
+        end.taper === false ? 0
+        : end.taper === true ? Math.max(size, totalLength)
+        : (end.taper as number);
 
     // The minimum allowed distance between points (squared)
     const minDistance = Math.pow(size * smoothing, 2);
@@ -515,14 +532,22 @@ export function getStrokeCenterPoints(
             // Rate of change - how much of a change is there?
             const rp = min(1, 1 - sp);
             // Accelerate the pressure
-            pressure = min(1, acc + (rp - acc) * (sp * RATE_OF_PRESSURE_CHANGE));
+            pressure = min(
+                1,
+                acc + (rp - acc) * (sp * RATE_OF_PRESSURE_CHANGE),
+            );
         }
 
         return (acc + pressure) / 2;
     }, points[0].pressure);
 
     // The current radius
-    let radius = getStrokeRadius(size, thinning, points[points.length - 1].pressure, easing);
+    let radius = getStrokeRadius(
+        size,
+        thinning,
+        points[points.length - 1].pressure,
+        easing,
+    );
 
     // The radius of the first saved point
     let firstRadius: number | undefined = undefined;
@@ -579,7 +604,8 @@ export function getStrokeCenterPoints(
                 const rp = min(1, 1 - sp);
                 pressure = min(
                     1,
-                    prevPressure + (rp - prevPressure) * (sp * RATE_OF_PRESSURE_CHANGE),
+                    prevPressure +
+                        (rp - prevPressure) * (sp * RATE_OF_PRESSURE_CHANGE),
                 );
             }
 
@@ -598,12 +624,15 @@ export function getStrokeCenterPoints(
             the smaller of the two taper strengths to the radius.
         */
 
-        const ts = runningLength < taperStart ? taperStartEase(runningLength / taperStart) : 1;
+        const ts =
+            runningLength < taperStart ?
+                taperStartEase(runningLength / taperStart)
+            :   1;
 
         const te =
-            totalLength - runningLength < taperEnd
-                ? taperEndEase((totalLength - runningLength) / taperEnd)
-                : 1;
+            totalLength - runningLength < taperEnd ?
+                taperEndEase((totalLength - runningLength) / taperEnd)
+            :   1;
 
         radius = Math.max(0.01, radius * Math.min(ts, te));
 
@@ -730,14 +759,20 @@ export function getStrokePoints(
         const last = pts[1];
         pts = pts.slice(0, -1);
         for (let i = 1; i < 5; i++) {
-            pts.push({ point: pts[0].point.lerp(last.point, i / 4), pressure: last.pressure });
+            pts.push({
+                point: pts[0].point.lerp(last.point, i / 4),
+                pressure: last.pressure,
+            });
             // pts.push(vec.lrp(pts[0] as Vector2, last as Vector2, i / 4));
         }
     }
 
     // If there's only one point, add another point at a 1pt offset.
     if (pts.length === 1) {
-        pts.push({ point: pts[0].point.add(Vector2.UNIT), pressure: pts[0].pressure });
+        pts.push({
+            point: pts[0].point.add(Vector2.UNIT),
+            pressure: pts[0].pressure,
+        });
     }
 
     // The strokePoints array will hold the points for the stroke.
@@ -745,7 +780,10 @@ export function getStrokePoints(
     const strokePoints: StrokePoint[] = [
         {
             point: pts[0].point,
-            pressure: pts[0].pressure != null && pts[0].pressure >= 0 ? pts[0].pressure : 0.25,
+            pressure:
+                pts[0].pressure != null && pts[0].pressure >= 0 ?
+                    pts[0].pressure
+                :   0.25,
             vector: Vector2.UNIT,
             distance: 0,
             runningLength: 0,
@@ -768,14 +806,14 @@ export function getStrokePoints(
     for (let i = 1; i < pts.length; i++) {
         const pt = pts[i];
         const point =
-            isComplete && i === max
-                ? // If we're at the last point, and `options.last` is true,
-                  // then add the actual input point.
-                  pt.point
-                : // Otherwise, using the t calculated from the streamline
-                  // option, interpolate a new point between the previous
-                  // point the current point.
-                  prev.point.lerp(pt.point, t);
+            isComplete && i === max ?
+                // If we're at the last point, and `options.last` is true,
+                // then add the actual input point.
+                pt.point
+                // Otherwise, using the t calculated from the streamline
+                // option, interpolate a new point between the previous
+                // point the current point.
+            :   prev.point.lerp(pt.point, t);
 
         // If the new point is the same as the previous point, skip ahead.
         if (prev.point.equals(point)) continue;
@@ -798,7 +836,8 @@ export function getStrokePoints(
             // The adjusted point
             point,
             // The input pressure (or .5 if not specified)
-            pressure: pt.pressure != null && pt.pressure >= 0 ? pt.pressure : 0.5,
+            pressure:
+                pt.pressure != null && pt.pressure >= 0 ? pt.pressure : 0.5,
             // The vector from the current point to the previous point
             vector: prev.point.sub(point).normalize(),
             // The distance between the current point and the previous point

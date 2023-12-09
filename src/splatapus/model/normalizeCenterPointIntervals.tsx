@@ -18,7 +18,8 @@ export function normalizeCenterPointIntervalsLinear(
         const distanceBetweenPoints = current.center.distanceTo(prev.center);
         let consumedDistance = 0;
         while (distanceBetweenPoints - consumedDistance >= currentTargetDist) {
-            const t = (currentTargetDist + consumedDistance) / distanceBetweenPoints;
+            const t =
+                (currentTargetDist + consumedDistance) / distanceBetweenPoints;
             result.push({
                 center: prev.center.lerp(current.center, t),
                 radius: lerp(prev.radius, current.radius, t),
@@ -66,7 +67,8 @@ export function normalizeCenterPointIntervalsQuadratic(
         const end = midPoint;
         let consumedDistance = 0;
         while (distanceBetweenPoints - consumedDistance >= currentTargetDist) {
-            const t = (currentTargetDist + consumedDistance) / distanceBetweenPoints;
+            const t =
+                (currentTargetDist + consumedDistance) / distanceBetweenPoints;
             result.push({
                 center: start.lerp(control, t).lerp(control.lerp(end, t), t),
                 radius: lerp(prev.radius, current.radius, t),

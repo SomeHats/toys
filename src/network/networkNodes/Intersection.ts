@@ -47,7 +47,11 @@ export default class Intersection implements NetworkNode {
     getAllReachableNodes(visited: Set<NetworkNode> = new Set()): NetworkNode[] {
         visited.add(this);
         return uniq(
-            flatten(this._connectionSet.outgoing.map((road) => road.getAllReachableNodes(visited))),
+            flatten(
+                this._connectionSet.outgoing.map((road) =>
+                    road.getAllReachableNodes(visited),
+                ),
+            ),
         );
     }
 
@@ -60,7 +64,10 @@ export default class Intersection implements NetworkNode {
         let shortestDistance = Infinity;
         this.outgoingConnections.forEach((road) => {
             const traveller = road.getTravellerAfterPosition(-1);
-            if (traveller && traveller.positionOnCurrentRoad < shortestDistance) {
+            if (
+                traveller &&
+                traveller.positionOnCurrentRoad < shortestDistance
+            ) {
                 bestTraveller = traveller;
                 shortestDistance = traveller.positionOnCurrentRoad;
             }
@@ -74,7 +81,10 @@ export default class Intersection implements NetworkNode {
         let shortestDistance = Infinity;
         this.incomingConnections.forEach((road) => {
             const traveller = road.getTravellerBeforePosition(road.length);
-            if (traveller && traveller.distanceToEndOfCurrentRoad < shortestDistance) {
+            if (
+                traveller &&
+                traveller.distanceToEndOfCurrentRoad < shortestDistance
+            ) {
                 bestTraveller = traveller;
                 shortestDistance = traveller.distanceToEndOfCurrentRoad;
             }

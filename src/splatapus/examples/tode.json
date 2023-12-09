@@ -8,7 +8,10 @@
             },
             "key.TCuOiBB2p2jcv9lK": {
                 "id": "key.TCuOiBB2p2jcv9lK",
-                "position": { "x": -405.3625707339681, "y": -451.48989378216874 }
+                "position": {
+                    "x": -405.3625707339681,
+                    "y": -451.48989378216874
+                }
             },
             "key.PZ6A2HfxkQu6geUt": {
                 "id": "key.PZ6A2HfxkQu6geUt",
@@ -16,11 +19,17 @@
             },
             "key.5mmnsMgw3W4srg2a": {
                 "id": "key.5mmnsMgw3W4srg2a",
-                "position": { "x": 1.2445829458402322, "y": -105.80276275105261 }
+                "position": {
+                    "x": 1.2445829458402322,
+                    "y": -105.80276275105261
+                }
             },
             "key.XfTuQOrmMjcd1MVe": {
                 "id": "key.XfTuQOrmMjcd1MVe",
-                "position": { "x": -19.359333026966567, "y": -44.42534383496911 }
+                "position": {
+                    "x": -19.359333026966567,
+                    "y": -44.42534383496911
+                }
             }
         },
         "shapes": {

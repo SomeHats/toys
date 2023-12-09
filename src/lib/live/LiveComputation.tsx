@@ -18,7 +18,10 @@ export function incrementGlobalVersion() {
 
 let computationContext: ComputationContext | null = null;
 
-type DependencyMap = Map<Live<unknown>, { value: unknown; unsubscribe: Unsubscribe | null }>;
+type DependencyMap = Map<
+    Live<unknown>,
+    { value: unknown; unsubscribe: Unsubscribe | null }
+>;
 type NonTrackingContext = {
     previous: ComputationContext | null;
     shouldTrack: false;
@@ -57,7 +60,10 @@ function endTracking(context: TrackingContext) {
     computationContext = computationContext.previous;
 
     if (context.shouldTrack && context.previousDependencies) {
-        for (const [liveValue, { unsubscribe }] of context.previousDependencies) {
+        for (const [
+            liveValue,
+            { unsubscribe },
+        ] of context.previousDependencies) {
             if (!context.nextDependencies.has(liveValue)) {
                 unsubscribe?.();
             }
@@ -75,21 +81,36 @@ function flushInvalidations() {
 export function trackRead(liveValue: Live<unknown>) {
     assert(computationContext, "cannot call .live() outside of a live context");
 
-    if (computationContext.shouldTrack && !computationContext.nextDependencies.has(liveValue)) {
-        const unsubscribe = computationContext.shouldListen
-            ? computationContext.previousDependencies?.get(liveValue)?.unsubscribe ??
-              liveValue.addEagerInvalidateListener(computationContext.invalidateListener)
-            : null;
+    if (
+        computationContext.shouldTrack &&
+        !computationContext.nextDependencies.has(liveValue)
+    ) {
+        const unsubscribe =
+            computationContext.shouldListen ?
+                computationContext.previousDependencies?.get(liveValue)
+                    ?.unsubscribe ??
+                liveValue.addEagerInvalidateListener(
+                    computationContext.invalidateListener,
+                )
+            :   null;
         const value = liveValue.getOnce();
-        computationContext.nextDependencies.set(liveValue, { value, unsubscribe });
+        computationContext.nextDependencies.set(liveValue, {
+            value,
+            unsubscribe,
+        });
     }
 }
 
-function didAnyDependenciesChange(dependencies: DependencyMap, debugName: string) {
+function didAnyDependenciesChange(
+    dependencies: DependencyMap,
+    debugName: string,
+) {
     for (const [liveValue, { value }] of dependencies) {
         if (!Object.is(liveValue.getOnce(), value)) {
             if (PRINT_TRIGGER_LOG) {
-                console.log(`recalculate ${debugName} because ${liveValue.getDebugName()} changed`);
+                console.log(
+                    `recalculate ${debugName} because ${liveValue.getDebugName()} changed`,
+                );
             }
             return true;
         }
@@ -98,7 +119,10 @@ function didAnyDependenciesChange(dependencies: DependencyMap, debugName: string
 }
 
 export function runLiveWithoutListening<T>(fn: () => T): T {
-    const nonTracking: NonTrackingContext = { shouldTrack: false, previous: computationContext };
+    const nonTracking: NonTrackingContext = {
+        shouldTrack: false,
+        previous: computationContext,
+    };
     computationContext = nonTracking;
     const result = fn();
     assert(computationContext === nonTracking);
@@ -114,7 +138,11 @@ export class LiveComputation<T> {
     private isComputing = false;
     private completion: Result<T, unknown> | null = null;
 
-    constructor(private readonly compute: () => T, debugName: string | undefined, type: string) {
+    constructor(
+        private readonly compute: () => T,
+        debugName: string | undefined,
+        type: string,
+    ) {
         this.invalidation = new LiveInvalidation(debugName, type);
     }
 
@@ -123,7 +151,10 @@ export class LiveComputation<T> {
     }
 
     private invalidate = () => {
-        assert(!this.isComputing, "cannot write whilst computing dependant live computation");
+        assert(
+            !this.isComputing,
+            "cannot write whilst computing dependant live computation",
+        );
         if (this._isValid) {
             this._isValid = false;
             this.invalidation.invalidate();
@@ -215,7 +246,9 @@ export class LiveComputation<T> {
     subscribeToDependencies() {
         if (this.isValid() && this.dependencies) {
             for (const [liveValue, subscription] of this.dependencies) {
-                subscription.unsubscribe = liveValue.addEagerInvalidateListener(this.invalidate);
+                subscription.unsubscribe = liveValue.addEagerInvalidateListener(
+                    this.invalidate,
+                );
             }
         } else {
             this.computeIfNeeded();

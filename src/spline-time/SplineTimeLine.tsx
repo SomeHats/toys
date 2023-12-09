@@ -13,14 +13,20 @@ export class SplineTimeLine {
     constructor(readonly points: ReadonlyArray<Vector2>) {}
 
     insertPointAtIndex(index: number, point: Vector2) {
-        return new SplineTimeLine(copyArrayAndInsert(this.points, index, point));
+        return new SplineTimeLine(
+            copyArrayAndInsert(this.points, index, point),
+        );
     }
 
     updatePointAtIndex(index: number, point: Vector2) {
-        return new SplineTimeLine(copyArrayAndReplace(this.points, index, point));
+        return new SplineTimeLine(
+            copyArrayAndReplace(this.points, index, point),
+        );
     }
 
-    getClosestPointTo(target: Vector2): { index: number; point: Vector2; distance: number } | null {
+    getClosestPointTo(
+        target: Vector2,
+    ): { index: number; point: Vector2; distance: number } | null {
         if (this.points.length === 0) return null;
 
         let closestPointIndex = 0;

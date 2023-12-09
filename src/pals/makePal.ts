@@ -1,7 +1,10 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 import Entity from "@/lib/scene/Entity";
 import { generateRandomPalConfig } from "@/pals/PalConfig";
-import { PalAbsoluteController, PalTargetController } from "@/pals/PalController";
+import {
+    PalAbsoluteController,
+    PalTargetController,
+} from "@/pals/PalController";
 import PalGeom from "@/pals/PalGeom";
 import PalRenderer from "@/pals/PalRenderer";
 import PalWalkAnimationController from "@/pals/PalWalkAnimationController";

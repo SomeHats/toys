@@ -6,7 +6,11 @@ export class GlShader {
     readonly shader: WebGLShader;
     private readonly gl: Gl;
 
-    constructor(_gl: Gl, readonly type: GlShaderType, source: string) {
+    constructor(
+        _gl: Gl,
+        readonly type: GlShaderType,
+        source: string,
+    ) {
         this.gl = _gl;
         const { gl } = _gl;
         const shader = assertExists(gl.createShader(glEnum(type)));
@@ -14,7 +18,9 @@ export class GlShader {
         gl.compileShader(shader);
         const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
         if (!success) {
-            const error = `Failed to compile shader: ${gl.getShaderInfoLog(shader)}`;
+            const error = `Failed to compile shader: ${gl.getShaderInfoLog(
+                shader,
+            )}`;
             gl.deleteShader(shader);
             fail(error);
         }

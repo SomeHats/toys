@@ -15,7 +15,11 @@ type ShapeVersionLookupIndex = UniqueIndex<
     SplatShapeVersionId,
     [SplatShapeId, SplatKeyPointId]
 >;
-type ShapeVersionIdsByShapeIndex = Index<SplatShapeVersion, SplatShapeVersionId, SplatShapeId>;
+type ShapeVersionIdsByShapeIndex = Index<
+    SplatShapeVersion,
+    SplatShapeVersionId,
+    SplatShapeId
+>;
 type ShapeVersionIdsByKeyPointIndex = Index<
     SplatShapeVersion,
     SplatShapeVersionId,

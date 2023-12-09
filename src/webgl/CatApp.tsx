@@ -5,7 +5,11 @@ import { Vector2 } from "@/lib/geom/Vector2";
 import { Vector3, Vector3Ish } from "@/lib/geom/Vector3";
 import { Gl, glsl } from "@/lib/gl/Gl";
 import { GlBuffer } from "@/lib/gl/GlBuffer";
-import { GlBufferUsage, GlCapability, GlVertexAttribType } from "@/lib/gl/GlTypes";
+import {
+    GlBufferUsage,
+    GlCapability,
+    GlVertexAttribType,
+} from "@/lib/gl/GlTypes";
 import { GlVertexArray } from "@/lib/gl/GlVertexArray";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { useResizeObserver } from "@/lib/hooks/useResizeObserver";
@@ -126,7 +130,11 @@ function start(
         // const camera = Matrix4.rotateY(degreesToRadians(controls.cameraAngle)).translate(
         //     controls.cameraTranslate,
         // );
-        const camera = Matrix4.lookAt(controls.cameraTranslate, targetPosition(), Vector3.Y);
+        const camera = Matrix4.lookAt(
+            controls.cameraTranslate,
+            targetPosition(),
+            Vector3.Y,
+        );
 
         // create a view matrix from the camera:
         const view = camera.inverse();
@@ -191,19 +199,23 @@ function start(
             0, 0, 30, 30, 0, 30, 0, 150, 30, 0, 150, 30, 30, 0, 30, 30, 150, 30,
 
             // top rung back
-            30, 0, 30, 100, 0, 30, 30, 30, 30, 30, 30, 30, 100, 0, 30, 100, 30, 30,
+            30, 0, 30, 100, 0, 30, 30, 30, 30, 30, 30, 30, 100, 0, 30, 100, 30,
+            30,
 
             // middle rung back
-            30, 60, 30, 67, 60, 30, 30, 90, 30, 30, 90, 30, 67, 60, 30, 67, 90, 30,
+            30, 60, 30, 67, 60, 30, 30, 90, 30, 30, 90, 30, 67, 60, 30, 67, 90,
+            30,
 
             // top
             0, 0, 0, 100, 0, 0, 100, 0, 30, 0, 0, 0, 100, 0, 30, 0, 0, 30,
 
             // top rung right
-            100, 0, 0, 100, 30, 0, 100, 30, 30, 100, 0, 0, 100, 30, 30, 100, 0, 30,
+            100, 0, 0, 100, 30, 0, 100, 30, 30, 100, 0, 0, 100, 30, 30, 100, 0,
+            30,
 
             // under top rung
-            30, 30, 0, 30, 30, 30, 100, 30, 30, 30, 30, 0, 100, 30, 30, 100, 30, 0,
+            30, 30, 0, 30, 30, 30, 100, 30, 30, 30, 30, 0, 100, 30, 30, 100, 30,
+            0,
 
             // between top rung and middle
             30, 30, 0, 30, 60, 30, 30, 30, 30, 30, 30, 0, 30, 60, 0, 30, 60, 30,
@@ -218,10 +230,12 @@ function start(
             30, 90, 0, 30, 90, 30, 67, 90, 30, 30, 90, 0, 67, 90, 30, 67, 90, 0,
 
             // right of bottom
-            30, 90, 0, 30, 150, 30, 30, 90, 30, 30, 90, 0, 30, 150, 0, 30, 150, 30,
+            30, 90, 0, 30, 150, 30, 30, 90, 30, 30, 90, 0, 30, 150, 0, 30, 150,
+            30,
 
             // bottom
-            0, 150, 0, 0, 150, 30, 30, 150, 30, 0, 150, 0, 30, 150, 30, 30, 150, 0,
+            0, 150, 0, 0, 150, 30, 30, 150, 30, 0, 150, 0, 30, 150, 30, 30, 150,
+            0,
 
             // left side
             0, 0, 0, 0, 0, 30, 0, 150, 30, 0, 0, 0, 0, 150, 30, 0, 150, 0,
@@ -237,7 +251,11 @@ function start(
         const matrix = Matrix4.rotateX(Math.PI).translate(-50, -75, -15);
 
         for (let ii = 0; ii < positions.length; ii += 3) {
-            const before = new Vector3(positions[ii + 0], positions[ii + 1], positions[ii + 2]);
+            const before = new Vector3(
+                positions[ii + 0],
+                positions[ii + 1],
+                positions[ii + 2],
+            );
             const vector = matrix.transformVector3(
                 positions[ii + 0],
                 positions[ii + 1],
@@ -317,7 +335,8 @@ export function CatApp() {
 
     const size = useResizeObserver<Vector2>(
         container,
-        (entry) => new Vector2(entry.contentRect.width, entry.contentRect.height),
+        (entry) =>
+            new Vector2(entry.contentRect.width, entry.contentRect.height),
     );
     const sizeToUse = size ?? Vector2.UNIT;
     const scaledSize = sizeToUse.scale(window.devicePixelRatio);
@@ -346,13 +365,23 @@ export function CatApp() {
                 ref={glCanvasRef}
                 width={scaledSize.x}
                 height={scaledSize.y}
-                style={{ position: "absolute", width: sizeToUse.x, height: sizeToUse.y, inset: 0 }}
+                style={{
+                    position: "absolute",
+                    width: sizeToUse.x,
+                    height: sizeToUse.y,
+                    inset: 0,
+                }}
             />
             <canvas
                 ref={debugCanvasRef}
                 width={scaledSize.x}
                 height={scaledSize.y}
-                style={{ position: "absolute", width: sizeToUse.x, height: sizeToUse.y, inset: 0 }}
+                style={{
+                    position: "absolute",
+                    width: sizeToUse.x,
+                    height: sizeToUse.y,
+                    inset: 0,
+                }}
             />
         </div>
     );

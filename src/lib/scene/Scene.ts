@@ -52,7 +52,10 @@ export default class Scene {
     }
 
     set isPlaying(newValue: boolean) {
-        assert(this.frameHandle !== null, "cannot set isPlaying without calling start");
+        assert(
+            this.frameHandle !== null,
+            "cannot set isPlaying without calling start",
+        );
         this._isPlaying = newValue;
     }
 
@@ -80,7 +83,10 @@ export default class Scene {
             !this.hasSystem(system.constructor as SystemClass<SceneSystem>),
             "only one system of each type allowed",
         );
-        this.systemsByClass.set(system.constructor as SystemClass<SceneSystem>, system);
+        this.systemsByClass.set(
+            system.constructor as SystemClass<SceneSystem>,
+            system,
+        );
         system.afterAddToScene(this);
     }
 

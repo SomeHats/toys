@@ -15,7 +15,11 @@ function scenario() {
         }
     });
 
-    const computation = new LiveComputation(computationFn, undefined, "computation");
+    const computation = new LiveComputation(
+        computationFn,
+        undefined,
+        "computation",
+    );
 
     return { v1, v2, vConditional, computation, computationFn };
 }

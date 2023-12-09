@@ -65,7 +65,9 @@ jobs:
                       ~/.cargo/git/db/
                       src/slomojs/crate/target/
                       target
-                  key: ${{ hashFiles('.rustversion') }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+                  key:
+                      ${{ hashFiles('.rustversion') }}-cargo-${{
+                      hashFiles('**/Cargo.lock') }}
 
             - name: Install dependencies
               run: yarn --immutable

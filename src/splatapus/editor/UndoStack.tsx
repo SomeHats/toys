@@ -34,8 +34,11 @@ export const UndoStack = {
         current: { ...entry, options: {} },
     }),
     canUndo: (undoStack: UndoStack): boolean => undoStack.undoStates.length > 0,
-    canRedo: (undoStack: UndoStack): boolean => (undoStack.redoStates?.length ?? 0) > 0,
-    beginOperation: (undoStack: UndoStack): { undoStack: UndoStack; txId: number } => {
+    canRedo: (undoStack: UndoStack): boolean =>
+        (undoStack.redoStates?.length ?? 0) > 0,
+    beginOperation: (
+        undoStack: UndoStack,
+    ): { undoStack: UndoStack; txId: number } => {
         const txId = Math.random();
         assert(undoStack.pendingOp == null, "pending op already in progress");
 
@@ -81,7 +84,11 @@ export const UndoStack = {
             },
         };
     },
-    commitOperation: (undoStack: UndoStack, txId: number, options: OpOptions = {}): UndoStack => {
+    commitOperation: (
+        undoStack: UndoStack,
+        txId: number,
+        options: OpOptions = {},
+    ): UndoStack => {
         assert(undoStack.pendingOp?.txId === txId, "Pending op mismatch");
         const undoStates = [
             {
@@ -96,7 +103,10 @@ export const UndoStack = {
         }
         const current = { ...undoStack.current, options };
         if (options.lockstepLocation) {
-            current.location = applyUpdate(current.location, options.lockstepLocation);
+            current.location = applyUpdate(
+                current.location,
+                options.lockstepLocation,
+            );
         }
         return {
             ...undoStack,
@@ -171,20 +181,24 @@ export const UndoStack = {
         const undoStates = [undoStack.current, ...undoStack.undoStates];
         return {
             ...undoStack,
-            current: targetState.options.lockstepLocation
-                ? {
-                      ...targetState,
-                      location: applyUpdate(
-                          undoStack.current.location,
-                          targetState.options.lockstepLocation,
-                      ),
-                  }
-                : targetState,
+            current:
+                targetState.options.lockstepLocation ?
+                    {
+                        ...targetState,
+                        location: applyUpdate(
+                            undoStack.current.location,
+                            targetState.options.lockstepLocation,
+                        ),
+                    }
+                :   targetState,
             undoStates,
             redoStates: redoStates.length === 0 ? null : redoStates,
         };
     },
-    updateLocation: (undoStack: UndoStack, action: UpdateAction<SplatLocationState>): UndoStack => {
+    updateLocation: (
+        undoStack: UndoStack,
+        action: UpdateAction<SplatLocationState>,
+    ): UndoStack => {
         return {
             ...undoStack,
             current: {

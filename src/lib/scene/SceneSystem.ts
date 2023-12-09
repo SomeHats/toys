@@ -14,7 +14,8 @@ export default abstract class SceneSystem {
             "SceneSystem is an abstract class that must be extended",
         );
         assert(
-            (this.constructor as typeof SceneSystem).systemName !== DEFAULT_NAME,
+            (this.constructor as typeof SceneSystem).systemName !==
+                DEFAULT_NAME,
             "classes extending SceneSystem must override SceneSystem.systemName",
         );
     }

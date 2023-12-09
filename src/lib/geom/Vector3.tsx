@@ -6,7 +6,9 @@ import { Schema } from "@/lib/schema";
 export type Vector3Ish =
     | { readonly x: number; readonly y: number; readonly z: number }
     | readonly [x: number, y: number, z: number];
-export type Vector3Args = [x: number, y: number, z: number] | [vector: Vector3Ish | Vector3];
+export type Vector3Args =
+    | [x: number, y: number, z: number]
+    | [vector: Vector3Ish | Vector3];
 
 export type Vector3Key = "x" | "y" | "z";
 
@@ -48,7 +50,11 @@ export class Vector3 {
         return new Vector3(vector3Ish.x, vector3Ish.y, vector3Ish.z);
     }
 
-    constructor(readonly x: number, readonly y: number, readonly z: number) {}
+    constructor(
+        readonly x: number,
+        readonly y: number,
+        readonly z: number,
+    ) {}
 
     toString(fixedAmt?: number) {
         const x = fixedAmt == null ? this.x : this.x.toFixed(fixedAmt);
@@ -67,7 +73,10 @@ export class Vector3 {
 
     equals(...args: Vector3Args) {
         const other = Vector3.fromArgs(args);
-        return this === other || (this.x === other.x && this.y === other.y && this.z === other.z);
+        return (
+            this === other ||
+            (this.x === other.x && this.y === other.y && this.z === other.z)
+        );
     }
 
     distanceToSquared(...args: Vector3Args) {
@@ -92,24 +101,44 @@ export class Vector3 {
 
     add(...args: Vector3Args): Vector3 {
         const other = Vector3.fromArgs(args);
-        return new Vector3(this.x + other.x, this.y + other.y, this.z + other.z);
+        return new Vector3(
+            this.x + other.x,
+            this.y + other.y,
+            this.z + other.z,
+        );
     }
 
     sub(...args: Vector3Args): Vector3 {
         const other = Vector3.fromArgs(args);
-        return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z);
+        return new Vector3(
+            this.x - other.x,
+            this.y - other.y,
+            this.z - other.z,
+        );
     }
 
     floor(): Vector3 {
-        return new Vector3(Math.floor(this.x), Math.floor(this.y), Math.floor(this.z));
+        return new Vector3(
+            Math.floor(this.x),
+            Math.floor(this.y),
+            Math.floor(this.z),
+        );
     }
 
     ceil(): Vector3 {
-        return new Vector3(Math.ceil(this.x), Math.ceil(this.y), Math.ceil(this.z));
+        return new Vector3(
+            Math.ceil(this.x),
+            Math.ceil(this.y),
+            Math.ceil(this.z),
+        );
     }
 
     round(): Vector3 {
-        return new Vector3(Math.round(this.x), Math.round(this.y), Math.round(this.z));
+        return new Vector3(
+            Math.round(this.x),
+            Math.round(this.y),
+            Math.round(this.z),
+        );
     }
 
     withMagnitude(magnitude: number): Vector3 {

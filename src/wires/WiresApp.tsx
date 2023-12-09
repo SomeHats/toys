@@ -2,7 +2,10 @@ import { assertExists } from "@/lib/assert";
 import { Path } from "@/lib/geom/Path";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { useGestureDetector } from "@/lib/hooks/useGestureDetector";
-import { sizeFromBorderBox, useResizeObserver } from "@/lib/hooks/useResizeObserver";
+import {
+    sizeFromBorderBox,
+    useResizeObserver,
+} from "@/lib/hooks/useResizeObserver";
 import { useSessionStorageState } from "@/lib/hooks/useStoredState";
 import {
     UpdateAction,
@@ -131,7 +134,9 @@ function WiresCanvas({
 const wireJoinRadius = 8;
 function LineRenderer({ points }: { points: Vector2[] }) {
     const svgPath = useMemo(() => {
-        const path = Path.straightThroughPoints(...points).autoRound(wireJoinRadius);
+        const path = Path.straightThroughPoints(...points).autoRound(
+            wireJoinRadius,
+        );
         return Path.segmentToSvgPath(path);
     }, [points]);
 
@@ -165,16 +170,19 @@ function segmentifyPoints(points: ReadonlyArray<Vector2>): Array<Vector2> {
 
         const direction = end.sub(start).normalize();
         const nearestDirection = assertExists(
-            minBy(possibleDirections, (dir) => Math.abs(dir - direction.angle())),
+            minBy(possibleDirections, (dir) =>
+                Math.abs(dir - direction.angle()),
+            ),
         );
 
         if (!currentRun || nearestDirection !== currentRun.direction) {
             if (currentRun) {
                 runs.push({
                     direction: Vector2.fromPolar(currentRun.direction, 1),
-                    referencePoint: runs.length
-                        ? currentRun.start.lerp(end, 0.5)
-                        : currentRun.start,
+                    referencePoint:
+                        runs.length ?
+                            currentRun.start.lerp(end, 0.5)
+                        :   currentRun.start,
                 });
             }
             currentRun = { start, direction: nearestDirection };
@@ -196,7 +204,8 @@ function segmentifyPoints(points: ReadonlyArray<Vector2>): Array<Vector2> {
     for (const [prev, next] of windows(runs, 2)) {
         // intersect the lines from the two runs
         const denominator =
-            next.direction.y * prev.direction.x - next.direction.x * prev.direction.y;
+            next.direction.y * prev.direction.x -
+            next.direction.x * prev.direction.y;
 
         // Lines are parallel
         if (denominator === 0) {
@@ -205,8 +214,10 @@ function segmentifyPoints(points: ReadonlyArray<Vector2>): Array<Vector2> {
         }
 
         const ua =
-            (next.direction.x * (prev.referencePoint.y - next.referencePoint.y) -
-                next.direction.y * (prev.referencePoint.x - next.referencePoint.x)) /
+            (next.direction.x *
+                (prev.referencePoint.y - next.referencePoint.y) -
+                next.direction.y *
+                    (prev.referencePoint.x - next.referencePoint.x)) /
             denominator;
 
         result.push(

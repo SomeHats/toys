@@ -61,7 +61,9 @@ export class TerrainCell {
         this.noiseHeight = getNoiseHeight(this.position.x, this.position.y);
     }
 
-    *iterateEdgesStartingFromIndex(startIndex: number): IterableIterator<number> {
+    *iterateEdgesStartingFromIndex(
+        startIndex: number,
+    ): IterableIterator<number> {
         for (let i = 0; i < this.polygon.length; i++) {
             yield (startIndex + i) % this.polygon.length;
         }
@@ -97,7 +99,9 @@ export class TerrainCell {
     }
 
     getColor(shouldIncludeDrift = true): string {
-        return interpolateBiome(mapRange(-1, 1, 0, 1, this.getHeight(shouldIncludeDrift)));
+        return interpolateBiome(
+            mapRange(-1, 1, 0, 1, this.getHeight(shouldIncludeDrift)),
+        );
     }
 
     findConnectedCellsInRadius(radius: number): Array<TerrainCell> {
@@ -126,11 +130,18 @@ export class TerrainCell {
         this.heightAdjustment += amount;
     }
 
-    private getPressureForNeighbour(neighbour: TerrainCell, pressure: Vector2): Vector2 | null {
+    private getPressureForNeighbour(
+        neighbour: TerrainCell,
+        pressure: Vector2,
+    ): Vector2 | null {
         const positionDifference = neighbour.position.sub(this.position);
 
         const pressureCoefficient = Math.cos(
-            clamp(-Math.PI / 2, Math.PI / 2, positionDifference.angleBetween(pressure) * 1),
+            clamp(
+                -Math.PI / 2,
+                Math.PI / 2,
+                positionDifference.angleBetween(pressure) * 1,
+            ),
         );
 
         if (pressureCoefficient <= 0) {
@@ -150,7 +161,10 @@ export class TerrainCell {
         const neighboursToPropagateTo: Array<[TerrainCell, Vector2]> = [];
         for (const neighbourId of this.neighbourCellIds) {
             const neighbour = this.terrain.cellsById[neighbourId];
-            const neighbourPressure = this.getPressureForNeighbour(neighbour, pressure);
+            const neighbourPressure = this.getPressureForNeighbour(
+                neighbour,
+                pressure,
+            );
             if (neighbourPressure) {
                 neighboursToPropagateTo.push([neighbour, neighbourPressure]);
             }
@@ -158,7 +172,9 @@ export class TerrainCell {
 
         for (const [neighbour, neighbourPressure] of neighboursToPropagateTo) {
             neighbour.applyPressureForDrift(
-                neighbourPressure.scale(1 / Math.sqrt(neighboursToPropagateTo.length)),
+                neighbourPressure.scale(
+                    1 / Math.sqrt(neighboursToPropagateTo.length),
+                ),
             );
         }
     }
@@ -175,7 +191,10 @@ export class TerrainCell {
                 continue;
             }
 
-            const neighbourPressure = this.getPressureForNeighbour(neighbour, pressure);
+            const neighbourPressure = this.getPressureForNeighbour(
+                neighbour,
+                pressure,
+            );
             if (neighbourPressure) {
                 neighboursToPropagateTo.push([neighbour, neighbourPressure]);
             }

@@ -1,7 +1,10 @@
 import { Result } from "@/lib/Result";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { Schema, SchemaType } from "@/lib/schema";
-import { getLocalStorageItemUnchecked, setLocalStorageItemUnchecked } from "@/lib/storage";
+import {
+    getLocalStorageItemUnchecked,
+    setLocalStorageItemUnchecked,
+} from "@/lib/storage";
 import { debounce } from "@/lib/utils";
 import { AUTOSAVE_DEBOUNCE_TIME_MS } from "@/splatapus/constants";
 import { SplatLocationState } from "@/splatapus/editor/SplatLocation";
@@ -26,12 +29,21 @@ export function loadSaved(key: string): Result<SplatapusState, string> {
 export function writeSaved(key: string, state: SplatapusState) {
     // @ts-expect-error this is fine
     window.splatSerializedDoc = state;
-    setLocalStorageItemUnchecked(`splatapus.${key}`, splatapusStateSchema.serialize(state));
+    setLocalStorageItemUnchecked(
+        `splatapus.${key}`,
+        splatapusStateSchema.serialize(state),
+    );
 }
 
-export const writeSavedDebounced = debounce(AUTOSAVE_DEBOUNCE_TIME_MS, writeSaved);
+export const writeSavedDebounced = debounce(
+    AUTOSAVE_DEBOUNCE_TIME_MS,
+    writeSaved,
+);
 
-export function getDefaultLocationForDocument(document: SplatDocModel, screenSize: Vector2) {
+export function getDefaultLocationForDocument(
+    document: SplatDocModel,
+    screenSize: Vector2,
+) {
     const keyPointId = [...document.keyPoints][0].id;
     const shapeId = [...document.shapes][0].id;
     return SplatLocationState.initialize(keyPointId, shapeId);

@@ -30,11 +30,17 @@ export class Viewport {
 
     readonly pan = new LiveMemoWritable(
         () => this.state.live().pan,
-        (update) => this.state.update((state) => applyUpdateWithin(state, "pan", update)),
+        (update) =>
+            this.state.update((state) =>
+                applyUpdateWithin(state, "pan", update),
+            ),
     );
     readonly zoom = new LiveMemoWritable(
         () => this.state.live().zoom,
-        (update) => this.state.update((state) => applyUpdateWithin(state, "zoom", update)),
+        (update) =>
+            this.state.update((state) =>
+                applyUpdateWithin(state, "zoom", update),
+            ),
     );
 
     screenSizeWithSidebarOpenLive(): Vector2 {
@@ -77,7 +83,9 @@ export class Viewport {
     }
 
     screenToSceneLive(screenCoords: Vector2): Vector2 {
-        return screenCoords.add(this.originLive()).scale(1 / this.state.live().zoom);
+        return screenCoords
+            .add(this.originLive())
+            .scale(1 / this.state.live().zoom);
     }
 
     sceneToScreenLive(sceneCoords: Vector2): Vector2 {

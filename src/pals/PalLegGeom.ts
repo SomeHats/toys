@@ -5,7 +5,8 @@ import { PalControlData } from "@/pals/PalController";
 import PalGeom from "@/pals/PalGeom";
 
 const getLegRadius = ({ radius, hipHeight, legWidth }: PalConfig) =>
-    Math.sqrt(radius * radius - (radius - hipHeight) * (radius - hipHeight)) - legWidth;
+    Math.sqrt(radius * radius - (radius - hipHeight) * (radius - hipHeight)) -
+    legWidth;
 
 export type PalLegGeomUpdate = {
     footXY: Vector2;
@@ -43,9 +44,10 @@ export default class PalLegGeom {
     }
 
     getIdealFootRestingXY(): Vector2 {
-        return Vector2.fromPolar(this.palData.heading + this.angleOffset, this.floorRadius).add(
-            this.palData.position,
-        );
+        return Vector2.fromPolar(
+            this.palData.heading + this.angleOffset,
+            this.floorRadius,
+        ).add(this.palData.position);
     }
 
     getFootXY(): Vector2 {
@@ -53,7 +55,11 @@ export default class PalLegGeom {
     }
 
     getFootZ(): number {
-        return lerp(0, this.getHipZ() * this.config.legMaxLift, this.liftAmount);
+        return lerp(
+            0,
+            this.getHipZ() * this.config.legMaxLift,
+            this.liftAmount,
+        );
     }
 
     getFootOrigin(): Vector2 {
@@ -62,8 +68,18 @@ export default class PalLegGeom {
 
     getKneeXY(): Vector2 {
         return this.palData.position
-            .add(Vector2.fromPolar(this.palData.heading + this.angleOffset, this.kneeRadius))
-            .add(Vector2.fromPolar(this.palData.heading, this.liftAmount * this.config.kneeMaxOut));
+            .add(
+                Vector2.fromPolar(
+                    this.palData.heading + this.angleOffset,
+                    this.kneeRadius,
+                ),
+            )
+            .add(
+                Vector2.fromPolar(
+                    this.palData.heading,
+                    this.liftAmount * this.config.kneeMaxOut,
+                ),
+            );
     }
 
     getKneeZ(): number {
@@ -76,7 +92,10 @@ export default class PalLegGeom {
 
     getHipXY(): Vector2 {
         return this.palData.position.add(
-            Vector2.fromPolar(this.palData.heading + this.angleOffset, this.hipRadius),
+            Vector2.fromPolar(
+                this.palData.heading + this.angleOffset,
+                this.hipRadius,
+            ),
         );
         // return this._hipEllipse
         //   .pointOnCircumference(this.angle)
@@ -85,7 +104,11 @@ export default class PalLegGeom {
 
     getHipZ(): number {
         const bod = this.palGeom.getBod();
-        return this.palData.position.y - bod.center.y - (bod.radius - this.config.hipHeight);
+        return (
+            this.palData.position.y -
+            bod.center.y -
+            (bod.radius - this.config.hipHeight)
+        );
     }
 
     getHipOrigin(): Vector2 {

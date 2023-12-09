@@ -6,10 +6,10 @@ import path from "path";
 import prettier from "prettier";
 import resolveConfig from "tailwindcss/resolveConfig.js";
 import url from "url";
-import tailwindConfig from "../tailwind.config.js";
+import rawTailwindConfig from "../tailwind.config.js";
 
-const config = resolveConfig(tailwindConfig);
-const { colors, transitionTimingFunction: easings } = config.theme;
+const tailwindConfig = resolveConfig(rawTailwindConfig);
+const { colors, transitionTimingFunction: easings } = tailwindConfig.theme;
 
 const scriptDir = url.fileURLToPath(new URL(".", import.meta.url));
 
@@ -39,9 +39,13 @@ const code = [
         }
         const niceName = camelCase(name);
         return [
-            ...Object.entries(colors).map(([num, v]) => `${niceName}${num}: ${JSON.stringify(v)},`),
+            ...Object.entries(colors).map(
+                ([num, v]) => `${niceName}${num}: ${JSON.stringify(v)},`,
+            ),
             `${niceName}: makeColor({`,
-            ...Object.entries(colors).map(([num, v]) => `${num}: ${JSON.stringify(v)},`),
+            ...Object.entries(colors).map(
+                ([num, v]) => `${num}: ${JSON.stringify(v)},`,
+            ),
             `}),`,
         ];
     }),
@@ -54,7 +58,13 @@ const code = [
     "} as const;",
 ].join("\n");
 
-prettier.resolveConfig(scriptDir).then((config) => {
-    const formattedCode = prettier.format(code, { ...config, parser: "typescript" });
-    fs.writeFileSync(path.resolve(scriptDir, "../src/lib/theme.tsx"), formattedCode, "utf-8");
+const prettierConfig = await prettier.resolveConfig(scriptDir);
+const formattedCode = await prettier.format(code, {
+    ...prettierConfig,
+    parser: "typescript",
 });
+fs.writeFileSync(
+    path.resolve(scriptDir, "../src/lib/theme.tsx"),
+    formattedCode,
+    "utf-8",
+);

@@ -1,8 +1,8 @@
 import { PickByValue } from "utility-types";
 
-export function glEnum<Name extends keyof PickByValue<typeof WebGL2RenderingContext, number>>(
-    name: Name,
-) {
+export function glEnum<
+    Name extends keyof PickByValue<typeof WebGL2RenderingContext, number>,
+>(name: Name) {
     return WebGL2RenderingContext[name];
 }
 
@@ -122,7 +122,9 @@ export type GlPixelFormatByInternalFormat = {
 };
 
 export type GlPixelTypeByInternalFormat = {
-    [GlTextureInternalFormat.Rgb]: GlPixelType.UnsignedByte | GlPixelType.UnsignedShort565;
+    [GlTextureInternalFormat.Rgb]:
+        | GlPixelType.UnsignedByte
+        | GlPixelType.UnsignedShort565;
     [GlTextureInternalFormat.Rgba]:
         | GlPixelType.UnsignedByte
         | GlPixelType.UnsignedShort4444
@@ -140,7 +142,9 @@ export type GlPixelTypeByInternalFormat = {
     [GlTextureInternalFormat.Rg8ui]: GlPixelType.UnsignedByte;
     [GlTextureInternalFormat.Rgb8]: GlPixelType.UnsignedByte;
     [GlTextureInternalFormat.Srgb8]: GlPixelType.UnsignedByte;
-    [GlTextureInternalFormat.Rgb565]: GlPixelType.UnsignedByte | GlPixelType.UnsignedShort565;
+    [GlTextureInternalFormat.Rgb565]:
+        | GlPixelType.UnsignedByte
+        | GlPixelType.UnsignedShort565;
     [GlTextureInternalFormat.R11fG11fB10f]:
         | GlPixelType.UnsignedInt10f11f11fRev
         | GlPixelType.HalfFloat
@@ -151,10 +155,16 @@ export type GlPixelTypeByInternalFormat = {
     [GlTextureInternalFormat.Rgb8ui]: GlPixelType.UnsignedByte;
     [GlTextureInternalFormat.Rgba8]: GlPixelType.UnsignedByte;
     [GlTextureInternalFormat.Srgb8Alpha8]: GlPixelType.UnsignedByte;
-    [GlTextureInternalFormat.Rgb5A1]: GlPixelType.UnsignedByte | GlPixelType.UnsignedShort5551;
+    [GlTextureInternalFormat.Rgb5A1]:
+        | GlPixelType.UnsignedByte
+        | GlPixelType.UnsignedShort5551;
     [GlTextureInternalFormat.Rgb10A2]: GlPixelType.UnsignedInt2101010Rev;
-    [GlTextureInternalFormat.Rgba4]: GlPixelType.UnsignedByte | GlPixelType.UnsignedShort4444;
-    [GlTextureInternalFormat.Rgba16f]: GlPixelType.HalfFloat | GlPixelType.Float;
+    [GlTextureInternalFormat.Rgba4]:
+        | GlPixelType.UnsignedByte
+        | GlPixelType.UnsignedShort4444;
+    [GlTextureInternalFormat.Rgba16f]:
+        | GlPixelType.HalfFloat
+        | GlPixelType.Float;
     [GlTextureInternalFormat.Rgba32f]: GlPixelType.Float;
     [GlTextureInternalFormat.Rgba8ui]: GlPixelType.UnsignedByte;
 };

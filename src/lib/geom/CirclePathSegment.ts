@@ -10,7 +10,12 @@ export default class CirclePathSegment implements PathSegment {
     readonly startAngle: number;
     readonly endAngle: number;
 
-    constructor(center: Vector2, radius: number, startAngle: number, endAngle: number) {
+    constructor(
+        center: Vector2,
+        radius: number,
+        startAngle: number,
+        endAngle: number,
+    ) {
         this.circle = Circle.create(center.x, center.y, radius);
         this.startAngle = startAngle;
         this.endAngle = endAngle;

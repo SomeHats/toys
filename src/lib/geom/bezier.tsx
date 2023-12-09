@@ -24,7 +24,12 @@ SOFTWARE.
 
 import { Vector2 } from "@/lib/geom/Vector2";
 
-export function getQuadraticArcLength(start: Vector2, control: Vector2, end: Vector2, t = 1) {
+export function getQuadraticArcLength(
+    start: Vector2,
+    control: Vector2,
+    end: Vector2,
+    t = 1,
+) {
     const ax = start.x - 2 * control.x + end.x;
     const ay = start.y - 2 * control.y + end.y;
     const bx = 2 * control.x - 2 * start.x;
@@ -35,7 +40,12 @@ export function getQuadraticArcLength(start: Vector2, control: Vector2, end: Vec
     const C = bx * bx + by * by;
 
     if (A === 0) {
-        return t * Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
+        return (
+            t *
+            Math.sqrt(
+                Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2),
+            )
+        );
     }
     const b = B / (2 * A);
     const c = C / A;
@@ -44,7 +54,10 @@ export function getQuadraticArcLength(start: Vector2, control: Vector2, end: Vec
 
     const uuk = u * u + k > 0 ? Math.sqrt(u * u + k) : 0;
     const bbk = b * b + k > 0 ? Math.sqrt(b * b + k) : 0;
-    const term = b + Math.sqrt(b * b + k) !== 0 ? k * Math.log(Math.abs((u + uuk) / (b + bbk))) : 0;
+    const term =
+        b + Math.sqrt(b * b + k) !== 0 ?
+            k * Math.log(Math.abs((u + uuk) / (b + bbk)))
+        :   0;
 
     return (Math.sqrt(A) / 2) * (u * uuk - b * bbk + term);
 }

@@ -42,7 +42,10 @@ export class Wire extends Model({
             startAngle: radiansToDegrees(this.startAngle),
         });
 
-        const initialLine = Line2.fromAngleAndPoint(this.startAngle, this.start);
+        const initialLine = Line2.fromAngleAndPoint(
+            this.startAngle,
+            this.start,
+        );
         const middleLine1 = Line2.fromAngleAndPoint(
             this.startAngle + degreesToRadians(60),
             centerPoint,
@@ -51,12 +54,17 @@ export class Wire extends Model({
             this.startAngle - degreesToRadians(60),
             centerPoint,
         );
-        const middleLine1Start = middleLine1.pointAtIntersectionWith(initialLine);
-        const middleLine2Start = middleLine2.pointAtIntersectionWith(initialLine);
+        const middleLine1Start =
+            middleLine1.pointAtIntersectionWith(initialLine);
+        const middleLine2Start =
+            middleLine2.pointAtIntersectionWith(initialLine);
         const middleLine =
-            this.start.distanceTo(middleLine1Start) < this.start.distanceTo(middleLine2Start)
-                ? middleLine1
-                : middleLine2;
+            (
+                this.start.distanceTo(middleLine1Start) <
+                this.start.distanceTo(middleLine2Start)
+            ) ?
+                middleLine1
+            :   middleLine2;
 
         const lastLine = Line2.fromAngleAndPoint(this.startAngle, this.end);
 

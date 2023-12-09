@@ -5,7 +5,12 @@ import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 
 export default class ApproxQuadraticBezierPathSegment implements PathSegment {
     private readonly path: Path;
-    constructor(start: Vector2, control: Vector2, end: Vector2, resolution = 100) {
+    constructor(
+        start: Vector2,
+        control: Vector2,
+        end: Vector2,
+        resolution = 100,
+    ) {
         const path = new Path();
         let lastPoint = start;
         for (let i = 1; i <= resolution; i++) {

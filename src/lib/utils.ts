@@ -54,7 +54,13 @@ export function constrainWrapped(min: number, max: number, n: number): number {
     return min + n;
 }
 
-export function mapRange(a1: number, b1: number, a2: number, b2: number, n: number): number {
+export function mapRange(
+    a1: number,
+    b1: number,
+    a2: number,
+    b2: number,
+    n: number,
+): number {
     return lerp(a2, b2, invLerp(a1, b1, n));
 }
 
@@ -125,7 +131,10 @@ export function sortBy<T, Key extends number | string>(
     return items.slice().sort((a, b) => (getKey(a) < getKey(b) ? -1 : 1));
 }
 
-export function partition<T>(items: ReadonlyArray<T>, condition: (item: T) => boolean): [T[], T[]] {
+export function partition<T>(
+    items: ReadonlyArray<T>,
+    condition: (item: T) => boolean,
+): [T[], T[]] {
     const pass = [];
     const fail = [];
     for (const item of items) {
@@ -139,7 +148,9 @@ export function partition<T>(items: ReadonlyArray<T>, condition: (item: T) => bo
 }
 
 export function randomColor(): string {
-    return `rgb(${Math.floor(random(256))},${Math.floor(random(256))},${Math.floor(random(256))})`;
+    return `rgb(${Math.floor(random(256))},${Math.floor(
+        random(256),
+    )},${Math.floor(random(256))})`;
 }
 
 export function removeFromArray<T>(array: Array<T>, item: T) {
@@ -159,7 +170,9 @@ export function wait(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(() => resolve(), ms));
 }
 
-export function frameLoop(cb: (time: number, cancel: () => void) => void): () => void {
+export function frameLoop(
+    cb: (time: number, cancel: () => void) => void,
+): () => void {
     let shouldCancel = false;
     const cancel = () => {
         shouldCancel = true;
@@ -175,7 +188,9 @@ export function frameLoop(cb: (time: number, cancel: () => void) => void): () =>
     return cancel;
 }
 
-export function fromEntries<K extends PropertyKey, V>(entries: Iterable<[K, V]>): Record<K, V> {
+export function fromEntries<K extends PropertyKey, V>(
+    entries: Iterable<[K, V]>,
+): Record<K, V> {
     const result = {} as Record<K, V>;
     for (const [key, value] of entries) {
         result[key] = value;
@@ -183,24 +198,34 @@ export function fromEntries<K extends PropertyKey, V>(entries: Iterable<[K, V]>)
     return result;
 }
 
-export function keys<K extends string, V>(object: ReadonlyObjectMap<K, V>): Array<K> {
+export function keys<K extends string, V>(
+    object: ReadonlyObjectMap<K, V>,
+): Array<K> {
     return Object.keys(object) as K[];
 }
 
-export function values<K extends string, V>(object: ReadonlyRecord<K, V>): Array<V> {
+export function values<K extends string, V>(
+    object: ReadonlyRecord<K, V>,
+): Array<V> {
     return Object.values(object) as V[];
 }
 
-export function entries<K extends string, V>(object: ReadonlyRecord<K, V>): Array<[K, V]>;
+export function entries<K extends string, V>(
+    object: ReadonlyRecord<K, V>,
+): Array<[K, V]>;
 export function entries<K extends string, V>(
     object: ReadonlyObjectMap<K, V>,
 ): Array<[K, V | undefined]>;
-export function entries<K extends string, V>(object: ReadonlyRecord<K, V>): Array<[K, V]> {
+export function entries<K extends string, V>(
+    object: ReadonlyRecord<K, V>,
+): Array<[K, V]> {
     return Object.entries(object) as [K, V][];
 }
 
 export function compact<T>(arr: ReadonlyArray<T>): Array<NonNullable<T>> {
-    return arr.filter((item): item is NonNullable<T> => item !== null && item !== undefined);
+    return arr.filter(
+        (item): item is NonNullable<T> => item !== null && item !== undefined,
+    );
 }
 
 export function normalizeAngle(angle: number): number {
@@ -254,7 +279,10 @@ export function has(obj: object, key: string | number | symbol): boolean {
     return Object.prototype.hasOwnProperty.call(obj, key);
 }
 
-export function get<K extends string, V>(obj: Partial<Record<K, V>>, key: K): V | undefined;
+export function get<K extends string, V>(
+    obj: Partial<Record<K, V>>,
+    key: K,
+): V | undefined;
 export function get(obj: object, key: string): unknown;
 export function get(obj: object, key: string): unknown {
     if (!has(obj, key)) {
@@ -323,7 +351,9 @@ export function last<T>(arr: ReadonlyArray<T>): T | undefined {
     return arr[arr.length - 1];
 }
 
-export function* indexed<T>(iterable: Iterable<T>): Generator<[number, T], void> {
+export function* indexed<T>(
+    iterable: Iterable<T>,
+): Generator<[number, T], void> {
     let i = 0;
     for (const item of iterable) {
         yield [i, item];
@@ -331,19 +361,30 @@ export function* indexed<T>(iterable: Iterable<T>): Generator<[number, T], void>
     }
 }
 
-export function copyArrayAndInsert<T>(array: ReadonlyArray<T>, index: number, item: T): Array<T> {
+export function copyArrayAndInsert<T>(
+    array: ReadonlyArray<T>,
+    index: number,
+    item: T,
+): Array<T> {
     const copied = array.slice();
     copied.splice(index, 0, item);
     return copied;
 }
 
-export function copyArrayAndReplace<T>(array: ReadonlyArray<T>, index: number, item: T): Array<T> {
+export function copyArrayAndReplace<T>(
+    array: ReadonlyArray<T>,
+    index: number,
+    item: T,
+): Array<T> {
     const copied = array.slice();
     copied[index] = item;
     return copied;
 }
 
-export function copyAndRemove<T>(array: ReadonlyArray<T>, index: number): Array<T> {
+export function copyAndRemove<T>(
+    array: ReadonlyArray<T>,
+    index: number,
+): Array<T> {
     const copied = array.slice();
     copied.splice(index, 1);
     return copied;
@@ -354,7 +395,9 @@ export function identity<T>(value: T): T {
     return value;
 }
 
-export const IS_MAC = /(Mac|iPhone|iPod|iPad)/i.test(globalThis.navigator?.platform ?? "");
+export const IS_MAC = /(Mac|iPhone|iPod|iPad)/i.test(
+    globalThis.navigator?.platform ?? "",
+);
 
 export type CallbackAction<T> = (state: T) => T;
 export type UpdateAction<T> = CallbackAction<T> | T;
@@ -422,7 +465,10 @@ export function radiansToDegrees(radians: number) {
     return (radians * 180) / Math.PI;
 }
 
-export function windows<T>(array: ReadonlyArray<T>, size: number): Array<Array<T>> {
+export function windows<T>(
+    array: ReadonlyArray<T>,
+    size: number,
+): Array<Array<T>> {
     const result = [];
     for (let i = 0; i < array.length - size + 1; i++) {
         result.push(array.slice(i, i + size));
@@ -430,7 +476,10 @@ export function windows<T>(array: ReadonlyArray<T>, size: number): Array<Array<T
     return result;
 }
 
-export function maxBy<T>(array: ReadonlyArray<T>, fn: (item: T) => number): T | undefined {
+export function maxBy<T>(
+    array: ReadonlyArray<T>,
+    fn: (item: T) => number,
+): T | undefined {
     let max: T | undefined;
     let maxValue: number | undefined;
     for (const item of array) {
@@ -443,7 +492,10 @@ export function maxBy<T>(array: ReadonlyArray<T>, fn: (item: T) => number): T | 
     return max;
 }
 
-export function minBy<T>(array: ReadonlyArray<T>, fn: (item: T) => number): T | undefined {
+export function minBy<T>(
+    array: ReadonlyArray<T>,
+    fn: (item: T) => number,
+): T | undefined {
     return maxBy(array, (item) => -fn(item));
 }
 

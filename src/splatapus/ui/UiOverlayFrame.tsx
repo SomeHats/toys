@@ -1,7 +1,7 @@
 import { useLiveValue } from "@/lib/live";
+import { Transition } from "@/lib/react/Transition";
 import { SIDEBAR_WIDTH_PX } from "@/splatapus/constants";
 import { Splatapus } from "@/splatapus/editor/useEditor";
-import { Transition } from "@headlessui/react";
 import { ReactNode } from "react";
 
 const rightBarStyle = {
@@ -48,7 +48,9 @@ export function UiOverlayFrame({
     return (
         <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-stretch">
             <div className="pointer-events-auto flex flex-none items-center justify-between gap-3 bg-stone-100 px-3 py-2">
-                <h1 className="order-1 flex-1 font-bold tracking-wide text-stone-600">splatapus</h1>
+                <h1 className="order-1 flex-1 font-bold tracking-wide text-stone-600">
+                    splatapus
+                </h1>
                 <div className="order-2 flex flex-1 items-center justify-center gap-2">
                     {topBarLeft}
                 </div>

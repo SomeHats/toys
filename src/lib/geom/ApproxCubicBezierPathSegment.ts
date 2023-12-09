@@ -32,7 +32,13 @@ export default class ApproxCubicBezierPathSegment implements PathSegment {
         for (let i = 1; i <= resolution; i++) {
             const t = i / resolution;
 
-            const point = interpolateCubicBezier(start, control1, control2, end, t);
+            const point = interpolateCubicBezier(
+                start,
+                control1,
+                control2,
+                end,
+                t,
+            );
             path.addSegment(new StraightPathSegment(lastPoint, point));
             lastPoint = point;
         }

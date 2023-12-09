@@ -30,7 +30,10 @@ export function memo<This extends object, Value>(
 
 export function command<This, Args extends any[], Return>(
     method: (this: This, ...args: Args) => Return,
-    context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>,
+    context: ClassMethodDecoratorContext<
+        This,
+        (this: This, ...args: Args) => Return
+    >,
 ) {
     return function (this: This, ...args: Args) {
         return transact(() => method.call(this, ...args));

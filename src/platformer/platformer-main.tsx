@@ -55,7 +55,10 @@ class AABBComponent extends Component {
 }
 
 class AABBRenderer extends Component {
-    constructor(entity: Entity, public opts: StrokeAndFillOptions) {
+    constructor(
+        entity: Entity,
+        public opts: StrokeAndFillOptions,
+    ) {
         super(entity);
     }
 
@@ -66,7 +69,10 @@ class AABBRenderer extends Component {
     override draw(ctx: CanvasRenderingContext2D) {
         this.getScene()
             .getSystem(DebugDrawSystem)
-            .debugDraw.aabb(new AABB(Vector2.ZERO, this.getAABB().size), this.opts);
+            .debugDraw.aabb(
+                new AABB(Vector2.ZERO, this.getAABB().size),
+                this.opts,
+            );
     }
 }
 
@@ -74,7 +80,9 @@ class PlayerController extends Component {
     constructor(
         entity: Entity,
         public readonly moveSpeed: number,
-        public readonly controls: ButtonMapping<"left" | "right" | "jump" | "down">,
+        public readonly controls: ButtonMapping<
+            "left" | "right" | "jump" | "down"
+        >,
     ) {
         super(entity);
     }
@@ -103,7 +111,10 @@ const scene = new Scene(800, 600, window.devicePixelRatio);
 scene.addSystem(new DebugDrawSystem());
 
 const player = new Entity();
-player.addComponent(AABBComponent, new AABB(new Vector2(200, 200), new Vector2(20, 30)));
+player.addComponent(
+    AABBComponent,
+    new AABB(new Vector2(200, 200), new Vector2(20, 30)),
+);
 player.addComponent(AABBRenderer, {
     fill: "lime",
     stroke: "black",

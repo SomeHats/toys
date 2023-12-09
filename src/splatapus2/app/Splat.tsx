@@ -7,7 +7,13 @@ import { Inputs } from "@/splatapus2/app/Inputs";
 import { RootNode } from "@/splatapus2/states/State";
 import { appendIncrementalDiff } from "@/splatapus2/store/Incremental";
 import { Index } from "@/splatapus2/store/Index";
-import { Doc, DocDiff, KeyPointId, ShapeId, ShapeVersionId } from "@/splatapus2/store/Records";
+import {
+    Doc,
+    DocDiff,
+    KeyPointId,
+    ShapeId,
+    ShapeVersionId,
+} from "@/splatapus2/store/Records";
 import {
     computedIncrementalObjectProperty,
     incrementalTableAccessor,
@@ -18,7 +24,10 @@ import Immutable, { Stack } from "immutable";
 export const HistoryEntryId = new IdGenerator("hst");
 export type HistoryEntryId = typeof HistoryEntryId.Id;
 
-type HistoryEntry = { readonly id: HistoryEntryId; readonly inverse: readonly DocDiff[] };
+type HistoryEntry = {
+    readonly id: HistoryEntryId;
+    readonly inverse: readonly DocDiff[];
+};
 const historyEntrySchema = Schema.object({
     id: HistoryEntryId.schema,
     inverse: Schema.arrayOf(Doc.diffSchema),
@@ -113,11 +122,18 @@ export class Splat {
             if (lastHistoryItem) {
                 return history.pop().push({
                     ...lastHistoryItem,
-                    inverse: appendIncrementalDiff(Doc, lastHistoryItem.inverse, inverseOp),
+                    inverse: appendIncrementalDiff(
+                        Doc,
+                        lastHistoryItem.inverse,
+                        inverseOp,
+                    ),
                 });
             }
 
-            return history.push({ id: HistoryEntryId.generate("initial"), inverse: [inverseOp] });
+            return history.push({
+                id: HistoryEntryId.generate("initial"),
+                inverse: [inverseOp],
+            });
         });
         return this;
     }

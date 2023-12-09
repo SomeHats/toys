@@ -52,7 +52,10 @@ export function getDebugLabel(type: string) {
             for (const stackLine of stackLines) {
                 const match = stackLine.match(/^\s*at (.*) \((.*)\)\s*$/);
                 if (!match) continue;
-                if (match[2].includes("/lib/live/") || match[2].includes("/node_modules/"))
+                if (
+                    match[2].includes("/lib/live/") ||
+                    match[2].includes("/node_modules/")
+                )
                     continue;
                 return `${type} at ${match[1]} (${match[2]})`;
             }
@@ -84,7 +87,10 @@ export class LiveInvalidation {
 
     invalidate() {
         if (PRINT_DEBUG_LOG && this.debugName) {
-            console.group(`%c[live] invalidate ${this.debugName}`, "color: #7f7f7f");
+            console.group(
+                `%c[live] invalidate ${this.debugName}`,
+                "color: #7f7f7f",
+            );
         }
         if (pendingSyncInvalidations) {
             pendingSyncInvalidations.add(this.eagerInvalidation);
@@ -103,10 +109,16 @@ export class LiveInvalidation {
     }
 
     listenerCount(): number {
-        return this.eagerInvalidation.listenerCount() + this.batchedInvalidation.listenerCount();
+        return (
+            this.eagerInvalidation.listenerCount() +
+            this.batchedInvalidation.listenerCount()
+        );
     }
 
     hasListeners() {
-        return this.eagerInvalidation.hasListeners() || this.batchedInvalidation.hasListeners();
+        return (
+            this.eagerInvalidation.hasListeners() ||
+            this.batchedInvalidation.hasListeners()
+        );
     }
 }

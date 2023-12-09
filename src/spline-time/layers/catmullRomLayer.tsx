@@ -25,9 +25,15 @@ function CatmullRomLayer({ line, showExtras, uiTarget }: LayerProps) {
         const p2 = line.points[i + 1];
         const p3 = i + 2 < line.points.length ? line.points[i + 2] : p2;
 
-        const d1 = Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2));
-        const d2 = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-        const d3 = Math.sqrt(Math.pow(p2.x - p3.x, 2) + Math.pow(p2.y - p3.y, 2));
+        const d1 = Math.sqrt(
+            Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2),
+        );
+        const d2 = Math.sqrt(
+            Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2),
+        );
+        const d3 = Math.sqrt(
+            Math.pow(p2.x - p3.x, 2) + Math.pow(p2.y - p3.y, 2),
+        );
 
         // Catmull-Rom to Cubic Bezier conversion matrix
 
@@ -83,7 +89,11 @@ function CatmullRomLayer({ line, showExtras, uiTarget }: LayerProps) {
         <>
             {showExtras &&
                 controlPoints.map(({ target, control }, i) => (
-                    <BezierControlPoint target={target} control={control} key={i} />
+                    <BezierControlPoint
+                        target={target}
+                        control={control}
+                        key={i}
+                    />
                 ))}
             <FinalLine path={path.toString()} />
             <LayerUi label="catmull-rom" uiTarget={uiTarget}>

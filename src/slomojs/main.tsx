@@ -15,12 +15,16 @@ if (!has(Animation.prototype, "finished")) {
         get() {
             if (!this._finished) {
                 this._finished =
-                    this.playState === "finished"
-                        ? Promise.resolve()
-                        : new Promise((resolve, reject) => {
-                              this.addEventListener("finish", resolve, { once: true });
-                              this.addEventListener("cancel", reject, { once: true });
-                          });
+                    this.playState === "finished" ?
+                        Promise.resolve()
+                    :   new Promise((resolve, reject) => {
+                            this.addEventListener("finish", resolve, {
+                                once: true,
+                            });
+                            this.addEventListener("cancel", reject, {
+                                once: true,
+                            });
+                        });
             }
             return this._finished;
         },
@@ -40,6 +44,8 @@ log(__debugScope);
 `.trim();
 
 initSlomojs(new URL("./crate/pkg/slomojs_bg.wasm", import.meta.url))
-    .then(() => slomojs.start(source, assertExists(document.getElementById("root"))))
+    .then(() =>
+        slomojs.start(source, assertExists(document.getElementById("root"))),
+    )
     .then((result: unknown) => console.log("success", result))
     .catch((err: unknown) => console.log("error", err));

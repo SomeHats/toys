@@ -5,7 +5,9 @@ import { BaseTexture } from "pixi.js";
 
 type Id<T> = T extends infer U ? { [K in keyof U]: U[K] } : never;
 
-export class AssetBundle<AssetMap extends Record<string, unknown> = Record<string, never>> {
+export class AssetBundle<
+    AssetMap extends Record<string, unknown> = Record<string, never>,
+> {
     static async loadBaseTexture(url: URL): Promise<BaseTexture> {
         const image = await loadImage(url);
         return new BaseTexture(image);
@@ -13,7 +15,9 @@ export class AssetBundle<AssetMap extends Record<string, unknown> = Record<strin
 
     loaders: {
         [K in keyof AssetMap]: (
-            dep: <Dep extends keyof AssetMap>(dep: Dep) => Promise<AssetMap[Dep]>,
+            dep: <Dep extends keyof AssetMap>(
+                dep: Dep,
+            ) => Promise<AssetMap[Dep]>,
         ) => Promise<AssetMap[K]>;
     };
     private loadedAssets: Partial<AssetMap> = {};
@@ -28,7 +32,9 @@ export class AssetBundle<AssetMap extends Record<string, unknown> = Record<strin
     add<Key extends string, Type>(
         key: Key,
         loader: (
-            dep: <Dep extends keyof AssetMap>(dep: Dep) => Promise<AssetMap[Dep]>,
+            dep: <Dep extends keyof AssetMap>(
+                dep: Dep,
+            ) => Promise<AssetMap[Dep]>,
         ) => Promise<Type>,
     ): AssetBundle<Id<AssetMap & { [K in Key]: Type }>> {
         assert(!has(this.loaders, key));
@@ -40,7 +46,9 @@ export class AssetBundle<AssetMap extends Record<string, unknown> = Record<strin
         let loadPromise = this.loadPromises.get(key);
         if (!loadPromise) {
             loadPromise = (async () => {
-                const asset = await this.loaders[key]((dep) => this.getAsync(dep));
+                const asset = await this.loaders[key]((dep) =>
+                    this.getAsync(dep),
+                );
                 this.loadedAssets[key] = asset;
             })();
             this.loadPromises.set(key, loadPromise);
@@ -50,7 +58,9 @@ export class AssetBundle<AssetMap extends Record<string, unknown> = Record<strin
 
     async loadAll(): Promise<void> {
         if (!this.loadAllPromise) {
-            this.loadAllPromise = Promise.all(keys(this.loaders).map((key) => this.load(key)));
+            this.loadAllPromise = Promise.all(
+                keys(this.loaders).map((key) => this.load(key)),
+            );
         }
         await this.loadAllPromise;
     }

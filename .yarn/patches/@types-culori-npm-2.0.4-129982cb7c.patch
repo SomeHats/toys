@@ -1,0 +1,48 @@
+diff --git a/fn/index.d.ts b/fn/index.d.ts
+index d8427ad5732c487b7e078763bdafc2f2aa19789c..a080370ccc06ee22182f58fafebdd2203e1389a2 100644
+--- a/fn/index.d.ts
++++ b/fn/index.d.ts
+@@ -70,7 +70,7 @@ export {
+     interpolatorSplineMonotoneClosed,
+ } from "../src/interpolate/splineMonotone";
+ 
+-export { clampChroma, clampRgb } from "../src/clamp";
++export { clampChroma, clampRgb, toGamut, clampGamut } from "../src/clamp";
+ export { default as displayable } from "../src/displayable";
+ export { default as lerp } from "../src/interpolate/lerp";
+ export { getMode, removeParser, useMode, useParser } from "../src/modes";
+diff --git a/index.d.ts b/index.d.ts
+index c71d73f7b6c809029b35da1af2b0ac2afe9179d1..7a3dabd695c96253c661a593dcde72008c31188c 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -72,7 +72,7 @@ export {
+     interpolatorSplineMonotoneClosed,
+ } from "./src/interpolate/splineMonotone";
+ 
+-export { clampChroma, clampRgb } from "./src/clamp";
++export { clampChroma, clampRgb, toGamut, clampGamut } from "./src/clamp";
+ export { default as displayable } from "./src/displayable";
+ export { default as lerp } from "./src/interpolate/lerp";
+ export { getMode, removeParser, useMode, useParser } from "./src/modes";
+diff --git a/src/clamp.d.ts b/src/clamp.d.ts
+index e61d3a09805f62d6ce3bc2e8e2c2e3d687db92ec..3ed62131fd731998cd549b4e7273e5208e241c6a 100644
+--- a/src/clamp.d.ts
++++ b/src/clamp.d.ts
+@@ -1,7 +1,16 @@
+ import { Color, Mode } from "./common";
++import { DiffFn } from "./difference";
+ 
+ export function clampRgb(color: string): Color | undefined;
+ export function clampRgb<C extends Color>(color: C): C;
+ 
+ export function clampChroma(color: string, mode?: Mode): Color | undefined;
+ export function clampChroma<C extends Color>(color: C, mode?: Mode): C;
++
++export function toGamut(
++  dest?: Mode,
++  mode?: Mode,
++  delta?: DiffFn,
++  jnd?: number
++): (color: string | Color) => Color;
++export function clampGamut(mode?: Mode): (color: string | Color) => Color;
+\ No newline at end of file

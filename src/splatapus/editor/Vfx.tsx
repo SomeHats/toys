@@ -43,7 +43,10 @@ export function useVfxAnimation<T extends HTMLElement>(
     },
 ): React.RefObject<T> {
     const ref = useRef<T | null>(null);
-    const activeAnimationVersion = useLive(() => vfx.getActiveAnimationIdLive(name), [name, vfx]);
+    const activeAnimationVersion = useLive(
+        () => vfx.getActiveAnimationIdLive(name),
+        [name, vfx],
+    );
 
     const getAnimationConfig = useEvent(animate);
     useEffect(() => {

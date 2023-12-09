@@ -8,7 +8,9 @@ export type Vector2Ish =
     | readonly [x: number, y: number]
     | Vector2;
 
-export type Vector2Args = [x: number, y: number] | [vector: Vector2Ish | Vector2];
+export type Vector2Args =
+    | [x: number, y: number]
+    | [vector: Vector2Ish | Vector2];
 
 export class Vector2 {
     static readonly schema = Schema.object({
@@ -56,11 +58,20 @@ export class Vector2 {
         return new Vector2(vectorIsh.x, vectorIsh.y);
     }
 
-    static fromEvent({ clientX, clientY }: { clientX: number; clientY: number }): Vector2 {
+    static fromEvent({
+        clientX,
+        clientY,
+    }: {
+        clientX: number;
+        clientY: number;
+    }): Vector2 {
         return new Vector2(clientX, clientY);
     }
 
-    constructor(public readonly x: number, public readonly y: number) {}
+    constructor(
+        public readonly x: number,
+        public readonly y: number,
+    ) {}
 
     toString(fixedAmt?: number): string {
         const x = fixedAmt == null ? this.x : this.x.toFixed(fixedAmt);
@@ -96,7 +107,10 @@ export class Vector2 {
             const { x: previousX, y: previousY } = polygon[previousIdx];
             const doesIntersect =
                 currentY > y != previousY > y &&
-                x < ((previousX - currentX) * (y - currentY)) / (previousY - currentY) + currentX;
+                x <
+                    ((previousX - currentX) * (y - currentY)) /
+                        (previousY - currentY) +
+                        currentX;
 
             if (doesIntersect) {
                 isInside = !isInside;
@@ -130,7 +144,9 @@ export class Vector2 {
 
     angleBetween(...args: Vector2Args): number {
         const other = Vector2.fromArgs(args);
-        return normalizeAngle(Math.atan2(other.y, other.x) - Math.atan2(this.y, this.x));
+        return normalizeAngle(
+            Math.atan2(other.y, other.x) - Math.atan2(this.y, this.x),
+        );
     }
 
     dot(...args: Vector2Args): number {

@@ -55,12 +55,22 @@ export class Idle extends StateNode<RootInteraction> {
 
     override onPointerDown(event: PointerEvent) {
         const { activeKeyPoint, firstShape } = this.splat;
-        const existingShapeVersion = this.splat.getShapeVersion(firstShape.id, activeKeyPoint.id);
+        const existingShapeVersion = this.splat.getShapeVersion(
+            firstShape.id,
+            activeKeyPoint.id,
+        );
 
         const mark = this.splat.history.mark();
-        this.splat.update({ ...existingShapeVersion, rawPoints: [Vector2.fromEvent(event)] });
+        this.splat.update({
+            ...existingShapeVersion,
+            rawPoints: [Vector2.fromEvent(event)],
+        });
 
-        this.parent.child = new Draw(this.parent, existingShapeVersion.id, mark);
+        this.parent.child = new Draw(
+            this.parent,
+            existingShapeVersion.id,
+            mark,
+        );
     }
 }
 export class Draw extends StateNode<RootInteraction> {

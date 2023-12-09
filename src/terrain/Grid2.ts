@@ -7,11 +7,18 @@ export class Grid2<T> {
 
     constructor(size: Vector2) {
         this.size = size.floor();
-        this.rows = times(this.size.y, () => times(this.size.y, () => undefined));
+        this.rows = times(this.size.y, () =>
+            times(this.size.y, () => undefined),
+        );
     }
 
     areCoordsInBounds(coords: Vector2): boolean {
-        return 0 <= coords.x && coords.x < this.size.x && 0 <= coords.y && coords.y < this.size.y;
+        return (
+            0 <= coords.x &&
+            coords.x < this.size.x &&
+            0 <= coords.y &&
+            coords.y < this.size.y
+        );
     }
 
     vectorToGridCoords(vector: Vector2, cellSize: number): Vector2 {

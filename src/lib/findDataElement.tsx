@@ -2,17 +2,17 @@ import { assert } from "@/lib/assert";
 import { Schema } from "@/lib/schema";
 import { entries, ObjectMap } from "@/lib/utils";
 
-export function findDataElementParent<Props extends Record<string, string | Schema<unknown>>>(
+export function findDataElementParent<
+    Props extends Record<string, string | Schema<unknown>>,
+>(
     element: EventTarget,
     search: Props,
 ): null | {
     element: HTMLElement;
     data: {
-        [K in keyof Props]: Props[K] extends string
-            ? Props[K]
-            : Props[K] extends Schema<infer P>
-            ? P
-            : never;
+        [K in keyof Props]: Props[K] extends string ? Props[K]
+        : Props[K] extends Schema<infer P> ? P
+        : never;
     };
 } {
     assert(element instanceof HTMLElement);

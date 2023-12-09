@@ -4,7 +4,13 @@ import { DeviceContainer, DeviceContent } from "@/infinite-scroll/device";
 import { assertExists } from "@/lib/assert";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { useGestureDetector } from "@/lib/hooks/useGestureDetector";
-import { constrainWrapped, debounce, invLerp, mapRange, noop } from "@/lib/utils";
+import {
+    constrainWrapped,
+    debounce,
+    invLerp,
+    mapRange,
+    noop,
+} from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 const scrollCaptureHeightPx = 100000;
@@ -22,7 +28,11 @@ export function InfiniteScroller() {
         const resetScrollDebounced = debounce(300, () => {
             const newScrollTop =
                 scrollBasePx +
-                constrainWrapped(0, contentHeightPx, scrollContainer.scrollTop - scrollBasePx);
+                constrainWrapped(
+                    0,
+                    contentHeightPx,
+                    scrollContainer.scrollTop - scrollBasePx,
+                );
 
             if (Math.abs(newScrollTop - scrollContainer.scrollTop) > 1) {
                 scrollContainer.scrollTop = newScrollTop;
@@ -52,14 +62,16 @@ export function InfiniteScroller() {
         <>
             <H1>Infinite Scroll</H1>
             <Lead>
-                Scroll up, or scroll down. It doesn&apos;t really matter. Follow your heart!
+                Scroll up, or scroll down. It doesn&apos;t really matter. Follow
+                your heart!
             </Lead>
             <DummyContent />
         </>
     );
 
     const scrollDistance = scrollTop - scrollBasePx;
-    const scrollDistanceNormalized = (scrollDistance + targetHeightPx / 2) / contentHeightPx - 0.5;
+    const scrollDistanceNormalized =
+        (scrollDistance + targetHeightPx / 2) / contentHeightPx - 0.5;
     const pageFloor = Math.floor(scrollDistanceNormalized);
     const pageCeil = Math.ceil(scrollDistanceNormalized);
 
@@ -84,7 +96,9 @@ export function InfiniteScroller() {
                             <DeviceContent
                                 scale={scale}
                                 className="p-6"
-                                onSizeChange={(size) => setContentHeightPx(size.y)}
+                                onSizeChange={(size) =>
+                                    setContentHeightPx(size.y)
+                                }
                             >
                                 {content}
                             </DeviceContent>
@@ -114,7 +128,9 @@ export function InfiniteScroller() {
                                 scrollTop - scrollBasePx,
                             )}
                             onScroll={(amount) => {
-                                const container = assertExists(scrollContainerRef.current);
+                                const container = assertExists(
+                                    scrollContainerRef.current,
+                                );
                                 container.scrollTop = scrollBasePx + amount;
                             }}
                         />
@@ -143,7 +159,13 @@ function WrappingScrollBar({
         (containerHeightPx / contentHeightPx) * containerHeightPx,
     );
 
-    const scrollBarTopPx = mapRange(0, contentHeightPx, 0, containerHeightPx, scrollAmount);
+    const scrollBarTopPx = mapRange(
+        0,
+        contentHeightPx,
+        0,
+        containerHeightPx,
+        scrollAmount,
+    );
 
     const handleScroll = useEvent((yPosition: number) => {
         const container = assertExists(containerRef.current);
@@ -192,7 +214,9 @@ function WrappingScrollBar({
                 className="absolute right-0.5 top-0 w-2 rounded-full bg-stone-400"
                 style={{
                     height: `${scrollBarHeightPx}px`,
-                    transform: `translateY(${scrollBarTopPx - targetHeightPx * scale}px)`,
+                    transform: `translateY(${
+                        scrollBarTopPx - targetHeightPx * scale
+                    }px)`,
                 }}
             />
         </div>

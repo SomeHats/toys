@@ -1,20 +1,41 @@
 import { Vector2 } from "@/lib/geom/Vector2";
 
 export default class AABB {
-    static fromLeftTopRightBottom(left: number, top: number, right: number, bottom: number): AABB {
-        return new AABB(new Vector2(left, top), new Vector2(right - left, bottom - top));
+    static fromLeftTopRightBottom(
+        left: number,
+        top: number,
+        right: number,
+        bottom: number,
+    ): AABB {
+        return new AABB(
+            new Vector2(left, top),
+            new Vector2(right - left, bottom - top),
+        );
     }
 
-    static fromLeftTopWidthHeight(left: number, top: number, width: number, height: number): AABB {
+    static fromLeftTopWidthHeight(
+        left: number,
+        top: number,
+        width: number,
+        height: number,
+    ): AABB {
         return new AABB(new Vector2(left, top), new Vector2(width, height));
     }
 
-    constructor(public readonly origin: Vector2, public readonly size: Vector2) {
+    constructor(
+        public readonly origin: Vector2,
+        public readonly size: Vector2,
+    ) {
         Object.freeze(this);
     }
 
     contains({ x, y }: Vector2): boolean {
-        return this.left <= x && x <= this.right && this.top <= y && y <= this.bottom;
+        return (
+            this.left <= x &&
+            x <= this.right &&
+            this.top <= y &&
+            y <= this.bottom
+        );
     }
 
     intersects(other: AABB): boolean {

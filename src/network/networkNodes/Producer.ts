@@ -39,7 +39,11 @@ export default class Producer extends SceneObject implements NetworkNode {
     constructor(x: number, y: number, cooldown: number = DEFAULT_COOLDOWN) {
         super();
         this._circle = Circle.create(x, y, RADIUS);
-        this._visualConnectionCircle = Circle.create(x, y, VISUAL_CONNECTION_RADIUS);
+        this._visualConnectionCircle = Circle.create(
+            x,
+            y,
+            VISUAL_CONNECTION_RADIUS,
+        );
         this._cooldown = cooldown;
         this._timer = cooldown;
     }
@@ -59,7 +63,11 @@ export default class Producer extends SceneObject implements NetworkNode {
     getAllReachableNodes(visited: Set<NetworkNode> = new Set()) {
         visited.add(this);
         return uniq(
-            flatten(this._connectionSet.outgoing.map((road) => road.getAllReachableNodes(visited))),
+            flatten(
+                this._connectionSet.outgoing.map((road) =>
+                    road.getAllReachableNodes(visited),
+                ),
+            ),
         );
     }
 
@@ -85,12 +93,21 @@ export default class Producer extends SceneObject implements NetworkNode {
     override draw(ctx: CanvasRenderingContext2D) {
         const progress = this._timer / this._cooldown;
 
-        const colorMixAmount = constrain(0, 1, mapRange(0, CLOCK_FADE_DURATION, 1, 0, this._timer));
+        const colorMixAmount = constrain(
+            0,
+            1,
+            mapRange(0, CLOCK_FADE_DURATION, 1, 0, this._timer),
+        );
         const bgColor = MAIN_COLOR.mix(CLOCK_COLOR, colorMixAmount);
 
         ctx.beginPath();
         ctx.fillStyle = bgColor.toString();
-        ShapeHelpers.circle(ctx, this._circle.center.x, this._circle.center.y, this._circle.radius);
+        ShapeHelpers.circle(
+            ctx,
+            this._circle.center.x,
+            this._circle.center.y,
+            this._circle.radius,
+        );
         ctx.fill();
 
         ctx.beginPath();
@@ -108,7 +125,12 @@ export default class Producer extends SceneObject implements NetworkNode {
 
         ctx.beginPath();
         ctx.fillStyle = MAIN_COLOR.toString();
-        ShapeHelpers.circle(ctx, this._circle.center.x, this._circle.center.y, CLOCK_RADIUS);
+        ShapeHelpers.circle(
+            ctx,
+            this._circle.center.x,
+            this._circle.center.y,
+            CLOCK_RADIUS,
+        );
         ctx.fill();
     }
 

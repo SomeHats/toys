@@ -3,11 +3,15 @@ import { assert } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { isWithin } from "@/lib/utils";
 
-const isSlopeVertical = (slope: number) => slope === Infinity || slope === -Infinity;
+const isSlopeVertical = (slope: number) =>
+    slope === Infinity || slope === -Infinity;
 
 export class Line2 {
     static fromSlopeAndDisplacement(slope: number, displacement: number) {
-        assert(!isSlopeVertical(slope), "cannot create vertical line from displacement");
+        assert(
+            !isSlopeVertical(slope),
+            "cannot create vertical line from displacement",
+        );
 
         const start = new Vector2(0, displacement);
         const end = new Vector2(1, slope + displacement);
@@ -61,7 +65,10 @@ export class Line2 {
     }
 
     get verticalX(): number {
-        assert(this.isVertical, "verticalX is not defined on non vertical lines");
+        assert(
+            this.isVertical,
+            "verticalX is not defined on non vertical lines",
+        );
         return this.start.x;
     }
 
@@ -71,7 +78,9 @@ export class Line2 {
     }
 
     isParallelTo(other: Line2): boolean {
-        return (this.isVertical && other.isVertical) || this.slope === other.slope;
+        return (
+            (this.isVertical && other.isVertical) || this.slope === other.slope
+        );
     }
 
     perpendicularLineThroughPoint(point: Vector2): Line2 {
@@ -87,12 +96,15 @@ export class Line2 {
         } else if (other.isVertical) {
             x = other.verticalX;
         } else {
-            x = (this.displacement - other.displacement) / (other.slope - this.slope);
+            x =
+                (this.displacement - other.displacement) /
+                (other.slope - this.slope);
         }
 
-        const y = this.isVertical
-            ? other.slope * x + other.displacement
-            : this.slope * x + this.displacement;
+        const y =
+            this.isVertical ?
+                other.slope * x + other.displacement
+            :   this.slope * x + this.displacement;
 
         return new Vector2(x, y);
     }
@@ -100,17 +112,26 @@ export class Line2 {
     pointAtIntersectionConstrained(other: Line2): Vector2 | undefined {
         if (this.isParallelTo(other)) return undefined;
         const point = this.pointAtIntersectionWith(other);
-        if (this.isPointWithinBounds(point) && other.isPointWithinBounds(point)) {
+        if (
+            this.isPointWithinBounds(point) &&
+            other.isPointWithinBounds(point)
+        ) {
             return point;
         }
         return undefined;
     }
 
     midpoint(): Vector2 {
-        return new Vector2((this.start.x + this.end.x) / 2, (this.start.y + this.end.y) / 2);
+        return new Vector2(
+            (this.start.x + this.end.x) / 2,
+            (this.start.y + this.end.y) / 2,
+        );
     }
 
     isPointWithinBounds({ x, y }: Vector2): boolean {
-        return isWithin(this.start.x, this.end.x, x) && isWithin(this.start.y, this.end.y, y);
+        return (
+            isWithin(this.start.x, this.end.x, x) &&
+            isWithin(this.start.y, this.end.y, y)
+        );
     }
 }

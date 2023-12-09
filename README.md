@@ -3,15 +3,16 @@
 a repo where i keep:
 
 -   a collection of weird little toys
--   a bunch of creative coding tools / libs etc. that are helpful to me when making weird little
-    toys
+-   a bunch of creative coding tools / libs etc. that are helpful to me when
+    making weird little toys
 
 you can look at the toys here: https://alex.dytry.ch/toys
 
-before i had this repo, i'd make a new one for each new weird little toy and waste a bunch of time
-on build setup and reimplementing all my standard tools / libs from scratch. this way is quicker. i
-think some of the tools here are more generally useful, but i probably won't publish them cus i'd
-rather focus my limited free time on actually making things with the tools.
+before i had this repo, i'd make a new one for each new weird little toy and
+waste a bunch of time on build setup and reimplementing all my standard tools /
+libs from scratch. this way is quicker. i think some of the tools here are more
+generally useful, but i probably won't publish them cus i'd rather focus my
+limited free time on actually making things with the tools.
 
 ## wip notes & todos
 
@@ -44,8 +45,8 @@ rather focus my limited free time on actually making things with the tools.
         -   [x] add basics
         -   [x] restore mode as part of location
         -   [x] drag-preview in rig mode
-    -   [x] (P0) fix up new drawing for unplaced point - extrapolation produces bad onion skins
-            currently
+    -   [x] (P0) fix up new drawing for unplaced point - extrapolation produces
+            bad onion skins currently
     -   [ ] optimize for quickly drawing multiple shapes
     -   [ ] figure out proper workflow/right way to use the tool
     -   [ ] new "stack of cards" ui for keyframes
@@ -58,7 +59,8 @@ rather focus my limited free time on actually making things with the tools.
         -   [ ] spring-interpolation
         -   [ ] paint spring params on lines
     -   [ ] animation
-        -   [ ] (P2) try density based point allocation instead of distance based
+        -   [ ] (P2) try density based point allocation instead of distance
+                based
         -   [ ] (P2) "pin" points on the line for animation consistency
         -   [ ] turn around?
     -   [x] design overhaul
@@ -89,7 +91,8 @@ rather focus my limited free time on actually making things with the tools.
     -   [ ] octopus singing text trails
     -   [ ] what happens when you touch somewhere other than the keyboard
     -   [ ] hats?????
-    -   [ ] figure out other flavour / cool stuff to do with octopus face / tentacles etc
+    -   [ ] figure out other flavour / cool stuff to do with octopus face /
+            tentacles etc
 -   signals
     -   [ ] make signal midi bindings work when inspector isn't rendered
     -   [x] ADSR-style signal envelopes

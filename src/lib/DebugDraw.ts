@@ -36,12 +36,20 @@ export class DebugDraw {
         size = Vector2.from(size);
         this.ctx.resetTransform();
         this.clear();
-        this.ctx.scale(this.ctx.canvas.width / size.x, this.ctx.canvas.height / size.y);
+        this.ctx.scale(
+            this.ctx.canvas.width / size.x,
+            this.ctx.canvas.height / size.y,
+        );
     }
 
     public clear(fill?: string) {
         if (!fill) {
-            this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+            this.ctx.clearRect(
+                0,
+                0,
+                this.ctx.canvas.width,
+                this.ctx.canvas.height,
+            );
             return;
         }
 
@@ -78,8 +86,19 @@ export class DebugDraw {
     public quadraticCurveTo(control: Vector2, target: Vector2) {
         this.ctx.quadraticCurveTo(control.x, control.y, target.x, target.y);
     }
-    public bezierCurveTo(control1: Vector2, control2: Vector2, target: Vector2) {
-        this.ctx.bezierCurveTo(control1.x, control1.y, control2.x, control2.y, target.x, target.y);
+    public bezierCurveTo(
+        control1: Vector2,
+        control2: Vector2,
+        target: Vector2,
+    ) {
+        this.ctx.bezierCurveTo(
+            control1.x,
+            control1.y,
+            control2.x,
+            control2.y,
+            target.x,
+            target.y,
+        );
     }
 
     public applyStrokeOptions({
@@ -130,7 +149,9 @@ export class DebugDraw {
         this.stroke(options);
     }
 
-    public getDebugStrokeOptions(color: string = DebugDraw.DEFAULT_DEBUG_COLOR): StrokeOptions {
+    public getDebugStrokeOptions(
+        color: string = DebugDraw.DEFAULT_DEBUG_COLOR,
+    ): StrokeOptions {
         return { stroke: color, strokeWidth: DebugDraw.HAIRLINE };
     }
 
@@ -138,12 +159,20 @@ export class DebugDraw {
         this.stroke(this.getDebugStrokeOptions(color));
     }
 
-    public fillText(text: string, position: Vector2, options: FillOptions = {}) {
+    public fillText(
+        text: string,
+        position: Vector2,
+        options: FillOptions = {},
+    ) {
         this.applyFillOptions(options);
         this.ctx.fillText(text, position.x, position.y);
     }
 
-    public circle(center: Vector2, radius: number, options: StrokeAndFillOptions) {
+    public circle(
+        center: Vector2,
+        radius: number,
+        options: StrokeAndFillOptions,
+    ) {
         this.beginPath();
         this.arc(center, radius, 0, 2 * Math.PI);
         this.strokeAndFill(options);
@@ -156,11 +185,23 @@ export class DebugDraw {
         options: StrokeAndFillOptions,
     ) {
         this.beginPath();
-        this.ctx.ellipse(center.x, center.y, radiusX, radiusY, 0, 0, Math.PI * 2);
+        this.ctx.ellipse(
+            center.x,
+            center.y,
+            radiusX,
+            radiusY,
+            0,
+            0,
+            Math.PI * 2,
+        );
         this.strokeAndFill(options);
     }
 
-    public debugLabel(label: string | undefined, position: Vector2, color: string) {
+    public debugLabel(
+        label: string | undefined,
+        position: Vector2,
+        color: string,
+    ) {
         if (label) {
             this.applyFillOptions({ fill: color });
             this.fillText(label, position.add(DebugDraw.LABEL_OFFSET));
@@ -169,7 +210,10 @@ export class DebugDraw {
 
     public debugPointX(
         position: Vector2,
-        { color = DebugDraw.DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+        {
+            color = DebugDraw.DEFAULT_DEBUG_COLOR,
+            label = undefined,
+        }: DebugOptions = {},
     ) {
         this.debugLabel(label, position, color);
 
@@ -195,7 +239,10 @@ export class DebugDraw {
 
     public debugPointO(
         position: Vector2,
-        { color = DebugDraw.DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+        {
+            color = DebugDraw.DEFAULT_DEBUG_COLOR,
+            label = undefined,
+        }: DebugOptions = {},
     ) {
         this.debugLabel(label, position, color);
 
@@ -208,7 +255,10 @@ export class DebugDraw {
     public debugArrow(
         start: Vector2,
         end: Vector2,
-        { color = DebugDraw.DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+        {
+            color = DebugDraw.DEFAULT_DEBUG_COLOR,
+            label = undefined,
+        }: DebugOptions = {},
     ) {
         this.debugLabel(label, Vector2.average([start, end]), color);
 
@@ -232,11 +282,18 @@ export class DebugDraw {
         this.stroke({ strokeWidth: DebugDraw.HAIRLINE, stroke: color });
     }
 
-    public debugVectorAtPoint(vector: Vector2, base: Vector2, options?: DebugOptions) {
+    public debugVectorAtPoint(
+        vector: Vector2,
+        base: Vector2,
+        options?: DebugOptions,
+    ) {
         this.debugArrow(base, base.add(vector), options);
     }
 
-    public polygon(polygon: ReadonlyArray<Vector2>, options: StrokeAndFillOptions = {}) {
+    public polygon(
+        polygon: ReadonlyArray<Vector2>,
+        options: StrokeAndFillOptions = {},
+    ) {
         this.beginPath();
         this.moveTo(polygon[polygon.length - 1]);
         for (const point of polygon) {
@@ -245,7 +302,10 @@ export class DebugDraw {
         this.strokeAndFill(options);
     }
 
-    public polyLine(points: ReadonlyArray<Vector2>, options: StrokeOptions = {}) {
+    public polyLine(
+        points: ReadonlyArray<Vector2>,
+        options: StrokeOptions = {},
+    ) {
         this.beginPath();
         this.moveTo(points[0]);
         for (let i = 1; i < points.length; i++) {
@@ -256,7 +316,10 @@ export class DebugDraw {
 
     public debugPolygon(
         polygon: ReadonlyArray<Vector2>,
-        { color = DebugDraw.DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+        {
+            color = DebugDraw.DEFAULT_DEBUG_COLOR,
+            label = undefined,
+        }: DebugOptions = {},
     ) {
         this.debugLabel(label, polygon[0], color);
         this.polygon(polygon, this.getDebugStrokeOptions(color));
@@ -264,7 +327,10 @@ export class DebugDraw {
 
     public debugPolyLine(
         polyLine: ReadonlyArray<Vector2>,
-        { color = DebugDraw.DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+        {
+            color = DebugDraw.DEFAULT_DEBUG_COLOR,
+            label = undefined,
+        }: DebugOptions = {},
     ) {
         this.debugLabel(label, polyLine[0], color);
         this.polyLine(polyLine, this.getDebugStrokeOptions(color));
@@ -273,7 +339,10 @@ export class DebugDraw {
         from: Vector2,
         control: Vector2,
         to: Vector2,
-        { color = DebugDraw.DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+        {
+            color = DebugDraw.DEFAULT_DEBUG_COLOR,
+            label = undefined,
+        }: DebugOptions = {},
     ) {
         this.debugLabel(label, from, color);
         this.beginPath();
@@ -286,7 +355,10 @@ export class DebugDraw {
         control1: Vector2,
         control2: Vector2,
         to: Vector2,
-        { color = DebugDraw.DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+        {
+            color = DebugDraw.DEFAULT_DEBUG_COLOR,
+            label = undefined,
+        }: DebugOptions = {},
     ) {
         this.debugLabel(label, from, color);
         this.beginPath();
@@ -296,13 +368,19 @@ export class DebugDraw {
     }
     public debugLine2(
         line: Line2,
-        { color = DebugDraw.DEFAULT_DEBUG_COLOR, label = undefined }: DebugOptions = {},
+        {
+            color = DebugDraw.DEFAULT_DEBUG_COLOR,
+            label = undefined,
+        }: DebugOptions = {},
     ) {
         this.debugLabel(label, line.start, color);
         this.debugArrow(line.start, line.end, { color, label });
     }
 
-    public aabb(aabb: AABB, opts: StrokeAndFillOptions & { debug?: DebugOptions }) {
+    public aabb(
+        aabb: AABB,
+        opts: StrokeAndFillOptions & { debug?: DebugOptions },
+    ) {
         if (opts.debug) {
             this.debugLabel(
                 opts.debug.label,

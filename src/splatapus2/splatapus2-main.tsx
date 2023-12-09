@@ -12,11 +12,9 @@ if (import.meta.hot) {
 
 const root = assertExists(document.getElementById("root"));
 createRoot(root).render(
-    USE_REACT_STRICT_MODE ? (
+    USE_REACT_STRICT_MODE ?
         <React.StrictMode>
             <App />
         </React.StrictMode>
-    ) : (
-        <App />
-    ),
+    :   <App />,
 );

@@ -10,7 +10,10 @@ type ComponentClass<T extends Component, Args extends unknown[]> = {
 };
 
 export default class Entity extends SceneObject {
-    private componentInstances = new Map<ComponentClass<Component, any>, Component>();
+    private componentInstances = new Map<
+        ComponentClass<Component, any>,
+        Component
+    >();
 
     addComponent<T extends Component, Args extends unknown[]>(
         component: ComponentClass<T, Args>,
@@ -25,7 +28,9 @@ export default class Entity extends SceneObject {
         return instance;
     }
 
-    hasComponent<T extends Component>(component: ComponentClass<T, any[]>): boolean {
+    hasComponent<T extends Component>(
+        component: ComponentClass<T, any[]>,
+    ): boolean {
         return this.componentInstances.has(component);
     }
 
@@ -36,7 +41,9 @@ export default class Entity extends SceneObject {
         return instance;
     }
 
-    removeComponent<T extends Component>(component: ComponentClass<T, any[]>): T {
+    removeComponent<T extends Component>(
+        component: ComponentClass<T, any[]>,
+    ): T {
         const instance = this.getComponent(component);
         this.componentInstances.delete(component);
         instance.onRemove();

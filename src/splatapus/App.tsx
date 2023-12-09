@@ -1,6 +1,9 @@
 import { assertExists } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { sizeFromContentRect, useResizeObserver } from "@/lib/hooks/useResizeObserver";
+import {
+    sizeFromContentRect,
+    useResizeObserver,
+} from "@/lib/hooks/useResizeObserver";
 import { LiveEffect, runLive, useLive, useLiveValue } from "@/lib/live";
 import { DebugSettingsMenu } from "@/splatapus/DebugSettings";
 import { LOAD_FROM_AUTOSAVE_ENABLED } from "@/splatapus/constants";
@@ -8,7 +11,11 @@ import { PreviewPosition } from "@/splatapus/editor/PreviewPosition";
 import { ModeType } from "@/splatapus/editor/modes/Mode";
 import { RigMode } from "@/splatapus/editor/modes/RigMode";
 import { Splatapus, useSplatapus } from "@/splatapus/editor/useEditor";
-import { loadSaved, makeEmptySaveState, writeSavedDebounced } from "@/splatapus/model/store";
+import {
+    loadSaved,
+    makeEmptySaveState,
+    writeSavedDebounced,
+} from "@/splatapus/model/store";
 import { DocumentRenderer } from "@/splatapus/renderer/DocumentRenderer";
 import { ImportExportButtons } from "@/splatapus/ui/ImportExportButtons";
 import { ModePicker } from "@/splatapus/ui/ModePicker";
@@ -40,7 +47,10 @@ export function App() {
     });
 
     return (
-        <div ref={setContainer} className="absolute inset-0 touch-none overflow-hidden">
+        <div
+            ref={setContainer}
+            className="absolute inset-0 touch-none overflow-hidden"
+        >
             {size && <AppMain splatapus={splatapus} />}
         </div>
     );
@@ -96,7 +106,9 @@ function AppMain({ splatapus }: { splatapus: Splatapus }) {
                 bottomBarRight={<DebugSettingsMenu />}
                 splatapus={splatapus}
             />
-            {process.env.NODE_ENV === "development" && <DebugInfo splatapus={splatapus} />}
+            {process.env.NODE_ENV === "development" && (
+                <DebugInfo splatapus={splatapus} />
+            )}
         </>
     );
 }
@@ -105,11 +117,17 @@ function DebugInfo({ splatapus }: { splatapus: Splatapus }) {
     return (
         <div className="pointer-events-none absolute left-3 top-14 text-xs">
             {useLive(
-                () => PreviewPosition.toDebugString(splatapus.previewPosition.live()),
+                () =>
+                    PreviewPosition.toDebugString(
+                        splatapus.previewPosition.live(),
+                    ),
                 [splatapus],
             )}
             <br />
-            {useLive(() => splatapus.interaction.toDebugStringLive(), [splatapus])}
+            {useLive(
+                () => splatapus.interaction.toDebugStringLive(),
+                [splatapus],
+            )}
         </div>
     );
 }

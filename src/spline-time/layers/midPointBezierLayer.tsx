@@ -17,7 +17,10 @@ export function midPointBezierLayer({ line, uiTarget }: LayerProps) {
             path.moveTo(line.points[0]);
             path.lineTo(line.points[0].lerp(line.points[1], 0.5));
             for (let i = 1; i < line.points.length - 1; i++) {
-                path.quadraticCurveTo(line.points[i], line.points[i].lerp(line.points[i + 1], 0.5));
+                path.quadraticCurveTo(
+                    line.points[i],
+                    line.points[i].lerp(line.points[i + 1], 0.5),
+                );
             }
             path.lineTo(line.points[line.points.length - 1]);
     }

@@ -1,5 +1,10 @@
 import { useEvent } from "@/lib/hooks/useEvent";
-import { copyArrayAndReplace, deepEqual, exhaustiveSwitchError, UpdateAction } from "@/lib/utils";
+import {
+    copyArrayAndReplace,
+    deepEqual,
+    exhaustiveSwitchError,
+    UpdateAction,
+} from "@/lib/utils";
 import classNames from "classnames";
 import { useId, useMemo, useRef, useState } from "react";
 
@@ -62,7 +67,9 @@ export function useInstantUi() {
             return (
                 state.find(
                     (entry): entry is RangeUiEntry =>
-                        entry.type === "range" && entry.label === label && entry.oldValue === value,
+                        entry.type === "range" &&
+                        entry.label === label &&
+                        entry.oldValue === value,
                 )?.value ?? value
             );
         },
@@ -119,7 +126,9 @@ export function useInstantUi() {
         return (
             state.find(
                 (entry): entry is CheckboxUiEntry =>
-                    entry.type === "checkbox" && entry.label === label && entry.oldValue === value,
+                    entry.type === "checkbox" &&
+                    entry.label === label &&
+                    entry.oldValue === value,
             )?.value ?? value
         );
     });
@@ -159,7 +168,12 @@ function InstantUiRenderer({
                                 label={entry.label}
                                 value={entry.value}
                                 onChange={(value) =>
-                                    onChange(copyArrayAndReplace(state, i, { ...entry, value }))
+                                    onChange(
+                                        copyArrayAndReplace(state, i, {
+                                            ...entry,
+                                            value,
+                                        }),
+                                    )
                                 }
                             />
                         );
@@ -170,7 +184,12 @@ function InstantUiRenderer({
                                 label={entry.label}
                                 value={entry.value}
                                 onChange={(value) =>
-                                    onChange(copyArrayAndReplace(state, i, { ...entry, value }))
+                                    onChange(
+                                        copyArrayAndReplace(state, i, {
+                                            ...entry,
+                                            value,
+                                        }),
+                                    )
                                 }
                                 min={entry.min}
                                 max={entry.max}
@@ -186,7 +205,12 @@ function InstantUiRenderer({
                                 value={entry.value}
                                 options={entry.options}
                                 onChange={(value) =>
-                                    onChange(copyArrayAndReplace(state, i, { ...entry, value }))
+                                    onChange(
+                                        copyArrayAndReplace(state, i, {
+                                            ...entry,
+                                            value,
+                                        }),
+                                    )
                                 }
                             />
                         );
@@ -199,7 +223,12 @@ function InstantUiRenderer({
                                 value={entry.value}
                                 options={entry.options}
                                 onChange={(value) =>
-                                    onChange(copyArrayAndReplace(state, i, { ...entry, value }))
+                                    onChange(
+                                        copyArrayAndReplace(state, i, {
+                                            ...entry,
+                                            value,
+                                        }),
+                                    )
                                 }
                             />
                         );
@@ -241,7 +270,9 @@ function RangeInput({
                     step={step}
                     onChange={(e) => onChange(e.currentTarget.valueAsNumber)}
                 />
-                <span className="w-1/3 flex-none text-right">{value.toPrecision(3)}</span>
+                <span className="w-1/3 flex-none text-right">
+                    {value.toPrecision(3)}
+                </span>
             </div>
         </div>
     );
@@ -322,7 +353,9 @@ function SegmentedControlInput({
                         key={i}
                         className={classNames(
                             "flex h-6 flex-auto items-center justify-center rounded text-sm",
-                            deepEqual(option.value, value) ? "bg-gray-600" : "hover:bg-gray-800",
+                            deepEqual(option.value, value) ? "bg-gray-600" : (
+                                "hover:bg-gray-800"
+                            ),
                         )}
                         onClick={() => onChange(option.value)}
                     >

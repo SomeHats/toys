@@ -1,13 +1,20 @@
 import { assert, assertExists } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { useEvent } from "@/lib/hooks/useEvent";
-import { ResizeObserver, ResizeObserverEntry, ResizeObserverSize } from "@juggle/resize-observer";
+import {
+    ResizeObserver,
+    ResizeObserverEntry,
+    ResizeObserverSize,
+} from "@juggle/resize-observer";
 import { useLayoutEffect, useState } from "react";
 
 export { ResizeObserverEntry, ResizeObserverSize };
 
 let cachedObserver: ResizeObserver | undefined;
-const callbacksByElement = new Map<Element, Set<(entry: ResizeObserverEntry) => void>>();
+const callbacksByElement = new Map<
+    Element,
+    Set<(entry: ResizeObserverEntry) => void>
+>();
 const lastEntryByElement = new WeakMap<Element, ResizeObserverEntry>();
 
 function handleResize(entries: ResizeObserverEntry[]) {
@@ -29,7 +36,10 @@ function getObserver(): ResizeObserver {
     return cachedObserver;
 }
 
-function addCallbackForElement(element: Element, callback: (entry: ResizeObserverEntry) => void) {
+function addCallbackForElement(
+    element: Element,
+    callback: (entry: ResizeObserverEntry) => void,
+) {
     let callbacksForElement = callbacksByElement.get(element);
 
     if (!callbacksForElement) {
@@ -92,5 +102,8 @@ export function sizeFromContentRect(entry: ResizeObserverEntry): Vector2 {
 }
 
 export function sizeFromBorderBox(entry: ResizeObserverEntry): Vector2 {
-    return new Vector2(entry.borderBoxSize[0].inlineSize, entry.borderBoxSize[0].blockSize);
+    return new Vector2(
+        entry.borderBoxSize[0].inlineSize,
+        entry.borderBoxSize[0].blockSize,
+    );
 }

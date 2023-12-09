@@ -4,7 +4,13 @@ import { BG_COLOR } from "@/bees/constants";
 import { driver } from "@/bees/driver";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { random, times } from "@/lib/utils";
-import { Application, InteractionManager, Renderer, SCALE_MODES, settings } from "pixi.js";
+import {
+    Application,
+    InteractionManager,
+    Renderer,
+    SCALE_MODES,
+    settings,
+} from "pixi.js";
 
 Renderer.registerPlugin("interaction", InteractionManager);
 console.log({ Renderer, InteractionManager });
@@ -40,7 +46,8 @@ function makeBee() {
             const beePosition = Vector2.from(bee.getGlobalPosition());
             const mousePosition = Vector2.from(
                 (
-                    application.renderer.plugins.interaction as InteractionManager
+                    application.renderer.plugins
+                        .interaction as InteractionManager
                 ).mouse.getLocalPosition(application.stage),
             );
 
@@ -50,7 +57,9 @@ function makeBee() {
 
             bee.heading = newVec.angle();
             bee.position.copyFrom(
-                Vector2.from(bee.position).add(Vector2.fromPolar(bee.heading, sp)),
+                Vector2.from(bee.position).add(
+                    Vector2.fromPolar(bee.heading, sp),
+                ),
             );
         },
     });

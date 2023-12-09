@@ -14,7 +14,11 @@ test("normalizes stack traces", () => {
     }
 
     assert(thrownError);
-    assert(thrownError.stack?.startsWith(`Error: it failed!\n    at myFunctionThatThrows`));
+    assert(
+        thrownError.stack?.startsWith(
+            `Error: it failed!\n    at myFunctionThatThrows`,
+        ),
+    );
 });
 
 test("automatically inserts an error message", () => {
@@ -23,7 +27,9 @@ test("automatically inserts an error message", () => {
         '"Assertion Error: 2 + 2 === 5"',
     );
 
-    expect(() => assertExists((() => undefined)())).toThrowErrorMatchingInlineSnapshot(
+    expect(() =>
+        assertExists((() => undefined)()),
+    ).toThrowErrorMatchingInlineSnapshot(
         '"Assertion Error: (() => undefined)()"',
     );
 });

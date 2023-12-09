@@ -73,7 +73,11 @@ export class TriCoord {
         return results;
     }
 
-    constructor(public readonly a: number, public readonly b: number, public readonly c: number) {
+    constructor(
+        public readonly a: number,
+        public readonly b: number,
+        public readonly c: number,
+    ) {
         assert(Number.isInteger(a));
         assert(Number.isInteger(b));
         assert(Number.isInteger(c));
@@ -127,6 +131,10 @@ export class TriCoord {
 
     /** Returns how many steps one tri is from another */
     distanceTo(other: TriCoord): number {
-        return Math.abs(this.a - other.a) + Math.abs(this.b - other.b) + Math.abs(this.c - other.c);
+        return (
+            Math.abs(this.a - other.a) +
+            Math.abs(this.b - other.b) +
+            Math.abs(this.c - other.c)
+        );
     }
 }

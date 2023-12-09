@@ -96,7 +96,12 @@ class UnitBezier {
     }
 }
 
-export const cubicBezier = (x1: number, y1: number, x2: number, y2: number): Easing => {
+export const cubicBezier = (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+): Easing => {
     const bezier = new UnitBezier(x1, y1, x2, y2);
     const fn: Easing = (x: number) => bezier.solve(x);
     fn.cubicBezier = `cubic-bezier(${x1}, ${y1}, ${x2}, ${y2})`;
@@ -119,7 +124,8 @@ inQuad.cubicBezier = "cubic-bezier(0.11, 0, 0.5, 0)";
 export const outQuad: Easing = (t) => t * (2 - t);
 outQuad.cubicBezier = "cubic-bezier(0.5, 1, 0.89, 1)";
 
-export const inOutQuad: Easing = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+export const inOutQuad: Easing = (t) =>
+    t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 inOutQuad.cubicBezier = "cubic-bezier(0.45, 0, 0.55, 1)";
 
 export const inCubic: Easing = (t) => t * t * t;
@@ -138,7 +144,8 @@ inQuart.cubicBezier = "cubic-bezier(0.5, 0, 0.75, 0)";
 export const outQuart: Easing = (t) => 1 - --t * t * t * t;
 outQuart.cubicBezier = "cubic-bezier(0.25, 1, 0.5, 1)";
 
-export const inOutQuart: Easing = (t) => (t < 0.5 ? 8 * t * t * t * t : 1 - 8 * --t * t * t * t);
+export const inOutQuart: Easing = (t) =>
+    t < 0.5 ? 8 * t * t * t * t : 1 - 8 * --t * t * t * t;
 inOutQuart.cubicBezier = "cubic-bezier(0.76, 0, 0.24, 1)";
 
 export const inQuint: Easing = (t) => t * t * t * t * t;
@@ -199,7 +206,11 @@ export const inElastic = (t: number): number => {
     } else {
         s = (p / (2 * Math.PI)) * Math.asin(1 / a);
     }
-    return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t - s) * (2 * Math.PI)) / p));
+    return -(
+        a *
+        Math.pow(2, 10 * (t -= 1)) *
+        Math.sin(((t - s) * (2 * Math.PI)) / p)
+    );
 };
 
 export const outElastic = (t: number): number => {
@@ -215,7 +226,9 @@ export const outElastic = (t: number): number => {
     } else {
         s = (p / (2 * Math.PI)) * Math.asin(1 / a);
     }
-    return a * Math.pow(2, -10 * t) * Math.sin(((t - s) * (2 * Math.PI)) / p) + 1;
+    return (
+        a * Math.pow(2, -10 * t) * Math.sin(((t - s) * (2 * Math.PI)) / p) + 1
+    );
 };
 
 export const inOutElastic = (t: number): number => {
@@ -232,8 +245,19 @@ export const inOutElastic = (t: number): number => {
         s = (p / (2 * Math.PI)) * Math.asin(1 / a);
     }
     if (t < 1)
-        return -0.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t - s) * (2 * Math.PI)) / p));
-    return a * Math.pow(2, -10 * (t -= 1)) * Math.sin(((t - s) * (2 * Math.PI)) / p) * 0.5 + 1;
+        return (
+            -0.5 *
+            (a *
+                Math.pow(2, 10 * (t -= 1)) *
+                Math.sin(((t - s) * (2 * Math.PI)) / p))
+        );
+    return (
+        a *
+            Math.pow(2, -10 * (t -= 1)) *
+            Math.sin(((t - s) * (2 * Math.PI)) / p) *
+            0.5 +
+        1
+    );
 };
 
 export const inBack =
@@ -252,7 +276,8 @@ export const outBack =
 export const inOutBack =
     (s = 1.70158) =>
     (t: number): number => {
-        if ((t /= 1 / 2) < 1) return (1 / 2) * (t * t * (((s *= 1.525) + 1) * t - s));
+        if ((t /= 1 / 2) < 1)
+            return (1 / 2) * (t * t * (((s *= 1.525) + 1) * t - s));
         return (1 / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2);
     };
 

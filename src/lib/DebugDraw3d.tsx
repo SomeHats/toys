@@ -34,10 +34,16 @@ export class DebugDraw3d {
         log9(
             "project",
             Vector3.from(point).toString(),
-            this.projection.transformVector3(point).swizzle2("x", "y").toString(),
+            this.projection
+                .transformVector3(point)
+                .swizzle2("x", "y")
+                .toString(),
         );
         const { x, y } = this.projection.transformVector3(point);
-        return new Vector2(mapRange(-1, 1, 0, this.size.x, x), mapRange(1, -1, 0, this.size.y, y));
+        return new Vector2(
+            mapRange(-1, 1, 0, this.size.x, x),
+            mapRange(1, -1, 0, this.size.y, y),
+        );
     }
 
     projectArray(points: ReadonlyArray<Vector3Ish>): Array<Vector2> {
@@ -63,7 +69,11 @@ export class DebugDraw3d {
     public quadraticCurveTo(control: Vector3Ish, target: Vector3Ish) {
         this.dbg.quadraticCurveTo(this.project(control), this.project(target));
     }
-    public bezierCurveTo(control1: Vector3Ish, control2: Vector3Ish, target: Vector3Ish) {
+    public bezierCurveTo(
+        control1: Vector3Ish,
+        control2: Vector3Ish,
+        target: Vector3Ish,
+    ) {
         this.dbg.bezierCurveTo(
             this.project(control1),
             this.project(control2),
@@ -107,7 +117,11 @@ export class DebugDraw3d {
         this.dbg.fillText(text, this.project(position), options);
     }
 
-    public debugLabel(label: string | undefined, position: Vector3, color: string) {
+    public debugLabel(
+        label: string | undefined,
+        position: Vector3,
+        color: string,
+    ) {
         this.dbg.debugLabel(label, this.project(position), color);
     }
 
@@ -119,17 +133,28 @@ export class DebugDraw3d {
         this.dbg.debugPointO(this.project(position), options);
     }
 
-    public debugArrow(start: Vector3Ish, end: Vector3Ish, options?: DebugOptions) {
+    public debugArrow(
+        start: Vector3Ish,
+        end: Vector3Ish,
+        options?: DebugOptions,
+    ) {
         this.dbg.debugArrow(this.project(start), this.project(end), options);
     }
 
-    public debugVectorAtPoint(vector: Vector3Ish, base: Vector3Ish, options?: DebugOptions) {
+    public debugVectorAtPoint(
+        vector: Vector3Ish,
+        base: Vector3Ish,
+        options?: DebugOptions,
+    ) {
         const start = Vector3.from(base);
         const end = start.add(vector);
         this.debugArrow(start, end, options);
     }
 
-    public polygon(polygon: ReadonlyArray<Vector3Ish>, options?: StrokeAndFillOptions) {
+    public polygon(
+        polygon: ReadonlyArray<Vector3Ish>,
+        options?: StrokeAndFillOptions,
+    ) {
         this.dbg.polygon(this.projectArray(polygon), options);
     }
 
@@ -137,11 +162,17 @@ export class DebugDraw3d {
         this.dbg.polyLine(this.projectArray(points), options);
     }
 
-    public debugPolygon(polygon: ReadonlyArray<Vector3Ish>, options?: DebugOptions) {
+    public debugPolygon(
+        polygon: ReadonlyArray<Vector3Ish>,
+        options?: DebugOptions,
+    ) {
         this.dbg.debugPolygon(this.projectArray(polygon), options);
     }
 
-    public debugPolyLine(polyLine: ReadonlyArray<Vector3Ish>, options?: DebugOptions) {
+    public debugPolyLine(
+        polyLine: ReadonlyArray<Vector3Ish>,
+        options?: DebugOptions,
+    ) {
         this.dbg.debugPolyLine(this.projectArray(polyLine), options);
     }
     public debugQuadraticCurve(
@@ -174,8 +205,17 @@ export class DebugDraw3d {
     }
 
     public gizmo(position: Vector3Ish, size = 30) {
-        this.debugVectorAtPoint(Vector3.X.scale(size), position, { color: "red", label: "x" });
-        this.debugVectorAtPoint(Vector3.Y.scale(size), position, { color: "green", label: "y" });
-        this.debugVectorAtPoint(Vector3.Z.scale(size), position, { color: "blue", label: "z" });
+        this.debugVectorAtPoint(Vector3.X.scale(size), position, {
+            color: "red",
+            label: "x",
+        });
+        this.debugVectorAtPoint(Vector3.Y.scale(size), position, {
+            color: "green",
+            label: "y",
+        });
+        this.debugVectorAtPoint(Vector3.Z.scale(size), position, {
+            color: "blue",
+            label: "z",
+        });
     }
 }

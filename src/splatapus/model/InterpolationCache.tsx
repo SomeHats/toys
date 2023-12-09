@@ -34,25 +34,34 @@ class InterpolationCache {
     } | null {
         switch (position.type) {
             case "keyPointId": {
-                const shapeVersion = document.getShapeVersion(position.keyPointId, shapeId);
+                const shapeVersion = document.getShapeVersion(
+                    position.keyPointId,
+                    shapeId,
+                );
                 if (!shapeVersion) {
-                    const keyPoint = document.keyPoints.get(position.keyPointId);
+                    const keyPoint = document.keyPoints.get(
+                        position.keyPointId,
+                    );
                     if (!keyPoint.position) {
                         return null;
                     }
-                    const interpolatedPoints = this.getCenterPointsAtInterpolatedPosition(
-                        document,
-                        shapeId,
-                        keyPoint.position,
-                    );
+                    const interpolatedPoints =
+                        this.getCenterPointsAtInterpolatedPosition(
+                            document,
+                            shapeId,
+                            keyPoint.position,
+                        );
                     if (!interpolatedPoints) return null;
                     return { normalized: interpolatedPoints, smoothed: null };
                 }
                 return {
-                    normalized: document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id)
-                        .normalizedCenterPoints,
-                    smoothed: document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id)
-                        .smoothedCenterPoints,
+                    normalized:
+                        document.getNormalizedCenterPointsForShapeVersion(
+                            shapeVersion.id,
+                        ).normalizedCenterPoints,
+                    smoothed: document.getNormalizedCenterPointsForShapeVersion(
+                        shapeVersion.id,
+                    ).smoothedCenterPoints,
                 };
             }
             case "interpolated": {
@@ -74,7 +83,9 @@ class InterpolationCache {
         position: Vector2,
     ): StrokeCenterPoint[] | null {
         const shape = document.shapes.get(shapeId);
-        const shapeVersions = new Set(document.iterateShapeVersionsForShape(shapeId));
+        const shapeVersions = new Set(
+            document.iterateShapeVersionsForShape(shapeId),
+        );
         if (!shapeVersions.size) {
             return null;
         }
@@ -89,7 +100,10 @@ class InterpolationCache {
         if (cacheEntry) {
             interpolators = cacheEntry.interpolators;
         } else {
-            interpolators = this.calculateInterpolators(document, shapeVersions);
+            interpolators = this.calculateInterpolators(
+                document,
+                shapeVersions,
+            );
             this.cache.set(shape, {
                 versions: shapeVersions,
                 keyPoints,
@@ -99,13 +113,19 @@ class InterpolationCache {
 
         return (
             interpolators?.map(({ x, y, r }) => ({
-                center: new Vector2(x.interpolate(position), y.interpolate(position)),
+                center: new Vector2(
+                    x.interpolate(position),
+                    y.interpolate(position),
+                ),
                 radius: r.interpolate(position),
             })) ?? null
         );
     }
 
-    private calculateInterpolators(document: SplatDocModel, shapeVersions: Set<SplatShapeVersion>) {
+    private calculateInterpolators(
+        document: SplatDocModel,
+        shapeVersions: Set<SplatShapeVersion>,
+    ) {
         console.time("calculatInterpolators");
         const allNormalizedPoints = compact(
             Array.from(shapeVersions, (version) => {
@@ -114,9 +134,10 @@ class InterpolationCache {
                     return null;
                 }
                 return {
-                    normalizedCenterPoints: document.getNormalizedCenterPointsForShapeVersion(
-                        version.id,
-                    ).normalizedCenterPoints,
+                    normalizedCenterPoints:
+                        document.getNormalizedCenterPointsForShapeVersion(
+                            version.id,
+                        ).normalizedCenterPoints,
                     version,
                     keyPointPosition: keyPoint.position,
                 };
@@ -127,7 +148,9 @@ class InterpolationCache {
             return null;
         }
 
-        const centers = allNormalizedPoints.map(({ keyPointPosition }) => keyPointPosition);
+        const centers = allNormalizedPoints.map(
+            ({ keyPointPosition }) => keyPointPosition,
+        );
 
         const minLength = Math.min(
             ...allNormalizedPoints.map(
@@ -138,13 +161,16 @@ class InterpolationCache {
         const interpolators = [];
         for (let i = 0; i < minLength; i++) {
             const xs = allNormalizedPoints.map(
-                ({ normalizedCenterPoints }) => normalizedCenterPoints[i].center.x,
+                ({ normalizedCenterPoints }) =>
+                    normalizedCenterPoints[i].center.x,
             );
             const ys = allNormalizedPoints.map(
-                ({ normalizedCenterPoints }) => normalizedCenterPoints[i].center.y,
+                ({ normalizedCenterPoints }) =>
+                    normalizedCenterPoints[i].center.y,
             );
             const rs = allNormalizedPoints.map(
-                ({ normalizedCenterPoints }) => normalizedCenterPoints[i].radius,
+                ({ normalizedCenterPoints }) =>
+                    normalizedCenterPoints[i].radius,
             );
             interpolators.push({
                 x: new AutoInterpolator(centers, xs),

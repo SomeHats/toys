@@ -62,11 +62,23 @@ export const Controls = memo(function Controls({
                 <CopyButton value={formatCss(color)} label="Copy raw" />
                 <CopyButton
                     value={formatP3AsCss(color)}
-                    label={<>{!inP3(color) && <FaCompressAlt className="mr-1" />} Copy P3</>}
+                    label={
+                        <>
+                            {!inP3(color) && <FaCompressAlt className="mr-1" />}{" "}
+                            Copy P3
+                        </>
+                    }
                 />
                 <CopyButton
                     value={formatRgbAsCss(color)}
-                    label={<>{!inRGB(color) && <FaCompressAlt className="mr-1" />} Copy srgb</>}
+                    label={
+                        <>
+                            {!inRGB(color) && (
+                                <FaCompressAlt className="mr-1" />
+                            )}{" "}
+                            Copy srgb
+                        </>
+                    }
                 />
             </div>
         </div>
@@ -120,25 +132,46 @@ function Slider({
             const isInRgb = inRGB(value);
             const isInP3 = inP3(value);
             const isInRec2020 = inRec2020(value);
-            const isInGamut = gamut === "srgb" ? isInRgb : gamut === "p3" ? isInP3 : isInRec2020;
+            const isInGamut =
+                gamut === "srgb" ? isInRgb
+                : gamut === "p3" ? isInP3
+                : isInRec2020;
 
             if (wasInRgb !== null && isInRgb !== wasInRgb && gamut !== "srgb") {
                 transitionPoints.push(invLerp(min, max, i));
-            } else if (wasInP3 !== null && isInP3 !== wasInP3 && gamut === "rec2020") {
+            } else if (
+                wasInP3 !== null &&
+                isInP3 !== wasInP3 &&
+                gamut === "rec2020"
+            ) {
                 transitionPoints.push(invLerp(min, max, i));
             }
 
             if (isInGamut !== wasInGamut) {
                 if (isInGamut) {
-                    stops.push(`${format({ ...value, alpha: 0 })} ${invLerp(min, max, i) * 100}%`);
-                    stops.push(`${format(value)} ${invLerp(min, max, i) * 100}%`);
+                    stops.push(
+                        `${format({ ...value, alpha: 0 })} ${
+                            invLerp(min, max, i) * 100
+                        }%`,
+                    );
+                    stops.push(
+                        `${format(value)} ${invLerp(min, max, i) * 100}%`,
+                    );
                 } else {
-                    stops.push(`${format(value)} ${invLerp(min, max, i) * 100}%`);
-                    stops.push(`${format({ ...value, alpha: 0 })} ${invLerp(min, max, i) * 100}%`);
+                    stops.push(
+                        `${format(value)} ${invLerp(min, max, i) * 100}%`,
+                    );
+                    stops.push(
+                        `${format({ ...value, alpha: 0 })} ${
+                            invLerp(min, max, i) * 100
+                        }%`,
+                    );
                 }
             } else if (isInGamut) {
                 if (idx % 5 === 0) {
-                    stops.push(`${format(value)} ${invLerp(min, max, i) * 100}%`);
+                    stops.push(
+                        `${format(value)} ${invLerp(min, max, i) * 100}%`,
+                    );
                 }
             }
 
@@ -147,7 +180,10 @@ function Slider({
             wasInGamut = isInGamut;
             idx++;
         }
-        return { gradient: `linear-gradient(to right, ${stops.join(", ")})`, transitionPoints };
+        return {
+            gradient: `linear-gradient(to right, ${stops.join(", ")})`,
+            transitionPoints,
+        };
     }, [color, gamut, max, min, property]);
 
     const [dragState, setDragState] = useState<{
@@ -177,17 +213,26 @@ function Slider({
     function onPointerMove(e: React.PointerEvent) {
         if (dragState === null || e.pointerId !== dragState.pointerId) return;
         const point = Vector2.fromEvent(e);
-        if (dragState.couldBeClick && point.distanceTo(dragState.startPoint) > 3) {
+        if (
+            dragState.couldBeClick &&
+            point.distanceTo(dragState.startPoint) > 3
+        ) {
             setDragState({ ...dragState, couldBeClick: false });
         }
-        onChange({ ...color, [property]: clamp(min, max, pointToValue(point) - dragState.offset) });
+        onChange({
+            ...color,
+            [property]: clamp(min, max, pointToValue(point) - dragState.offset),
+        });
     }
 
     function onPointerUp(e: React.PointerEvent) {
         if (dragState === null || e.pointerId !== dragState.pointerId) return;
         if (dragState.couldBeClick) {
             const point = Vector2.fromEvent(e);
-            onChange({ ...color, [property]: clamp(min, max, pointToValue(point)) });
+            onChange({
+                ...color,
+                [property]: clamp(min, max, pointToValue(point)),
+            });
         }
         setDragState(null);
         assertExists(sliderRef.current).releasePointerCapture(e.pointerId);
@@ -233,7 +278,9 @@ function Slider({
                         color.l < threshold ? "bg-white" : "bg-black",
                     )}
                     style={{
-                        left: `${invLerp(min, max, color[property] ?? 0) * 100}%`,
+                        left: `${
+                            invLerp(min, max, color[property] ?? 0) * 100
+                        }%`,
                     }}
                 >
                     <div

@@ -21,6 +21,9 @@ export async function loadJson(src: URL): Promise<unknown> {
     return response.json();
 }
 
-export async function loadAndParseJson<T>(src: URL, schema: Schema<T>): Promise<T> {
+export async function loadAndParseJson<T>(
+    src: URL,
+    schema: Schema<T>,
+): Promise<T> {
     return schema.parse(await loadJson(src)).unwrap(src.toString());
 }

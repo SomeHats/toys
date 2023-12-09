@@ -10,7 +10,11 @@ import { Vector2 } from "@/lib/geom/Vector2";
 
 const TENSION = 0.2;
 
-export function traceBlobTree(blobTree: BlobTree, debugDraw: DebugDraw, console = fakeConsole) {
+export function traceBlobTree(
+    blobTree: BlobTree,
+    debugDraw: DebugDraw,
+    console = fakeConsole,
+) {
     for (const rootNode of blobTree.iterateRootNodes()) {
         traceBlobTreeRoot(blobTree, rootNode, debugDraw, console);
     }
@@ -23,8 +27,11 @@ export function traceBlobTreeRoot(
     console = fakeConsole,
 ) {
     const prevNode = root;
-    const node: BlobTreeNode | undefined = Array.from(tree.iterateChildNodes(root))[0];
-    const nextNode = node ? Array.from(tree.iterateChildNodes(node))[0] : undefined;
+    const node: BlobTreeNode | undefined = Array.from(
+        tree.iterateChildNodes(root),
+    )[0];
+    const nextNode =
+        node ? Array.from(tree.iterateChildNodes(node))[0] : undefined;
 
     if (!prevNode || !node || !nextNode) {
         return;
@@ -45,14 +52,17 @@ export function traceBlobTreeRoot(
     const outgoingTangentAtNode = nextTangents[0];
     debugDraw.debugLine2(incomingTangentAtNode, { color: "lime" });
     debugDraw.debugLine2(outgoingTangentAtNode, { color: "lime" });
-    const tangentIntersection =
-        incomingTangentAtNode.pointAtIntersectionWith(outgoingTangentAtNode);
+    const tangentIntersection = incomingTangentAtNode.pointAtIntersectionWith(
+        outgoingTangentAtNode,
+    );
     const connectionNormal = circle.center.angleTo(tangentIntersection);
     const connectionPoint =
-        incomingTangentAtNode.isPointWithinBounds(tangentIntersection) &&
-        outgoingTangentAtNode.isPointWithinBounds(tangentIntersection)
-            ? tangentIntersection
-            : circle.pointOnCircumference(connectionNormal);
+        (
+            incomingTangentAtNode.isPointWithinBounds(tangentIntersection) &&
+            outgoingTangentAtNode.isPointWithinBounds(tangentIntersection)
+        ) ?
+            tangentIntersection
+        :   circle.pointOnCircumference(connectionNormal);
 
     debugDraw.debugPointX(connectionPoint);
 

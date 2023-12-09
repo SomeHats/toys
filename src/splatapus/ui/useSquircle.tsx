@@ -1,8 +1,14 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import { sizeFromBorderBox, useResizeObserver } from "@/lib/hooks/useResizeObserver";
+import {
+    sizeFromBorderBox,
+    useResizeObserver,
+} from "@/lib/hooks/useResizeObserver";
 import { useMemo } from "react";
 
-export function useSquircleClipPath(element: Element | null, maxRadius = Infinity): string {
+export function useSquircleClipPath(
+    element: Element | null,
+    maxRadius = Infinity,
+): string {
     const size = useResizeObserver(element, sizeFromBorderBox) ?? Vector2.ZERO;
     return useMemo(() => {
         if (!size) {

@@ -10,21 +10,23 @@ function asSignal(signal: number | Signal<number>): Atom<number> {
     const self: Atom<number> = {
         name: "signal",
         get value() {
-            return writeTarget.value ? writeTarget.value.value : (signal as Signal<number>).value;
+            return writeTarget.value ?
+                    writeTarget.value.value
+                :   (signal as Signal<number>).value;
         },
         get lastChangedEpoch() {
-            return writeTarget.value
-                ? writeTarget.value.lastChangedEpoch
-                : (signal as Signal<number>).lastChangedEpoch;
+            return writeTarget.value ?
+                    writeTarget.value.lastChangedEpoch
+                :   (signal as Signal<number>).lastChangedEpoch;
         },
         getDiffSince() {
             return RESET_VALUE;
         },
         __unsafe__getWithoutCapture() {
             const t = writeTarget.__unsafe__getWithoutCapture();
-            return t
-                ? t.__unsafe__getWithoutCapture()
-                : (signal as Signal<number>).__unsafe__getWithoutCapture();
+            return t ?
+                    t.__unsafe__getWithoutCapture()
+                :   (signal as Signal<number>).__unsafe__getWithoutCapture();
         },
         set(value) {
             const t = writeTarget.value;
@@ -92,32 +94,47 @@ export class Spring {
 
     private tick(deltaMs: number) {
         const timeStep = deltaMs / 10000;
-        const { target, tension, friction, value: currentValue, velocity: currentVelocity } = this;
+        const {
+            target,
+            tension,
+            friction,
+            value: currentValue,
+            velocity: currentVelocity,
+        } = this;
 
         let tempValue = currentValue;
         let tempVelocity = currentVelocity;
 
         const aVelocity = currentVelocity;
-        const aAcceleration = tension * (target - tempValue) - friction * currentVelocity;
+        const aAcceleration =
+            tension * (target - tempValue) - friction * currentVelocity;
 
         tempValue = currentValue + aVelocity * timeStep * 0.5;
         tempVelocity = currentVelocity + aAcceleration * timeStep * 0.5;
         const bVelocity = tempVelocity;
-        const bAcceleration = tension * (target - tempValue) - friction * tempVelocity;
+        const bAcceleration =
+            tension * (target - tempValue) - friction * tempVelocity;
 
         tempValue = currentValue + bVelocity * timeStep * 0.5;
         tempVelocity = currentVelocity + bAcceleration * timeStep * 0.5;
         const cVelocity = tempVelocity;
-        const cAcceleration = tension * (target - tempValue) - friction * tempVelocity;
+        const cAcceleration =
+            tension * (target - tempValue) - friction * tempVelocity;
 
         tempValue = currentValue + cVelocity * timeStep;
         tempVelocity = currentVelocity + cAcceleration * timeStep;
         const dVelocity = tempVelocity;
-        const dAcceleration = tension * (target - tempValue) - friction * tempVelocity;
+        const dAcceleration =
+            tension * (target - tempValue) - friction * tempVelocity;
 
-        const dxdt = (1.0 / 6.0) * (aVelocity + 2.0 * (bVelocity + cVelocity) + dVelocity);
+        const dxdt =
+            (1.0 / 6.0) *
+            (aVelocity + 2.0 * (bVelocity + cVelocity) + dVelocity);
         const dvdt =
-            (1.0 / 6.0) * (aAcceleration + 2.0 * (bAcceleration + cAcceleration) + dAcceleration);
+            (1.0 / 6.0) *
+            (aAcceleration +
+                2.0 * (bAcceleration + cAcceleration) +
+                dAcceleration);
 
         if (Math.abs(dxdt) < 0.000001) {
             this.value = this.target;

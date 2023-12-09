@@ -76,7 +76,9 @@ export const generateRandomPalConfig = (): PalConfig => {
         buttTop: varyRelative(radius * 0.4, 0.2),
         buttBottom: varyRelative(radius * 0.85, 0.15),
         buttThickness: varyRelative(radius * 0.1, 0.5),
-        color: BLUE.lighten(random(-0.2, 0.2)).saturate(random(-0.2, 0.2)).rotate(random(-10, 10)),
+        color: BLUE.lighten(random(-0.2, 0.2))
+            .saturate(random(-0.2, 0.2))
+            .rotate(random(-10, 10)),
         hipHeight,
         kneeScale: varyAbsolute(1.3, 0.3),
         legMaxLift: random(0.2, 0.5),

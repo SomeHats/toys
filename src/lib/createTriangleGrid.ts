@@ -42,11 +42,19 @@ export default function createTriangleGrid(
                 if (iy % 2 === 0) {
                     const triangle1: IntermediateTriangle = {
                         id: getId("triangle"),
-                        points: [point, points[iy][ix - 1], points[iy - 1][ix - 1]],
+                        points: [
+                            point,
+                            points[iy][ix - 1],
+                            points[iy - 1][ix - 1],
+                        ],
                     };
                     const triangle2: IntermediateTriangle = {
                         id: getId("triangle"),
-                        points: [point, points[iy - 1][ix - 1], points[iy - 1][ix]],
+                        points: [
+                            point,
+                            points[iy - 1][ix - 1],
+                            points[iy - 1][ix],
+                        ],
                     };
                     triangleRow.push(triangle1, triangle2);
                 } else if (points[iy - 1][ix + 1]) {
@@ -56,7 +64,11 @@ export default function createTriangleGrid(
                     };
                     const triangle2: IntermediateTriangle = {
                         id: getId("triangle"),
-                        points: [point, points[iy - 1][ix + 1], points[iy - 1][ix]],
+                        points: [
+                            point,
+                            points[iy - 1][ix + 1],
+                            points[iy - 1][ix],
+                        ],
                     };
                     triangleRow.push(triangle1, triangle2);
                 }
@@ -71,40 +83,43 @@ export default function createTriangleGrid(
             const center = Vector2.average(triangle.points);
 
             const neighbours = compact(
-                ix % 2 === 0
-                    ? iy % 2 === 0
-                        ? [
-                              // 2,2
-                              trianglePoints[iy]?.[ix - 1],
-                              trianglePoints[iy]?.[ix + 1],
-                              trianglePoints[iy + 1]?.[ix - 1],
-                          ]
-                        : [
-                              // 2,3
-                              trianglePoints[iy]?.[ix - 1],
-                              trianglePoints[iy]?.[ix + 1],
-                              trianglePoints[iy + 1]?.[ix + 1],
-                          ]
-                    : iy % 2 === 0
-                    ? [
-                          // 3,2
-                          trianglePoints[iy]?.[ix - 1],
-                          trianglePoints[iy]?.[ix + 1],
-                          trianglePoints[iy - 1]?.[ix - 1],
-                      ]
-                    : [
-                          //3,3
-                          trianglePoints[iy]?.[ix - 1],
-                          trianglePoints[iy]?.[ix + 1],
-                          trianglePoints[iy - 1]?.[ix + 1],
-                      ],
+                ix % 2 === 0 ?
+                    iy % 2 === 0 ?
+                        [
+                            // 2,2
+                            trianglePoints[iy]?.[ix - 1],
+                            trianglePoints[iy]?.[ix + 1],
+                            trianglePoints[iy + 1]?.[ix - 1],
+                        ]
+                    :   [
+                            // 2,3
+                            trianglePoints[iy]?.[ix - 1],
+                            trianglePoints[iy]?.[ix + 1],
+                            trianglePoints[iy + 1]?.[ix + 1],
+                        ]
+                : iy % 2 === 0 ?
+                    [
+                        // 3,2
+                        trianglePoints[iy]?.[ix - 1],
+                        trianglePoints[iy]?.[ix + 1],
+                        trianglePoints[iy - 1]?.[ix - 1],
+                    ]
+                :   [
+                        //3,3
+                        trianglePoints[iy]?.[ix - 1],
+                        trianglePoints[iy]?.[ix + 1],
+                        trianglePoints[iy - 1]?.[ix + 1],
+                    ],
             );
 
             const fullTriangle = triangle as Triangle;
             fullTriangle.center = center;
             fullTriangle.neighbours = neighbours.map((neighbourTriangle) => ({
                 triangle: neighbourTriangle,
-                sharedPoints: intersection(triangle.points, neighbourTriangle.points),
+                sharedPoints: intersection(
+                    triangle.points,
+                    neighbourTriangle.points,
+                ),
             })) as TriangleNeighbour[];
             fullTriangle.ix = ix;
             fullTriangle.iy = iy;

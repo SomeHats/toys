@@ -26,8 +26,9 @@ export const ShapeVersionPreview = React.memo(function ShapeVersionPreview({
         if (!shapeVersion) {
             return null;
         }
-        return document.getNormalizedCenterPointsForShapeVersion(shapeVersion.id)
-            .normalizedCenterPoints;
+        return document.getNormalizedCenterPointsForShapeVersion(
+            shapeVersion.id,
+        ).normalizedCenterPoints;
     }, [keyPointId, shapeId, splatapus.document]);
     if (!centerPoints || centerPoints.length < 2) {
         return null;
@@ -58,9 +59,11 @@ export const ShapeVersionPreview = React.memo(function ShapeVersionPreview({
         <svg viewBox={`0 0 ${width} ${height}`} style={{ width, height }}>
             <g
                 transform={`translate(${
-                    padding + Math.max(availableWidth - shapeWidth * scale, 0) / 2
+                    padding +
+                    Math.max(availableWidth - shapeWidth * scale, 0) / 2
                 }, ${
-                    padding + Math.max(availableHeight - shapeHeight * scale, 0) / 2
+                    padding +
+                    Math.max(availableHeight - shapeHeight * scale, 0) / 2
                 }) scale(${scale}) translate(${-minX}, ${-minY})`}
             >
                 <path

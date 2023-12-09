@@ -3,7 +3,11 @@ import { assert } from "@/lib/assert";
 import { useLocalStorageState } from "@/lib/hooks/useStoredState";
 import { ListenToMidiInputFn } from "@/lib/midi";
 import { Schema } from "@/lib/schema";
-import { ControllableSignal, Signal, SignalManager } from "@/lib/signals/Signals";
+import {
+    ControllableSignal,
+    Signal,
+    SignalManager,
+} from "@/lib/signals/Signals";
 import useSignal from "@/lib/signals/useSignal";
 import { groupBy, mapRange, partition, sortBy } from "@/lib/utils";
 import cx from "classnames";
@@ -35,7 +39,9 @@ const SignalValue = React.memo(function _SignalValue({
 }) {
     const value = useSignal(signal);
 
-    return <div className={cx("text-gray-400", className)}>{format(value, 5)}</div>;
+    return (
+        <div className={cx("text-gray-400", className)}>{format(value, 5)}</div>
+    );
 });
 
 const SignalGraph = React.memo(function _SignalGraph({
@@ -149,12 +155,22 @@ function SignalControl({
             if (isWaitingForMidi) {
                 setMidiControlId(id);
                 setIsWaitingForMidi(false);
-                signal.set(mapRange(0, 1, signal.range[0], signal.range[1], value));
+                signal.set(
+                    mapRange(0, 1, signal.range[0], signal.range[1], value),
+                );
             } else if (id === midiControlId) {
-                signal.set(mapRange(0, 1, signal.range[0], signal.range[1], value));
+                signal.set(
+                    mapRange(0, 1, signal.range[0], signal.range[1], value),
+                );
             }
         });
-    }, [listenToMidi, signal, isWaitingForMidi, midiControlId, setMidiControlId]);
+    }, [
+        listenToMidi,
+        signal,
+        isWaitingForMidi,
+        midiControlId,
+        setMidiControlId,
+    ]);
 
     function onClickMidiButton(e: React.MouseEvent) {
         e.stopPropagation();
@@ -170,9 +186,12 @@ function SignalControl({
 
         const startYPosition = e.screenY;
         const startSignalValue = signal.read();
-        const adjustPerPx = signal.range
-            ? Math.abs(signal.range[1] - signal.range[0]) / 250
-            : Math.abs(startSignalValue === 0 ? 0.1 : startSignalValue * 0.01);
+        const adjustPerPx =
+            signal.range ?
+                Math.abs(signal.range[1] - signal.range[0]) / 250
+            :   Math.abs(
+                    startSignalValue === 0 ? 0.1 : startSignalValue * 0.01,
+                );
 
         const onMove = (nextYPosition: number) => {
             const delta = (startYPosition - nextYPosition) * adjustPerPx;
@@ -199,15 +218,17 @@ function SignalControl({
                 <div
                     className={cx(
                         "cursor-pointer px-1 py-1",
-                        isWaitingForMidi
-                            ? "text-gray-100"
-                            : midiControlId !== null
-                            ? "text-gray-300"
-                            : "text-gray-500 hover:text-gray-300",
+                        isWaitingForMidi ? "text-gray-100"
+                        : midiControlId !== null ? "text-gray-300"
+                        : "text-gray-500 hover:text-gray-300",
                     )}
                     onClick={onClickMidiButton}
                 >
-                    {isWaitingForMidi ? "◎" : midiControlId !== null ? "◉" : "○"}
+                    {isWaitingForMidi ?
+                        "◎"
+                    : midiControlId !== null ?
+                        "◉"
+                    :   "○"}
                 </div>
             )}
             <div
@@ -250,16 +271,16 @@ const SignalInspector = React.memo(function _SignalInspector({
                 className="flex cursor-pointer hover:bg-gray-800"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <div className="flex-auto whitespace-pre px-2 py-1">{displayName}</div>
-                {controllableSignals.length ? (
+                <div className="flex-auto whitespace-pre px-2 py-1">
+                    {displayName}
+                </div>
+                {controllableSignals.length ?
                     <SignalControl
                         name={name}
                         signal={controllableSignals[0]}
                         listenToMidi={listenToMidi}
                     />
-                ) : (
-                    <SignalValue signal={signals[0]} className="px-2 py-1" />
-                )}
+                :   <SignalValue signal={signals[0]} className="px-2 py-1" />}
             </div>
             {isExpanded && <SignalGraph signals={signals} width={width} />}
         </div>
@@ -297,7 +318,9 @@ function SignalInspectorGroup({
                         <SignalInspector
                             key={name}
                             name={name}
-                            displayName={`  ${name.slice(groupName.length + 1)}`}
+                            displayName={`  ${name.slice(
+                                groupName.length + 1,
+                            )}`}
                             signals={signals}
                             width={width}
                             listenToMidi={listenToMidi}

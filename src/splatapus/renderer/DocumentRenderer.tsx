@@ -16,7 +16,10 @@ export const DocumentRenderer = React.memo(function DocumentRenderer({
     );
     const isSidebarOpen = useLiveValue(splatapus.viewport.isSidebarOpen);
     const screenSize = useLiveValue(splatapus.viewport.screenSize);
-    const sceneTransform = useLive(() => splatapus.viewport.getSceneTransformLive(), [splatapus]);
+    const sceneTransform = useLive(
+        () => splatapus.viewport.getSceneTransformLive(),
+        [splatapus],
+    );
 
     const prevIsSidebarOpen = usePrevious(isSidebarOpen);
     const [isTransitioning, setIsTransitioning] = useState(false);
@@ -54,7 +57,11 @@ const DocumentPathRenderer = React.memo(function DocumentPathRenderer({
             {Array.from(
                 useLive(() => splatapus.document.live().shapes, [splatapus]),
                 (shape) => (
-                    <StrokeRenderer key={shape.id} shapeId={shape.id} splatapus={splatapus} />
+                    <StrokeRenderer
+                        key={shape.id}
+                        shapeId={shape.id}
+                        splatapus={splatapus}
+                    />
                 ),
             )}
         </>

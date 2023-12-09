@@ -2,7 +2,8 @@ import { Vector2 } from "@/lib/geom/Vector2";
 import { Wire, WiresApp } from "@/wires/wiresModel2";
 import { atom } from "@tldraw/state";
 
-type ChildOf<S extends AnyState> = S extends State<any, any, infer C> ? C : never;
+type ChildOf<S extends AnyState> =
+    S extends State<any, any, infer C> ? C : never;
 
 type AnyState = State<string, any, any>;
 abstract class State<
@@ -13,7 +14,10 @@ abstract class State<
     abstract readonly name: Name;
     private readonly _child = atom<Child | null>("State.child", null);
 
-    constructor(readonly parent: Parent, readonly app: WiresApp) {}
+    constructor(
+        readonly parent: Parent,
+        readonly app: WiresApp,
+    ) {}
 
     clear() {
         this._child.set(null);
@@ -101,7 +105,11 @@ export class IdleNode extends ChildState<"idle", RootNode> {
 export class DraggingHandle extends ChildState<"DraggingHandle", RootNode> {
     override name = "DraggingHandle" as const;
 
-    constructor(parent: RootNode, readonly handle: "start" | "end", readonly wire: Wire) {
+    constructor(
+        parent: RootNode,
+        readonly handle: "start" | "end",
+        readonly wire: Wire,
+    ) {
         super(parent);
     }
 

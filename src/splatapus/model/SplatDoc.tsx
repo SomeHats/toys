@@ -33,7 +33,10 @@ export const splatDocSchema = Schema.object({
     id: SplatDocId.schema,
     keyPoints: Schema.objectMap(SplatKeyPointId.schema, splatKeyPointSchema),
     shapes: Schema.objectMap(SplatShapeId.schema, splatShapeSchema),
-    shapeVersions: Schema.objectMap(SplatShapeVersionId.schema, splatShapeVersionSchema),
+    shapeVersions: Schema.objectMap(
+        SplatShapeVersionId.schema,
+        splatShapeVersionSchema,
+    ),
 });
 export type SplatDoc = SchemaType<typeof splatDocSchema>;
 

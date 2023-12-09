@@ -5,7 +5,12 @@ import { clamp, copyAndRemove, copyArrayAndReplace } from "@/lib/utils";
 import { Controls } from "@/palette/Controls";
 import { GamutPicker } from "@/palette/GamutPicker";
 import { Swatch, XAxisName, YAxisName } from "@/palette/Swatches";
-import { Palette, axisSchema, gamutSchema, paletteSchema } from "@/palette/schema";
+import {
+    Palette,
+    axisSchema,
+    gamutSchema,
+    paletteSchema,
+} from "@/palette/schema";
 import { useSupport } from "@/palette/support";
 import classNames from "classnames";
 import { oklch } from "culori";
@@ -51,8 +56,8 @@ export function PaletteApp() {
         return (
             <div className="absolute inset-0 flex items-center justify-center">
                 <div className="p-6 text-2xl text-neutral-300">
-                    Your browser does not support oklch colors. Sorry! Try a recent Chrome or
-                    Safari.
+                    Your browser does not support oklch colors. Sorry! Try a
+                    recent Chrome or Safari.
                 </div>
             </div>
         );
@@ -68,11 +73,20 @@ function PaletteAppInner() {
         if (support.p3Gamut) return "p3";
         return "srgb";
     });
-    const [palette, setPalette] = useUrlStorageState("palette", paletteSchema, defaultPalette, {
-        delayMs: 1000,
-    });
+    const [palette, setPalette] = useUrlStorageState(
+        "palette",
+        paletteSchema,
+        defaultPalette,
+        {
+            delayMs: 1000,
+        },
+    );
     const [axis, setAxis] = useUrlStorageState("axis", axisSchema, "shades");
-    const [rawSelectedIndex, setSelectedIndex] = useUrlStorageState("selected", Schema.number, 0);
+    const [rawSelectedIndex, setSelectedIndex] = useUrlStorageState(
+        "selected",
+        Schema.number,
+        0,
+    );
     const selectedIndex = clamp(0, palette[axis].length - 1, rawSelectedIndex);
 
     const xAxis = axis;
@@ -84,7 +98,10 @@ function PaletteAppInner() {
         setPalette((p) => ({
             ...p,
             families: [...p.families, ""],
-            colors: [...p.colors, p.colors[axis === "families" ? selectedIndex : 0]],
+            colors: [
+                ...p.colors,
+                p.colors[axis === "families" ? selectedIndex : 0],
+            ],
         }));
         if (axis === "families") setSelectedIndex(palette.families.length);
     }
@@ -92,7 +109,10 @@ function PaletteAppInner() {
         setPalette((p) => ({
             ...p,
             shades: [...p.shades, ""],
-            colors: p.colors.map((row) => [...row, row[axis === "shades" ? selectedIndex : 0]]),
+            colors: p.colors.map((row) => [
+                ...row,
+                row[axis === "shades" ? selectedIndex : 0],
+            ]),
         }));
         if (axis === "shades") setSelectedIndex(palette.shades.length);
     }
@@ -120,7 +140,8 @@ function PaletteAppInner() {
                             key={xIndex}
                             className={classNames(
                                 "p-1",
-                                xIndex === selectedIndex && "active group bg-neutral-600",
+                                xIndex === selectedIndex &&
+                                    "active group bg-neutral-600",
                             )}
                             onClick={onClickXAxis(xIndex)}
                         >
@@ -170,9 +191,9 @@ function PaletteAppInner() {
                                 <Swatch
                                     key={yIndex}
                                     color={
-                                        axis === "families"
-                                            ? palette.colors[xIndex]?.[yIndex]
-                                            : palette.colors[yIndex]?.[xIndex]
+                                        axis === "families" ?
+                                            palette.colors[xIndex]?.[yIndex]
+                                        :   palette.colors[yIndex]?.[xIndex]
                                     }
                                 />
                             ))}
@@ -186,19 +207,27 @@ function PaletteAppInner() {
                             key={yIndex}
                             gamut={gamut}
                             color={
-                                axis === "families"
-                                    ? palette.colors[selectedIndex][yIndex]
-                                    : palette.colors[yIndex][selectedIndex]
+                                axis === "families" ?
+                                    palette.colors[selectedIndex][yIndex]
+                                :   palette.colors[yIndex][selectedIndex]
                             }
                             onChange={(color) => {
                                 setPalette((p) => ({
                                     ...p,
                                     colors: copyArrayAndReplace(
                                         p.colors,
-                                        axis === "families" ? selectedIndex : yIndex,
+                                        axis === "families" ? selectedIndex : (
+                                            yIndex
+                                        ),
                                         copyArrayAndReplace(
-                                            p.colors[axis === "families" ? selectedIndex : yIndex],
-                                            axis === "families" ? yIndex : selectedIndex,
+                                            p.colors[
+                                                axis === "families" ?
+                                                    selectedIndex
+                                                :   yIndex
+                                            ],
+                                            axis === "families" ? yIndex : (
+                                                selectedIndex
+                                            ),
                                             color,
                                         ),
                                     ),
@@ -230,9 +259,11 @@ function PaletteAppInner() {
                                     ...p,
                                     [xAxis]: copyAndRemove(p[xAxis], xIndex),
                                     colors:
-                                        xAxis === "families"
-                                            ? copyAndRemove(p.colors, xIndex)
-                                            : p.colors.map((row) => copyAndRemove(row, xIndex)),
+                                        xAxis === "families" ?
+                                            copyAndRemove(p.colors, xIndex)
+                                        :   p.colors.map((row) =>
+                                                copyAndRemove(row, xIndex),
+                                            ),
                                 }));
                             }}
                         >

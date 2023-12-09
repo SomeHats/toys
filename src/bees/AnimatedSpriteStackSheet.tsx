@@ -15,7 +15,9 @@ const animatedSpriteStackGeometrySchema = Schema.object({
     trims: Schema.arrayOf(Schema.number),
 });
 
-export type AnimatedSpriteStackGeometry = SchemaType<typeof animatedSpriteStackGeometrySchema>;
+export type AnimatedSpriteStackGeometry = SchemaType<
+    typeof animatedSpriteStackGeometrySchema
+>;
 
 export type SpriteStackManifest = {
     geometry: URL;
@@ -28,12 +30,18 @@ export type SpriteStackManifest = {
 };
 
 export class AnimatedSpriteStackSheet {
-    static async load(manifest: SpriteStackManifest): Promise<AnimatedSpriteStackSheet> {
+    static async load(
+        manifest: SpriteStackManifest,
+    ): Promise<AnimatedSpriteStackSheet> {
         const geometry = await loadAndParseJson(
             manifest.geometry,
             animatedSpriteStackGeometrySchema,
         );
-        return new AnimatedSpriteStackSheet(await manifest.baseTexture, geometry, manifest);
+        return new AnimatedSpriteStackSheet(
+            await manifest.baseTexture,
+            geometry,
+            manifest,
+        );
     }
 
     private readonly texturesByAngleThenFrame: Texture[][];
@@ -116,7 +124,8 @@ export class AnimatedSpriteStackSheet {
     }
 
     getElapsedTimeAtAngle(angleRadians: number, elapsedTimeMs: number) {
-        const frameIndex = Math.floor(elapsedTimeMs / this.msPerFrame) % this.frames;
+        const frameIndex =
+            Math.floor(elapsedTimeMs / this.msPerFrame) % this.frames;
         return this.getFrameAtAngle(angleRadians, frameIndex);
     }
 }

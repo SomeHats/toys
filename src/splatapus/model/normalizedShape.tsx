@@ -1,5 +1,8 @@
 import { perfectFreehandOpts } from "@/splatapus/constants";
-import { SplatShapeVersion, SplatShapeVersionId } from "@/splatapus/model/SplatDoc";
+import {
+    SplatShapeVersion,
+    SplatShapeVersionId,
+} from "@/splatapus/model/SplatDoc";
 import { Table } from "@/splatapus/model/Table";
 import { normalizeCenterPointIntervalsQuadratic } from "@/splatapus/model/normalizeCenterPointIntervals";
 import {
@@ -28,7 +31,8 @@ export function calculateNormalizedShapePointsFromVersions(
     let longestLength = 0;
     for (const shapeVersion of shapeVersions) {
         const strokePoints = getStrokePoints(shapeVersion.rawPoints);
-        const length = strokePoints[strokePoints.length - 1]?.runningLength ?? 0;
+        const length =
+            strokePoints[strokePoints.length - 1]?.runningLength ?? 0;
         pointsWithStrokes.push({ id: shapeVersion.id, strokePoints, length });
         if (length > longestLength) {
             longestLength = length;
@@ -48,10 +52,11 @@ export function calculateNormalizedShapePointsFromVersions(
                     id,
                     length,
                     smoothedCenterPoints,
-                    normalizedCenterPoints: normalizeCenterPointIntervalsQuadratic(
-                        smoothedCenterPoints,
-                        length / targetPoints,
-                    ),
+                    normalizedCenterPoints:
+                        normalizeCenterPointIntervalsQuadratic(
+                            smoothedCenterPoints,
+                            length / targetPoints,
+                        ),
                 };
             }),
         ),

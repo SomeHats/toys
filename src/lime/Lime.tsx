@@ -97,7 +97,9 @@ export class Lime {
     }
     getSlideByIndex(index: number) {
         const { slideIds } = this.document;
-        return this.getSlide(slideIds[constrainWrapped(0, slideIds.length, index)]);
+        return this.getSlide(
+            slideIds[constrainWrapped(0, slideIds.length, index)],
+        );
     }
 
     updateSlide(slideId: SlideId, update: UpdateAction<Slide>) {
@@ -105,9 +107,12 @@ export class Lime {
     }
 
     @memo private get _slideStrokePointsCache() {
-        return this.store.createComputedCache("slideStrokePoints", (slide: Slide) => {
-            return getStrokePoints(slide.rawPoints, LIME_FREEHAND);
-        });
+        return this.store.createComputedCache(
+            "slideStrokePoints",
+            (slide: Slide) => {
+                return getStrokePoints(slide.rawPoints, LIME_FREEHAND);
+            },
+        );
     }
     getSlideStrokePoints(slideId: SlideId) {
         return assertExists(this._slideStrokePointsCache.get(slideId));
@@ -117,7 +122,9 @@ export class Lime {
     //#region ============ ANIMATION ============
     @memo private get playheadSpring() {
         return new Spring({
-            target: computed("playheadTarget", () => this.getSlideIndex(this.session.slideId)),
+            target: computed("playheadTarget", () =>
+                this.getSlideIndex(this.session.slideId),
+            ),
             ticker: this.ticker,
             tension: 100,
             friction: 25,
@@ -127,84 +134,103 @@ export class Lime {
         return this.playheadSpring.value;
     }
     @memo private get animationStepCache() {
-        return this.store.createComputedCache("animationSteps", (currentSlide: Slide) => {
-            const { tweenBezierControl, speed } = this.session;
+        return this.store.createComputedCache(
+            "animationSteps",
+            (currentSlide: Slide) => {
+                const { tweenBezierControl, speed } = this.session;
 
-            const nextSlide = this.getSlideByIndex(this.getSlideIndex(currentSlide.id) + 1);
+                const nextSlide = this.getSlideByIndex(
+                    this.getSlideIndex(currentSlide.id) + 1,
+                );
 
-            const currentRawPoints = currentSlide.rawPoints;
-            const nextRawPoints = nextSlide.rawPoints;
-            const currentStrokePoints = this.getSlideStrokePoints(currentSlide.id);
-            const nextStrokePoints = this.getSlideStrokePoints(nextSlide.id);
+                const currentRawPoints = currentSlide.rawPoints;
+                const nextRawPoints = nextSlide.rawPoints;
+                const currentStrokePoints = this.getSlideStrokePoints(
+                    currentSlide.id,
+                );
+                const nextStrokePoints = this.getSlideStrokePoints(
+                    nextSlide.id,
+                );
 
-            if (!currentRawPoints.length || !nextStrokePoints.length) return null;
+                if (!currentRawPoints.length || !nextStrokePoints.length)
+                    return null;
 
-            const origin = currentStrokePoints[currentStrokePoints.length - 1];
-            const destination = nextStrokePoints[0];
+                const origin =
+                    currentStrokePoints[currentStrokePoints.length - 1];
+                const destination = nextStrokePoints[0];
 
-            const distBetween = origin.point.distanceTo(destination.point);
-            const bStart = origin.point;
-            const bControl1 = origin.point.sub(
-                origin.vector.scale(distBetween * tweenBezierControl),
-            );
-            const bControl2 = destination.point.add(
-                destination.vector.scale(distBetween * tweenBezierControl),
-            );
-            const bEnd = destination.point;
+                const distBetween = origin.point.distanceTo(destination.point);
+                const bStart = origin.point;
+                const bControl1 = origin.point.sub(
+                    origin.vector.scale(distBetween * tweenBezierControl),
+                );
+                const bControl2 = destination.point.add(
+                    destination.vector.scale(distBetween * tweenBezierControl),
+                );
+                const bEnd = destination.point;
 
-            const middlePoints = [];
-            for (let d = 0; d < distBetween; d += speed / 60) {
-                const t = invLerp(0, distBetween, d);
-                const p = interpolateCubicBezier(bStart, bControl1, bControl2, bEnd, t);
-                middlePoints.push(p);
-            }
-
-            const runningLengths = [0];
-            const allPoints = [];
-
-            let runningLength = 0;
-            let prevPoint = null;
-            for (const point of currentRawPoints) {
-                if (prevPoint) {
-                    const distance = point.distanceTo(prevPoint);
-                    runningLength += distance;
-                    runningLengths.push(runningLength);
+                const middlePoints = [];
+                for (let d = 0; d < distBetween; d += speed / 60) {
+                    const t = invLerp(0, distBetween, d);
+                    const p = interpolateCubicBezier(
+                        bStart,
+                        bControl1,
+                        bControl2,
+                        bEnd,
+                        t,
+                    );
+                    middlePoints.push(p);
                 }
-                prevPoint = point;
-                allPoints.push(point);
-            }
-            const lengthOfCurrentSection = runningLength;
 
-            for (const point of middlePoints) {
-                if (prevPoint) {
-                    const distance = point.distanceTo(prevPoint);
-                    runningLength += distance;
-                    runningLengths.push(runningLength);
+                const runningLengths = [0];
+                const allPoints = [];
+
+                let runningLength = 0;
+                let prevPoint = null;
+                for (const point of currentRawPoints) {
+                    if (prevPoint) {
+                        const distance = point.distanceTo(prevPoint);
+                        runningLength += distance;
+                        runningLengths.push(runningLength);
+                    }
+                    prevPoint = point;
+                    allPoints.push(point);
                 }
-                prevPoint = point;
-                allPoints.push(point);
-            }
-            const lengthOfMiddleSection = runningLength - lengthOfCurrentSection;
+                const lengthOfCurrentSection = runningLength;
 
-            for (const point of nextRawPoints) {
-                if (prevPoint) {
-                    const distance = point.distanceTo(prevPoint);
-                    runningLength += distance;
-                    runningLengths.push(runningLength);
+                for (const point of middlePoints) {
+                    if (prevPoint) {
+                        const distance = point.distanceTo(prevPoint);
+                        runningLength += distance;
+                        runningLengths.push(runningLength);
+                    }
+                    prevPoint = point;
+                    allPoints.push(point);
                 }
-                prevPoint = point;
-                allPoints.push(point);
-            }
+                const lengthOfMiddleSection =
+                    runningLength - lengthOfCurrentSection;
 
-            return {
-                allPoints,
-                runningLengths,
-                initialWindowStart: 0,
-                initialWindowEnd: lengthOfCurrentSection,
-                finalWindowStart: lengthOfCurrentSection + lengthOfMiddleSection,
-                finalWindowEnd: runningLength,
-            };
-        });
+                for (const point of nextRawPoints) {
+                    if (prevPoint) {
+                        const distance = point.distanceTo(prevPoint);
+                        runningLength += distance;
+                        runningLengths.push(runningLength);
+                    }
+                    prevPoint = point;
+                    allPoints.push(point);
+                }
+
+                return {
+                    allPoints,
+                    runningLengths,
+                    initialWindowStart: 0,
+                    initialWindowEnd: lengthOfCurrentSection,
+                    finalWindowStart:
+                        lengthOfCurrentSection + lengthOfMiddleSection,
+                    finalWindowEnd: runningLength,
+                };
+            },
+        );
     }
     getPlayheadPoints() {
         const { playhead } = this;
@@ -226,7 +252,10 @@ export class Lime {
             progress,
         );
 
-        const windowStartIndex = binarySearch(animationStep.runningLengths, windowStart);
+        const windowStartIndex = binarySearch(
+            animationStep.runningLengths,
+            windowStart,
+        );
         const windowEndIndex = binarySearch(
             animationStep.runningLengths,
             windowEnd,
@@ -237,7 +266,10 @@ export class Lime {
             windowStartIndex + 1,
             animationStep.allPoints.length,
         );
-        const afterWindowEndIndex = Math.min(windowEndIndex + 1, animationStep.allPoints.length);
+        const afterWindowEndIndex = Math.min(
+            windowEndIndex + 1,
+            animationStep.allPoints.length,
+        );
         const beforeWindowEndIndex = Math.max(windowEndIndex - 1, 0);
 
         const firstPoint = animationStep.allPoints[windowStartIndex].lerp(
@@ -260,7 +292,10 @@ export class Lime {
 
         return [
             firstPoint,
-            ...animationStep.allPoints.slice(afterWindowStartIndex, beforeWindowEndIndex),
+            ...animationStep.allPoints.slice(
+                afterWindowStartIndex,
+                beforeWindowEndIndex,
+            ),
             lastPoint,
         ];
 
@@ -284,7 +319,10 @@ export class Lime {
     @action newSlide() {
         const slide = Slide.create({});
         this.store.insert(slide);
-        this.updateDocument((doc) => ({ ...doc, slideIds: [...doc.slideIds, slide.id] }));
+        this.updateDocument((doc) => ({
+            ...doc,
+            slideIds: [...doc.slideIds, slide.id],
+        }));
         this.updateSession((session) => ({ ...session, slideId: slide.id }));
     }
 

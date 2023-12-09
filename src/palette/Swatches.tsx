@@ -38,7 +38,11 @@ export const YAxisName = memo(function YAxisName({
                 onChange={(e) => {
                     setPalette((p) => ({
                         ...p,
-                        [axis]: copyArrayAndReplace(p[axis], index, e.currentTarget.value),
+                        [axis]: copyArrayAndReplace(
+                            p[axis],
+                            index,
+                            e.currentTarget.value,
+                        ),
                     }));
                 }}
                 autoFocus={value === ""}
@@ -66,7 +70,11 @@ export const XAxisName = memo(function XAxisName({
             onChange={(e) => {
                 setPalette((p) => ({
                     ...p,
-                    [axis]: copyArrayAndReplace(p[axis], index, e.currentTarget.value),
+                    [axis]: copyArrayAndReplace(
+                        p[axis],
+                        index,
+                        e.currentTarget.value,
+                    ),
                 }));
             }}
             autoFocus={value === ""}
@@ -75,7 +83,11 @@ export const XAxisName = memo(function XAxisName({
 });
 
 const black: Oklch = { mode: "oklch", l: 0, c: 0, h: 0 };
-export const Swatch = memo(function Swatch({ color = black }: { color?: Oklch }) {
+export const Swatch = memo(function Swatch({
+    color = black,
+}: {
+    color?: Oklch;
+}) {
     const support = useSupport();
 
     const css = useMemo(() => {
@@ -99,7 +111,10 @@ export const Swatch = memo(function Swatch({ color = black }: { color?: Oklch })
             bestSupportedColor = asRec2020;
             isSupported = true;
         } else {
-            bestSupportedColor = support.rec2020Gamut ? asRec2020 : support.p3Gamut ? asP3 : asRgb;
+            bestSupportedColor =
+                support.rec2020Gamut ? asRec2020
+                : support.p3Gamut ? asP3
+                : asRgb;
             isSupported = false;
         }
 
@@ -168,7 +183,10 @@ export const Swatch = memo(function Swatch({ color = black }: { color?: Oklch })
             <div
                 className="grid h-full w-full grid-cols-2 grid-rows-2 gap-px overflow-hidden rounded-sm"
                 style={{
-                    backgroundColor: isHovered ? css.uiFg : formatCss(css.bestSupportedColor),
+                    backgroundColor:
+                        isHovered ?
+                            css.uiFg
+                        :   formatCss(css.bestSupportedColor),
                 }}
             >
                 <Subswatch color={css.raw} space="Raw" />
@@ -214,7 +232,9 @@ const Subswatch = memo(function Subswatch({
             <div
                 className={classNames(
                     "flex-wrap items-center justify-center rounded-lg px-1.5 text-center text-xs leading-4",
-                    !isSupported || isClamped ? "flex" : "hidden group-hover/swatch:flex",
+                    !isSupported || isClamped ? "flex" : (
+                        "hidden group-hover/swatch:flex"
+                    ),
                 )}
                 style={{ background: "var(--swatch-bg)", fontSize: "10px" }}
             >

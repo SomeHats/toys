@@ -12,10 +12,8 @@ export type TapGestureHandler<Args extends ReadonlyArray<unknown> = []> = (
     event: PointerEvent,
     ...args: Args
 ) => void;
-export type DragStartGestureHandler<Args extends ReadonlyArray<unknown> = []> = (
-    event: PointerEvent,
-    ...args: Args
-) => DragGestureHandler | null;
+export type DragStartGestureHandler<Args extends ReadonlyArray<unknown> = []> =
+    (event: PointerEvent, ...args: Args) => DragGestureHandler | null;
 export type DragGestureHandler = {
     couldBeTap: boolean;
     pointerCapture: boolean;
@@ -26,7 +24,9 @@ export type DragGestureHandler = {
 };
 
 export const defaultTapGestureHandler: TapGestureHandler<Array<unknown>> = noop;
-export const defaultDragGestureHandler: DragStartGestureHandler<Array<unknown>> = () => null;
+export const defaultDragGestureHandler: DragStartGestureHandler<
+    Array<unknown>
+> = () => null;
 
 type State<Args extends ReadonlyArray<unknown>> =
     | {
@@ -112,8 +112,9 @@ export class GestureDetector<Args extends Array<unknown> = []> {
                 if (this.state.pointerId !== event.pointerId) return;
                 this.state.dragHandler.onMove(event);
                 if (
-                    this.state.startPosition.distanceTo(Vector2.fromEvent(event)) >=
-                    MIN_DRAG_GESTURE_DISTANCE_PX
+                    this.state.startPosition.distanceTo(
+                        Vector2.fromEvent(event),
+                    ) >= MIN_DRAG_GESTURE_DISTANCE_PX
                 ) {
                     this.state.dragHandler.onConfirm?.(event);
                     this.state = {
@@ -216,9 +217,13 @@ export function useGestureDetector(handlers: {
     onDragStart?: DragStartGestureHandler;
 }) {
     const onTap = useEvent(handlers.onTap ?? defaultTapGestureHandler);
-    const onDragStart = useEvent(handlers.onDragStart ?? defaultDragGestureHandler);
+    const onDragStart = useEvent(
+        handlers.onDragStart ?? defaultDragGestureHandler,
+    );
 
-    const [detector] = useState(() => new GestureDetector({ onTap, onDragStart }));
+    const [detector] = useState(
+        () => new GestureDetector({ onTap, onDragStart }),
+    );
     const [isGestureInProgress, setIsGestureInProgress] = useState(false);
 
     return {

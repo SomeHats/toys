@@ -8,20 +8,34 @@ import classNames from "classnames";
 import { FaRedoAlt, FaUndoAlt } from "react-icons/fa";
 
 export function UndoRedoButtons({ splatapus }: { splatapus: Splatapus }) {
-    const canUndo = useLive(() => UndoStack.canUndo(splatapus.undoStack.live()), [splatapus]);
-    const canRedo = useLive(() => UndoStack.canRedo(splatapus.undoStack.live()), [splatapus]);
+    const canUndo = useLive(
+        () => UndoStack.canUndo(splatapus.undoStack.live()),
+        [splatapus],
+    );
+    const canRedo = useLive(
+        () => UndoStack.canRedo(splatapus.undoStack.live()),
+        [splatapus],
+    );
 
-    const undoAnimationRef = useVfxAnimation<HTMLDivElement>(splatapus.vfx, "undo", () => ({
-        keyFrames: { transform: ["rotate(0)", "rotate(-360deg)"] },
-        duration: 300,
-        easing: tailwindEasings.DEFAULT,
-    }));
+    const undoAnimationRef = useVfxAnimation<HTMLDivElement>(
+        splatapus.vfx,
+        "undo",
+        () => ({
+            keyFrames: { transform: ["rotate(0)", "rotate(-360deg)"] },
+            duration: 300,
+            easing: tailwindEasings.DEFAULT,
+        }),
+    );
 
-    const redoAnimationRef = useVfxAnimation<HTMLDivElement>(splatapus.vfx, "redo", () => ({
-        keyFrames: { transform: ["rotate(0)", "rotate(360deg)"] },
-        duration: 300,
-        easing: tailwindEasings.DEFAULT,
-    }));
+    const redoAnimationRef = useVfxAnimation<HTMLDivElement>(
+        splatapus.vfx,
+        "redo",
+        () => ({
+            keyFrames: { transform: ["rotate(0)", "rotate(360deg)"] },
+            duration: 300,
+            easing: tailwindEasings.DEFAULT,
+        }),
+    );
 
     return (
         <div className="pointer-events-auto pb-2 pl-3">
@@ -29,14 +43,14 @@ export function UndoRedoButtons({ splatapus }: { splatapus: Splatapus }) {
                 disabled={!canUndo}
                 className={classNames(
                     "transition-all duration-300",
-                    canUndo
-                        ? "pointer-events-auto ease-out-back"
-                        : canRedo
-                        ? "pointer-events-none opacity-50"
-                        : "pointer-events-none scale-0 opacity-0 ease-in-back",
+                    canUndo ? "pointer-events-auto ease-out-back"
+                    : canRedo ? "pointer-events-none opacity-50"
+                    : "pointer-events-none scale-0 opacity-0 ease-in-back",
                 )}
                 onClick={() =>
-                    splatapus.undoStack.update((stack) => UndoStack.undo(stack, splatapus.vfx))
+                    splatapus.undoStack.update((stack) =>
+                        UndoStack.undo(stack, splatapus.vfx),
+                    )
                 }
                 iconLeft={
                     <div
@@ -53,12 +67,14 @@ export function UndoRedoButtons({ splatapus }: { splatapus: Splatapus }) {
                 disabled={!canRedo}
                 className={classNames(
                     "transition-all duration-300",
-                    canRedo
-                        ? "pointer-events-auto ease-out-back-md"
-                        : "scale-0 opacity-0 ease-in-back-md",
+                    canRedo ?
+                        "pointer-events-auto ease-out-back-md"
+                    :   "scale-0 opacity-0 ease-in-back-md",
                 )}
                 onClick={() =>
-                    splatapus.undoStack.update((stack) => UndoStack.redo(stack, splatapus.vfx))
+                    splatapus.undoStack.update((stack) =>
+                        UndoStack.redo(stack, splatapus.vfx),
+                    )
                 }
                 iconRight={
                     <div

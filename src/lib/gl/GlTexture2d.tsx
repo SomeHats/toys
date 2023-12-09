@@ -1,6 +1,11 @@
 import { assert, assertExists } from "@/lib/assert";
 import { Gl } from "@/lib/gl/Gl";
-import { GlTextureFilter, GlTextureFormat, GlTextureWrap, glEnum } from "@/lib/gl/GlTypes";
+import {
+    GlTextureFilter,
+    GlTextureFormat,
+    GlTextureWrap,
+    glEnum,
+} from "@/lib/gl/GlTypes";
 
 export type GlTexture2dData = {
     readonly data: ArrayBufferView;
@@ -48,11 +53,29 @@ export class GlTexture2d {
         const { gl } = this.gl;
         this.bind();
         if (params.magFilter)
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, glEnum(params.magFilter));
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_MAG_FILTER,
+                glEnum(params.magFilter),
+            );
         if (params.minFilter)
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, glEnum(params.minFilter));
-        if (params.wrapS) gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, glEnum(params.wrapS));
-        if (params.wrapT) gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, glEnum(params.wrapT));
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_MIN_FILTER,
+                glEnum(params.minFilter),
+            );
+        if (params.wrapS)
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_S,
+                glEnum(params.wrapS),
+            );
+        if (params.wrapT)
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_T,
+                glEnum(params.wrapT),
+            );
     }
 
     configureForData() {

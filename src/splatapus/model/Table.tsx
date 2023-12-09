@@ -10,13 +10,18 @@ import {
 } from "@/lib/utils";
 
 export type UnknownTableEntry = { readonly id: string };
-export type TableData<T extends UnknownTableEntry> = ReadonlyObjectMap<T["id"], T>;
+export type TableData<T extends UnknownTableEntry> = ReadonlyObjectMap<
+    T["id"],
+    T
+>;
 
 export class Table<T extends UnknownTableEntry> implements Iterable<T> {
     readonly data: TableData<T>;
 
     static fromArray<T extends UnknownTableEntry>(entries: Array<T>): Table<T> {
-        return new Table(fromEntries(entries.map((item) => [item.id, item] as [T["id"], T])));
+        return new Table(
+            fromEntries(entries.map((item) => [item.id, item] as [T["id"], T])),
+        );
     }
 
     constructor(data: TableData<T>) {
@@ -101,8 +106,15 @@ export class UniqueIndex<Entry, Value, Lookup> {
         this.#getLookupKey = getLookupKey;
     }
 
-    private withIndex(index: ReadonlyMap<string, Value>): UniqueIndex<Entry, Value, Lookup> {
-        return new UniqueIndex(index, this.#getKey, this.#getValue, this.#getLookupKey);
+    private withIndex(
+        index: ReadonlyMap<string, Value>,
+    ): UniqueIndex<Entry, Value, Lookup> {
+        return new UniqueIndex(
+            index,
+            this.#getKey,
+            this.#getValue,
+            this.#getLookupKey,
+        );
     }
 
     lookup(lookup: Lookup): Value | undefined {
@@ -175,8 +187,15 @@ export class Index<Entry, Value extends string, Lookup> {
         this.#getLookupKey = getLookupKey;
     }
 
-    private withIndex(index: ReadonlyMap<string, ReadonlySet<Value>>): Index<Entry, Value, Lookup> {
-        return new Index(index, this.#getKey, this.#getValue, this.#getLookupKey);
+    private withIndex(
+        index: ReadonlyMap<string, ReadonlySet<Value>>,
+    ): Index<Entry, Value, Lookup> {
+        return new Index(
+            index,
+            this.#getKey,
+            this.#getValue,
+            this.#getLookupKey,
+        );
     }
 
     lookup(lookup: Lookup): ReadonlySet<Value> {

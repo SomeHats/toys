@@ -4,7 +4,10 @@ import { SignalManager } from "@/lib/signals/Signals";
 import SignalsCanvas, { SignalsCanvasScene } from "@/lib/signals/SignalsCanvas";
 import { createRoot } from "react-dom/client";
 
-export default async function startSignalsApp(scene: SignalsCanvasScene, debuggerEnabled: boolean) {
+export default async function startSignalsApp(
+    scene: SignalsCanvasScene,
+    debuggerEnabled: boolean,
+) {
     const listenToMidi = await getListenToMidiInput();
 
     const s = new SignalManager();

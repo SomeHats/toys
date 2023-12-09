@@ -1,5 +1,11 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import { LiveEffect, LiveMemo, LiveMemoWritable, LiveValue, runLive } from "@/lib/live";
+import {
+    LiveEffect,
+    LiveMemo,
+    LiveMemoWritable,
+    LiveValue,
+    runLive,
+} from "@/lib/live";
 import { last } from "@/lib/utils";
 import { PointerEventType } from "@/splatapus/editor/EventContext";
 import { Interaction } from "@/splatapus/editor/Interaction";
@@ -20,7 +26,9 @@ export class Splatapus {
         new LiveMemoWritable(
             () => this.undoStack.live().current.location,
             (update) =>
-                this.undoStack.update((undoStack) => UndoStack.updateLocation(undoStack, update)),
+                this.undoStack.update((undoStack) =>
+                    UndoStack.updateLocation(undoStack, update),
+                ),
             "location",
         ),
     );
@@ -34,13 +42,22 @@ export class Splatapus {
     );
     readonly viewport = new Viewport(
         this.screenSize,
-        new LiveMemo(() => this.interaction.isSidebarOpenLive(), "viewport.isSidebarOpen"),
+        new LiveMemo(
+            () => this.interaction.isSidebarOpenLive(),
+            "viewport.isSidebarOpen",
+        ),
         this.location.viewportState,
     );
     readonly keyPointIdHistory: LiveValue<ReadonlyArray<SplatKeyPointId>>;
 
-    constructor(readonly screenSize: LiveValue<Vector2>, state: SplatapusState) {
-        this.undoStack = new LiveValue(UndoStack.initialize(state), "undoStack");
+    constructor(
+        readonly screenSize: LiveValue<Vector2>,
+        state: SplatapusState,
+    ) {
+        this.undoStack = new LiveValue(
+            UndoStack.initialize(state),
+            "undoStack",
+        );
         this.interaction = new Interaction(state.location.mode);
         this.keyPointIdHistory = new LiveValue<ReadonlyArray<SplatKeyPointId>>(
             Array.from(this.document.getOnce().keyPoints, (point) => point.id),
@@ -55,24 +72,31 @@ export class Splatapus {
     onPointerDown = (event: PointerEvent) => this.onPointerEvent("down", event);
     onPointerMove = (event: PointerEvent) => this.onPointerEvent("move", event);
     onPointerUp = (event: PointerEvent) => this.onPointerEvent("up", event);
-    onPointerCancel = (event: PointerEvent) => this.onPointerEvent("cancel", event);
+    onPointerCancel = (event: PointerEvent) =>
+        this.onPointerEvent("cancel", event);
     onWheel = (event: WheelEvent) => {
         this.viewport.handleWheelEvent(event);
     };
-    onKeyDown = (event: KeyboardEvent) => this.interaction.onKeyDown({ event, splatapus: this });
-    onKeyUp = (event: KeyboardEvent) => this.interaction.onKeyUp({ event, splatapus: this });
+    onKeyDown = (event: KeyboardEvent) =>
+        this.interaction.onKeyDown({ event, splatapus: this });
+    onKeyUp = (event: KeyboardEvent) =>
+        this.interaction.onKeyUp({ event, splatapus: this });
 
     previewPosition = new LiveMemo(() => {
         const interactionPosition = this.interaction.getPreviewPositionLive();
-        return interactionPosition
-            ? PreviewPosition.interpolated(interactionPosition)
-            : PreviewPosition.keyPointId(this.location.keyPointId.live());
+        return interactionPosition ?
+                PreviewPosition.interpolated(interactionPosition)
+            :   PreviewPosition.keyPointId(this.location.keyPointId.live());
     }, "previewPosition");
 }
 
 export function useSplatapus(initialize: () => SplatapusState) {
     const splatapus = useState(
-        () => new Splatapus(new LiveValue(Vector2.ZERO, "screenSize"), initialize()),
+        () =>
+            new Splatapus(
+                new LiveValue(Vector2.ZERO, "screenSize"),
+                initialize(),
+            ),
     )[0];
     useEffect(() => {
         // @ts-expect-error expose splatapus on window
@@ -90,9 +114,14 @@ export function useSplatapus(initialize: () => SplatapusState) {
                 const document = splatapus.document.live();
                 splatapus.keyPointIdHistory.update((history) => {
                     const nextHistory = history.filter(
-                        (entry) => document.keyPoints.has(entry) && entry !== keyPointId,
+                        (entry) =>
+                            document.keyPoints.has(entry) &&
+                            entry !== keyPointId,
                     );
-                    if (nextHistory.length === history.length - 1 && last(history) === keyPointId) {
+                    if (
+                        nextHistory.length === history.length - 1 &&
+                        last(history) === keyPointId
+                    ) {
                         console.log("update keyPointIdHistory (static)");
                         return history;
                     }

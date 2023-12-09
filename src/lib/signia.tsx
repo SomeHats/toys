@@ -1,5 +1,11 @@
 import { assert, assertExists } from "@/lib/assert";
-import { Atom, Signal, atom, computed as createComputed, transact } from "@tldraw/state";
+import {
+    Atom,
+    Signal,
+    atom,
+    computed as createComputed,
+    transact,
+} from "@tldraw/state";
 
 export function memo<This extends object, Value>(
     compute: () => Value,

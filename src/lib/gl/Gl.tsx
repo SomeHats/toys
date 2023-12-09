@@ -2,7 +2,12 @@ import { assert, assertExists } from "@/lib/assert";
 import { GlProgram } from "@/lib/gl/GlProgram";
 import { GlShader } from "@/lib/gl/GlShader";
 import { GlTexture2d } from "@/lib/gl/GlTexture2d";
-import { GlCapability, GlShaderType, GlTextureFormat, glEnum } from "@/lib/gl/GlTypes";
+import {
+    GlCapability,
+    GlShaderType,
+    GlTextureFormat,
+    glEnum,
+} from "@/lib/gl/GlTypes";
 import { GlVertexArray } from "@/lib/gl/GlVertexArray";
 import { get } from "@/lib/utils";
 
@@ -21,7 +26,8 @@ export class Gl {
     readonly gl: WebGL2RenderingContext;
 
     private shaders = new GlResources(
-        (type: GlShaderType, source: string) => new GlShader(this, type, source),
+        (type: GlShaderType, source: string) =>
+            new GlShader(this, type, source),
         (shader) => this.gl.deleteShader(shader.shader),
     );
     private programs = new GlResources(
@@ -57,9 +63,18 @@ export class Gl {
         this.textures.destroyAll();
     }
 
-    createProgram({ vertex, fragment }: { vertex: string; fragment: string }): GlProgram {
+    createProgram({
+        vertex,
+        fragment,
+    }: {
+        vertex: string;
+        fragment: string;
+    }): GlProgram {
         const vertexShader = this.shaders.create(GlShaderType.Vertex, vertex);
-        const fragmentShader = this.shaders.create(GlShaderType.Fragment, fragment);
+        const fragmentShader = this.shaders.create(
+            GlShaderType.Fragment,
+            fragment,
+        );
         return this.programs.create(vertexShader, fragmentShader);
     }
     createBuffer() {
@@ -68,7 +83,11 @@ export class Gl {
     createVertexArray() {
         return this.vertexArrays.create();
     }
-    createTexture(textureUnit: number, format: GlTextureFormat, level?: number) {
+    createTexture(
+        textureUnit: number,
+        format: GlTextureFormat,
+        level?: number,
+    ) {
         return this.textures.create(textureUnit, format, level);
     }
 

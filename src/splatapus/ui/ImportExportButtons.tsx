@@ -3,7 +3,10 @@ import { Vector2 } from "@/lib/geom/Vector2";
 import { stringFromError } from "@/lib/utils";
 import { Splatapus } from "@/splatapus/editor/useEditor";
 import catExample from "@/splatapus/examples/cat.json";
-import { makeEmptySaveState, splatapusStateSchema } from "@/splatapus/model/store";
+import {
+    makeEmptySaveState,
+    splatapusStateSchema,
+} from "@/splatapus/model/store";
 import { Button } from "@/splatapus/ui/Button";
 
 export function ImportExportButtons({ splatapus }: { splatapus: Splatapus }) {
@@ -62,17 +65,27 @@ function ImportButton({ splatapus }: { splatapus: Splatapus }) {
                         }
                         assert(typeof result === "string");
                         try {
-                            const parseResult = splatapusStateSchema.parse(JSON.parse(result));
+                            const parseResult = splatapusStateSchema.parse(
+                                JSON.parse(result),
+                            );
                             if (!parseResult.ok) {
-                                alert(`cannot read splat doc: ${parseResult.error.message}`);
+                                alert(
+                                    `cannot read splat doc: ${parseResult.error.message}`,
+                                );
                                 return;
                             }
                             const serialized = parseResult.value;
-                            splatapus.document.update(() => serialized.document, {
-                                lockstepLocation: (location) => serialized.location,
-                            });
+                            splatapus.document.update(
+                                () => serialized.document,
+                                {
+                                    lockstepLocation: (location) =>
+                                        serialized.location,
+                                },
+                            );
                         } catch (err) {
-                            alert(`could not parse json: ${stringFromError(err)}`);
+                            alert(
+                                `could not parse json: ${stringFromError(err)}`,
+                            );
                         }
                     });
                     reader.readAsText(file);
@@ -90,7 +103,9 @@ function ResetButton({ splatapus }: { splatapus: Splatapus }) {
         <Button
             onClick={() => {
                 const { document, location } = makeEmptySaveState(Vector2.UNIT);
-                splatapus.document.update(() => document, { lockstepLocation: location });
+                splatapus.document.update(() => document, {
+                    lockstepLocation: location,
+                });
             }}
         >
             reset

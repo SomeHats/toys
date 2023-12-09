@@ -58,7 +58,10 @@ export class Idle extends StateNode<LimeState> {
 
 export class Drawing extends StateNode<LimeState> {
     override name = "drawing";
-    constructor(parent: LimeState, private readonly slideId: SlideId) {
+    constructor(
+        parent: LimeState,
+        private readonly slideId: SlideId,
+    ) {
         super(parent);
     }
 

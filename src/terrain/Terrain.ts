@@ -12,7 +12,9 @@ import { Quadtree, quadtree } from "d3-quadtree";
 function assignPlates(plateCount: number, terrain: Terrain) {
     const remainingCellIds = new Set(terrain.activeCellIds);
     const queue = new RandomQueue(terrain.activeCellIds);
-    const plateIdByCellId: Array<number> = new Array(terrain.activeCellIds.length);
+    const plateIdByCellId: Array<number> = new Array(
+        terrain.activeCellIds.length,
+    );
 
     const plates = times(plateCount, (id) => {
         const initialCellId = queue.pop();
@@ -40,7 +42,8 @@ function assignPlates(plateCount: number, terrain: Terrain) {
 
         while (plate.activeCellIds.size) {
             const activeCellId = plate.activeCellIds.pop();
-            const neighbourIds = terrain.cellsById[activeCellId].neighbourCellIds;
+            const neighbourIds =
+                terrain.cellsById[activeCellId].neighbourCellIds;
             const remainingNeighbourIds = neighbourIds.filter((neighbourId) =>
                 remainingCellIds.has(neighbourId),
             );
@@ -100,8 +103,12 @@ export default class Terrain {
 
     constructor(delaunay: Delaunay, activeBounds: AABB) {
         this.allCellIds = delaunay.points.map((p, i) => i);
-        this.isActiveByCellId = delaunay.points.map((point) => activeBounds.contains(point));
-        this.activeCellIds = this.allCellIds.filter((id) => this.isActiveByCellId[id]);
+        this.isActiveByCellId = delaunay.points.map((point) =>
+            activeBounds.contains(point),
+        );
+        this.activeCellIds = this.allCellIds.filter(
+            (id) => this.isActiveByCellId[id],
+        );
 
         const heightNoise = mapNoise2d(
             config.CELL_NOISE_SCALE,
@@ -116,7 +123,14 @@ export default class Terrain {
             makeFractalNoise2d(5),
         );
         this.cellsById = delaunay.cellsByPointId.map(
-            (cell, cellId) => new TerrainCell(cellId, cell, this, heightNoise, tectonicDriftNoise),
+            (cell, cellId) =>
+                new TerrainCell(
+                    cellId,
+                    cell,
+                    this,
+                    heightNoise,
+                    tectonicDriftNoise,
+                ),
         );
         this.cellsQuadTree = quadtree(
             this.cellsById,
@@ -126,7 +140,9 @@ export default class Terrain {
 
         console.time("assignPlates");
         const { plateIdByCellId, platesById } = assignPlates(
-            Math.ceil(this.activeCellIds.length / config.TARGET_CELLS_PER_PLATE),
+            Math.ceil(
+                this.activeCellIds.length / config.TARGET_CELLS_PER_PLATE,
+            ),
             this,
         );
         console.timeEnd("assignPlates");
@@ -151,7 +167,8 @@ export default class Terrain {
         for (const cellId of this.activeCellIds) {
             const cell = this.cellsById[cellId];
             const nearbyCellRadius = noise(cell.position.x, cell.position.y);
-            const nearbyCells = cell.findConnectedCellsInRadius(nearbyCellRadius);
+            const nearbyCells =
+                cell.findConnectedCellsInRadius(nearbyCellRadius);
 
             const sumPlateHeight = nearbyCells.reduce(
                 (sum, nearbyCell) => sum + nearbyCell.getPlate().baseHeight,
@@ -159,7 +176,8 @@ export default class Terrain {
             );
             const averagePlateHeight = sumPlateHeight / nearbyCells.length;
 
-            const plateHeightAdjustment = averagePlateHeight - cell.getPlate().baseHeight;
+            const plateHeightAdjustment =
+                averagePlateHeight - cell.getPlate().baseHeight;
 
             cell.adjustHeight(plateHeightAdjustment);
         }

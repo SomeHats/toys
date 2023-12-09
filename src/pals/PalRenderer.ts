@@ -16,7 +16,10 @@ export default class PalRenderer extends Component {
     private data: PalControlData;
     private geom: PalGeom;
 
-    constructor(entity: Entity, private config: PalConfig) {
+    constructor(
+        entity: Entity,
+        private config: PalConfig,
+    ) {
         super(entity);
         this.data = entity.getComponent(PalControlData);
         this.geom = entity.getComponent(PalGeom);
@@ -64,9 +67,21 @@ export default class PalRenderer extends Component {
             0.2 * (1 - colorDarkenAmount * colorDarkenAmount),
         );
 
-        const hip = this.projectZ(leg.getHipXY(), leg.getHipZ(), leg.getHipOrigin());
-        const knee = this.projectZ(leg.getKneeXY(), leg.getKneeZ(), leg.getKneeOrigin());
-        const foot = this.projectZ(leg.getFootXY(), leg.getFootZ(), leg.getFootOrigin());
+        const hip = this.projectZ(
+            leg.getHipXY(),
+            leg.getHipZ(),
+            leg.getHipOrigin(),
+        );
+        const knee = this.projectZ(
+            leg.getKneeXY(),
+            leg.getKneeZ(),
+            leg.getKneeOrigin(),
+        );
+        const foot = this.projectZ(
+            leg.getFootXY(),
+            leg.getFootZ(),
+            leg.getFootOrigin(),
+        );
 
         ctx.moveTo(hip.x, hip.y);
         ctx.quadraticCurveTo(knee.x, knee.y, foot.x, foot.y);
@@ -79,12 +94,19 @@ export default class PalRenderer extends Component {
     private drawBod(ctx: CanvasRenderingContext2D, bod: Circle) {
         ctx.save();
         ctx.beginPath();
-        ShapeHelpers.circle(ctx, bod.center.x, bod.center.y, this.config.radius);
+        ShapeHelpers.circle(
+            ctx,
+            bod.center.x,
+            bod.center.y,
+            this.config.radius,
+        );
         ctx.fillStyle = this.config.color.toString();
         ctx.fill();
         ctx.clip();
 
-        const faceX = (normalizeAngle(HALF_PI - this.data.heading) / HALF_PI) * this.config.radius;
+        const faceX =
+            (normalizeAngle(HALF_PI - this.data.heading) / HALF_PI) *
+            this.config.radius;
 
         // EYES
         ctx.beginPath();
@@ -130,11 +152,19 @@ export default class PalRenderer extends Component {
         ctx.restore();
     }
 
-    private makeButtLine(ctx: CanvasRenderingContext2D, bod: Circle, buttX: number) {
-        ctx.moveTo(buttX * 1.6 + bod.center.x, bod.center.y + this.config.buttTop);
+    private makeButtLine(
+        ctx: CanvasRenderingContext2D,
+        bod: Circle,
+        buttX: number,
+    ) {
+        ctx.moveTo(
+            buttX * 1.6 + bod.center.x,
+            bod.center.y + this.config.buttTop,
+        );
         ctx.quadraticCurveTo(
             buttX * 1.7 + bod.center.x,
-            bod.center.y + (this.config.buttTop + this.config.buttBottom) * 0.65,
+            bod.center.y +
+                (this.config.buttTop + this.config.buttBottom) * 0.65,
             buttX + bod.center.x,
             bod.center.y + this.config.buttBottom,
         );

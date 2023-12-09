@@ -4,7 +4,11 @@ import { windows } from "@/lib/utils";
 import { DottedGuideLine, FinalLine } from "@/spline-time/guides";
 import { LayerProps } from "@/spline-time/layers/Layer";
 
-export function straightLineThroughPointsLayer({ style }: { style: "final" | "dotted" }) {
+export function straightLineThroughPointsLayer({
+    style,
+}: {
+    style: "final" | "dotted";
+}) {
     if (style === "final") {
         return ({ line }: LayerProps) => {
             if (!line.points.length) {

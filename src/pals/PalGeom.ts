@@ -28,7 +28,10 @@ export default class PalGeom extends Component {
     private animationController: PalAnimationController | null = null;
     private bobAmount = 0;
 
-    constructor(entity: Entity, private config: PalConfig) {
+    constructor(
+        entity: Entity,
+        private config: PalConfig,
+    ) {
         super(entity);
         this.controlData = entity.getComponent(PalControlData);
         this.legs = shuffle(

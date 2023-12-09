@@ -1,17 +1,32 @@
 import { assert, assertExists } from "@/lib/assert";
 import { entries, keys } from "@/lib/utils";
-import { IncrementalSignal, IncrementalTable } from "@/splatapus2/store/Incremental";
-import { Computed, RESET_VALUE, computed, isUninitialized } from "@tldraw/state";
+import {
+    IncrementalSignal,
+    IncrementalTable,
+} from "@/splatapus2/store/Incremental";
+import {
+    Computed,
+    RESET_VALUE,
+    computed,
+    isUninitialized,
+} from "@tldraw/state";
 import Immutable from "immutable";
 
-export class Index<Id extends string, Value extends { readonly id: Id }, Diff, Field> {
+export class Index<
+    Id extends string,
+    Value extends { readonly id: Id },
+    Diff,
+    Field,
+> {
     private readonly result: Computed<{
         index: Immutable.Map<Field, Immutable.Set<Id>>;
         fields: Immutable.Map<Id, Field>;
     }>;
 
     constructor(
-        private readonly tableSignal: IncrementalSignal<IncrementalTable<Id, Value, Diff>>,
+        private readonly tableSignal: IncrementalSignal<
+            IncrementalTable<Id, Value, Diff>
+        >,
         getField: (value: Value) => Field,
     ) {
         const computeFromScratch = () => {
@@ -21,7 +36,9 @@ export class Index<Id extends string, Value extends { readonly id: Id }, Diff, F
 
             for (const [id, value] of tableSignal.value) {
                 const field = getField(value);
-                index.update(field, (ids) => (ids ? ids.add(id) : Immutable.Set([id])));
+                index.update(field, (ids) =>
+                    ids ? ids.add(id) : Immutable.Set([id]),
+                );
                 fields.set(id, field);
             }
 
@@ -52,7 +69,9 @@ export class Index<Id extends string, Value extends { readonly id: Id }, Diff, F
                         for (const [id, value] of entries(tableDiff.insert)) {
                             if (!value) continue;
                             const field = getField(value);
-                            index.update(field, (ids) => (ids ? ids.add(id) : Immutable.Set([id])));
+                            index.update(field, (ids) =>
+                                ids ? ids.add(id) : Immutable.Set([id]),
+                            );
                             fields.set(id, field);
                             didChange = true;
                         }
@@ -65,7 +84,9 @@ export class Index<Id extends string, Value extends { readonly id: Id }, Diff, F
                             const oldField = assertExists(fields.get(id));
                             const newField = getField(value);
                             if (oldField !== newField) {
-                                index.update(oldField, (ids) => assertExists(ids).remove(id));
+                                index.update(oldField, (ids) =>
+                                    assertExists(ids).remove(id),
+                                );
                                 index.update(newField, (ids) =>
                                     ids ? ids.add(id) : Immutable.Set([id]),
                                 );
@@ -77,7 +98,9 @@ export class Index<Id extends string, Value extends { readonly id: Id }, Diff, F
                     if (tableDiff.delete) {
                         for (const id of keys(tableDiff.delete)) {
                             const field = assertExists(fields.get(id));
-                            index.update(field, (ids) => assertExists(ids).remove(id));
+                            index.update(field, (ids) =>
+                                assertExists(ids).remove(id),
+                            );
                             fields.delete(id);
                             didChange = true;
                         }

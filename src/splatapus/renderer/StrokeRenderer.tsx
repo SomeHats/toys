@@ -74,7 +74,10 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                 rawPoints = [];
                 break;
             case "keyPointId": {
-                const shapeVersion = document.getShapeVersion(previewPosition.keyPointId, shapeId);
+                const shapeVersion = document.getShapeVersion(
+                    previewPosition.keyPointId,
+                    shapeId,
+                );
                 rawPoints = shapeVersion ? shapeVersion.rawPoints : [];
                 break;
             }
@@ -91,19 +94,25 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
             return {
                 normalized: actualCenterPoints.normalized,
                 smoothed: actualCenterPoints.smoothed,
-                reduced: actualCenterPoints.smoothed
-                    ? reducePointsBasedOnCost(actualCenterPoints.smoothed)
-                    : null,
+                reduced:
+                    actualCenterPoints.smoothed ?
+                        reducePointsBasedOnCost(actualCenterPoints.smoothed)
+                    :   null,
                 raw: rawPoints,
             };
         }
 
         const keyPointIdHistory = splatapus.keyPointIdHistory.live();
         for (let i = keyPointIdHistory.length - 1; i >= 0; i--) {
-            const previousShapeVersion = document.getShapeVersion(keyPointIdHistory[i], shapeId);
+            const previousShapeVersion = document.getShapeVersion(
+                keyPointIdHistory[i],
+                shapeId,
+            );
             if (previousShapeVersion) {
                 const { normalizedCenterPoints, smoothedCenterPoints } =
-                    document.getNormalizedCenterPointsForShapeVersion(previousShapeVersion.id);
+                    document.getNormalizedCenterPointsForShapeVersion(
+                        previousShapeVersion.id,
+                    );
                 return {
                     normalized: normalizedCenterPoints,
                     smoothed: smoothedCenterPoints,
@@ -126,13 +135,13 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
         <>
             {centerPoints.normalized && (
                 <path
-                    d={getSvgPathFromStroke(pathFromCenterPoints(centerPoints.normalized))}
+                    d={getSvgPathFromStroke(
+                        pathFromCenterPoints(centerPoints.normalized),
+                    )}
                     className={classNames(
-                        previewPoints
-                            ? "fill-stone-300"
-                            : isSelected
-                            ? "fill-stone-800"
-                            : "fill-stone-600",
+                        previewPoints ? "fill-stone-300"
+                        : isSelected ? "fill-stone-800"
+                        : "fill-stone-600",
                     )}
                 />
             )}
@@ -162,15 +171,23 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
             {previewPoints && (
                 <path
                     d={getSvgPathFromStroke(
-                        pathFromCenterPoints(previewPoints.reduced.retainedPoints),
+                        pathFromCenterPoints(
+                            previewPoints.reduced.retainedPoints,
+                        ),
                     )}
-                    className={classNames(isSelected ? "fill-stone-800" : "fill-stone-600")}
+                    className={classNames(
+                        isSelected ? "fill-stone-800" : "fill-stone-600",
+                    )}
                 />
             )}
             {shouldShowPoints &&
                 actualPoints.normalized &&
                 actualPoints.normalized.map((point, i) => (
-                    <DebugCircle center={point.center} radius={point.radius} key={i} />
+                    <DebugCircle
+                        center={point.center}
+                        radius={point.radius}
+                        key={i}
+                    />
                 ))}
             {shouldShowRawPoints &&
                 actualPoints.raw &&
@@ -194,7 +211,10 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
 const bendWeight = 10;
 const sizeWeight = 10;
 
-function getCostAtIndex(points: ReadonlyArray<StrokeCenterPoint>, index: number): number | null {
+function getCostAtIndex(
+    points: ReadonlyArray<StrokeCenterPoint>,
+    index: number,
+): number | null {
     if (index === 0 || index === points.length - 1) {
         return null;
     }
@@ -214,9 +234,9 @@ function getCostAtIndex(points: ReadonlyArray<StrokeCenterPoint>, index: number)
 
     const sizeFactor =
         (1 -
-            (currentPoint.radius < previousPoint.radius
-                ? currentPoint.radius / previousPoint.radius
-                : previousPoint.radius / currentPoint.radius)) *
+            (currentPoint.radius < previousPoint.radius ?
+                currentPoint.radius / previousPoint.radius
+            :   previousPoint.radius / currentPoint.radius)) *
         sizeWeight;
 
     return bendFactor + sizeFactor;

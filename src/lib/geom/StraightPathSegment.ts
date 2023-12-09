@@ -37,7 +37,9 @@ export default class StraightPathSegment implements PathSegment {
 
     getPointAtPosition(position: number): Vector2 {
         const constrainedPosition = constrain(0, this.getLength(), position);
-        return this.delta.withMagnitude(constrainedPosition).add(this.line.start);
+        return this.delta
+            .withMagnitude(constrainedPosition)
+            .add(this.line.start);
     }
 
     getAngleAtPosition(): number {

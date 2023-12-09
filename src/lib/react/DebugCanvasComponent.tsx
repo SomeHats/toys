@@ -57,7 +57,9 @@ export function OverlayDebugCanvas({ draw }: { draw: DrawFn }) {
                 pointerEvents: "none",
             }}
         >
-            {width && height ? <DebugCanvas draw={draw} width={width} height={height} /> : null}
+            {width && height ?
+                <DebugCanvas draw={draw} width={width} height={height} />
+            :   null}
         </div>
     );
 }

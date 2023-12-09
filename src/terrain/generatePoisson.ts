@@ -16,7 +16,10 @@ export function generatePoisson(
     const processList = new RandomQueue<Vector2>();
     const samplePoints = [];
 
-    const firstPoint = new Vector2(random(bounds.size.x), random(bounds.size.y));
+    const firstPoint = new Vector2(
+        random(bounds.size.x),
+        random(bounds.size.y),
+    );
     processList.add(firstPoint);
     samplePoints.push(firstPoint.add(bounds.origin));
 
@@ -40,7 +43,10 @@ export function generatePoisson(
     return samplePoints;
 }
 
-function generateRandomPointAround(point: Vector2, minimumDistance: number): Vector2 {
+function generateRandomPointAround(
+    point: Vector2,
+    minimumDistance: number,
+): Vector2 {
     const radius = random(minimumDistance, 2 * minimumDistance);
     const angle = random(Math.PI * 2);
     return Vector2.fromPolar(angle, radius).add(point);

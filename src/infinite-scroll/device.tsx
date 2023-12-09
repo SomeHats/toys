@@ -46,7 +46,11 @@ export function DeviceContent({
     );
 }
 
-export function DeviceContainer({ children }: { children: (scale: number) => ReactNode }) {
+export function DeviceContainer({
+    children,
+}: {
+    children: (scale: number) => ReactNode;
+}) {
     const [container, setContainer] = useState<HTMLElement | null>(null);
     const size = useResizeObserver(container, sizeFromContentRect);
 
@@ -62,9 +66,14 @@ export function DeviceContainer({ children }: { children: (scale: number) => Rea
         >
             <div
                 className="relative overflow-hidden rounded-md border border-stone-200 shadow-lg"
-                style={{ width: targetWidthPx * scale, height: targetHeightPx * scale }}
+                style={{
+                    width: targetWidthPx * scale,
+                    height: targetHeightPx * scale,
+                }}
             >
-                <div className="absolute inset-0 h-full w-full">{children(scale)}</div>
+                <div className="absolute inset-0 h-full w-full">
+                    {children(scale)}
+                </div>
             </div>
         </div>
     );

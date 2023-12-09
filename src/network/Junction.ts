@@ -34,15 +34,21 @@ export default class Junction extends SceneObject {
         return this._circle.pointOnCircumference(radians);
     }
 
-    connectToRoadAtAngle(road: Road, angle: number, direction: ConnectionDirection): Intersection {
+    connectToRoadAtAngle(
+        road: Road,
+        angle: number,
+        direction: ConnectionDirection,
+    ): Intersection {
         const intersection = this._intersectionAtAngle(angle);
         intersection.connectTo(road, direction);
 
         const isIncoming =
-            direction === ConnectionDirection.IN || this._incomingIntersections.has(intersection);
+            direction === ConnectionDirection.IN ||
+            this._incomingIntersections.has(intersection);
 
         const isOutgoing =
-            direction === ConnectionDirection.OUT || this._outgoingIntersections.has(intersection);
+            direction === ConnectionDirection.OUT ||
+            this._outgoingIntersections.has(intersection);
 
         if (isIncoming) this._incomingIntersections.add(intersection);
         if (isOutgoing) this._outgoingIntersections.add(intersection);

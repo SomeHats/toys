@@ -28,15 +28,22 @@ export function arcLayer({ line, uiTarget, showExtras }: LayerProps) {
                 const nextPoint = line.points[i + 1];
                 const nextMidPoint = point.lerp(nextPoint, 0.5);
 
-                const previousMidPointDistance = previousMidPoint.distanceTo(point);
+                const previousMidPointDistance =
+                    previousMidPoint.distanceTo(point);
                 const nextMidPointDistance = nextMidPoint.distanceTo(point);
-                const distanceForArc = Math.min(previousMidPointDistance, nextMidPointDistance);
+                const distanceForArc = Math.min(
+                    previousMidPointDistance,
+                    nextMidPointDistance,
+                );
 
                 const arcStartPoint = point.lerp(
                     previousMidPoint,
                     distanceForArc / previousMidPointDistance,
                 );
-                const arcEndPoint = point.lerp(nextMidPoint, distanceForArc / nextMidPointDistance);
+                const arcEndPoint = point.lerp(
+                    nextMidPoint,
+                    distanceForArc / nextMidPointDistance,
+                );
 
                 pathMarkers.push(
                     <LineMarker
@@ -82,7 +89,8 @@ export function arcLayer({ line, uiTarget, showExtras }: LayerProps) {
 
     return (
         <>
-            {showExtras && pathMarkers.map((d, i) => <Fragment key={i}>{d}</Fragment>)}
+            {showExtras &&
+                pathMarkers.map((d, i) => <Fragment key={i}>{d}</Fragment>)}
             <FinalLine path={path.toString()} />
             <LayerUi uiTarget={uiTarget} label={"arcs"} />
         </>

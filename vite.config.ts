@@ -28,7 +28,10 @@ export default defineConfig(async ({ mode }) => {
                 babel: {
                     plugins: [
                         createAssertPlugin(),
-                        ["@babel/plugin-proposal-decorators", { version: "2023-01" }],
+                        [
+                            "@babel/plugin-proposal-decorators",
+                            { version: "2023-01" },
+                        ],
                     ],
                 },
             }),
@@ -62,9 +65,12 @@ function resolveATags(): PluginOption {
     return {
         name: "resolve-a-tags",
         transformIndexHtml: async (html, ctx) => {
-            return html.replace(/(<a [^>]*?href=")([^"]+?)("[^>]*?>)/g, (_, pre, url, post) => {
-                return `${pre}${path.join(baseUrl, url)}${post}`;
-            });
+            return html.replace(
+                /(<a [^>]*?href=")([^"]+?)("[^>]*?>)/g,
+                (_, pre, url, post) => {
+                    return `${pre}${path.join(baseUrl, url)}${post}`;
+                },
+            );
         },
     };
 }
@@ -86,7 +92,8 @@ function createAssertPlugin(): PluginObj {
                     const importDeclaration = binding.path.parent;
                     assert(importDeclaration.type === "ImportDeclaration");
 
-                    if (importDeclaration.source.value !== "@/lib/assert") return;
+                    if (importDeclaration.source.value !== "@/lib/assert")
+                        return;
                     if (importSpecifier.imported.type !== "Identifier") return;
                     if (
                         importSpecifier.imported.name !== "assert" &&

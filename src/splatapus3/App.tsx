@@ -1,10 +1,18 @@
 import { DebugPolyline } from "@/lib/DebugSvg";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { sizeFromContentRect, useResizeObserver } from "@/lib/hooks/useResizeObserver";
+import {
+    sizeFromContentRect,
+    useResizeObserver,
+} from "@/lib/hooks/useResizeObserver";
 import { getLocalStorageItem, setLocalStorageItem } from "@/lib/storage";
 import { debounce } from "@/lib/utils";
 import { Splat } from "@/splatapus3/model/Splat";
-import { SerializedStoreSchema, ShapeId, SplatRecord, Store } from "@/splatapus3/model/schema";
+import {
+    SerializedStoreSchema,
+    ShapeId,
+    SplatRecord,
+    Store,
+} from "@/splatapus3/model/schema";
 import { track } from "@tldraw/state";
 import { SerializedStore } from "@tldraw/store";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -18,13 +26,17 @@ export function App() {
         const initialValue = getLocalStorageItem(
             "splatapus3.doc",
             SerializedStoreSchema,
-            () => ({} as SerializedStore<SplatRecord>),
+            () => ({}) as SerializedStore<SplatRecord>,
         );
         const store = new Store(initialValue);
         setStore(store);
 
         const saveDebounced = debounce(1000, () => {
-            setLocalStorageItem("splatapus3.doc", SerializedStoreSchema, store.serialize("all"));
+            setLocalStorageItem(
+                "splatapus3.doc",
+                SerializedStoreSchema,
+                store.serialize("all"),
+            );
         });
 
         const unsubscribe = store.listen(() => {
@@ -38,13 +50,22 @@ export function App() {
     }, []);
 
     return (
-        <div ref={setContainer} className="absolute inset-0 touch-none select-none overflow-hidden">
+        <div
+            ref={setContainer}
+            className="absolute inset-0 touch-none select-none overflow-hidden"
+        >
             {size && store && <AppMain size={size} store={store} />}
         </div>
     );
 }
 
-const AppMain = track(function AppMain({ size, store }: { size: Vector2; store: Store }) {
+const AppMain = track(function AppMain({
+    size,
+    store,
+}: {
+    size: Vector2;
+    store: Store;
+}) {
     const [splat, setSplat] = useState(() => new Splat(store));
     if (splat.store !== store) {
         setSplat(new Splat(store));
@@ -73,10 +94,17 @@ const AppMain = track(function AppMain({ size, store }: { size: Vector2; store: 
     );
 });
 
-const DocumentRenderer = track(function DocumentRenderer({ splat }: { splat: Splat }) {
+const DocumentRenderer = track(function DocumentRenderer({
+    splat,
+}: {
+    splat: Splat;
+}) {
     const { screenSize } = splat.viewport;
     return (
-        <svg viewBox={`0 0 ${screenSize.x} ${screenSize.y}`} className="absolute left-0 top-0">
+        <svg
+            viewBox={`0 0 ${screenSize.x} ${screenSize.y}`}
+            className="absolute left-0 top-0"
+        >
             <g>
                 <DocumentPathRenderer splat={splat} />
             </g>
@@ -84,7 +112,11 @@ const DocumentRenderer = track(function DocumentRenderer({ splat }: { splat: Spl
     );
 });
 
-const DocumentPathRenderer = track(function DocumentPathRenderer({ splat }: { splat: Splat }) {
+const DocumentPathRenderer = track(function DocumentPathRenderer({
+    splat,
+}: {
+    splat: Splat;
+}) {
     const { allShapeIds } = splat;
     return (
         <>
@@ -102,7 +134,10 @@ const StrokeRenderer = track(function StrokeRenderer({
     shapeId: ShapeId;
     splat: Splat;
 }) {
-    const shapeVersion = splat.getShapeVersion(shapeId, splat.activeKeyPoint.id);
+    const shapeVersion = splat.getShapeVersion(
+        shapeId,
+        splat.activeKeyPoint.id,
+    );
     return (
         <>
             <DebugPolyline points={shapeVersion.rawPoints} />

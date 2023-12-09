@@ -56,9 +56,10 @@ export class SplatDocModel {
                     (version) => version.id,
                     identity,
                 ),
-                normalizedShapeVersions: calculateNormalizedShapePointsFromVersions(
-                    Array.from(shapeVersions),
-                ).versions,
+                normalizedShapeVersions:
+                    calculateNormalizedShapePointsFromVersions(
+                        Array.from(shapeVersions),
+                    ).versions,
             },
             version,
             false,
@@ -75,7 +76,10 @@ export class SplatDocModel {
         }
 
         const serialized = this.serialize();
-        const deserialized = SplatDocModel.deserialize(serialized, this.version);
+        const deserialized = SplatDocModel.deserialize(
+            serialized,
+            this.version,
+        );
         if (!deepEqual(this, deserialized)) {
             console.log({ actual: this, expected: deserialized });
             const actual = JSON.stringify(this, null, 2);
@@ -118,20 +122,30 @@ export class SplatDocModel {
         return this.data.shapeVersions;
     }
 
-    getShapeVersion(keyPointId: SplatKeyPointId, shapeId: SplatShapeId): SplatShapeVersion | null {
-        const shapeVersionId = this.data.shapeVersionLookup.lookup([shapeId, keyPointId]);
+    getShapeVersion(
+        keyPointId: SplatKeyPointId,
+        shapeId: SplatShapeId,
+    ): SplatShapeVersion | null {
+        const shapeVersionId = this.data.shapeVersionLookup.lookup([
+            shapeId,
+            keyPointId,
+        ]);
         if (!shapeVersionId) {
             return null;
         }
         return this.shapeVersions.get(shapeVersionId);
     }
 
-    getNormalizedCenterPointsForShapeVersion(shapeVersionId: SplatShapeVersionId) {
+    getNormalizedCenterPointsForShapeVersion(
+        shapeVersionId: SplatShapeVersionId,
+    ) {
         return this.data.normalizedShapeVersions.get(shapeVersionId);
     }
 
     *iterateShapeVersionsForShape(shapeId: SplatShapeId) {
-        for (const shapeVersionId of this.data.shapeVersionIdsByShape.lookup(shapeId)) {
+        for (const shapeVersionId of this.data.shapeVersionIdsByShape.lookup(
+            shapeId,
+        )) {
             yield this.shapeVersions.get(shapeVersionId);
         }
     }
@@ -146,7 +160,10 @@ export class SplatDocModel {
         return this.with({ shapes });
     }
 
-    addKeyPoint(keyPointId: SplatKeyPointId, position: Vector2 | null): SplatDocModel {
+    addKeyPoint(
+        keyPointId: SplatKeyPointId,
+        position: Vector2 | null,
+    ): SplatDocModel {
         console.log("doc.addKeyPoint", keyPointId);
 
         const keyPoints = this.keyPoints.insert({
@@ -180,7 +197,8 @@ export class SplatDocModel {
             return this.with({
                 shapeVersions,
                 normalizedShapeVersions:
-                    calculateNormalizedShapePointsFromVersions(shapeVersions).versions,
+                    calculateNormalizedShapePointsFromVersions(shapeVersions)
+                        .versions,
             });
         }
         const shapeVersion: SplatShapeVersion = {
@@ -193,10 +211,14 @@ export class SplatDocModel {
         return this.with({
             shapeVersions,
             normalizedShapeVersions:
-                calculateNormalizedShapePointsFromVersions(shapeVersions).versions,
-            shapeVersionLookup: this.data.shapeVersionLookup.insert(shapeVersion),
-            shapeVersionIdsByShape: this.data.shapeVersionIdsByShape.insert(shapeVersion),
-            shapeVersionIdsByKeyPoint: this.data.shapeVersionIdsByKeyPoint.insert(shapeVersion),
+                calculateNormalizedShapePointsFromVersions(shapeVersions)
+                    .versions,
+            shapeVersionLookup:
+                this.data.shapeVersionLookup.insert(shapeVersion),
+            shapeVersionIdsByShape:
+                this.data.shapeVersionIdsByShape.insert(shapeVersion),
+            shapeVersionIdsByKeyPoint:
+                this.data.shapeVersionIdsByKeyPoint.insert(shapeVersion),
         });
     }
 }

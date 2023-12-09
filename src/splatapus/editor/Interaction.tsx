@@ -41,13 +41,21 @@ export class Interaction {
     readonly activeMode: LiveValue<SpecificMode>;
 
     constructor(modeType: ModeType) {
-        this.activeMode = new LiveValue(initializeModeForType(modeType), "Interaction.activeMode");
+        this.activeMode = new LiveValue(
+            initializeModeForType(modeType),
+            "Interaction.activeMode",
+        );
 
         // hack: force evaluation of effects
-        this.activeMode.addBatchInvalidateListener(() => this.activeMode.getOnce());
+        this.activeMode.addBatchInvalidateListener(() =>
+            this.activeMode.getOnce(),
+        );
     }
     toDebugStringLive(): string {
-        return this.quickPan.toDebugStringLive() ?? this.activeMode.live().toDebugStringLive();
+        return (
+            this.quickPan.toDebugStringLive() ??
+            this.activeMode.live().toDebugStringLive()
+        );
     }
     getCanvasClassNameLive(): string | null {
         return this.quickPan.getCanvasClassNameLive();
@@ -94,7 +102,13 @@ export class Interaction {
                 );
                 return;
             }
-            if (matchesKeyDown(ctx.event, { key: "z", command: true, shift: true })) {
+            if (
+                matchesKeyDown(ctx.event, {
+                    key: "z",
+                    command: true,
+                    shift: true,
+                })
+            ) {
                 ctx.splatapus.undoStack.update((undoStack) =>
                     UndoStack.redo(undoStack, ctx.splatapus.vfx),
                 );
@@ -110,7 +124,9 @@ export class Interaction {
 
         for (let i = 0; i < 9; i++) {
             if (matchesKeyDown(ctx.event, `${i + 1}`)) {
-                const keyPointId = [...ctx.splatapus.document.getOnce().keyPoints][i]?.id;
+                const keyPointId = [
+                    ...ctx.splatapus.document.getOnce().keyPoints,
+                ][i]?.id;
                 if (keyPointId) {
                     ctx.splatapus.location.keyPointId.update(keyPointId);
                     return;

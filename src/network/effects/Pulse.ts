@@ -55,7 +55,11 @@ export default class Pulse extends SceneObject {
         const deltaProgress = deltaTime / this._duration;
         this._progress = Math.min(1, this._progress + deltaProgress);
         this._circle = this._circle.withRadius(
-            lerp(this._startRadius, this._endRadius, this._easeRadius(this._progress)),
+            lerp(
+                this._startRadius,
+                this._endRadius,
+                this._easeRadius(this._progress),
+            ),
         );
 
         if (this._progress === 1 && this._removeOnComplete) {
@@ -67,7 +71,12 @@ export default class Pulse extends SceneObject {
         ctx.beginPath();
         const opacity = this._easeOpacity(this._progress);
         ctx.fillStyle = this._color.fade(opacity).toString();
-        ShapeHelpers.circle(ctx, this._circle.center.x, this._circle.center.y, this._circle.radius);
+        ShapeHelpers.circle(
+            ctx,
+            this._circle.center.x,
+            this._circle.center.y,
+            this._circle.radius,
+        );
         ctx.fill();
     }
 }

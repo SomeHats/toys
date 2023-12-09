@@ -34,8 +34,14 @@ test("incrementalArrayOf", () => {
     const arr = incrementalArrayOf(Schema.unknown);
 
     expect(
-        applyChecked(arr, [], { type: IncrementalArrayOfDiffType.Replace, value: [1, 2, 3] }),
-    ).toStrictEqual([[1, 2, 3], { type: IncrementalArrayOfDiffType.Replace, value: [] }]);
+        applyChecked(arr, [], {
+            type: IncrementalArrayOfDiffType.Replace,
+            value: [1, 2, 3],
+        }),
+    ).toStrictEqual([
+        [1, 2, 3],
+        { type: IncrementalArrayOfDiffType.Replace, value: [] },
+    ]);
 
     expect(
         applyChecked(arr, [1, 2, 3], {
@@ -130,7 +136,12 @@ test("incrementalObject", () => {
             c: { d: "changed", e: "e" },
         },
         {
-            b: { type: IncrementalArrayOfDiffType.Splice, index: 3, insert: [], deleteCount: 1 },
+            b: {
+                type: IncrementalArrayOfDiffType.Splice,
+                index: 3,
+                insert: [],
+                deleteCount: 1,
+            },
             c: { d: "d" },
         },
     ]);

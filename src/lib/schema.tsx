@@ -12,7 +12,8 @@ import {
     values,
 } from "@/lib/utils";
 
-export type SchemaType<S extends Schema<any>> = S extends Schema<infer T> ? T : never;
+export type SchemaType<S extends Schema<any>> =
+    S extends Schema<infer T> ? T : never;
 
 export class SchemaParseError {
     constructor(
@@ -81,8 +82,12 @@ function typeToString(value: unknown): string {
 
 export class Schema<Parsed> {
     constructor(
-        public readonly parse: (input: unknown) => Result<Parsed, SchemaParseError>,
-        public readonly _validate: (input: unknown) => Result<Parsed, SchemaParseError>,
+        public readonly parse: (
+            input: unknown,
+        ) => Result<Parsed, SchemaParseError>,
+        public readonly _validate: (
+            input: unknown,
+        ) => Result<Parsed, SchemaParseError>,
         public readonly serialize: (input: Parsed) => unknown,
     ) {}
 
@@ -119,7 +124,9 @@ export class Schema<Parsed> {
                 }
                 return Result.error(
                     new SchemaParseError(
-                        `Expected instance of ${ctor.name}, got ${typeToString(input)}`,
+                        `Expected instance of ${ctor.name}, got ${typeToString(
+                            input,
+                        )}`,
                     ),
                 );
             },
@@ -191,7 +198,10 @@ export class Schema<Parsed> {
                 return Result.ok(input as T);
             }
             return Result.error(
-                new SchemaParseError(`Expected ${type}, got ${typeToString(input)}`, []),
+                new SchemaParseError(
+                    `Expected ${type}, got ${typeToString(input)}`,
+                    [],
+                ),
             );
         };
         return new Schema<T>(validate, validate, identity);
@@ -204,7 +214,8 @@ export class Schema<Parsed> {
     );
     static never = new Schema<undefined>(
         () => Result.error(new SchemaParseError("Cannot parse never schema")),
-        () => Result.error(new SchemaParseError("Cannot validate never schema")),
+        () =>
+            Result.error(new SchemaParseError("Cannot validate never schema")),
         () => {
             fail("Cannot serialize never schema");
         },
@@ -219,18 +230,26 @@ export class Schema<Parsed> {
                 return Result.ok(null);
             }
             return Result.error(
-                new SchemaParseError(`Expected null or undefined, got ${typeToString(input)}`),
+                new SchemaParseError(
+                    `Expected null or undefined, got ${typeToString(input)}`,
+                ),
             );
         },
         (input) => {
             if (input === null) {
                 return Result.ok(null);
             }
-            return Result.error(new SchemaParseError(`Expected null, got ${typeToString(input)}`));
+            return Result.error(
+                new SchemaParseError(
+                    `Expected null, got ${typeToString(input)}`,
+                ),
+            );
         },
         () => null,
     );
-    static value<V extends string | number | boolean>(value: V): ValueSchema<V> {
+    static value<V extends string | number | boolean>(
+        value: V,
+    ): ValueSchema<V> {
         return new ValueSchema(value);
     }
     static valueUnion<const V extends ReadonlyArray<string | number | boolean>>(
@@ -242,32 +261,44 @@ export class Schema<Parsed> {
             }
             return Result.error(
                 new SchemaParseError(
-                    `Expected one of ${values.join(" or ")}, got ${typeToString(input)}`,
+                    `Expected one of ${values.join(" or ")}, got ${typeToString(
+                        input,
+                    )}`,
                 ),
             );
         };
         return new Schema<V[number]>(validate, validate, identity);
     }
 
-    static arrayOf<Item>(itemSchema: Schema<Item>): Schema<ReadonlyArray<Item>> {
+    static arrayOf<Item>(
+        itemSchema: Schema<Item>,
+    ): Schema<ReadonlyArray<Item>> {
         return new Schema<ReadonlyArray<Item>>(
             (input) => {
                 if (!Array.isArray(input)) {
                     return Result.error(
-                        new SchemaParseError(`Expected an array, got ${typeToString(input)}`, []),
+                        new SchemaParseError(
+                            `Expected an array, got ${typeToString(input)}`,
+                            [],
+                        ),
                     );
                 }
 
                 return Result.collect(
                     input.map((rawItem, i) =>
-                        itemSchema.parse(rawItem).mapErr((err) => prefixError(err, i)),
+                        itemSchema
+                            .parse(rawItem)
+                            .mapErr((err) => prefixError(err, i)),
                     ),
                 );
             },
             (input) => {
                 if (!Array.isArray(input)) {
                     return Result.error(
-                        new SchemaParseError(`Expected an array, got ${typeToString(input)}`, []),
+                        new SchemaParseError(
+                            `Expected an array, got ${typeToString(input)}`,
+                            [],
+                        ),
                     );
                 }
 
@@ -299,7 +330,10 @@ export class Schema<Parsed> {
             (input) => {
                 if (typeof input !== "object" || input === null) {
                     return Result.error(
-                        new SchemaParseError(`Expected object, got ${typeToString(input)}`, []),
+                        new SchemaParseError(
+                            `Expected object, got ${typeToString(input)}`,
+                            [],
+                        ),
                     );
                 }
 
@@ -308,7 +342,9 @@ export class Schema<Parsed> {
                         keySchema
                             .parse(key)
                             .andThen((key) =>
-                                valueSchema.parse(get(input, key)).map((value) => [key, value]),
+                                valueSchema
+                                    .parse(get(input, key))
+                                    .map((value) => [key, value]),
                             )
                             .mapErr((err) => prefixError(err, key)),
                     ),
@@ -317,7 +353,10 @@ export class Schema<Parsed> {
             (input) => {
                 if (typeof input !== "object" || input === null) {
                     return Result.error(
-                        new SchemaParseError(`Expected object, got ${typeToString(input)}`, []),
+                        new SchemaParseError(
+                            `Expected object, got ${typeToString(input)}`,
+                            [],
+                        ),
                     );
                 }
 
@@ -328,7 +367,9 @@ export class Schema<Parsed> {
                     }
                     const valueResult = valueSchema.validate(value);
                     if (!valueResult.ok) {
-                        return valueResult.mapErr((err) => prefixError(err, key));
+                        return valueResult.mapErr((err) =>
+                            prefixError(err, key),
+                        );
                     }
                 }
 
@@ -339,7 +380,10 @@ export class Schema<Parsed> {
                 for (const [key, value] of entries(input)) {
                     if (value === undefined) continue;
                     const serializedKey = keySchema.serialize(key);
-                    assert(typeof serializedKey === "string" || typeof serializedKey === "number");
+                    assert(
+                        typeof serializedKey === "string" ||
+                            typeof serializedKey === "number",
+                    );
                     result[serializedKey] = valueSchema.serialize(value);
                 }
                 return result;
@@ -353,32 +397,35 @@ export class Schema<Parsed> {
             | ReadonlyRecord<string, string | number | boolean>,
     >(rawItems: T): Schema<EnumValues<T>> {
         const enumValues: Set<EnumValues<T>> = new Set(
-            Array.isArray(rawItems) ? rawItems : values(rawItems as Record<string, EnumValues<T>>),
+            Array.isArray(rawItems) ? rawItems : (
+                values(rawItems as Record<string, EnumValues<T>>)
+            ),
         );
         const validate = (input: unknown) => {
             if (enumValues.has(input as EnumValues<T>)) {
                 return Result.ok(input as EnumValues<T>);
             } else {
                 const actual =
-                    typeof input === "string"
-                        ? `"${input}"`
-                        : typeof input === "boolean" || typeof input === "number"
-                        ? String(input)
-                        : typeToString(input);
+                    typeof input === "string" ? `"${input}"`
+                    : typeof input === "boolean" || typeof input === "number" ?
+                        String(input)
+                    :   typeToString(input);
 
                 const expected = Array.from(enumValues, (value) =>
                     typeof value === "string" ? `"${value}"` : `${value}`,
                 ).join(" or ");
 
-                return Result.error(new SchemaParseError(`Expected ${expected}, got ${actual}`));
+                return Result.error(
+                    new SchemaParseError(`Expected ${expected}, got ${actual}`),
+                );
             }
         };
         return new Schema(validate, validate, identity);
     }
-    static union<Key extends string, Config extends UnionObjectSchemaConfig<Key, Config>>(
-        key: Key,
-        config: Config,
-    ): UnionObjectSchema<Key, Config> {
+    static union<
+        Key extends string,
+        Config extends UnionObjectSchemaConfig<Key, Config>,
+    >(key: Key, config: Config): UnionObjectSchema<Key, Config> {
         return new UnionObjectSchema(key, config);
     }
     static indexedUnion<
@@ -399,13 +446,14 @@ type EnumValues<
     T extends
         | ReadonlyArray<string | number | boolean>
         | ReadonlyRecord<string, string | number | boolean>,
-> = T extends ReadonlyArray<infer Values>
-    ? Values
-    : T extends Record<string, infer Values>
-    ? Values
+> =
+    T extends ReadonlyArray<infer Values> ? Values
+    : T extends Record<string, infer Values> ? Values
     : never;
 
-export class ValueSchema<Value extends string | number | boolean> extends Schema<Value> {
+export class ValueSchema<
+    Value extends string | number | boolean,
+> extends Schema<Value> {
     constructor(private readonly value: Value) {
         const validate = (input: unknown) => {
             if (input === value) {
@@ -424,12 +472,17 @@ export class ValueSchema<Value extends string | number | boolean> extends Schema
 }
 
 export class ObjectSchema<Shape extends object> extends Schema<Shape> {
-    constructor(readonly config: { readonly [K in keyof Shape]-?: Schema<Shape[K]> }) {
+    constructor(
+        readonly config: { readonly [K in keyof Shape]-?: Schema<Shape[K]> },
+    ) {
         super(
             (input) => {
                 if (typeof input !== "object" || input === null) {
                     return Result.error(
-                        new SchemaParseError(`Expected object, got ${typeToString(input)}`, []),
+                        new SchemaParseError(
+                            `Expected object, got ${typeToString(input)}`,
+                            [],
+                        ),
                     );
                 }
 
@@ -445,11 +498,16 @@ export class ObjectSchema<Shape extends object> extends Schema<Shape> {
             (input) => {
                 if (typeof input !== "object" || input === null) {
                     return Result.error(
-                        new SchemaParseError(`Expected object, got ${typeToString(input)}`, []),
+                        new SchemaParseError(
+                            `Expected object, got ${typeToString(input)}`,
+                            [],
+                        ),
                     );
                 }
 
-                const unknownProperties = new Set(keys(input as Record<string, unknown>));
+                const unknownProperties = new Set(
+                    keys(input as Record<string, unknown>),
+                );
                 for (const [key, schema] of entries(this.config)) {
                     unknownProperties.delete(key);
                     const value = get(input, key);
@@ -481,7 +539,9 @@ export class ObjectSchema<Shape extends object> extends Schema<Shape> {
         );
     }
 
-    indexed(indexByKey: { [K in keyof Shape]: number }): IndexedObjectSchema<Shape> {
+    indexed(indexByKey: {
+        [K in keyof Shape]: number;
+    }): IndexedObjectSchema<Shape> {
         return new IndexedObjectSchema(this, indexByKey);
     }
 }
@@ -511,7 +571,9 @@ export class IndexedObjectSchema<Shape extends object> extends Schema<Shape> {
                 if (typeof input !== "object" || input === null) {
                     return Result.error(
                         new SchemaParseError(
-                            `Expected an object or an array, got ${typeToString(input)}`,
+                            `Expected an object or an array, got ${typeToString(
+                                input,
+                            )}`,
                         ),
                     );
                 }
@@ -524,7 +586,9 @@ export class IndexedObjectSchema<Shape extends object> extends Schema<Shape> {
                         return schema
                             .parse(input[index])
                             .map((value) => [key, value])
-                            .mapErr((err) => prefixError(err, key, `(${index})`));
+                            .mapErr((err) =>
+                                prefixError(err, key, `(${index})`),
+                            );
                     }),
                 ).map((parsedEntries) => Object.fromEntries(parsedEntries));
             },
@@ -557,11 +621,17 @@ export class UnionObjectSchema<
     Key extends string,
     Config extends UnionObjectSchemaConfig<Key, Config>,
 > extends Schema<SchemaType<Config[keyof Config]>> {
-    constructor(private readonly key: Key, private readonly config: Config) {
+    constructor(
+        private readonly key: Key,
+        private readonly config: Config,
+    ) {
         const getMatchingSchema = (input: unknown) => {
             if (typeof input !== "object" || input === null) {
                 return Result.error(
-                    new SchemaParseError(`Expected an object, got ${typeToString(input)}`, []),
+                    new SchemaParseError(
+                        `Expected an object, got ${typeToString(input)}`,
+                        [],
+                    ),
                 );
             }
 
@@ -569,13 +639,16 @@ export class UnionObjectSchema<
             if (typeof variant !== "string") {
                 return Result.error(
                     new SchemaParseError(
-                        `Expected a string for key "${key}", got ${typeToString(variant)}`,
+                        `Expected a string for key "${key}", got ${typeToString(
+                            variant,
+                        )}`,
                         [],
                     ),
                 );
             }
 
-            const matchingSchema = has(config, variant) ? config[variant] : undefined;
+            const matchingSchema =
+                has(config, variant) ? config[variant] : undefined;
             if (matchingSchema === undefined) {
                 return Result.error(
                     new SchemaParseError(
@@ -597,7 +670,9 @@ export class UnionObjectSchema<
                 const { schema, variant } = result.value;
                 return schema
                     .parse(input)
-                    .mapErr((err) => prefixError(err, `(${key} = ${variant})`)) as any;
+                    .mapErr((err) =>
+                        prefixError(err, `(${key} = ${variant})`),
+                    ) as any;
             },
             (input) => {
                 const result = getMatchingSchema(input);
@@ -606,7 +681,9 @@ export class UnionObjectSchema<
                 const { schema, variant } = result.value;
                 return schema
                     .validate(input)
-                    .mapErr((err) => prefixError(err, `(${key} = ${variant})`)) as any;
+                    .mapErr((err) =>
+                        prefixError(err, `(${key} = ${variant})`),
+                    ) as any;
             },
             (object) => {
                 const type = object[key] as keyof Config;
@@ -628,9 +705,15 @@ export class IndexedUnionObjectSchema<
     Key extends string,
     Config extends IndexedUnionObjectSchemaConfig<Key, Config>,
 > extends Schema<SchemaType<Config[keyof Config]>> {
-    constructor(private readonly key: Key, private readonly config: Config) {
+    constructor(
+        private readonly key: Key,
+        private readonly config: Config,
+    ) {
         for (const [variant, schema] of entries(config)) {
-            assert(schema.keyByIndex[0] === key, `Variant ${variant} must have ${key} at index 0`);
+            assert(
+                schema.keyByIndex[0] === key,
+                `Variant ${variant} must have ${key} at index 0`,
+            );
         }
 
         super(
@@ -638,26 +721,30 @@ export class IndexedUnionObjectSchema<
                 if (typeof input !== "object" || input === null) {
                     return Result.error(
                         new SchemaParseError(
-                            `Expected an object or an array, got ${typeToString(input)}`,
+                            `Expected an object or an array, got ${typeToString(
+                                input,
+                            )}`,
                             [],
                         ),
                     );
                 }
 
                 const isArray = Array.isArray(input);
-                let variant: keyof Config | undefined = Array.isArray(input)
-                    ? input[0]
-                    : get(input, key);
-                if (typeof variant === "number") variant = String(variant) as keyof Config;
+                let variant: keyof Config | undefined =
+                    Array.isArray(input) ? input[0] : get(input, key);
+                if (typeof variant === "number")
+                    variant = String(variant) as keyof Config;
                 if (typeof variant !== "string") {
                     return Result.error(
-                        new SchemaParseError(`Expected a string, got ${typeToString(variant)}`, [
-                            isArray ? 0 : key,
-                        ]),
+                        new SchemaParseError(
+                            `Expected a string, got ${typeToString(variant)}`,
+                            [isArray ? 0 : key],
+                        ),
                     );
                 }
 
-                const matchingSchema = has(config, variant) ? config[variant] : undefined;
+                const matchingSchema =
+                    has(config, variant) ? config[variant] : undefined;
                 if (matchingSchema === undefined) {
                     return Result.error(
                         new SchemaParseError(
@@ -671,12 +758,17 @@ export class IndexedUnionObjectSchema<
 
                 return matchingSchema
                     .parse(input)
-                    .mapErr((err) => prefixError(err, `(${key} = ${String(variant)})`)) as any;
+                    .mapErr((err) =>
+                        prefixError(err, `(${key} = ${String(variant)})`),
+                    ) as any;
             },
             (input) => {
                 if (typeof input !== "object" || input === null) {
                     return Result.error(
-                        new SchemaParseError(`Expected an object, got ${typeToString(input)}`, []),
+                        new SchemaParseError(
+                            `Expected an object, got ${typeToString(input)}`,
+                            [],
+                        ),
                     );
                 }
 
@@ -684,13 +776,16 @@ export class IndexedUnionObjectSchema<
                 if (typeof variant !== "string") {
                     return Result.error(
                         new SchemaParseError(
-                            `Expected a string for key "${key}", got ${typeToString(variant)}`,
+                            `Expected a string for key "${key}", got ${typeToString(
+                                variant,
+                            )}`,
                             [],
                         ),
                     );
                 }
 
-                const matchingSchema = has(config, variant) ? config[variant] : undefined;
+                const matchingSchema =
+                    has(config, variant) ? config[variant] : undefined;
                 if (matchingSchema === undefined) {
                     return Result.error(
                         new SchemaParseError(
@@ -704,7 +799,9 @@ export class IndexedUnionObjectSchema<
 
                 return matchingSchema
                     .validate(input)
-                    .mapErr((err) => prefixError(err, `(${key} = ${String(variant)})`)) as any;
+                    .mapErr((err) =>
+                        prefixError(err, `(${key} = ${String(variant)})`),
+                    ) as any;
             },
             (object) => {
                 const type = object[key] as keyof Config;

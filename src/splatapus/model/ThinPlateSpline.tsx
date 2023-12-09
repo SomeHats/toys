@@ -69,7 +69,9 @@ export class Tps {
 
         const ws = this.solve(ys, matrix);
         if (!ws) {
-            fail("rbf failed to compile with given centers./nCenters must be unique :/");
+            fail(
+                "rbf failed to compile with given centers./nCenters must be unique :/",
+            );
         }
 
         this.ws = ws;
@@ -160,7 +162,9 @@ const Matrix = {
         return Matrix.multiplyMatrix(self, Matrix.fromVector(other));
     },
     transpose(self: Matrix): Matrix {
-        return times(self[0].length, (i) => times(self.length, (j) => self[j][i]));
+        return times(self[0].length, (i) =>
+            times(self.length, (j) => self[j][i]),
+        );
     },
     isSquare(self: Matrix): boolean {
         return self.length === self[0].length;
@@ -192,7 +196,11 @@ const Matrix = {
                         // be set straight to zero, since that's the point of
                         // this routine and it avoids having to loop over and
                         // correct rounding errors later
-                        els.push(p <= i ? 0 : result[j][p] - result[i][p] * multiplier);
+                        els.push(
+                            p <= i ? 0 : (
+                                result[j][p] - result[i][p] * multiplier
+                            ),
+                        );
                     }
                     result[j] = els;
                 }
@@ -232,7 +240,9 @@ const Matrix = {
 
         const n = self.length;
         const inverse: Matrix = [];
-        const M = Matrix.toRightTriangular(Matrix.augment(self, Matrix.identity(n)));
+        const M = Matrix.toRightTriangular(
+            Matrix.augment(self, Matrix.identity(n)),
+        );
         const np = M[0].length;
 
         let i = self.length;

@@ -3,7 +3,10 @@ import { Vector2 } from "@/lib/geom/Vector2";
 import { useEvent } from "@/lib/hooks/useEvent";
 import { useGestureDetector } from "@/lib/hooks/useGestureDetector";
 import { ANY, useIsKeyDown } from "@/lib/hooks/useKeyPress";
-import { sizeFromBorderBox, useResizeObserver } from "@/lib/hooks/useResizeObserver";
+import {
+    sizeFromBorderBox,
+    useResizeObserver,
+} from "@/lib/hooks/useResizeObserver";
 import { useSessionStorageState } from "@/lib/hooks/useStoredState";
 import { UpdateAction } from "@/lib/utils";
 import { Button } from "@/splatapus/ui/Button";
@@ -39,14 +42,21 @@ export function SplineTime() {
     return (
         <div className="absolute inset-0 flex flex-col bg-stone-100">
             <div className="flex flex-none items-center justify-between gap-3 bg-stone-100 px-4 py-3">
-                <h1 className="flex-none font-bold tracking-wide text-stone-600">spline time</h1>
+                <h1 className="flex-none font-bold tracking-wide text-stone-600">
+                    spline time
+                </h1>
                 <div className="text-stone-500">
-                    click/drag to create/move points. hold shift to hide annotations.
+                    click/drag to create/move points. hold shift to hide
+                    annotations.
                 </div>
-                <Button onClick={() => setLine(new SplineTimeLine([]))}>reset</Button>
+                <Button onClick={() => setLine(new SplineTimeLine([]))}>
+                    reset
+                </Button>
             </div>
             <div className="relative flex-auto touch-none" ref={setContainer}>
-                {size && <SplineTimeMain size={size} line={line} setLine={setLine} />}
+                {size && (
+                    <SplineTimeMain size={size} line={line} setLine={setLine} />
+                )}
             </div>
         </div>
     );
@@ -75,7 +85,10 @@ function SplineTimeMain({
     });
 
     const getHoveredIndex = useEvent((event: PointerEvent) => {
-        return line.getClosestPointIndexWithinRadius(coordsFromEvent(event), HOVER_RADIUS_PX);
+        return line.getClosestPointIndexWithinRadius(
+            coordsFromEvent(event),
+            HOVER_RADIUS_PX,
+        );
     });
 
     const [activePointIdx, setActivePointIdx] = useState<number | null>(null);
@@ -108,11 +121,15 @@ function SplineTimeMain({
                 pointerCapture: true,
                 onMove: (event) => {
                     const cursor = coordsFromEvent(event);
-                    setLine((line) => line.updatePointAtIndex(pointIndex, cursor.add(offset)));
+                    setLine((line) =>
+                        line.updatePointAtIndex(pointIndex, cursor.add(offset)),
+                    );
                 },
                 onEnd: (event) => {
                     const cursor = coordsFromEvent(event);
-                    setLine((line) => line.updatePointAtIndex(pointIndex, cursor.add(offset)));
+                    setLine((line) =>
+                        line.updatePointAtIndex(pointIndex, cursor.add(offset)),
+                    );
                     setActivePointIdx(null);
                 },
                 onCancel: () => {
@@ -122,7 +139,9 @@ function SplineTimeMain({
         },
     });
 
-    const [rawHoveredPointIdx, setHoveredPointIdx] = useState<number | null>(null);
+    const [rawHoveredPointIdx, setHoveredPointIdx] = useState<number | null>(
+        null,
+    );
     const hoveredPointIdx = isGestureInProgress ? null : rawHoveredPointIdx;
 
     const renderWindowProps = {
@@ -146,15 +165,22 @@ function SplineTimeMain({
             <RenderWindow
                 {...renderWindowProps}
                 layers={[
-                    showExtras && straightLineThroughPointsLayer({ style: "dotted" }),
+                    showExtras &&
+                        straightLineThroughPointsLayer({ style: "dotted" }),
                     arcLayer,
                 ]}
-                location={AABB.fromLeftTopWidthHeight(paddingPx, 0, previewWidth, previewHeight)}
+                location={AABB.fromLeftTopWidthHeight(
+                    paddingPx,
+                    0,
+                    previewWidth,
+                    previewHeight,
+                )}
             />
             <RenderWindow
                 {...renderWindowProps}
                 layers={[
-                    showExtras && straightLineThroughPointsLayer({ style: "dotted" }),
+                    showExtras &&
+                        straightLineThroughPointsLayer({ style: "dotted" }),
                     midPointBezierLayer,
                     midPointMarkerLayer,
                 ]}
@@ -234,13 +260,21 @@ function RenderWindow({
                 onPointerCancel={onPointerCancel}
             >
                 <svg className="absolute inset-0 h-full w-full">
-                    <g transform={`translate(${location.width / 2}, ${location.height / 2})`}>
+                    <g
+                        transform={`translate(${location.width / 2}, ${
+                            location.height / 2
+                        })`}
+                    >
                         {layers.map(
                             (annotation, i) =>
                                 annotation &&
                                 uiTarget && (
                                     <Fragment key={i}>
-                                        {annotation({ line, showExtras, uiTarget })}
+                                        {annotation({
+                                            line,
+                                            showExtras,
+                                            uiTarget,
+                                        })}
                                     </Fragment>
                                 ),
                         )}
@@ -254,18 +288,20 @@ function RenderWindow({
                                     strokeWidth={2}
                                     className={classNames(
                                         "stroke-blue-600",
-                                        i === activePointIdx
-                                            ? "fill-blue-600"
-                                            : i === hoveredPointIdx
-                                            ? "fill-blue-300"
-                                            : "fill-white",
+                                        i === activePointIdx ? "fill-blue-600"
+                                        : i === hoveredPointIdx ?
+                                            "fill-blue-300"
+                                        :   "fill-white",
                                     )}
                                 />
                             ))}
                     </g>
                 </svg>
             </div>
-            <div className="pointer-events-auto absolute z-10 w-full" ref={setUiTarget} />
+            <div
+                className="pointer-events-auto absolute z-10 w-full"
+                ref={setUiTarget}
+            />
         </div>
     );
 }

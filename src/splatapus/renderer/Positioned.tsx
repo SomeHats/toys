@@ -18,7 +18,10 @@ export function PositionedDiv({
     return (
         <div
             className={classNames("absolute top-0 left-0", className)}
-            style={{ transform: `translate(${position.x}px, ${position.y}px)`, ...style }}
+            style={{
+                transform: `translate(${position.x}px, ${position.y}px)`,
+                ...style,
+            }}
             {...props}
         >
             {children}

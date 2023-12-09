@@ -1,6 +1,9 @@
 import { entries, ObjectMap } from "@/lib/utils";
 
-export type DebugProps = ObjectMap<string, string | number | boolean | null | undefined>;
+export type DebugProps = ObjectMap<
+    string,
+    string | number | boolean | null | undefined
+>;
 
 export function debugPropsToString(props: DebugProps) {
     return entries(props)

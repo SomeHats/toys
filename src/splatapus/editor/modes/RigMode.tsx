@@ -3,6 +3,7 @@ import { debugStateToString } from "@/lib/debugPropsToString";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { useKeepNonNull } from "@/lib/hooks/useNonNull";
 import { LiveValue, runOnce, useLive } from "@/lib/live";
+import { Transition } from "@/lib/react/Transition";
 import { mapRange } from "@/lib/utils";
 import {
     PointerEventContext,
@@ -14,12 +15,13 @@ import { Mode, ModeType } from "@/splatapus/editor/modes/Mode";
 import { Splatapus } from "@/splatapus/editor/useEditor";
 import { SplatKeyPoint, SplatKeyPointId } from "@/splatapus/model/SplatDoc";
 import { KeyPointPreview } from "@/splatapus/ui/KeyPointPreview";
-import { Transition } from "@headlessui/react";
 import classNames from "classnames";
 import { PointerEvent, PointerEventHandler, ReactNode, useState } from "react";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 
-type GestureArgs = [keyPoint?: { id: SplatKeyPointId; initialScenePosition: Vector2 }];
+type GestureArgs = [
+    keyPoint?: { id: SplatKeyPointId; initialScenePosition: Vector2 },
+];
 
 const DOCK_THRESHOLD_PX = 80;
 const DOCK_CENTER_LINE_PX = 64;
@@ -55,14 +57,17 @@ export class RigMode implements Mode<ModeType.Rig> {
                     couldBeTap: false,
                     pointerCapture: true,
                     onMove: (event) =>
-                        this.previewPosition.update(viewport.eventSceneCoords(event)),
+                        this.previewPosition.update(
+                            viewport.eventSceneCoords(event),
+                        ),
                     onEnd: () => this.previewPosition.update(null),
                     onCancel: () => this.previewPosition.update(null),
                 };
             }
 
             location.keyPointId.update(keyPoint.id);
-            const startingPointerScenePosition = viewport.eventSceneCoords(event);
+            const startingPointerScenePosition =
+                viewport.eventSceneCoords(event);
             const startingKeyPointScenePosition = keyPoint.initialScenePosition;
             return {
                 couldBeTap: true,
@@ -82,7 +87,10 @@ export class RigMode implements Mode<ModeType.Rig> {
                         .sub(startingPointerScenePosition)
                         .add(startingKeyPointScenePosition);
                     const isInDock = runOnce(() =>
-                        isPointInDockLive(viewport, viewport.sceneToScreenLive(newPosition)),
+                        isPointInDockLive(
+                            viewport,
+                            viewport.sceneToScreenLive(newPosition),
+                        ),
                     );
                     this.previewMovement.update(null);
                     document.update((doc) =>
@@ -106,15 +114,15 @@ export class RigMode implements Mode<ModeType.Rig> {
         const previewPosition = this.previewPosition.live();
         return debugStateToString(
             "rig",
-            previewPosition
-                ? { _: "preview", position: previewPosition.toString(2) }
-                : previewMovement
-                ? {
-                      _: "moving",
-                      keyPointId: previewMovement.keyPointId,
-                      delta: previewMovement.scenePosition.toString(2),
-                  }
-                : { _: "idle" },
+            previewPosition ?
+                { _: "preview", position: previewPosition.toString(2) }
+            : previewMovement ?
+                {
+                    _: "moving",
+                    keyPointId: previewMovement.keyPointId,
+                    delta: previewMovement.scenePosition.toString(2),
+                }
+            :   { _: "idle" },
         );
     }
     onPointerEvent(ctx: PointerEventContext<PointerEventType>): void {
@@ -134,75 +142,96 @@ export class RigMode implements Mode<ModeType.Rig> {
         splatapus: Splatapus;
         mode: RigMode | null;
     }) {
-        const { points, pointsInDock, size, isAnyDragging, maxScreenProgress, minScreenProgress } =
-            useLive(() => {
-                const size = splatapus.viewport.screenSizeWithSidebarOpenLive();
-                const previewMovement = mode?.previewMovement.live();
-                const selectedKeyPointId = splatapus.location.keyPointId.live();
+        const {
+            points,
+            pointsInDock,
+            size,
+            isAnyDragging,
+            maxScreenProgress,
+            minScreenProgress,
+        } = useLive(() => {
+            const size = splatapus.viewport.screenSizeWithSidebarOpenLive();
+            const previewMovement = mode?.previewMovement.live();
+            const selectedKeyPointId = splatapus.location.keyPointId.live();
 
-                let dockIndex = 0;
-                let minScreenProgress = Infinity;
-                let maxScreenProgress = -Infinity;
+            let dockIndex = 0;
+            let minScreenProgress = Infinity;
+            let maxScreenProgress = -Infinity;
 
-                const points = Array.from(
-                    splatapus.document.live().keyPoints,
-                    (keyPoint, overallIndex) => {
-                        const draggingPosition =
-                            previewMovement?.keyPointId === keyPoint.id
-                                ? splatapus.viewport.sceneToScreenLive(
-                                      previewMovement.scenePosition,
-                                  )
-                                : null;
+            const points = Array.from(
+                splatapus.document.live().keyPoints,
+                (keyPoint, overallIndex) => {
+                    const draggingPosition =
+                        previewMovement?.keyPointId === keyPoint.id ?
+                            splatapus.viewport.sceneToScreenLive(
+                                previewMovement.scenePosition,
+                            )
+                        :   null;
 
-                        const keypointPosition = keyPoint.position
-                            ? splatapus.viewport.sceneToScreenLive(keyPoint.position)
-                            : null;
+                    const keypointPosition =
+                        keyPoint.position ?
+                            splatapus.viewport.sceneToScreenLive(
+                                keyPoint.position,
+                            )
+                        :   null;
 
-                        const isInDock = draggingPosition
-                            ? isPointInDockLive(splatapus.viewport, draggingPosition)
-                            : !keyPoint.position;
+                    const isInDock =
+                        draggingPosition ?
+                            isPointInDockLive(
+                                splatapus.viewport,
+                                draggingPosition,
+                            )
+                        :   !keyPoint.position;
 
-                        let screenProgress = null;
-                        if (keypointPosition) {
-                            screenProgress = keypointPosition.dot(size) / size.dot(size);
-                            minScreenProgress = Math.min(minScreenProgress, screenProgress);
-                            maxScreenProgress = Math.max(maxScreenProgress, screenProgress);
-                        }
-
-                        return {
-                            dockIndex: isInDock ? dockIndex++ : null,
-                            keyPoint,
-                            overallIndex,
-                            isSelected: keyPoint.id === selectedKeyPointId,
-                            screenPosition: draggingPosition ?? keypointPosition,
-                            isDragging: !!draggingPosition,
+                    let screenProgress = null;
+                    if (keypointPosition) {
+                        screenProgress =
+                            keypointPosition.dot(size) / size.dot(size);
+                        minScreenProgress = Math.min(
+                            minScreenProgress,
                             screenProgress,
-                        };
-                    },
-                );
+                        );
+                        maxScreenProgress = Math.max(
+                            maxScreenProgress,
+                            screenProgress,
+                        );
+                    }
 
-                return {
-                    points,
-                    pointsInDock: dockIndex,
-                    size,
-                    isAnyDragging: !!previewMovement,
-                    minScreenProgress,
-                    maxScreenProgress,
-                };
-            }, [splatapus, mode]);
+                    return {
+                        dockIndex: isInDock ? dockIndex++ : null,
+                        keyPoint,
+                        overallIndex,
+                        isSelected: keyPoint.id === selectedKeyPointId,
+                        screenPosition: draggingPosition ?? keypointPosition,
+                        isDragging: !!draggingPosition,
+                        screenProgress,
+                    };
+                },
+            );
+
+            return {
+                points,
+                pointsInDock: dockIndex,
+                size,
+                isAnyDragging: !!previewMovement,
+                minScreenProgress,
+                maxScreenProgress,
+            };
+        }, [splatapus, mode]);
 
         const shouldShow = !!mode;
         const [shouldShowDock, setShouldShowDock] = useState(shouldShow);
         const exitPosition = new Vector2(size.x / 2, size.y + 50);
 
-        const [hoveredId, setHoveredId] = useState<SplatKeyPointId | null>(null);
+        const [hoveredId, setHoveredId] = useState<SplatKeyPointId | null>(
+            null,
+        );
         const dockedHovered = points.find(
-            (point) => point.dockIndex !== null && point.keyPoint.id === hoveredId,
+            (point) =>
+                point.dockIndex !== null && point.keyPoint.id === hoveredId,
         );
         const prevDockedHovered = useKeepNonNull(dockedHovered);
-        console.log({ dockedHovered, prevDockedHovered });
 
-        console.log("render");
         return (
             <>
                 <Transition
@@ -214,8 +243,10 @@ export class RigMode implements Mode<ModeType.Rig> {
                     leave="transition duration-200"
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
-                    beforeEnter={() => requestAnimationFrame(() => setShouldShowDock(true))}
-                    beforeLeave={() => setShouldShowDock(false)}
+                    onBeforeEnter={() =>
+                        requestAnimationFrame(() => setShouldShowDock(true))
+                    }
+                    onBeforeLeave={() => setShouldShowDock(false)}
                 />
                 {points.map((props) => {
                     return (
@@ -231,7 +262,9 @@ export class RigMode implements Mode<ModeType.Rig> {
                             isAnyDragging={isAnyDragging}
                             minScreenProgress={minScreenProgress}
                             maxScreenProgress={maxScreenProgress}
-                            onPointerEnter={() => setHoveredId(props.keyPoint.id)}
+                            onPointerEnter={() =>
+                                setHoveredId(props.keyPoint.id)
+                            }
                             onPointerLeave={() => setHoveredId(null)}
                             {...props}
                         />
@@ -248,7 +281,8 @@ export class RigMode implements Mode<ModeType.Rig> {
                     leaveTo="opacity-0"
                     style={{
                         width: size.x,
-                        transitionDelay: shouldShow ? `${pointsInDock * 30 + 400}ms` : "0ms",
+                        transitionDelay:
+                            shouldShow ? `${pointsInDock * 30 + 400}ms` : "0ms",
                     }}
                 >
                     drag each key point into the canvas
@@ -266,7 +300,10 @@ export class RigMode implements Mode<ModeType.Rig> {
                         style={{
                             left: size.x / 2,
                             transform: `translateX(${
-                                (assertExists((dockedHovered ?? prevDockedHovered).dockIndex) -
+                                (assertExists(
+                                    (dockedHovered ?? prevDockedHovered)
+                                        .dockIndex,
+                                ) -
                                     (pointsInDock - 1) / 2) *
                                 56
                             }px) translateY(var(--tw-translate-y)) scale(var(--tw-scale-x), var(--tw-scale-y))`,
@@ -279,11 +316,15 @@ export class RigMode implements Mode<ModeType.Rig> {
                                 classNames={{
                                     // ew gross i hate this
                                     enter: "transition-opacity bg-stone-50 absolute",
-                                    enterActive: "transition-opacity bg-stone-50 absolute",
-                                    enterDone: "transition-opacity bg-stone-50 absolute",
+                                    enterActive:
+                                        "transition-opacity bg-stone-50 absolute",
+                                    enterDone:
+                                        "transition-opacity bg-stone-50 absolute",
                                     exit: "transition-opacity opacity-0 bg-stone-50 absolute",
-                                    exitActive: "transition-opacity opacity-0 bg-stone-50 absolute",
-                                    exitDone: "transition-opacity opacity-0 bg-stone-50 absolute",
+                                    exitActive:
+                                        "transition-opacity opacity-0 bg-stone-50 absolute",
+                                    exitDone:
+                                        "transition-opacity opacity-0 bg-stone-50 absolute",
                                 }}
                             >
                                 <KeyPointPreview
@@ -345,15 +386,28 @@ export class RigMode implements Mode<ModeType.Rig> {
         const isDocked = dockIndex !== null;
         if (!screenPosition) {
             assert(dockIndex !== null);
-            screenPosition = shouldShowDock
-                ? new Vector2(
-                      screenSize.x / 2 + (dockIndex - (pointsInDock - 1) / 2) * 56,
-                      screenSize.y - DOCK_CENTER_LINE_PX,
-                  )
-                : exitPosition;
+            screenPosition =
+                shouldShowDock ?
+                    new Vector2(
+                        screenSize.x / 2 +
+                            (dockIndex - (pointsInDock - 1) / 2) * 56,
+                        screenSize.y - DOCK_CENTER_LINE_PX,
+                    )
+                :   exitPosition;
         }
 
         const [isHovered, setIsHovered] = useState(false);
+
+        if (isDragging)
+            console.log({
+                dockIndex,
+                isDocked,
+                isDragging,
+                className:
+                    isDragging ? "z-20"
+                    : isDocked ? "z-10"
+                    : "z-[5]",
+            });
 
         return (
             <>
@@ -362,29 +416,35 @@ export class RigMode implements Mode<ModeType.Rig> {
                     show={shouldShow}
                     className={classNames(
                         "absolute top-0 left-0 flex cursor-move items-center justify-center",
-                        isDocked ? "-mt-7 -ml-7 h-14 w-14" : "-mt-5 -ml-5 h-10 w-10 rounded-full",
-                        isDragging ? "z-20" : isDocked ? "z-10" : "z-[5]",
+                        isDocked ?
+                            "-mt-7 -ml-7 h-14 w-14"
+                        :   "-mt-5 -ml-5 h-10 w-10 rounded-full",
+                        isDragging ? "z-20"
+                        : isDocked ? "z-10"
+                        : "z-[5]",
                         !isDragging &&
-                            (shouldShow
-                                ? dockIndex !== null && "transition duration-300 ease-out-back"
-                                : dockIndex !== null && "transition duration-200 ease-in"),
+                            (shouldShow ?
+                                dockIndex !== null &&
+                                "transition duration-300 ease-out-back"
+                            :   dockIndex !== null &&
+                                "transition duration-200 ease-in"),
                     )}
                     enter={
-                        isDocked
-                            ? "transition-transform duration-300 ease-out-back"
-                            : "transition-transform duration-200 ease-out-back"
+                        isDocked ?
+                            "transition-transform duration-300 ease-out-back"
+                        :   "transition-transform duration-200 ease-out-back"
                     }
                     enterFrom={isDocked ? "scale-50" : "scale-0"}
                     enterTo="scale-100"
                     leave={
-                        isDocked
-                            ? "transition-transform duration-200 ease-in"
-                            : "transition-transform duration-200 ease-in-back"
+                        isDocked ?
+                            "transition-transform duration-200 ease-in"
+                        :   "transition-transform duration-200 ease-in-back"
                     }
                     leaveFrom="scale-100"
                     leaveTo={isDocked ? "scale-50" : "scale-0"}
-                    afterEnter={() => setIsTransitionedIn(true)}
-                    beforeLeave={() => setIsTransitionedIn(false)}
+                    onAfterEnter={() => setIsTransitionedIn(true)}
+                    onBeforeLeave={() => setIsTransitionedIn(false)}
                     onPointerEnter={(event: PointerEvent) => {
                         setIsHovered(true);
                         onPointerEnter(event);
@@ -409,41 +469,41 @@ export class RigMode implements Mode<ModeType.Rig> {
                     }}
                     style={{
                         transform: `translate(${screenPosition.x}px, ${screenPosition.y}px) scale(var(--tw-scale-x), var(--tw-scale-y))`,
-                        transitionDelay: isAnyDragging
-                            ? "0ms"
-                            : isDocked
-                            ? `${dockIndex * 25}ms`
-                            : isTransitionedIn
-                            ? "0ms"
+                        transitionDelay:
+                            isAnyDragging ? "0ms"
+                            : isDocked ? `${dockIndex * 25}ms`
+                            : isTransitionedIn ? "0ms"
                             : `${mapRange(
-                                  minScreenProgress,
-                                  maxScreenProgress,
-                                  0,
-                                  200,
-                                  assertExists(screenProgress),
-                              )}ms`,
+                                    minScreenProgress,
+                                    maxScreenProgress,
+                                    0,
+                                    200,
+                                    assertExists(screenProgress),
+                                )}ms`,
                     }}
                 >
                     <div
                         className={classNames(
                             "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shadow-md transition-transform duration-200 ease-out-back-md",
                             isDocked ? "scale-150" : "scale-100",
-                            isSelected
-                                ? "bg-gradient-to-br from-cyan-400 to-blue-400 text-white"
-                                : "border border-stone-200 bg-white text-stone-400",
+                            isSelected ?
+                                "bg-gradient-to-br from-cyan-400 to-blue-400 text-white"
+                            :   "border border-stone-200 bg-white text-stone-400",
                         )}
                     >
                         {overallIndex + 1}
                     </div>
                 </Transition>
-                <Transition
-                    show={isHovered && !isDocked && !isAnyDragging}
+                <div
                     className="pointer-events-none absolute top-0 left-0 z-[4]"
                     style={{
-                        transform: `translate(${screenPosition.x}px, ${screenPosition.y - 24}px)`,
+                        transform: `translate(${screenPosition.x}px, ${
+                            screenPosition.y - 24
+                        }px)`,
                     }}
                 >
-                    <Transition.Child
+                    <Transition
+                        show={isHovered && !isDocked && !isAnyDragging}
                         className="-mt-16 -ml-10 h-16 w-20 origin-bottom rounded border border-stone-300 bg-stone-50 shadow-md"
                         enter="transition ease-out"
                         enterFrom="translate-y-4 opacity-0 scale-75"
@@ -458,8 +518,8 @@ export class RigMode implements Mode<ModeType.Rig> {
                             keyPointId={keyPoint.id}
                             splatapus={splatapus}
                         />
-                    </Transition.Child>
-                </Transition>
+                    </Transition>
+                </div>
             </>
         );
     };

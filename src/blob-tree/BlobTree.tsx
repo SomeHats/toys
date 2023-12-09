@@ -10,7 +10,11 @@ export class BlobTreeNode {
         return new BlobTreeNode(BlobTreeNode.ids.next(), position, radius);
     }
 
-    constructor(readonly id: string, public position: Vector2, public radius: number) {}
+    constructor(
+        readonly id: string,
+        public position: Vector2,
+        public radius: number,
+    ) {}
 
     toCircle(): Circle {
         return new Circle(this.position, this.radius);
@@ -55,7 +59,11 @@ export class BlobTree {
         this.nodesById.set(node.id, node);
         return node;
     }
-    createNewChild(parent: BlobTreeNode, position: Vector2, radius: number): BlobTreeNode {
+    createNewChild(
+        parent: BlobTreeNode,
+        position: Vector2,
+        radius: number,
+    ): BlobTreeNode {
         const node = BlobTreeNode.create(position, radius);
         this.nodesById.set(node.id, node);
         this.parentById.set(node.id, parent.id);

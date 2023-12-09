@@ -28,7 +28,11 @@ export class GlProgram {
     private readonly gl: Gl;
     private readonly uniforms: Array<GlUniform<unknown>> = [];
 
-    constructor(_gl: Gl, readonly vertexShader: GlShader, readonly fragmentShader: GlShader) {
+    constructor(
+        _gl: Gl,
+        readonly vertexShader: GlShader,
+        readonly fragmentShader: GlShader,
+    ) {
         this.gl = _gl;
         const { gl } = _gl;
         const program = assertExists(gl.createProgram());
@@ -38,7 +42,9 @@ export class GlProgram {
 
         const success = gl.getProgramParameter(program, gl.LINK_STATUS);
         if (!success) {
-            const error = `Failed to link shaders: ${gl.getProgramInfoLog(program)}`;
+            const error = `Failed to link shaders: ${gl.getProgramInfoLog(
+                program,
+            )}`;
             gl.deleteProgram(program);
             fail(error);
         }
@@ -70,7 +76,14 @@ export class GlProgram {
 
         const attribLocation = gl.getAttribLocation(this.program, name);
         gl.enableVertexAttribArray(attribLocation);
-        gl.vertexAttribPointer(attribLocation, size, glEnum(type), normalize, stride, offset);
+        gl.vertexAttribPointer(
+            attribLocation,
+            size,
+            glEnum(type),
+            normalize,
+            stride,
+            offset,
+        );
 
         return new GlVertexArray(this.gl, vertexArray, buffer);
     }
@@ -96,7 +109,14 @@ export class GlProgram {
 
         const attribLocation = gl.getAttribLocation(this.program, name);
         gl.enableVertexAttribArray(attribLocation);
-        gl.vertexAttribPointer(attribLocation, size, glEnum(type), normalize, stride, offset);
+        gl.vertexAttribPointer(
+            attribLocation,
+            size,
+            glEnum(type),
+            normalize,
+            stride,
+            offset,
+        );
 
         return new GlBuffer(this.gl, buffer);
     }
@@ -152,10 +172,16 @@ export class GlProgram {
     uniformBool(name: string, initialValue: GlUniformInitialValue<boolean>) {
         return this.addUniform(GlUniformBool, name, initialValue);
     }
-    uniformTexture2d(name: string, initialValue: GlUniformInitialValue<GlTexture2d>) {
+    uniformTexture2d(
+        name: string,
+        initialValue: GlUniformInitialValue<GlTexture2d>,
+    ) {
         return this.addUniform(GlUniformTexture2d, name, initialValue);
     }
-    uniformEnum<T extends number>(name: string, initialValue: GlUniformInitialValue<T>) {
+    uniformEnum<T extends number>(
+        name: string,
+        initialValue: GlUniformInitialValue<T>,
+    ) {
         return this.addUniform(GlUniformEnum, name, initialValue);
     }
 

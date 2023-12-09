@@ -15,15 +15,21 @@ export type BoolGlslType = { readonly type: "scalar"; readonly name: "bool" };
 export type IntGlslType = { readonly type: "scalar"; readonly name: "int" };
 export type UintGlslType = { readonly type: "scalar"; readonly name: "uint" };
 export type FloatGlslType = { readonly type: "scalar"; readonly name: "float" };
-export type DoubleGlslType = { readonly type: "scalar"; readonly name: "double" };
+export type DoubleGlslType = {
+    readonly type: "scalar";
+    readonly name: "double";
+};
 
 export type GlslType = ScalarGlslType;
 
-export type GlslTypeToJsType<T extends ScalarGlslType> = JsTypeByScalarGlslTypeName[T["name"]];
+export type GlslTypeToJsType<T extends ScalarGlslType> =
+    JsTypeByScalarGlslTypeName[T["name"]];
 
 export abstract class GlslExpressionBase<_Type extends GlslType> {}
 
-export class GlslScalar<Type extends ScalarGlslType> extends GlslExpressionBase<Type> {
+export class GlslScalar<
+    Type extends ScalarGlslType,
+> extends GlslExpressionBase<Type> {
     constructor(readonly value: GlslTypeToJsType<Type>) {
         super();
     }

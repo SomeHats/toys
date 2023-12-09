@@ -13,10 +13,13 @@ function findPlateEdges(
     plateIdByCellId: ReadonlyArray<number>,
 ): { edgeCellIds: Set<number>; polygon: Array<Vector2> } {
     const isNeighbourCellIdInOtherPlate = (neighbourCellId: number | null) =>
-        neighbourCellId === null || plateIdByCellId[neighbourCellId] !== currentPlateId;
+        neighbourCellId === null ||
+        plateIdByCellId[neighbourCellId] !== currentPlateId;
 
     const startingEdgeCellId = cellIds.find((cellId) =>
-        terrain.cellsById[cellId].neighbourCellIdsByEdgeIndex.some(isNeighbourCellIdInOtherPlate),
+        terrain.cellsById[cellId].neighbourCellIdsByEdgeIndex.some(
+            isNeighbourCellIdInOtherPlate,
+        ),
     );
     if (startingEdgeCellId == null) {
         throw new Error(`startingEdgeCellId must exist`);
@@ -27,7 +30,9 @@ function findPlateEdges(
 
     const startingEdgeCell = terrain.cellsById[startingEdgeCellId];
     const startingEdgeCellStartingEdgeIndex =
-        startingEdgeCell.neighbourCellIdsByEdgeIndex.findIndex(isNeighbourCellIdInOtherPlate);
+        startingEdgeCell.neighbourCellIdsByEdgeIndex.findIndex(
+            isNeighbourCellIdInOtherPlate,
+        );
     if (startingEdgeCellStartingEdgeIndex === -1) {
         throw new Error("startingEdgeCellStartingEdgeIndex must exist");
     }
@@ -41,8 +46,11 @@ function findPlateEdges(
 
         edgeCellIds.add(currentCell.id);
         const currentCellAtStartOfEdgeIteration = currentCell;
-        for (const edgeIndex of currentCell.iterateEdgesStartingFromIndex(currentEdgeIndexInCell)) {
-            const neighbourCellId = currentCell.neighbourCellIdsByEdgeIndex[edgeIndex];
+        for (const edgeIndex of currentCell.iterateEdgesStartingFromIndex(
+            currentEdgeIndexInCell,
+        )) {
+            const neighbourCellId =
+                currentCell.neighbourCellIdsByEdgeIndex[edgeIndex];
 
             if (isNeighbourCellIdInOtherPlate(neighbourCellId)) {
                 lastPolygonPoint = currentCell.polygon[edgeIndex];
@@ -58,8 +66,8 @@ function findPlateEdges(
                     throw new Error("lastPolygonPoint must exist");
                 }
                 const nextCell = terrain.cellsById[neighbourCellId];
-                const nextCellStartEdgeIndex = nextCell.polygon.findIndex((point) =>
-                    assertExists(lastPolygonPoint).equals(point),
+                const nextCellStartEdgeIndex = nextCell.polygon.findIndex(
+                    (point) => assertExists(lastPolygonPoint).equals(point),
                 );
                 if (nextCellStartEdgeIndex === -1) {
                     throw new Error("currentEdgeIndexInCell must exist");
@@ -100,7 +108,12 @@ export class TectonicPlate {
     ) {
         this.cellIds = new Set(cellIds);
         console.time("plate.findPlateEdges");
-        const plateEdges = findPlateEdges(id, terrain, cellIds, plateIdByCellId);
+        const plateEdges = findPlateEdges(
+            id,
+            terrain,
+            cellIds,
+            plateIdByCellId,
+        );
         this.edgeCellIds = plateEdges.edgeCellIds;
         this.polygon = plateEdges.polygon;
         console.timeEnd("plate.findPlateEdges");
@@ -117,10 +130,15 @@ export class TectonicPlate {
         for (const edgeCellId of this.edgeCellIds) {
             const cell = this.getCell(edgeCellId);
             const neighbourDrifts = cell.neighbourCellIds
-                .filter((neighbourId) => this.terrain.plateIdByCellId[neighbourId] !== this.id)
+                .filter(
+                    (neighbourId) =>
+                        this.terrain.plateIdByCellId[neighbourId] !== this.id,
+                )
                 .map(
                     (neighbourId) =>
-                        this.terrain.platesById[this.terrain.plateIdByCellId[neighbourId]].drift,
+                        this.terrain.platesById[
+                            this.terrain.plateIdByCellId[neighbourId]
+                        ].drift,
                 );
 
             if (!neighbourDrifts.length) continue;

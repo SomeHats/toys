@@ -35,7 +35,10 @@ async function buildIfNeeded(packageJsonPath) {
         return;
     }
 
-    const entryPoint = path.resolve(path.dirname(packageJsonPath), packageJson.main);
+    const entryPoint = path.resolve(
+        path.dirname(packageJsonPath),
+        packageJson.main,
+    );
 
     const outDir = path.resolve(pacakgesOutDir, packageJson.name);
 
@@ -63,7 +66,9 @@ async function buildIfNeeded(packageJsonPath) {
     rimraf(path.resolve(outDir, "src/vite-env.d.ts"));
     rimraf(path.resolve(outDir, "types"));
 
-    const typesPath = path.relative(rootDir, entryPoint).replace(/\.tsx?$/, ".d.ts");
+    const typesPath = path
+        .relative(rootDir, entryPoint)
+        .replace(/\.tsx?$/, ".d.ts");
     const packageJsonFile = {
         ...packageJson,
         main: "./index.umd.js",

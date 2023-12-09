@@ -14,7 +14,9 @@ type Snake = {
 
 const makeSnake = () => {
     const triangles: Array<Triangle> = [];
-    let triangle = sample([...trianglesById.values()].filter((t) => !occupied.has(t)));
+    let triangle = sample(
+        [...trianglesById.values()].filter((t) => !occupied.has(t)),
+    );
     // if (!triangle) return;
 
     // const targetLength = mapRange(
@@ -31,7 +33,9 @@ const makeSnake = () => {
         occupied.add(triangle);
         neighbours = triangle.neighbours.map((n) => n.triangle);
 
-        const availableNeighbours = neighbours.filter((neighbour) => !occupied.has(neighbour));
+        const availableNeighbours = neighbours.filter(
+            (neighbour) => !occupied.has(neighbour),
+        );
         if (!availableNeighbours.length) break;
         triangle = sample(availableNeighbours);
     }

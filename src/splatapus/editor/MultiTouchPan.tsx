@@ -76,7 +76,8 @@ export class MultiTouchPan {
                 return ctx;
             case "oneFingerDown":
                 if (this.state.pointerA.id === event.pointerId) {
-                    this.state.pointerA.currentScreenPosition = Vector2.fromEvent(event);
+                    this.state.pointerA.currentScreenPosition =
+                        Vector2.fromEvent(event);
                 }
                 return ctx;
             case "bothFingersDown":
@@ -85,30 +86,35 @@ export class MultiTouchPan {
                     event.pointerId === this.state.pointerB.id
                 ) {
                     const pointerAScreenPosition =
-                        event.pointerId === this.state.pointerA.id
-                            ? Vector2.fromEvent(event)
-                            : this.state.pointerA.currentScreenPosition;
+                        event.pointerId === this.state.pointerA.id ?
+                            Vector2.fromEvent(event)
+                        :   this.state.pointerA.currentScreenPosition;
                     const pointerBScreenPosition =
-                        event.pointerId === this.state.pointerB.id
-                            ? Vector2.fromEvent(event)
-                            : this.state.pointerB.currentScreenPosition;
+                        event.pointerId === this.state.pointerB.id ?
+                            Vector2.fromEvent(event)
+                        :   this.state.pointerB.currentScreenPosition;
 
                     const initialScreenDistance =
                         this.state.pointerA.startScreenPosition.distanceTo(
                             this.state.pointerB.startScreenPosition,
                         );
                     const currentScreenDistance =
-                        pointerAScreenPosition.distanceTo(pointerBScreenPosition);
-                    const scaleChange = currentScreenDistance / initialScreenDistance;
+                        pointerAScreenPosition.distanceTo(
+                            pointerBScreenPosition,
+                        );
+                    const scaleChange =
+                        currentScreenDistance / initialScreenDistance;
 
-                    const initialScreenCenterPoint = this.state.pointerA.startScreenPosition.lerp(
-                        this.state.pointerB.startScreenPosition,
-                        0.5,
-                    );
-                    const currentScreenCenterPoint = pointerAScreenPosition.lerp(
-                        pointerBScreenPosition,
-                        0.5,
-                    );
+                    const initialScreenCenterPoint =
+                        this.state.pointerA.startScreenPosition.lerp(
+                            this.state.pointerB.startScreenPosition,
+                            0.5,
+                        );
+                    const currentScreenCenterPoint =
+                        pointerAScreenPosition.lerp(
+                            pointerBScreenPosition,
+                            0.5,
+                        );
 
                     const newPan = initialScreenCenterPoint
                         .add(this.state.initialViewportState.pan)
@@ -116,12 +122,15 @@ export class MultiTouchPan {
                         .sub(currentScreenCenterPoint);
 
                     splatapus.viewport.state.update({
-                        zoom: this.state.initialViewportState.zoom * scaleChange,
+                        zoom:
+                            this.state.initialViewportState.zoom * scaleChange,
                         pan: newPan,
                     });
 
-                    this.state.pointerA.currentScreenPosition = pointerAScreenPosition;
-                    this.state.pointerB.currentScreenPosition = pointerBScreenPosition;
+                    this.state.pointerA.currentScreenPosition =
+                        pointerAScreenPosition;
+                    this.state.pointerB.currentScreenPosition =
+                        pointerBScreenPosition;
 
                     // we're actively handling things, so don't pass-thru
                     return null;

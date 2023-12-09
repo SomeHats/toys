@@ -1,6 +1,9 @@
 import { LiveEffect, LiveValue, runLive, useLiveValue } from "@/lib/live";
 import { Schema, SchemaType } from "@/lib/schema";
-import { getSessionStorageItemUnchecked, setSessionStorageItemUnchecked } from "@/lib/storage";
+import {
+    getSessionStorageItemUnchecked,
+    setSessionStorageItemUnchecked,
+} from "@/lib/storage";
 import { Button, PlainButton } from "@/splatapus/ui/Button";
 import { useSquircleClipPath } from "@/splatapus/ui/useSquircle";
 import { Popover, Switch, Transition } from "@headlessui/react";
@@ -43,35 +46,49 @@ export function DebugSettingsMenu() {
             >
                 <Popover.Panel
                     ref={setMenu}
-                    className={classNames("flex  w-60 flex-col gap-3 bg-stone-100 p-3")}
+                    className={classNames(
+                        "flex  w-60 flex-col gap-3 bg-stone-100 p-3",
+                    )}
                     style={{ clipPath }}
                 >
                     <ToggleItem
                         label="Show points"
                         value={settings.shouldShowPoints}
                         onChange={(shouldShowPoints) =>
-                            debugSettings.update({ ...settings, shouldShowPoints })
+                            debugSettings.update({
+                                ...settings,
+                                shouldShowPoints,
+                            })
                         }
                     />
                     <ToggleItem
                         label="Show raw points"
                         value={settings.shouldShowRawPoints}
                         onChange={(shouldShowRawPoints) =>
-                            debugSettings.update({ ...settings, shouldShowRawPoints })
+                            debugSettings.update({
+                                ...settings,
+                                shouldShowRawPoints,
+                            })
                         }
                     />
                     <ToggleItem
                         label="Smooth points"
                         value={settings.shouldShowSmoothPoints}
                         onChange={(shouldShowSmoothPoints) =>
-                            debugSettings.update({ ...settings, shouldShowSmoothPoints })
+                            debugSettings.update({
+                                ...settings,
+                                shouldShowSmoothPoints,
+                            })
                         }
                     />
                     <ToggleItem
                         label="Smart normalization"
                         value={settings.useSmartNormalization}
                         onChange={(useSmartNormalization) =>
-                            debugSettings.update({ ...settings, useSmartNormalization })
+                            debugSettings.update({
+                                ...settings,
+                                useSmartNormalization,
+                            })
                         }
                     />
                 </Popover.Panel>
@@ -107,7 +124,9 @@ function ToggleItem({
 function readDebugSettings(): DebugSettings {
     const contents = getSessionStorageItemUnchecked(STORAGE_KEY);
     try {
-        return debugSettingsSchema.parse(JSON.parse(contents as string)).unwrap();
+        return debugSettingsSchema
+            .parse(JSON.parse(contents as string))
+            .unwrap();
     } catch (err) {
         return defaultDebugSettings;
     }
@@ -115,9 +134,14 @@ function readDebugSettings(): DebugSettings {
 
 const debugSettings = new LiveValue(readDebugSettings(), "debugSettings");
 runLive(LiveEffect.idle, () => {
-    setSessionStorageItemUnchecked(STORAGE_KEY, JSON.stringify(debugSettings.live()));
+    setSessionStorageItemUnchecked(
+        STORAGE_KEY,
+        JSON.stringify(debugSettings.live()),
+    );
 });
 
-export function useDebugSetting<K extends keyof DebugSettings>(key: K): DebugSettings[K] {
+export function useDebugSetting<K extends keyof DebugSettings>(
+    key: K,
+): DebugSettings[K] {
     return useLiveValue(debugSettings)[key];
 }

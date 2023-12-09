@@ -39,7 +39,9 @@ function SignalsCanvas({
     listenToMidi: ListenToMidiInputFn;
     scene: SignalsCanvasScene;
 }) {
-    const [children, setChildren] = React.useState<null | React.ReactNode>(null);
+    const [children, setChildren] = React.useState<null | React.ReactNode>(
+        null,
+    );
     const containerRef = React.useRef<null | HTMLDivElement>(null);
     const canvasRef = React.useRef<null | HTMLCanvasElement>(null);
     const [size, setSize] = React.useState({
@@ -60,8 +62,12 @@ function SignalsCanvas({
         });
 
         const signals = {
-            width: signalManager.controlled(canvas.clientWidth).debug("canvas.width"),
-            height: signalManager.controlled(canvas.clientHeight).debug("canvas.height"),
+            width: signalManager
+                .controlled(canvas.clientWidth)
+                .debug("canvas.width"),
+            height: signalManager
+                .controlled(canvas.clientHeight)
+                .debug("canvas.height"),
             devicePixelRatio: signalManager
                 .controlled(window.devicePixelRatio)
                 .debug("canvas.devicePixelRatio"),
@@ -110,7 +116,11 @@ function SignalsCanvas({
 
         const start = Date.now();
         const loop = scene(signalManager, canvas, signals);
-        console.log("get frame loop", Date.now() - start, signalManager.debugSignalsByName.size);
+        console.log(
+            "get frame loop",
+            Date.now() - start,
+            signalManager.debugSignalsByName.size,
+        );
 
         let lastTime = 0;
         frameLoop((time, cancel) => {
@@ -134,7 +144,15 @@ function SignalsCanvas({
     }, [scene, signalManager]);
 
     return (
-        <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, right: 0 }}>
+        <div
+            style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+            }}
+        >
             <div
                 ref={containerRef}
                 style={{

@@ -11,7 +11,10 @@ import { ReactNode } from "react";
 
 export class DrawMode implements Mode<ModeType.Draw> {
     readonly type = ModeType.Draw;
-    readonly previewPoints = new LiveValue<ReadonlyArray<Vector2>>([], "DrawMode.previewPoints");
+    readonly previewPoints = new LiveValue<ReadonlyArray<Vector2>>(
+        [],
+        "DrawMode.previewPoints",
+    );
     private readonly gesture = new SplatapusGestureDetector({
         onDragStart: (event, { viewport, location, document }) => {
             event.preventDefault();
@@ -47,9 +50,9 @@ export class DrawMode implements Mode<ModeType.Draw> {
     toDebugStringLive(): string {
         return debugStateToString(
             "draw",
-            this.isIdleLive()
-                ? { _: "idle" }
-                : { _: "drawing", points: this.previewPoints.live().length },
+            this.isIdleLive() ?
+                { _: "idle" }
+            :   { _: "drawing", points: this.previewPoints.live().length },
         );
     }
     onPointerEvent(ctx: PointerEventContext<PointerEventType>): void {

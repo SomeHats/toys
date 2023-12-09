@@ -15,24 +15,43 @@ import {
 } from "@/lib/gl/GlTypes";
 import { matchesKey } from "@/lib/hooks/useKeyPress";
 import { tailwindColors } from "@/lib/theme";
-import { exhaustiveSwitchError, frameLoop, invLerp, random, sample, times } from "@/lib/utils";
+import {
+    exhaustiveSwitchError,
+    frameLoop,
+    invLerp,
+    random,
+    sample,
+    times,
+} from "@/lib/utils";
 import Color from "color";
 import { interpolateHcl } from "d3-interpolate";
 import { useEffect, useRef } from "react";
 
-type CyberColorScale = (level: 5 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90) => string;
+type CyberColorScale = (
+    level: 5 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90,
+) => string;
 function interpolateScale(n: number, scale: CyberColorScale): Color {
     if (n < 5) return Color(scale(5));
-    if (n < 10) return interpolateColors(scale(5), scale(10), invLerp(5, 10, n));
-    if (n < 20) return interpolateColors(scale(10), scale(20), invLerp(10, 20, n));
-    if (n < 30) return interpolateColors(scale(20), scale(30), invLerp(20, 30, n));
-    if (n < 40) return interpolateColors(scale(30), scale(40), invLerp(30, 40, n));
-    if (n < 50) return interpolateColors(scale(40), scale(50), invLerp(40, 50, n));
-    if (n < 60) return interpolateColors(scale(50), scale(60), invLerp(50, 60, n));
-    if (n < 70) return interpolateColors(scale(60), scale(70), invLerp(60, 70, n));
-    if (n < 80) return interpolateColors(scale(70), scale(80), invLerp(70, 80, n));
-    if (n < 90) return interpolateColors(scale(80), scale(90), invLerp(80, 90, n));
-    if (n < 100) return interpolateColors(scale(90), "#000000", invLerp(90, 100, n));
+    if (n < 10)
+        return interpolateColors(scale(5), scale(10), invLerp(5, 10, n));
+    if (n < 20)
+        return interpolateColors(scale(10), scale(20), invLerp(10, 20, n));
+    if (n < 30)
+        return interpolateColors(scale(20), scale(30), invLerp(20, 30, n));
+    if (n < 40)
+        return interpolateColors(scale(30), scale(40), invLerp(30, 40, n));
+    if (n < 50)
+        return interpolateColors(scale(40), scale(50), invLerp(40, 50, n));
+    if (n < 60)
+        return interpolateColors(scale(50), scale(60), invLerp(50, 60, n));
+    if (n < 70)
+        return interpolateColors(scale(60), scale(70), invLerp(60, 70, n));
+    if (n < 80)
+        return interpolateColors(scale(70), scale(80), invLerp(70, 80, n));
+    if (n < 90)
+        return interpolateColors(scale(80), scale(90), invLerp(80, 90, n));
+    if (n < 100)
+        return interpolateColors(scale(90), "#000000", invLerp(90, 100, n));
     return Color("#000000");
 }
 function interpolateColors(a: string, b: string, n: number) {
@@ -87,17 +106,23 @@ export function BlobFactoryRenderer({ size }: { size: Vector2 }) {
                 className="absolute inset-0"
                 onPointerMove={(e) => {
                     if (blobFactoryRef.current) {
-                        blobFactoryRef.current.onPointerMove(Vector2.fromEvent(e));
+                        blobFactoryRef.current.onPointerMove(
+                            Vector2.fromEvent(e),
+                        );
                     }
                 }}
                 onPointerDown={(e) => {
                     if (blobFactoryRef.current) {
-                        blobFactoryRef.current.onPointerDown(Vector2.fromEvent(e));
+                        blobFactoryRef.current.onPointerDown(
+                            Vector2.fromEvent(e),
+                        );
                     }
                 }}
                 onPointerUp={(e) => {
                     if (blobFactoryRef.current) {
-                        blobFactoryRef.current.onPointerUp(Vector2.fromEvent(e));
+                        blobFactoryRef.current.onPointerUp(
+                            Vector2.fromEvent(e),
+                        );
                     }
                 }}
             >
@@ -262,7 +287,10 @@ function startBlobFactory(
             newSize.x,
             newSize.y,
         ];
-        positionsVao.bufferData(new Float32Array(positions), GlBufferUsage.StaticDraw);
+        positionsVao.bufferData(
+            new Float32Array(positions),
+            GlBufferUsage.StaticDraw,
+        );
         draw();
     };
 
@@ -290,7 +318,10 @@ function startBlobFactory(
             }
             case "moving":
             case "resizing":
-                return [assertExists(blobAtIndex(state.blobIndex)), state.blobIndex];
+                return [
+                    assertExists(blobAtIndex(state.blobIndex)),
+                    state.blobIndex,
+                ];
             default:
                 exhaustiveSwitchError(state);
         }
@@ -313,7 +344,11 @@ function startBlobFactory(
     const draw = () => {
         // controls:
         darkMode.value = controls.checkbox("dark mode", darkMode.value);
-        colorLevel = controls.range("color level", colorLevel, { min: 5, max: 100, step: 1 });
+        colorLevel = controls.range("color level", colorLevel, {
+            min: 5,
+            max: 100,
+            step: 1,
+        });
         interpolateMode.value = controls.segmentedControl(
             "interpolation",
             interpolateMode.value,
@@ -327,7 +362,10 @@ function startBlobFactory(
             });
         }
         mode.value = controls.segmentedControl("mode", mode.value, modes);
-        if (mode.value === BlobFactoryMode.Inside || mode.value === BlobFactoryMode.Outside) {
+        if (
+            mode.value === BlobFactoryMode.Inside ||
+            mode.value === BlobFactoryMode.Outside
+        ) {
             smoothness.value = controls.range("smoothness", smoothness.value, {
                 min: 0,
                 max: 100,
@@ -348,7 +386,11 @@ function startBlobFactory(
         }
         forceChroma = controls.checkbox("force chroma", forceChroma);
         if (forceChroma) {
-            forcedChroma = controls.range("chroma", forcedChroma, { min: 0, max: 1, step: 0.01 });
+            forcedChroma = controls.range("chroma", forcedChroma, {
+                min: 0,
+                max: 1,
+                step: 0.01,
+            });
         }
         forceLightness = controls.checkbox("force lightness", forceLightness);
         if (forceLightness) {
@@ -387,17 +429,25 @@ function startBlobFactory(
         const [hovered] = getHover();
         const selected = getSelected();
         if (hovered && hovered !== selected) {
-            ui.circle(hovered.center, hovered.radius, { stroke: "cyan", strokeWidth: 1 });
+            ui.circle(hovered.center, hovered.radius, {
+                stroke: "cyan",
+                strokeWidth: 1,
+            });
         }
         if (selected) {
-            ui.circle(selected.center, selected.radius, { stroke: "cyan", strokeWidth: 2 });
+            ui.circle(selected.center, selected.radius, {
+                stroke: "cyan",
+                strokeWidth: 2,
+            });
             selected.colorScale = controls.colorPicker(
                 "color",
                 selected.colorScale,
                 colorOptions,
             ) as CyberColorScale;
         }
-        ui.fillText(stateToString(state), new Vector2(30, 40), { fill: "white" });
+        ui.fillText(stateToString(state), new Vector2(30, 40), {
+            fill: "white",
+        });
 
         controls.flush();
     };
@@ -454,7 +504,13 @@ function startBlobFactory(
                     const distance = state.center.distanceTo(cursor);
                     if (distance > 5) {
                         const blobIndex = blobs.length;
-                        blobs.push(new Blob(state.center, distance, sample(possibleColors)));
+                        blobs.push(
+                            new Blob(
+                                state.center,
+                                distance,
+                                sample(possibleColors),
+                            ),
+                        );
                         state = { type: "resizing", blobIndex };
                     }
                     break;
@@ -527,7 +583,11 @@ class Blob {
         public colorScale: CyberColorScale,
     ) {}
 
-    toArray(colorLevel: number, forceChroma: number | null, forceLightness: number | null) {
+    toArray(
+        colorLevel: number,
+        forceChroma: number | null,
+        forceLightness: number | null,
+    ) {
         let color = interpolateScale(colorLevel, this.colorScale).lch();
         if (forceChroma !== null) {
             color = color.chroma(forceChroma * 100);
@@ -566,6 +626,8 @@ function stateToString(state: BlobFactoryState): string {
                 blob: state.blobIndex,
             });
         case "unconfirmedCreate":
-            return debugStateToString(state.type, { center: state.center.toString(2) });
+            return debugStateToString(state.type, {
+                center: state.center.toString(2),
+            });
     }
 }

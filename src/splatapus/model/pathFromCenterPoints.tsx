@@ -1,7 +1,12 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import { getSvgPathFromStroke, StrokeCenterPoint } from "@/splatapus/model/perfectFreehand";
+import {
+    getSvgPathFromStroke,
+    StrokeCenterPoint,
+} from "@/splatapus/model/perfectFreehand";
 
-export function pathFromCenterPoints(path: ReadonlyArray<StrokeCenterPoint>): Vector2[] {
+export function pathFromCenterPoints(
+    path: ReadonlyArray<StrokeCenterPoint>,
+): Vector2[] {
     const leftPoints: Vector2[] = [];
     const rightPoints: Vector2[] = [];
 
@@ -13,7 +18,11 @@ export function pathFromCenterPoints(path: ReadonlyArray<StrokeCenterPoint>): Ve
         const dot: Vector2[] = [];
 
         for (let i = 0; i < 12; i++) {
-            dot.push(path[0].center.add(Vector2.fromPolar((i * Math.PI) / 6, path[0].radius)));
+            dot.push(
+                path[0].center.add(
+                    Vector2.fromPolar((i * Math.PI) / 6, path[0].radius),
+                ),
+            );
         }
 
         return dot;
@@ -49,6 +58,8 @@ export function pathFromCenterPoints(path: ReadonlyArray<StrokeCenterPoint>): Ve
     return leftPoints.concat(rightPoints.reverse());
 }
 
-export function svgPathFromCenterPoints(path: ReadonlyArray<StrokeCenterPoint>): string {
+export function svgPathFromCenterPoints(
+    path: ReadonlyArray<StrokeCenterPoint>,
+): string {
     return getSvgPathFromStroke(pathFromCenterPoints(path));
 }

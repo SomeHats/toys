@@ -1,8 +1,18 @@
 import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
 import RingBuffer from "@/lib/RingBuffer";
 import { assert } from "@/lib/assert";
-import { getLocalStorageItemUnchecked, setLocalStorageItemUnchecked } from "@/lib/storage";
-import { ReadonlyRecord, clamp, debounce, has, lerp, mapRange } from "@/lib/utils";
+import {
+    getLocalStorageItemUnchecked,
+    setLocalStorageItemUnchecked,
+} from "@/lib/storage";
+import {
+    ReadonlyRecord,
+    clamp,
+    debounce,
+    has,
+    lerp,
+    mapRange,
+} from "@/lib/utils";
 
 export abstract class Signal {
     private currentValue: number | null = null;
@@ -31,7 +41,10 @@ export abstract class Signal {
 }
 
 export class ControlledSignal extends Signal {
-    constructor(manager: SignalManager, private value: number) {
+    constructor(
+        manager: SignalManager,
+        private value: number,
+    ) {
         super(manager);
     }
 
@@ -44,7 +57,10 @@ export class ControlledSignal extends Signal {
     }
 }
 
-function _clamp(value: number, range: [number, number] | null | undefined): number {
+function _clamp(
+    value: number,
+    range: [number, number] | null | undefined,
+): number {
     if (range) {
         return clamp(range[0], range[1], value);
     }
@@ -61,7 +77,10 @@ export class ControllableSignal extends ControlledSignal {
         super(
             manager,
             _clamp(
-                getLocalStorageItemUnchecked(`signalSetting.${key}`, initialValue) as number,
+                getLocalStorageItemUnchecked(
+                    `signalSetting.${key}`,
+                    initialValue,
+                ) as number,
                 range,
             ),
         );
@@ -81,7 +100,10 @@ export class ControllableSignal extends ControlledSignal {
 }
 
 export class ComputedSignal extends Signal {
-    constructor(manager: SignalManager, private compute: () => number) {
+    constructor(
+        manager: SignalManager,
+        private compute: () => number,
+    ) {
         super(manager);
     }
 
@@ -91,7 +113,8 @@ export class ComputedSignal extends Signal {
 }
 
 export class SignalManager {
-    public debugSignalsByName: ReadonlyRecord<string, ReadonlyArray<Signal>> = {};
+    public debugSignalsByName: ReadonlyRecord<string, ReadonlyArray<Signal>> =
+        {};
     private readonly debugSignalsChangeEvent = new EventEmitter();
     private readonly updateEvent = new EventEmitter();
     private readonly signals = new Set<Signal>();
@@ -132,7 +155,9 @@ export class SignalManager {
     }
 
     input(name: string, value: number, range?: [number, number]): Signal {
-        return this.addSignal(new ControllableSignal(this, name, value, range)).debug(name);
+        return this.addSignal(
+            new ControllableSignal(this, name, value, range),
+        ).debug(name);
     }
 
     sin({
@@ -192,30 +217,38 @@ export class SignalManager {
 
             const aVelocity = currentVelocity;
             const aAcceleration =
-                tension * (targetPosition - tempPosition) - friction * currentVelocity;
+                tension * (targetPosition - tempPosition) -
+                friction * currentVelocity;
 
             tempPosition = currentPosition + aVelocity * timeStep * 0.5;
             tempVelocity = currentVelocity + aAcceleration * timeStep * 0.5;
             const bVelocity = tempVelocity;
             const bAcceleration =
-                tension * (targetPosition - tempPosition) - friction * tempVelocity;
+                tension * (targetPosition - tempPosition) -
+                friction * tempVelocity;
 
             tempPosition = currentPosition + bVelocity * timeStep * 0.5;
             tempVelocity = currentVelocity + bAcceleration * timeStep * 0.5;
             const cVelocity = tempVelocity;
             const cAcceleration =
-                tension * (targetPosition - tempPosition) - friction * tempVelocity;
+                tension * (targetPosition - tempPosition) -
+                friction * tempVelocity;
 
             tempPosition = currentPosition + cVelocity * timeStep;
             tempVelocity = currentVelocity + cAcceleration * timeStep;
             const dVelocity = tempVelocity;
             const dAcceleration =
-                tension * (targetPosition - tempPosition) - friction * tempVelocity;
+                tension * (targetPosition - tempPosition) -
+                friction * tempVelocity;
 
-            const dxdt = (1.0 / 6.0) * (aVelocity + 2.0 * (bVelocity + cVelocity) + dVelocity);
+            const dxdt =
+                (1.0 / 6.0) *
+                (aVelocity + 2.0 * (bVelocity + cVelocity) + dVelocity);
             const dvdt =
                 (1.0 / 6.0) *
-                (aAcceleration + 2.0 * (bAcceleration + cAcceleration) + dAcceleration);
+                (aAcceleration +
+                    2.0 * (bAcceleration + cAcceleration) +
+                    dAcceleration);
 
             currentPosition += dxdt * timeStep;
             currentVelocity += dvdt * timeStep;
@@ -248,7 +281,11 @@ export class SignalManager {
         return this.computed(() => aSignal.read() / bSignal.read());
     }
 
-    switch(control: Signal | number, a: Signal | number, b: Signal | number): Signal {
+    switch(
+        control: Signal | number,
+        a: Signal | number,
+        b: Signal | number,
+    ): Signal {
         const controlSignal = this.toSignal(control);
         const aSignal = this.toSignal(a);
         const bSignal = this.toSignal(b);
@@ -305,7 +342,8 @@ export class SignalManager {
                 }
 
                 if (state === AdsrState.Attacking) {
-                    currentValue += (targetValue / attackSignal.read()) * driver.read();
+                    currentValue +=
+                        (targetValue / attackSignal.read()) * driver.read();
                     if (currentValue >= targetValue) {
                         state = AdsrState.Holding;
                     }
@@ -320,13 +358,17 @@ export class SignalManager {
                             sustainTarget,
                             targetValue,
                             currentValue +
-                                ((sustainTarget - targetValue) / delaySignal.read()) *
+                                ((sustainTarget - targetValue) /
+                                    delaySignal.read()) *
                                     driver.read(),
                         );
                     }
                 }
             } else {
-                if (state === AdsrState.Attacking || state === AdsrState.Holding) {
+                if (
+                    state === AdsrState.Attacking ||
+                    state === AdsrState.Holding
+                ) {
                     if (currentValue === 0) {
                         state = AdsrState.Off;
                     } else {
@@ -336,7 +378,9 @@ export class SignalManager {
                 }
 
                 if (state === AdsrState.Releasing) {
-                    currentValue -= (releaseStartValue / releaseSignal.read()) * driver.read();
+                    currentValue -=
+                        (releaseStartValue / releaseSignal.read()) *
+                        driver.read();
                     if (currentValue <= 0) {
                         currentValue = 0;
                         state = AdsrState.Off;
@@ -352,7 +396,13 @@ export class SignalManager {
         });
     }
 
-    easeExponential({ target, rate = 0.1 }: { target: Signal; rate?: Signal | number }): Signal {
+    easeExponential({
+        target,
+        rate = 0.1,
+    }: {
+        target: Signal;
+        rate?: Signal | number;
+    }): Signal {
         const rateSignal = this.toSignal(rate);
         let currentValue = target.read();
         return this.computed(() => {
@@ -366,7 +416,9 @@ export class SignalManager {
         const aSignal = this.toSignal(a);
         const bSignal = this.toSignal(b);
         const nSignal = this.toSignal(n);
-        return this.computed(() => lerp(aSignal.read(), bSignal.read(), nSignal.read()));
+        return this.computed(() =>
+            lerp(aSignal.read(), bSignal.read(), nSignal.read()),
+        );
     }
 
     delay({
@@ -410,9 +462,10 @@ export class SignalManager {
             this.signals.has(signal),
             `signal called ${name} does not belong to this signal manager`,
         );
-        const newArray = has(this.debugSignalsByName, name)
-            ? [...this.debugSignalsByName[name], signal]
-            : [signal];
+        const newArray =
+            has(this.debugSignalsByName, name) ?
+                [...this.debugSignalsByName[name], signal]
+            :   [signal];
         this.debugSignalsByName = {
             ...this.debugSignalsByName,
             [name]: newArray,

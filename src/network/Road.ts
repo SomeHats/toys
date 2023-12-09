@@ -40,13 +40,15 @@ export default class Road extends SceneObject {
     ) {
         super();
 
-        const angleFrom = points
-            ? from.position.angleTo(points[0])
-            : from.position.angleTo(to.position);
+        const angleFrom =
+            points ?
+                from.position.angleTo(points[0])
+            :   from.position.angleTo(to.position);
 
-        const angleTo = points
-            ? to.position.angleTo(points[points.length - 1])
-            : to.position.angleTo(from.position);
+        const angleTo =
+            points ?
+                to.position.angleTo(points[points.length - 1])
+            :   to.position.angleTo(from.position);
 
         if (path) {
             this._path = path;
@@ -70,14 +72,22 @@ export default class Road extends SceneObject {
         }
 
         if (from instanceof Junction) {
-            this.from = from.connectToRoadAtAngle(this, angleFrom, ConnectionDirection.OUT);
+            this.from = from.connectToRoadAtAngle(
+                this,
+                angleFrom,
+                ConnectionDirection.OUT,
+            );
         } else {
             this.from = from;
             from.connectTo(this, ConnectionDirection.OUT);
         }
 
         if (to instanceof Junction) {
-            this.to = to.connectToRoadAtAngle(this, angleTo, ConnectionDirection.IN);
+            this.to = to.connectToRoadAtAngle(
+                this,
+                angleTo,
+                ConnectionDirection.IN,
+            );
         } else {
             this.to = to;
             to.connectTo(this, ConnectionDirection.IN);
@@ -99,8 +109,10 @@ export default class Road extends SceneObject {
     get expectedTimeFromStartToEnd(): number {
         if (this._currentTravellers.length) {
             const avgSpeed =
-                this._currentTravellers.reduce((sum, traveller) => sum + traveller.speed, 0) /
-                this._currentTravellers.length;
+                this._currentTravellers.reduce(
+                    (sum, traveller) => sum + traveller.speed,
+                    0,
+                ) / this._currentTravellers.length;
             return this.length / avgSpeed;
         }
 
@@ -110,7 +122,10 @@ export default class Road extends SceneObject {
     canAddTravellerAtStart(): boolean {
         const nextTraveller = this.getTravellerAfterPosition(0);
         if (!nextTraveller) return true;
-        return nextTraveller.positionOnCurrentRoad > nextTraveller.comfortableRadius;
+        return (
+            nextTraveller.positionOnCurrentRoad >
+            nextTraveller.comfortableRadius
+        );
     }
 
     addTravellerAtStart(traveller: Traveller) {
@@ -208,12 +223,13 @@ export default class Road extends SceneObject {
         const wholeDashLength = wholeDashCount * ROAD_IDEAL_DASH_LENGTH;
 
         const roundDownLength = this.length - wholeDashLength;
-        const roundUpLength = wholeDashLength + ROAD_IDEAL_DASH_LENGTH - this.length;
+        const roundUpLength =
+            wholeDashLength + ROAD_IDEAL_DASH_LENGTH - this.length;
 
         const dashScale =
-            roundDownLength < roundUpLength
-                ? this.length / wholeDashLength
-                : this.length / (wholeDashLength + ROAD_IDEAL_DASH_LENGTH);
+            roundDownLength < roundUpLength ?
+                this.length / wholeDashLength
+            :   this.length / (wholeDashLength + ROAD_IDEAL_DASH_LENGTH);
 
         return dashScale;
     }

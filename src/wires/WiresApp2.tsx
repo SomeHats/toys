@@ -9,7 +9,11 @@ import { useEffect } from "react";
 
 const ACTION_GRADIENT = "action-gradient";
 
-const app = getLocalStorageItem("wiresApp", WiresApp.schema, WiresApp.createEmpty);
+const app = getLocalStorageItem(
+    "wiresApp",
+    WiresApp.schema,
+    WiresApp.createEmpty,
+);
 react(
     "save",
     () => {
@@ -39,7 +43,10 @@ export const WiresAppRenderer = track(function WiresAppRenderer() {
 
     return (
         <>
-            <svg className="absolute inset-0 isolate h-full w-full bg-white" {...app.events}>
+            <svg
+                className="absolute inset-0 isolate h-full w-full bg-white"
+                {...app.events}
+            >
                 <radialGradient id={ACTION_GRADIENT}></radialGradient>
                 {app.wires.map((wire) => {
                     return <WireRenderer key={wire.id} wire={wire} />;
@@ -47,7 +54,10 @@ export const WiresAppRenderer = track(function WiresAppRenderer() {
             </svg>
             <div className="pointer-events-none absolute inset-0 bg-stone-50 mix-blend-darken" />
             <div className="pointer-events-none absolute inset-0 p-3">
-                <Button onClick={() => app.reset()} className="pointer-events-auto">
+                <Button
+                    onClick={() => app.reset()}
+                    className="pointer-events-auto"
+                >
                     reset
                 </Button>
                 <div>{app.state.path}</div>
@@ -102,14 +112,18 @@ const WireRenderer = track(function WireRenderer({ wire }: { wire: Wire }) {
     return (
         <>
             <path
-                d={SvgPathBuilder.straightThroughPoints(wire.segments).toString()}
+                d={SvgPathBuilder.straightThroughPoints(
+                    wire.segments,
+                ).toString()}
                 className="fill-none stroke-slate-800 opacity-30 mix-blend-color-burn"
                 strokeWidth={20}
                 strokeLinecap="round"
                 strokeLinejoin="round"
             />
             <path
-                d={SvgPathBuilder.straightThroughPoints(wire.segments).toString()}
+                d={SvgPathBuilder.straightThroughPoints(
+                    wire.segments,
+                ).toString()}
                 className="fill-none stroke-fuchsia-400"
                 strokeWidth={8}
                 strokeLinecap="round"

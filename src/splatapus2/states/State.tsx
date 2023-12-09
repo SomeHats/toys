@@ -3,7 +3,8 @@ import { IncrementalArrayOfDiffType } from "@/splatapus2/store/Incremental";
 import { ShapeVersionId } from "@/splatapus2/store/Records";
 import { atom } from "@tldraw/state";
 
-type ChildOf<S extends AnyState> = S extends State<any, any, infer C> ? C : never;
+type ChildOf<S extends AnyState> =
+    S extends State<any, any, infer C> ? C : never;
 
 type AnyState = State<string, any, any>;
 abstract class State<
@@ -14,7 +15,10 @@ abstract class State<
     abstract readonly name: Name;
     private readonly _child = atom<Child | null>("State.child", null);
 
-    constructor(readonly parent: Parent, readonly splat: Splat) {}
+    constructor(
+        readonly parent: Parent,
+        readonly splat: Splat,
+    ) {}
 
     clear() {
         this._child.set(null);
@@ -105,7 +109,10 @@ export class DrawNode extends ChildState<"draw", RootNode> {
     override name = "draw" as const;
     private readonly mark: HistoryEntryId;
 
-    constructor(parent: RootNode, readonly shapeVersionId: ShapeVersionId) {
+    constructor(
+        parent: RootNode,
+        readonly shapeVersionId: ShapeVersionId,
+    ) {
         super(parent);
 
         this.mark = this.splat.mark("draw");
@@ -122,7 +129,8 @@ export class DrawNode extends ChildState<"draw", RootNode> {
         this.splat.shapeVersions.update(this.shapeVersionId, {
             rawPoints: {
                 type: IncrementalArrayOfDiffType.Splice,
-                index: this.splat.shapeVersions.get(this.shapeVersionId).rawPoints.length,
+                index: this.splat.shapeVersions.get(this.shapeVersionId)
+                    .rawPoints.length,
                 insert: [this.splat.inputs.pointer],
                 deleteCount: 0,
             },

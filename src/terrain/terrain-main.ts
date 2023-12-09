@@ -11,8 +11,14 @@ import { interpolateMagma } from "d3-scale-chromatic";
 const spaceVec = new Vector2(config.POINT_SPACING, config.POINT_SPACING);
 const sizeVec = new Vector2(config.SIZE, config.SIZE);
 const baseBounds = new AABB(Vector2.ZERO, sizeVec);
-const expandedBounds = new AABB(spaceVec.negate(), sizeVec.add(spaceVec).add(spaceVec));
-const _contractedBounds = new AABB(spaceVec, sizeVec.sub(spaceVec).sub(spaceVec));
+const expandedBounds = new AABB(
+    spaceVec.negate(),
+    sizeVec.add(spaceVec).add(spaceVec),
+);
+const _contractedBounds = new AABB(
+    spaceVec,
+    sizeVec.sub(spaceVec).sub(spaceVec),
+);
 const activeBounds = baseBounds;
 
 console.time("generatePoisson");
@@ -171,9 +177,13 @@ window.addEventListener("click", () => {
 
                 i++;
                 if (i % 3 === 0) {
-                    canvas.debugVectorAtPoint(plate.drift.scale(15), cell.position, {
-                        color: "white",
-                    });
+                    canvas.debugVectorAtPoint(
+                        plate.drift.scale(15),
+                        cell.position,
+                        {
+                            color: "white",
+                        },
+                    );
                 }
             }
         }

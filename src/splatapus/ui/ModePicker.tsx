@@ -6,7 +6,11 @@ import { ActionButton } from "@/splatapus/ui/Button";
 import classNames from "classnames";
 import React, { ReactNode } from "react";
 
-export const ModePicker = React.memo(function ModePicker({ splatapus }: { splatapus: Splatapus }) {
+export const ModePicker = React.memo(function ModePicker({
+    splatapus,
+}: {
+    splatapus: Splatapus;
+}) {
     return (
         <>
             <ModeButton modeType={ModeType.Draw} splatapus={splatapus}>

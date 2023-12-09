@@ -3,13 +3,21 @@ import CirclePathSegment from "@/lib/geom/CirclePathSegment";
 import { Path } from "@/lib/geom/Path";
 import StraightPathSegment from "@/lib/geom/StraightPathSegment";
 
-export function circle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
+export function circle(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    radius: number,
+) {
     ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
 }
 
 export function path(ctx: CanvasRenderingContext2D, path: Path) {
     if (path.segments.length) {
-        ctx.moveTo(path.segments[0].getStart().x, path.segments[0].getStart().y);
+        ctx.moveTo(
+            path.segments[0].getStart().x,
+            path.segments[0].getStart().y,
+        );
     }
 
     for (const segment of path.segments) {

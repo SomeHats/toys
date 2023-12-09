@@ -59,7 +59,8 @@ export class Path implements PathSegment {
             return new StraightPathSegment(entryPoint, exitPoint);
         }
 
-        const roadCircleCenter = entryLineNormal.pointAtIntersectionWith(exitLineNormal);
+        const roadCircleCenter =
+            entryLineNormal.pointAtIntersectionWith(exitLineNormal);
         const roadCircleRadius = entryPoint.distanceTo(roadCircleCenter);
 
         // containingCircle.center.debugDraw('lime');
@@ -90,7 +91,10 @@ export class Path implements PathSegment {
     }
 
     getLength(): number {
-        return this.segments.reduce((length, segment) => length + segment.getLength(), 0);
+        return this.segments.reduce(
+            (length, segment) => length + segment.getLength(),
+            0,
+        );
     }
 
     appendToSvgPathBuilder(pathBuilder: SvgPathBuilder): void {
@@ -143,34 +147,43 @@ export class Path implements PathSegment {
     }
 
     autoRound(radius: number): this {
-        const newSegments = this.segments.map((segment, i): PathSegment | null => {
-            const lastSegment = i === 0 ? null : this.segments[i - 1];
-            if (!lastSegment) {
-                if (segment instanceof StraightPathSegment) return null;
-                return segment;
-            }
+        const newSegments = this.segments.map(
+            (segment, i): PathSegment | null => {
+                const lastSegment = i === 0 ? null : this.segments[i - 1];
+                if (!lastSegment) {
+                    if (segment instanceof StraightPathSegment) return null;
+                    return segment;
+                }
 
-            if (!(segment instanceof StraightPathSegment)) return segment;
-            if (!(lastSegment instanceof StraightPathSegment)) return null;
+                if (!(segment instanceof StraightPathSegment)) return segment;
+                if (!(lastSegment instanceof StraightPathSegment)) return null;
 
-            assert(lastSegment.getEnd().equals(segment.getStart()), "segments must join");
+                assert(
+                    lastSegment.getEnd().equals(segment.getStart()),
+                    "segments must join",
+                );
 
-            const entryAngle = lastSegment.angle();
-            const exitAngle = segment.angle();
-            const usableRadius = Math.min(
-                radius,
-                lastSegment.getLength() / 2,
-                segment.getLength() / 2,
-            );
+                const entryAngle = lastSegment.angle();
+                const exitAngle = segment.angle();
+                const usableRadius = Math.min(
+                    radius,
+                    lastSegment.getLength() / 2,
+                    segment.getLength() / 2,
+                );
 
-            const containingCircle = Circle.create(
-                segment.getStart().x,
-                segment.getStart().y,
-                usableRadius,
-            );
+                const containingCircle = Circle.create(
+                    segment.getStart().x,
+                    segment.getStart().y,
+                    usableRadius,
+                );
 
-            return Path.segmentAcrossCircle(containingCircle, entryAngle, exitAngle);
-        });
+                return Path.segmentAcrossCircle(
+                    containingCircle,
+                    entryAngle,
+                    exitAngle,
+                );
+            },
+        );
 
         const compacted = compact(newSegments);
 
@@ -183,7 +196,9 @@ export class Path implements PathSegment {
             if (segment.getStart().equals(lastPoint)) {
                 this.addSegment(segment);
             } else {
-                this.addSegment(new StraightPathSegment(lastPoint, segment.getStart()));
+                this.addSegment(
+                    new StraightPathSegment(lastPoint, segment.getStart()),
+                );
                 this.addSegment(segment);
             }
 

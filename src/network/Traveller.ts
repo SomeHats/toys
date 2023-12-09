@@ -45,7 +45,10 @@ export default class Traveller extends SceneObject {
     static MAX_SPEED = MAX_SPEED;
     static StopReason = StopReason;
 
-    comfortableRadius = random(MIN_TRAVELLER_COMFORTABLE_RADIUS, MAX_TRAVELLER_COMFORTABLE_RADIUS);
+    comfortableRadius = random(
+        MIN_TRAVELLER_COMFORTABLE_RADIUS,
+        MAX_TRAVELLER_COMFORTABLE_RADIUS,
+    );
     safeRadius = random(MIN_TRAVELLER_SAFE_RADIUS, MAX_TRAVELLER_SAFE_RADIUS);
     _currentRoad: Road | null = null;
     _destination: NetworkNode | null = null;
@@ -65,7 +68,9 @@ export default class Traveller extends SceneObject {
 
     get position(): Vector2 {
         assert(this._currentRoad, "currentRoad must be defined");
-        return this._currentRoad.getPointAtPosition(this._positionOnCurrentRoad);
+        return this._currentRoad.getPointAtPosition(
+            this._positionOnCurrentRoad,
+        );
     }
 
     // get predictedPositionInDirectionOfTravel(): Vector2 {
@@ -92,7 +97,10 @@ export default class Traveller extends SceneObject {
         const currentRoad = this._currentRoad;
         assert(currentRoad, "currentRoad must be defined");
         const stopPosition = this._getPredictedStopPositionIfDecelerating();
-        return this._getPredictedPointForPosition(currentRoad, stopPosition + 1);
+        return this._getPredictedPointForPosition(
+            currentRoad,
+            stopPosition + 1,
+        );
     }
 
     get positionOnCurrentRoad(): number {
@@ -231,7 +239,9 @@ export default class Traveller extends SceneObject {
     // }
 
     _getEnterTransitionScale() {
-        return enterEase(constrain(0, 1, mapRange(0, ENTER_DURATION, 0, 1, this._age)));
+        return enterEase(
+            constrain(0, 1, mapRange(0, ENTER_DURATION, 0, 1, this._age)),
+        );
     }
 
     _getExitTransitionScale() {
@@ -263,14 +273,21 @@ export default class Traveller extends SceneObject {
         );
     }
 
-    _getPredictedPointForPosition(currentRoad: Road, position: number): Vector2 {
+    _getPredictedPointForPosition(
+        currentRoad: Road,
+        position: number,
+    ): Vector2 {
         if (position <= currentRoad.length) {
             return currentRoad.getPointAtPosition(position);
         }
 
         const overshoot = position - currentRoad.length;
-        const overshootAngle = currentRoad.getAngleAtPosition(currentRoad.length);
-        return Vector2.fromPolar(overshootAngle, overshoot).add(currentRoad.end);
+        const overshootAngle = currentRoad.getAngleAtPosition(
+            currentRoad.length,
+        );
+        return Vector2.fromPolar(overshootAngle, overshoot).add(
+            currentRoad.end,
+        );
     }
 
     _pickDestination() {
@@ -291,7 +308,10 @@ export default class Traveller extends SceneObject {
             this._forceAccelerateTimer - dtMilliseconds,
         );
 
-        if (this._forceAccelerateTimer <= 0 && this._shouldDecelerate(currentRoad)) {
+        if (
+            this._forceAccelerateTimer <= 0 &&
+            this._shouldDecelerate(currentRoad)
+        ) {
             this._accelerate(DECELERATION, dtSeconds, currentRoad);
         } else {
             this._accelerate(ACCELERATION, dtSeconds, currentRoad);
@@ -305,7 +325,8 @@ export default class Traveller extends SceneObject {
     }
 
     _shouldDecelerate(currentRoad: Road): boolean {
-        const predictedStopPosition = this._getPredictedStopPositionIfDecelerating();
+        const predictedStopPosition =
+            this._getPredictedStopPositionIfDecelerating();
         if (
             currentRoad.to === this._destination &&
             currentRoad.length + ROAD_END_OVERSHOOT < predictedStopPosition
@@ -318,7 +339,8 @@ export default class Traveller extends SceneObject {
             this._positionOnCurrentRoad,
         );
 
-        const safeStopAheadPosition = predictedStopPosition + this.comfortableRadius;
+        const safeStopAheadPosition =
+            predictedStopPosition + this.comfortableRadius;
 
         if (
             nextTravellerOnRoad &&
@@ -331,10 +353,12 @@ export default class Traveller extends SceneObject {
 
         if (currentRoad.to instanceof Intersection) {
             const intersection = currentRoad.to;
-            const outgoingTraveller = intersection.getClosestOutgoingTraveller();
+            const outgoingTraveller =
+                intersection.getClosestOutgoingTraveller();
             if (outgoingTraveller) {
                 const outgoingTravellerPosition =
-                    currentRoad.length + outgoingTraveller.positionOnCurrentRoad;
+                    currentRoad.length +
+                    outgoingTraveller.positionOnCurrentRoad;
 
                 if (outgoingTravellerPosition < safeStopAheadPosition) {
                     this._stopReason = StopReason.STOPPED_FOR_TRAFFIC_IN_FRONT;
@@ -343,10 +367,12 @@ export default class Traveller extends SceneObject {
                 }
             }
 
-            const incomingTraveller = intersection.getClosestIncomingTraveller();
+            const incomingTraveller =
+                intersection.getClosestIncomingTraveller();
             if (incomingTraveller && incomingTraveller !== this) {
                 const incomingTravellerPosition =
-                    currentRoad.length - incomingTraveller.distanceToEndOfCurrentRoad;
+                    currentRoad.length -
+                    incomingTraveller.distanceToEndOfCurrentRoad;
                 if (incomingTravellerPosition < safeStopAheadPosition) {
                     this._stopReason = StopReason.STOPPED_FOR_TRAFFIC_IN_FRONT;
                     this._stoppedFor.push(incomingTraveller);
@@ -401,7 +427,8 @@ export default class Traveller extends SceneObject {
         const stopPoint = stopArea.center;
         const nextStopPoint = this.potentialNextPredictedStopPoint;
         const searchArea = stopArea.withRadius(NEARBY_RADIUS);
-        const nearbyTravellers = travellerFinder.findTravellersInCircle(searchArea);
+        const nearbyTravellers =
+            travellerFinder.findTravellersInCircle(searchArea);
 
         for (const other of nearbyTravellers) {
             // cannot crash into self
@@ -418,15 +445,19 @@ export default class Traveller extends SceneObject {
             const otherNextStopPoint = other.potentialNextPredictedStopPoint;
 
             // if we're moving away from each other, everything is fine:
-            const currentStopDistance = stopPoint.distanceTo(otherStopArea.center);
-            const nextStopDistance = nextStopPoint.distanceTo(otherNextStopPoint);
+            const currentStopDistance = stopPoint.distanceTo(
+                otherStopArea.center,
+            );
+            const nextStopDistance =
+                nextStopPoint.distanceTo(otherNextStopPoint);
             if (nextStopDistance > currentStopDistance) continue;
 
             // who is moving in a direction that's headed more towards the other's
             // stop position? if they're moving towards me but i'm moving more
             // orthagonally relative to them, they should slow down
             const approachAmount = stopPoint.distanceTo(otherNextStopPoint);
-            const otherApproachAmount = otherStopPoint.distanceTo(nextStopPoint);
+            const otherApproachAmount =
+                otherStopPoint.distanceTo(nextStopPoint);
             if (approachAmount < otherApproachAmount) {
                 continue;
             }
@@ -512,7 +543,11 @@ export default class Traveller extends SceneObject {
 
     _accelerate(acceleration: number, dtSeconds: number, currentRoad: Road) {
         const lastSpeed = this._speed;
-        this._speed = constrain(0, MAX_SPEED, this._speed + acceleration * dtSeconds);
+        this._speed = constrain(
+            0,
+            MAX_SPEED,
+            this._speed + acceleration * dtSeconds,
+        );
         const avgSpeed = (lastSpeed + this._speed) / 2;
         this._positionOnCurrentRoad = constrain(
             0,

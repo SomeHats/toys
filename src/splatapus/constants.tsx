@@ -1,6 +1,6 @@
 import { StrokeOptions } from "@/splatapus/model/perfectFreehand";
 
-export const USE_REACT_STRICT_MODE = true;
+export const USE_REACT_STRICT_MODE = false;
 
 export const SIDEBAR_WIDTH_PX = 300;
 

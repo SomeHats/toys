@@ -27,7 +27,8 @@ export function matchesKey(event: KeyboardEvent, key: TargetKey): boolean {
     const target: TargetKey = typeof key === "string" ? { key } : key;
     return (
         event.key.toLowerCase() === target.key.toLowerCase() &&
-        (target.command === ANY || (target.command ?? false) === isCommandKeyPressed(event)) &&
+        (target.command === ANY ||
+            (target.command ?? false) === isCommandKeyPressed(event)) &&
         (target.shift === ANY || (target.shift ?? false) === event.shiftKey) &&
         (target.alt === ANY || (target.alt ?? false) === event.altKey)
     );
@@ -36,7 +37,10 @@ export function matchesKeyDown(event: KeyboardEvent, key: TargetKey): boolean {
     return matchesKey(event, key) && event.repeat === false;
 }
 
-export function useKeyPress(key: TargetKey, cb: (event: KeyboardEvent) => void) {
+export function useKeyPress(
+    key: TargetKey,
+    cb: (event: KeyboardEvent) => void,
+) {
     useKeyDown((event) => {
         if (matchesKeyDown(event, key)) {
             event.preventDefault();
@@ -98,7 +102,10 @@ class KeyHandler {
         const handler = { type: "down" as const, callback };
         this.handlers.add(handler);
         return () => {
-            assert(this.handlers.delete(handler), "handler has already been deleted");
+            assert(
+                this.handlers.delete(handler),
+                "handler has already been deleted",
+            );
         };
     }
 
@@ -106,7 +113,10 @@ class KeyHandler {
         const handler = { type: "up" as const, callback };
         this.handlers.add(handler);
         return () => {
-            assert(this.handlers.delete(handler), "handler has already been deleted");
+            assert(
+                this.handlers.delete(handler),
+                "handler has already been deleted",
+            );
         };
     }
 

@@ -1,4 +1,9 @@
-import { DebugDraw, FillOptions, StrokeAndFillOptions, StrokeOptions } from "@/lib/DebugDraw";
+import {
+    DebugDraw,
+    FillOptions,
+    StrokeAndFillOptions,
+    StrokeOptions,
+} from "@/lib/DebugDraw";
 import { Vector2, Vector2Ish } from "@/lib/geom/Vector2";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { ComponentProps } from "react";
@@ -38,7 +43,9 @@ function getStrokeAndFillProps(options: StrokeAndFillOptions) {
     };
 }
 
-function getDebugStrokeOptions(color: string = DebugDraw.DEFAULT_DEBUG_COLOR): StrokeOptions {
+function getDebugStrokeOptions(
+    color: string = DebugDraw.DEFAULT_DEBUG_COLOR,
+): StrokeOptions {
     return { stroke: color, strokeWidth: DebugDraw.HAIRLINE };
 }
 
@@ -70,21 +77,48 @@ export function DebugLabel({
 
 type DebugOptions = { color?: string; label?: string };
 
-export function DebugSvgPath({ color, path }: { color?: string; path: string }) {
-    return <path d={path} {...getStrokeProps(getDebugStrokeOptions(color))} fill="transparent" />;
+export function DebugSvgPath({
+    color,
+    path,
+}: {
+    color?: string;
+    path: string;
+}) {
+    return (
+        <path
+            d={path}
+            {...getStrokeProps(getDebugStrokeOptions(color))}
+            fill="transparent"
+        />
+    );
 }
 
-export function DebugPointX({ position, ...debugOpts }: { position: Vector2Ish } & DebugOptions) {
+export function DebugPointX({
+    position,
+    ...debugOpts
+}: { position: Vector2Ish } & DebugOptions) {
     const { x, y } = Vector2.from(position);
     return (
         <>
             <DebugSvgPath
                 {...debugOpts}
                 path={new SvgPathBuilder()
-                    .moveTo(x - DebugDraw.DEBUG_POINT_SIZE, y - DebugDraw.DEBUG_POINT_SIZE)
-                    .lineTo(x + DebugDraw.DEBUG_POINT_SIZE, y + DebugDraw.DEBUG_POINT_SIZE)
-                    .moveTo(x - DebugDraw.DEBUG_POINT_SIZE, y + DebugDraw.DEBUG_POINT_SIZE)
-                    .lineTo(x + DebugDraw.DEBUG_POINT_SIZE, y - DebugDraw.DEBUG_POINT_SIZE)
+                    .moveTo(
+                        x - DebugDraw.DEBUG_POINT_SIZE,
+                        y - DebugDraw.DEBUG_POINT_SIZE,
+                    )
+                    .lineTo(
+                        x + DebugDraw.DEBUG_POINT_SIZE,
+                        y + DebugDraw.DEBUG_POINT_SIZE,
+                    )
+                    .moveTo(
+                        x - DebugDraw.DEBUG_POINT_SIZE,
+                        y + DebugDraw.DEBUG_POINT_SIZE,
+                    )
+                    .lineTo(
+                        x + DebugDraw.DEBUG_POINT_SIZE,
+                        y - DebugDraw.DEBUG_POINT_SIZE,
+                    )
                     .toString()}
             />
             <DebugLabel {...debugOpts} position={position} />
@@ -92,7 +126,10 @@ export function DebugPointX({ position, ...debugOpts }: { position: Vector2Ish }
     );
 }
 
-export function DebugPointO({ position, ...debugOpts }: { position: Vector2Ish } & DebugOptions) {
+export function DebugPointO({
+    position,
+    ...debugOpts
+}: { position: Vector2Ish } & DebugOptions) {
     const { x, y } = Vector2.from(position);
     return (
         <>
@@ -137,7 +174,10 @@ export function DebugArrow({
                     .lineTo(arrowRightPoint)
                     .toString()}
             />
-            <DebugLabel {...debugOpts} position={Vector2.average([start, end])} />
+            <DebugLabel
+                {...debugOpts}
+                position={Vector2.average([start, end])}
+            />
         </>
     );
 }
@@ -147,7 +187,13 @@ export function DebugVectorAtPoint({
     base,
     ...debugOpts
 }: { vector: Vector2Ish; base: Vector2Ish } & DebugOptions) {
-    return <DebugArrow {...debugOpts} start={base} end={Vector2.from(base).add(vector)} />;
+    return (
+        <DebugArrow
+            {...debugOpts}
+            start={base}
+            end={Vector2.from(base).add(vector)}
+        />
+    );
 }
 
 export function DebugCircle({
@@ -162,7 +208,9 @@ export function DebugCircle({
                 cx={x}
                 cy={y}
                 r={radius}
-                {...getStrokeAndFillProps(getDebugStrokeOptions(debugOpts.color))}
+                {...getStrokeAndFillProps(
+                    getDebugStrokeOptions(debugOpts.color),
+                )}
             />
             <DebugLabel {...debugOpts} position={center} />
         </>

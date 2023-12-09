@@ -1,5 +1,10 @@
 import { Schema } from "@/lib/schema";
-import { WatchableStorage, getStorageItem, setStorageItem, urlStorage } from "@/lib/storage";
+import {
+    WatchableStorage,
+    getStorageItem,
+    setStorageItem,
+    urlStorage,
+} from "@/lib/storage";
 import { Initializer, UpdateAction, applyUpdate } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
 

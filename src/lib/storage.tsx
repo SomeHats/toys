@@ -14,7 +14,9 @@ export function getStorageItem<T>(
 ): T {
     try {
         const item = storage.getItem(key);
-        return item ? schema.parse(JSON.parse(item)).unwrap() : resolveInitializer(fallback);
+        return item ?
+                schema.parse(JSON.parse(item)).unwrap()
+            :   resolveInitializer(fallback);
     } catch (error) {
         // If error also return initialValue
         console.log("Error reading from storage:", error);
@@ -30,7 +32,12 @@ export function getStorageItemUnchecked(
     return getStorageItem(storage, key, Schema.unknown, fallback);
 }
 
-export function setStorageItem<T>(storage: Storage, key: string, schema: Schema<T>, value: T) {
+export function setStorageItem<T>(
+    storage: Storage,
+    key: string,
+    schema: Schema<T>,
+    value: T,
+) {
     const stringified = JSON.stringify(schema.serialize(value));
     try {
         storage.setItem(key, stringified);
@@ -39,7 +46,11 @@ export function setStorageItem<T>(storage: Storage, key: string, schema: Schema<
     }
 }
 
-export function setStorageItemUnchecked(storage: Storage, key: string, value: unknown) {
+export function setStorageItemUnchecked(
+    storage: Storage,
+    key: string,
+    value: unknown,
+) {
     return setStorageItem(storage, key, Schema.unknown, value);
 }
 
@@ -59,7 +70,11 @@ export function getLocalStorageItem<T>(
 ): T {
     return getStorageItem(window.localStorage, key, schema, fallback);
 }
-export function setLocalStorageItem<T>(key: string, schema: Schema<T>, value: T) {
+export function setLocalStorageItem<T>(
+    key: string,
+    schema: Schema<T>,
+    value: T,
+) {
     return setStorageItem(window.localStorage, key, schema, value);
 }
 
@@ -79,14 +94,19 @@ export function getSessionStorageItem<T>(
 ): T {
     return getStorageItem(window.sessionStorage, key, schema, fallback);
 }
-export function setSessionStorageItem<T>(key: string, schema: Schema<T>, value: T) {
+export function setSessionStorageItem<T>(
+    key: string,
+    schema: Schema<T>,
+    value: T,
+) {
     return setStorageItem(window.sessionStorage, key, schema, value);
 }
 
 let lastUrlSearchParams: URLSearchParams | null = null;
 export const urlStorage: WatchableStorage = {
     get length(): number {
-        return Array.from(new URLSearchParams(window.location.search).keys()).length;
+        return Array.from(new URLSearchParams(window.location.search).keys())
+            .length;
     },
     clear: function (): void {
         window.history.replaceState(null, "", window.location.pathname);
@@ -99,7 +119,9 @@ export const urlStorage: WatchableStorage = {
         return rawValue;
     },
     key: function (index: number): string | null {
-        const keys = Array.from(new URLSearchParams(window.location.search).keys());
+        const keys = Array.from(
+            new URLSearchParams(window.location.search).keys(),
+        );
         if (index < 0 || index >= keys.length) {
             return null;
         }
@@ -108,17 +130,28 @@ export const urlStorage: WatchableStorage = {
     removeItem: function (key: string): void {
         const params = new URLSearchParams(window.location.search);
         params.delete(key);
-        window.history.pushState(null, "", `${window.location.pathname}?${params.toString()}`);
+        window.history.pushState(
+            null,
+            "",
+            `${window.location.pathname}?${params.toString()}`,
+        );
     },
     setItem: function (key: string, value: string): void {
         const params = new URLSearchParams(window.location.search);
         params.set(key, value);
-        window.history.pushState(null, "", `${window.location.pathname}?${params.toString()}`);
+        window.history.pushState(
+            null,
+            "",
+            `${window.location.pathname}?${params.toString()}`,
+        );
     },
     watchItem(key, callback) {
         const onUrlStateChange = () => {
             const searchParams = new URLSearchParams(window.location.search);
-            if (lastUrlSearchParams && searchParams.get(key) === lastUrlSearchParams.get(key)) {
+            if (
+                lastUrlSearchParams &&
+                searchParams.get(key) === lastUrlSearchParams.get(key)
+            ) {
                 return;
             }
             lastUrlSearchParams = searchParams;
@@ -129,7 +162,10 @@ export const urlStorage: WatchableStorage = {
     },
 };
 
-export function getUrlStorageItemUnchecked(key: string, fallback?: Initializer<unknown>): unknown {
+export function getUrlStorageItemUnchecked(
+    key: string,
+    fallback?: Initializer<unknown>,
+): unknown {
     return getStorageItemUnchecked(urlStorage, key, fallback);
 }
 
@@ -137,7 +173,11 @@ export function setUrlStorageItemUnchecked(key: string, value: unknown) {
     return setStorageItemUnchecked(urlStorage, key, value);
 }
 
-export function getUrlStorageItem<T>(key: string, schema: Schema<T>, fallback: Initializer<T>): T {
+export function getUrlStorageItem<T>(
+    key: string,
+    schema: Schema<T>,
+    fallback: Initializer<T>,
+): T {
     return getStorageItem(urlStorage, key, schema, fallback);
 }
 

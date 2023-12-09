@@ -3,7 +3,13 @@ import { LiveEffect, LiveEffectScheduleFn } from "@/lib/live/LiveEffect";
 import { getDebugLabel } from "@/lib/live/LiveInvalidation";
 import { LiveMemo } from "@/lib/live/LiveMemo";
 import { UpdateAction } from "@/lib/utils";
-import { useCallback, useDebugValue, useMemo, useRef, useSyncExternalStore } from "react";
+import {
+    useCallback,
+    useDebugValue,
+    useMemo,
+    useRef,
+    useSyncExternalStore,
+} from "react";
 
 export { runLiveWithoutListening as runOnce } from "@/lib/live/LiveComputation";
 export { LiveEffect } from "@/lib/live/LiveEffect";
@@ -32,7 +38,10 @@ export function useLiveValue<T>(live: Live<T>): T {
     isRendering.current = true;
     try {
         const value = useSyncExternalStore(
-            useCallback((onChange) => live.addBatchInvalidateListener(onChange), [live]),
+            useCallback(
+                (onChange) => live.addBatchInvalidateListener(onChange),
+                [live],
+            ),
             () => {
                 if (isRendering.current) {
                     return live.getOnce();
@@ -58,7 +67,10 @@ export function useLiveValue<T>(live: Live<T>): T {
 }
 
 export function useLive<T>(compute: () => T, deps: ReadonlyArray<unknown>): T {
-    const debugLabel = process.env.NODE_ENV !== "production" ? getDebugLabel("useLive") : undefined;
+    const debugLabel =
+        process.env.NODE_ENV !== "production" ?
+            getDebugLabel("useLive")
+        :   undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const liveMemo = useMemo(() => new LiveMemo(compute, debugLabel), deps);
     const value = useLiveValue(liveMemo);
@@ -66,7 +78,10 @@ export function useLive<T>(compute: () => T, deps: ReadonlyArray<unknown>): T {
     return value;
 }
 
-export function runLive(schedule: LiveEffectScheduleFn, run: () => void): Unsubscribe {
+export function runLive(
+    schedule: LiveEffectScheduleFn,
+    run: () => void,
+): Unsubscribe {
     const effect = new LiveEffect(run, schedule);
     return () => effect.cancel;
 }

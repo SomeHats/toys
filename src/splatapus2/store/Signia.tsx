@@ -8,7 +8,12 @@ import {
     IncrementalTable,
     IncrementalTableDiff,
 } from "@/splatapus2/store/Incremental";
-import { RESET_VALUE, computed, isUninitialized, withDiff } from "@tldraw/state";
+import {
+    RESET_VALUE,
+    computed,
+    isUninitialized,
+    withDiff,
+} from "@tldraw/state";
 
 export function computedIncrementalObjectProperty<
     Config extends IncrementalObjectConfig,
@@ -36,17 +41,16 @@ export function computedIncrementalObjectProperty<
             let diff: RESET_VALUE | IncrementalDiff<Config[Key]> = RESET_VALUE;
             if (objectDiffs !== RESET_VALUE) {
                 for (const objectDiff of objectDiffs) {
-                    const propertyDiff = objectDiff[key as keyof typeof objectDiff] as
-                        | IncrementalDiff<Config[Key]>
-                        | undefined;
+                    const propertyDiff = objectDiff[
+                        key as keyof typeof objectDiff
+                    ] as IncrementalDiff<Config[Key]> | undefined;
                     if (propertyDiff !== undefined) {
                         if (diff === RESET_VALUE) {
                             diff = propertyDiff;
                         } else {
-                            const coalesced = incrementalObject.config[key].coalesce(
-                                diff,
-                                propertyDiff,
-                            );
+                            const coalesced = incrementalObject.config[
+                                key
+                            ].coalesce(diff, propertyDiff);
                             if (coalesced) {
                                 diff = coalesced;
                             } else {

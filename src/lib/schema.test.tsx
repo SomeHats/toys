@@ -10,14 +10,14 @@ test("Schema.enum", () => {
     const enumSchema = Schema.enum(TestEnum);
 
     expect(arraySchema.parse(true).unwrap()).toBe(true);
-    expect(arraySchema.parse(false).unwrapError().toString()).toMatchInlineSnapshot(
-        '"Expected \\"one\\" or 2 or true, got false"',
-    );
+    expect(
+        arraySchema.parse(false).unwrapError().toString(),
+    ).toMatchInlineSnapshot('"Expected \\"one\\" or 2 or true, got false"');
 
     expect(enumSchema.parse("one").unwrap()).toBe(TestEnum.One);
-    expect(enumSchema.parse({ hello: "world" }).unwrapError().toString()).toMatchInlineSnapshot(
-        '"Expected \\"one\\" or \\"two\\", got an object"',
-    );
+    expect(
+        enumSchema.parse({ hello: "world" }).unwrapError().toString(),
+    ).toMatchInlineSnapshot('"Expected \\"one\\" or \\"two\\", got an object"');
 });
 
 test("nested errors", () => {
@@ -31,9 +31,9 @@ test("nested errors", () => {
     expect(schema.parse(false).unwrapError().toString()).toMatchInlineSnapshot(
         '"Expected object, got a boolean"',
     );
-    expect(schema.parse({ foo: false }).unwrapError().toString()).toMatchInlineSnapshot(
-        '"At .foo: Expected object, got a boolean"',
-    );
+    expect(
+        schema.parse({ foo: false }).unwrapError().toString(),
+    ).toMatchInlineSnapshot('"At .foo: Expected object, got a boolean"');
     expect(
         schema
             .parse({ foo: { four: "hi" } })
@@ -61,13 +61,19 @@ test("ObjectSchema.indexed", () => {
     });
 
     // accepts the actual object
-    expect(schema.parse({ foo: true, bar: "hello" }).unwrap()).toEqual({ foo: true, bar: "hello" });
+    expect(schema.parse({ foo: true, bar: "hello" }).unwrap()).toEqual({
+        foo: true,
+        bar: "hello",
+    });
     // accepts an array
-    expect(schema.parse([true, null, "hello"]).unwrap()).toEqual({ foo: true, bar: "hello" });
+    expect(schema.parse([true, null, "hello"]).unwrap()).toEqual({
+        foo: true,
+        bar: "hello",
+    });
     // tags errors with the index
-    expect(schema.parse([true, null, 3]).unwrapError().toString()).toMatchInlineSnapshot(
-        '"At .bar(2): Expected string, got a number"',
-    );
+    expect(
+        schema.parse([true, null, 3]).unwrapError().toString(),
+    ).toMatchInlineSnapshot('"At .bar(2): Expected string, got a number"');
 });
 
 test("UnionSchema", () => {
@@ -93,8 +99,13 @@ test("UnionSchema", () => {
         meow: true,
     });
     expect(
-        animalSchema.parse({ type: "cow", moo: false }).unwrapError().toString(),
-    ).toMatchInlineSnapshot('"At .type: Expected one of \\"cat\\" or \\"dog\\", got a string"');
+        animalSchema
+            .parse({ type: "cow", moo: false })
+            .unwrapError()
+            .toString(),
+    ).toMatchInlineSnapshot(
+        '"At .type: Expected one of \\"cat\\" or \\"dog\\", got a string"',
+    );
     expect(
         nested
             .parse({ animal: { type: "cow", moo: false } })
@@ -108,7 +119,9 @@ test("UnionSchema", () => {
             .parse({ animal: { type: "cat", moo: false } })
             .unwrapError()
             .toString(),
-    ).toMatchInlineSnapshot('"At .animal(type = cat).meow: Expected boolean, got undefined"');
+    ).toMatchInlineSnapshot(
+        '"At .animal(type = cat).meow: Expected boolean, got undefined"',
+    );
 });
 
 test("IndexedUnionSchema", () => {
@@ -139,9 +152,16 @@ test("IndexedUnionSchema", () => {
     });
 
     expect(
-        animalSchema.parse({ type: "cow", moo: false }).unwrapError().toString(),
-    ).toMatchInlineSnapshot('"At .type: Expected one of \\"cat\\" or \\"dog\\", got a string"');
-    expect(animalSchema.parse(["cow", false]).unwrapError().toString()).toMatchInlineSnapshot(
+        animalSchema
+            .parse({ type: "cow", moo: false })
+            .unwrapError()
+            .toString(),
+    ).toMatchInlineSnapshot(
+        '"At .type: Expected one of \\"cat\\" or \\"dog\\", got a string"',
+    );
+    expect(
+        animalSchema.parse(["cow", false]).unwrapError().toString(),
+    ).toMatchInlineSnapshot(
         '"At .0: Expected one of \\"cat\\" or \\"dog\\", got a string"',
     );
 
@@ -167,11 +187,15 @@ test("IndexedUnionSchema", () => {
             .parse({ animal: { type: "cat", moo: false } })
             .unwrapError()
             .toString(),
-    ).toMatchInlineSnapshot('"At .animal(type = cat).meow: Expected boolean, got undefined"');
+    ).toMatchInlineSnapshot(
+        '"At .animal(type = cat).meow: Expected boolean, got undefined"',
+    );
     expect(
         nested
             .parse([null, ["cat", 3]])
             .unwrapError()
             .toString(),
-    ).toMatchInlineSnapshot('"At .animal(1, type = cat).meow(1): Expected boolean, got a number"');
+    ).toMatchInlineSnapshot(
+        '"At .animal(1, type = cat).meow(1): Expected boolean, got a number"',
+    );
 });

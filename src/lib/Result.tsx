@@ -20,9 +20,18 @@ export const Result = {
         }
         return Result.ok(arr);
     },
-    collectObject<E, Results extends ReadonlyRecord<string, Result<unknown, E>>>(
+    collectObject<
+        E,
+        Results extends ReadonlyRecord<string, Result<unknown, E>>,
+    >(
         results: Results,
-    ): Result<{ [K in keyof Results]: Results[K] extends Result<infer T, E> ? T : never }, E> {
+    ): Result<
+        {
+            [K in keyof Results]: Results[K] extends Result<infer T, E> ? T
+            :   never;
+        },
+        E
+    > {
         const object: ObjectMap<string, unknown> = {};
         for (const [key, result] of entries(results)) {
             if (result.ok) {
@@ -32,7 +41,10 @@ export const Result = {
             }
         }
         return Result.ok(
-            object as { [K in keyof Results]: Results[K] extends Result<infer T, E> ? T : never },
+            object as {
+                [K in keyof Results]: Results[K] extends Result<infer T, E> ? T
+                :   never;
+            },
         );
     },
     fromFn<T>(fn: () => T): Result<T, unknown> {

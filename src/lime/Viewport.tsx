@@ -34,16 +34,28 @@ export class Viewport {
 
     @memo get slideOffset() {
         return new Vector2(
-            Math.max(LIME_SLIDE_PADDING_PX.x, (this.canvasSize.x - this.slideSize.x) / 2),
-            Math.max(LIME_SLIDE_PADDING_PX.y, (this.canvasSize.y - this.slideSize.y) / 2),
+            Math.max(
+                LIME_SLIDE_PADDING_PX.x,
+                (this.canvasSize.x - this.slideSize.x) / 2,
+            ),
+            Math.max(
+                LIME_SLIDE_PADDING_PX.y,
+                (this.canvasSize.y - this.slideSize.y) / 2,
+            ),
         );
     }
 
     screenToSlide(screenCoords: Vector2) {
-        return screenCoords.sub(this.canvasOffset).sub(this.slideOffset).div(this.scaleFactor);
+        return screenCoords
+            .sub(this.canvasOffset)
+            .sub(this.slideOffset)
+            .div(this.scaleFactor);
     }
 
     slideToScreen(slideCoords: Vector2) {
-        return slideCoords.mul(this.scaleFactor).add(this.slideOffset).add(this.canvasOffset);
+        return slideCoords
+            .mul(this.scaleFactor)
+            .add(this.slideOffset)
+            .add(this.canvasOffset);
     }
 }

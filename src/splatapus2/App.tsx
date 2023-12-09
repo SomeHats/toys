@@ -1,6 +1,9 @@
 import { assertExists } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { sizeFromContentRect, useResizeObserver } from "@/lib/hooks/useResizeObserver";
+import {
+    sizeFromContentRect,
+    useResizeObserver,
+} from "@/lib/hooks/useResizeObserver";
 import { getLocalStorageItem, setLocalStorageItem } from "@/lib/storage";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { perfectFreehandOpts } from "@/splatapus/constants";
@@ -56,7 +59,13 @@ export const App = track(function App() {
     );
 });
 
-const Canvas = track(function Canvas({ splat, screenSize }: { splat: Splat; screenSize: Vector2 }) {
+const Canvas = track(function Canvas({
+    splat,
+    screenSize,
+}: {
+    splat: Splat;
+    screenSize: Vector2;
+}) {
     return (
         <svg
             viewBox={`0 0 ${screenSize.x} ${screenSize.y}`}
@@ -84,7 +93,9 @@ const ShapeRenderer = track(function ShapeRenderer({
     return (
         <g>
             <path
-                d={SvgPathBuilder.midpointQuadraticViaPoints(shapeVersion.rawPoints).toString()}
+                d={SvgPathBuilder.midpointQuadraticViaPoints(
+                    shapeVersion.rawPoints,
+                ).toString()}
                 fill="none"
                 strokeWidth={6}
                 strokeLinejoin="round"
@@ -154,7 +165,10 @@ function magicLineReduction(
 const bendWeight = 10;
 const sizeWeight = 10;
 
-function getCostAtIndex(points: ReadonlyArray<StrokeCenterPoint>, index: number): number | null {
+function getCostAtIndex(
+    points: ReadonlyArray<StrokeCenterPoint>,
+    index: number,
+): number | null {
     if (index === 0 || index === points.length - 1) {
         return null;
     }
@@ -174,9 +188,9 @@ function getCostAtIndex(points: ReadonlyArray<StrokeCenterPoint>, index: number)
 
     const sizeFactor =
         (1 -
-            (currentPoint.radius < previousPoint.radius
-                ? currentPoint.radius / previousPoint.radius
-                : previousPoint.radius / currentPoint.radius)) *
+            (currentPoint.radius < previousPoint.radius ?
+                currentPoint.radius / previousPoint.radius
+            :   previousPoint.radius / currentPoint.radius)) *
         sizeWeight;
 
     return bendFactor + sizeFactor;

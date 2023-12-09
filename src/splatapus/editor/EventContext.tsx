@@ -15,8 +15,9 @@ export interface EventContext<Event> {
 }
 
 export type PointerEventType = "down" | "move" | "up" | "cancel";
-export interface PointerEventContext<Type extends PointerEventType = PointerEventType>
-    extends EventContext<PointerEvent> {
+export interface PointerEventContext<
+    Type extends PointerEventType = PointerEventType,
+> extends EventContext<PointerEvent> {
     readonly eventType: Type;
 }
 
@@ -49,14 +50,18 @@ export class SplatapusGestureDetector<Args extends Array<unknown> = []> {
     readonly isDragging = new LiveValue(false, "Gesture.isDragging");
     readonly isDragConfirmed = new LiveValue(false, "Gesture.isDragConfirmed");
 
-    private readonly gesture: GestureDetector<[splatapus: Splatapus, ...args: Args]>;
+    private readonly gesture: GestureDetector<
+        [splatapus: Splatapus, ...args: Args]
+    >;
 
     constructor({
         onTap,
         onDragStart,
     }: {
         onTap?: TapGestureHandler<[splatapus: Splatapus, ...args: Args]>;
-        onDragStart?: DragStartGestureHandler<[splatapus: Splatapus, ...args: Args]>;
+        onDragStart?: DragStartGestureHandler<
+            [splatapus: Splatapus, ...args: Args]
+        >;
     }) {
         const dragStart = onDragStart ?? defaultDragGestureHandler;
         this.gesture = new GestureDetector({
@@ -94,7 +99,11 @@ export class SplatapusGestureDetector<Args extends Array<unknown> = []> {
     onPointerEvent(ctx: PointerEventContext, ...args: Args) {
         switch (ctx.eventType) {
             case "down":
-                return this.gesture.onPointerDown(ctx.event, ctx.splatapus, ...args);
+                return this.gesture.onPointerDown(
+                    ctx.event,
+                    ctx.splatapus,
+                    ...args,
+                );
             case "move":
                 return this.gesture.onPointerMove(ctx.event);
             case "up":

@@ -14,7 +14,10 @@ const splatLocationSchema = Schema.object({
 export type SplatLocationState = SchemaType<typeof splatLocationSchema>;
 
 export const SplatLocationState = {
-    initialize: (keyPointId: SplatKeyPointId, shapeId: SplatShapeId): SplatLocationState => ({
+    initialize: (
+        keyPointId: SplatKeyPointId,
+        shapeId: SplatShapeId,
+    ): SplatLocationState => ({
         keyPointId,
         shapeId,
         mode: ModeType.Draw,
@@ -28,18 +31,30 @@ export class SplatLocation {
 
     readonly keyPointId = new LiveMemoWritable(
         () => this.state.live().keyPointId,
-        (update) => this.state.update((state) => applyUpdateWithin(state, "keyPointId", update)),
+        (update) =>
+            this.state.update((state) =>
+                applyUpdateWithin(state, "keyPointId", update),
+            ),
     );
     readonly shapeId = new LiveMemoWritable(
         () => this.state.live().shapeId,
-        (update) => this.state.update((state) => applyUpdateWithin(state, "shapeId", update)),
+        (update) =>
+            this.state.update((state) =>
+                applyUpdateWithin(state, "shapeId", update),
+            ),
     );
     readonly mode = new LiveMemoWritable(
         () => this.state.live().mode,
-        (update) => this.state.update((state) => applyUpdateWithin(state, "mode", update)),
+        (update) =>
+            this.state.update((state) =>
+                applyUpdateWithin(state, "mode", update),
+            ),
     );
     readonly viewportState = new LiveMemoWritable(
         () => this.state.live().viewport,
-        (update) => this.state.update((state) => applyUpdateWithin(state, "viewport", update)),
+        (update) =>
+            this.state.update((state) =>
+                applyUpdateWithin(state, "viewport", update),
+            ),
     );
 }

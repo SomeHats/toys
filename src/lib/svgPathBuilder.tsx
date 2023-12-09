@@ -91,7 +91,11 @@ export class SvgPathBuilder {
         return this.add(`T${t.x} ${t.y}`);
     }
 
-    bezierCurveTo(control1: Vector2Ish, control2: Vector2Ish, target: Vector2Ish) {
+    bezierCurveTo(
+        control1: Vector2Ish,
+        control2: Vector2Ish,
+        target: Vector2Ish,
+    ) {
         const c1 = Vector2.from(control1);
         const c2 = Vector2.from(control2);
         const t = Vector2.from(target);

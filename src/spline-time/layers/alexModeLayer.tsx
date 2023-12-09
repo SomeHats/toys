@@ -1,7 +1,11 @@
 import { assert } from "@/lib/assert";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
-import { BezierControlPoint, DottedGuideLine, FinalLine } from "@/spline-time/guides";
+import {
+    BezierControlPoint,
+    DottedGuideLine,
+    FinalLine,
+} from "@/spline-time/guides";
 import { LayerProps, LayerUi } from "@/spline-time/layers/Layer";
 import { Fragment, ReactNode, useState } from "react";
 
@@ -38,7 +42,10 @@ function AlexModeLayer({ line, showExtras, uiTarget }: LayerProps) {
                     controlPointBefore = fromPoint.add(
                         previousControlPointDirection.scale(distance * slop),
                     );
-                    controlPoints.push({ target: fromPoint, control: controlPointBefore });
+                    controlPoints.push({
+                        target: fromPoint,
+                        control: controlPointBefore,
+                    });
                 }
 
                 if (nextPoint) {
@@ -49,12 +56,21 @@ function AlexModeLayer({ line, showExtras, uiTarget }: LayerProps) {
                         distance / joinedDistance,
                     );
                     const isLeft =
-                        (nextPoint.x - fromPoint.x) * (toPoint.y - fromPoint.y) -
-                            (nextPoint.y - fromPoint.y) * (toPoint.x - fromPoint.x) >
+                        (nextPoint.x - fromPoint.x) *
+                            (toPoint.y - fromPoint.y) -
+                            (nextPoint.y - fromPoint.y) *
+                                (toPoint.x - fromPoint.x) >
                         0;
 
-                    debug.push(<DottedGuideLine from={fromPoint} to={nextPoint} />);
-                    debug.push(<DottedGuideLine from={referencePointOnSkipLine} to={toPoint} />);
+                    debug.push(
+                        <DottedGuideLine from={fromPoint} to={nextPoint} />,
+                    );
+                    debug.push(
+                        <DottedGuideLine
+                            from={referencePointOnSkipLine}
+                            to={toPoint}
+                        />,
+                    );
 
                     // const controlPointDirection = nextPoint.sub(fromPoint).normalize();
                     let controlPointDirection = toPoint
@@ -67,9 +83,16 @@ function AlexModeLayer({ line, showExtras, uiTarget }: LayerProps) {
                     const controlPointAfter = toPoint.sub(
                         controlPointDirection.scale(distance * slop),
                     );
-                    controlPoints.push({ target: toPoint, control: controlPointAfter });
+                    controlPoints.push({
+                        target: toPoint,
+                        control: controlPointAfter,
+                    });
                     if (controlPointBefore) {
-                        path.bezierCurveTo(controlPointBefore, controlPointAfter, toPoint);
+                        path.bezierCurveTo(
+                            controlPointBefore,
+                            controlPointAfter,
+                            toPoint,
+                        );
                     } else {
                         path.quadraticCurveTo(controlPointAfter, toPoint);
                     }
@@ -128,9 +151,14 @@ function AlexModeLayer({ line, showExtras, uiTarget }: LayerProps) {
         <>
             {showExtras &&
                 controlPoints.map(({ target, control }, i) => (
-                    <BezierControlPoint target={target} control={control} key={i} />
+                    <BezierControlPoint
+                        target={target}
+                        control={control}
+                        key={i}
+                    />
                 ))}
-            {showExtras && debug.map((d, i) => <Fragment key={i}>{d}</Fragment>)}
+            {showExtras &&
+                debug.map((d, i) => <Fragment key={i}>{d}</Fragment>)}
             <FinalLine path={path.toString()} />
             <LayerUi label="alex mode" uiTarget={uiTarget}>
                 slop:

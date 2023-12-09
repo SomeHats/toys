@@ -66,7 +66,9 @@ export class QuickPan {
 
     toDebugStringLive() {
         if (this.isKeyDown.live()) {
-            return debugStateToString("quickPan", { dragging: this.isDragging.live() });
+            return debugStateToString("quickPan", {
+                dragging: this.isDragging.live(),
+            });
         }
         return null;
     }

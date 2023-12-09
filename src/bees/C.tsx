@@ -50,7 +50,21 @@ export class C {
         });
     }
 
-    drawSprite(image: HTMLImageElement, x: number, y: number, opts?: SpriteOpts) {
-        this.drawSpriteFromSheet(image, 0, 0, image.naturalWidth, image.naturalHeight, x, y, opts);
+    drawSprite(
+        image: HTMLImageElement,
+        x: number,
+        y: number,
+        opts?: SpriteOpts,
+    ) {
+        this.drawSpriteFromSheet(
+            image,
+            0,
+            0,
+            image.naturalWidth,
+            image.naturalHeight,
+            x,
+            y,
+            opts,
+        );
     }
 }

@@ -83,11 +83,19 @@ function _signalsToVector(signals: [Signal, Signal]): Vector2 {
     return new Vector2(signals[0].read(), signals[1].read());
 }
 
-function screenToScene(coordinate: number, translate: number, scale: number): number {
+function screenToScene(
+    coordinate: number,
+    translate: number,
+    scale: number,
+): number {
     return (coordinate - translate) / scale;
 }
 
-function sceneToScreen(coordinate: number, translate: number, scale: number): number {
+function sceneToScreen(
+    coordinate: number,
+    translate: number,
+    scale: number,
+): number {
     return coordinate * scale + translate;
 }
 
@@ -107,9 +115,15 @@ function octopusScene(
     assert(ctx);
     const draw = new DebugDraw(ctx);
 
-    const canvasScale = s.computed(() => Math.min(width.read() / WIDTH, height.read() / HEIGHT));
-    const canvasTranslateX = s.computed(() => (width.read() - canvasScale.read() * WIDTH) / 2);
-    const canvasTranslateY = s.computed(() => (height.read() - canvasScale.read() * HEIGHT) / 2);
+    const canvasScale = s.computed(() =>
+        Math.min(width.read() / WIDTH, height.read() / HEIGHT),
+    );
+    const canvasTranslateX = s.computed(
+        () => (width.read() - canvasScale.read() * WIDTH) / 2,
+    );
+    const canvasTranslateY = s.computed(
+        () => (height.read() - canvasScale.read() * HEIGHT) / 2,
+    );
     // const mouseX = s.computed(() =>
     //     screenToScene(rawMouseX.read(), canvasTranslateX.read(), canvasScale.read()),
     // );
@@ -139,9 +153,13 @@ function octopusScene(
         const activeTargetX = s.controlled(0);
         const activeTargetY = s.controlled(0);
 
-        const startX = s.computed(() => octopusX.read() + (t - (tentacleCount - 1) / 2) * 65);
+        const startX = s.computed(
+            () => octopusX.read() + (t - (tentacleCount - 1) / 2) * 65,
+        );
         const startY = s.computed(
-            () => octopusY.read() + Math.sin((t / (tentacleCount - 1)) * Math.PI) * 120,
+            () =>
+                octopusY.read() +
+                Math.sin((t / (tentacleCount - 1)) * Math.PI) * 120,
         );
 
         let lastEndX: Signal = startX;
@@ -152,7 +170,9 @@ function octopusScene(
 
         const activeDX = s.subtract(activeTargetX, startX);
         const activeDY = s.subtract(activeTargetY, startY);
-        const activeAngle = s.computed(() => Math.atan2(activeDY.read(), activeDX.read()));
+        const activeAngle = s.computed(() =>
+            Math.atan2(activeDY.read(), activeDX.read()),
+        );
 
         const activeWaveFreq = s.sin({
             min: varyAbsolute(-1, 0.75),
@@ -179,7 +199,11 @@ function octopusScene(
                 target: isActive,
                 attack: 0.05 * idxFromEnd,
             });
-            const friction = s.lerp(idleFriction, activeFriction, springControl);
+            const friction = s.lerp(
+                idleFriction,
+                activeFriction,
+                springControl,
+            );
             const tension = s.lerp(idleTension, activeTension, springControl);
 
             const idleAngleWave = s.sin({
@@ -201,11 +225,14 @@ function octopusScene(
 
             const activeProportion = (i + 1) / segmentCount;
 
-            const activeWaveMagnitude = Math.sin(activeProportion * Math.PI) * 20;
+            const activeWaveMagnitude =
+                Math.sin(activeProportion * Math.PI) * 20;
             const activeWave = s.sin({
                 min: -activeWaveMagnitude,
                 max: activeWaveMagnitude,
-                offset: s.computed(() => (i / segmentCount) * activeWaveCount.read()),
+                offset: s.computed(
+                    () => (i / segmentCount) * activeWaveCount.read(),
+                ),
                 frequency: activeWaveFreq,
             });
 
@@ -248,48 +275,56 @@ function octopusScene(
                     s.computed(
                         () =>
                             endX.read() -
-                            (dy.read() / segmentLength.read()) * (INNER_THICKNESS / 2 - i + 1),
+                            (dy.read() / segmentLength.read()) *
+                                (INNER_THICKNESS / 2 - i + 1),
                     ),
                     s.computed(
                         () =>
                             endY.read() +
-                            (dx.read() / segmentLength.read()) * (INNER_THICKNESS / 2 - i + 1),
+                            (dx.read() / segmentLength.read()) *
+                                (INNER_THICKNESS / 2 - i + 1),
                     ),
                 ],
                 rightInner: [
                     s.computed(
                         () =>
                             endX.read() +
-                            (dy.read() / segmentLength.read()) * (INNER_THICKNESS / 2 - i + 1),
+                            (dy.read() / segmentLength.read()) *
+                                (INNER_THICKNESS / 2 - i + 1),
                     ),
                     s.computed(
                         () =>
                             endY.read() -
-                            (dx.read() / segmentLength.read()) * (INNER_THICKNESS / 2 - i + 1),
+                            (dx.read() / segmentLength.read()) *
+                                (INNER_THICKNESS / 2 - i + 1),
                     ),
                 ],
                 leftOuter: [
                     s.computed(
                         () =>
                             endX.read() -
-                            (dy.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),
+                            (dy.read() / segmentLength.read()) *
+                                (THICKNESS / 2 - i + 1),
                     ),
                     s.computed(
                         () =>
                             endY.read() +
-                            (dx.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),
+                            (dx.read() / segmentLength.read()) *
+                                (THICKNESS / 2 - i + 1),
                     ),
                 ],
                 rightOuter: [
                     s.computed(
                         () =>
                             endX.read() +
-                            (dy.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),
+                            (dy.read() / segmentLength.read()) *
+                                (THICKNESS / 2 - i + 1),
                     ),
                     s.computed(
                         () =>
                             endY.read() -
-                            (dx.read() / segmentLength.read()) * (THICKNESS / 2 - i + 1),
+                            (dx.read() / segmentLength.read()) *
+                                (THICKNESS / 2 - i + 1),
                     ),
                 ],
             };
@@ -312,7 +347,8 @@ function octopusScene(
     const notesByTentacle = new Map<Tentacle, number>();
     const onNoteDown = (note: number, x: number, y: number) => {
         const tentacle =
-            sample(tentacles.filter((t) => !notesByTentacle.has(t))) ?? sample(tentacles);
+            sample(tentacles.filter((t) => !notesByTentacle.has(t))) ??
+            sample(tentacles);
         notesByTentacle.set(tentacle, note);
         tentacle.isActive.set(1);
         tentacle.activeTargetX.set(x);
@@ -349,12 +385,17 @@ function octopusScene(
                 avgTentacleEndX.read() - octopusXRoot,
                 avgTentacleEndY.read() - 400 - octopusYRoot,
             );
-            const octopusCenterAdjust = avgEndDelta.withMagnitude(avgEndDelta.magnitude() ** 0.9);
+            const octopusCenterAdjust = avgEndDelta.withMagnitude(
+                avgEndDelta.magnitude() ** 0.9,
+            );
             octopusXTarget.set(octopusXRoot + octopusCenterAdjust.x);
             octopusYTarget.set(octopusYRoot + octopusCenterAdjust.y);
         },
         draw: () => {
-            const octopusHead = new Vector2(octopusHeadX.read(), octopusHeadY.read());
+            const octopusHead = new Vector2(
+                octopusHeadX.read(),
+                octopusHeadY.read(),
+            );
 
             ctx.resetTransform();
             ctx.scale(devicePixelRatio.read(), devicePixelRatio.read());
@@ -401,8 +442,20 @@ function octopusScene(
             ctx.fill();
 
             for (let i = 0; i < zOrderedTentacles.length; i++) {
-                drawTentacle(ctx, zOrderedTentacles[i], "#FF709D", THICKNESS, 0);
-                drawTentacle(ctx, zOrderedTentacles[i], "#FF4782", INNER_THICKNESS, 3);
+                drawTentacle(
+                    ctx,
+                    zOrderedTentacles[i],
+                    "#FF709D",
+                    THICKNESS,
+                    0,
+                );
+                drawTentacle(
+                    ctx,
+                    zOrderedTentacles[i],
+                    "#FF4782",
+                    INNER_THICKNESS,
+                    3,
+                );
             }
 
             draw.ellipse(octopusHead, 250, 200, {
@@ -437,9 +490,12 @@ function octopusScene(
             ctx.fillStyle = "#FF4782";
             ctx.fill();
 
-            draw.debugPointX(new Vector2(avgTentacleEndX.read(), avgTentacleEndY.read()), {
-                label: "avg end",
-            });
+            draw.debugPointX(
+                new Vector2(avgTentacleEndX.read(), avgTentacleEndY.read()),
+                {
+                    label: "avg end",
+                },
+            );
         },
         children: (
             <OctopusUi
@@ -493,13 +549,16 @@ function OctopusUi({
     const [notesDown, setNotesDown] = React.useState<Array<number>>([]);
     console.log(notesDown);
 
-    const setRefForKey = React.useCallback((ref: HTMLDivElement | null, note: number) => {
-        if (ref) {
-            noteRefs.current.set(note, ref);
-        } else {
-            noteRefs.current.delete(note);
-        }
-    }, []);
+    const setRefForKey = React.useCallback(
+        (ref: HTMLDivElement | null, note: number) => {
+            if (ref) {
+                noteRefs.current.set(note, ref);
+            } else {
+                noteRefs.current.delete(note);
+            }
+        },
+        [],
+    );
 
     const handleNoteDown = React.useCallback(
         (note: number) => {
@@ -527,7 +586,12 @@ function OctopusUi({
                 return uniq([...prev, note]);
             });
         },
-        [canvasScaleSignal, canvasTranslateXSignal, canvasTranslateYSignal, onNoteDown],
+        [
+            canvasScaleSignal,
+            canvasTranslateXSignal,
+            canvasTranslateYSignal,
+            onNoteDown,
+        ],
     );
 
     const handleNoteUp = React.useCallback(

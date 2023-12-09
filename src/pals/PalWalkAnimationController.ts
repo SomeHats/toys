@@ -22,12 +22,18 @@ function isResting({ restTimer }: LegState): boolean {
     return restTimer > 0;
 }
 
-export default class PalWalkAnimationController implements PalAnimationController {
+export default class PalWalkAnimationController
+    implements PalAnimationController
+{
     private legStates = new Map<PalLegGeom, LegState>();
 
     constructor(private config: PalConfig) {}
 
-    update(dtMilliseconds: number, pal: PalControlData, legs: Array<PalLegGeom>): PalGeomUpdate {
+    update(
+        dtMilliseconds: number,
+        pal: PalControlData,
+        legs: Array<PalLegGeom>,
+    ): PalGeomUpdate {
         const dtSeconds = dtMilliseconds / 1000;
 
         for (const leg of legs) {
@@ -35,7 +41,10 @@ export default class PalWalkAnimationController implements PalAnimationControlle
         }
         const legUpdates = legs.map((leg) => this.getLegUpdate(pal, leg));
 
-        const totalLift = legUpdates.reduce((sum, update) => sum + update.liftAmount, 0);
+        const totalLift = legUpdates.reduce(
+            (sum, update) => sum + update.liftAmount,
+            0,
+        );
         const avgLift = totalLift / legs.length;
 
         return {
@@ -44,15 +53,23 @@ export default class PalWalkAnimationController implements PalAnimationControlle
         };
     }
 
-    private canLiftLeg(pal: PalControlData, legs: Array<PalLegGeom>, leg: PalLegGeom): boolean {
+    private canLiftLeg(
+        pal: PalControlData,
+        legs: Array<PalLegGeom>,
+        leg: PalLegGeom,
+    ): boolean {
         assert(legs.includes(leg), "whos leg even is this");
         const enoughLegsOnFloor =
-            legs.filter((l) => l !== leg && !isStepping(this.getLegState(pal, leg))).length >
-            Math.floor(Math.log(legs.length));
+            legs.filter(
+                (l) => l !== leg && !isStepping(this.getLegState(pal, leg)),
+            ).length > Math.floor(Math.log(legs.length));
 
         const anyStepsJustStarted = legs.some((leg) => {
             const state = this.getLegState(pal, leg);
-            return state.stepProgress > 0 && state.stepProgress < 1 / (legs.length / 2);
+            return (
+                state.stepProgress > 0 &&
+                state.stepProgress < 1 / (legs.length / 2)
+            );
         });
 
         return enoughLegsOnFloor && !anyStepsJustStarted;
@@ -66,7 +83,11 @@ export default class PalWalkAnimationController implements PalAnimationControlle
     ) {
         const state = this.getLegState(pal, leg);
 
-        state.restTimer = constrain(0, this.config.stepRestDuration, state.restTimer - dtSeconds);
+        state.restTimer = constrain(
+            0,
+            this.config.stepRestDuration,
+            state.restTimer - dtSeconds,
+        );
         if (isResting(state)) return;
 
         if (isStepping(state)) {
@@ -83,8 +104,13 @@ export default class PalWalkAnimationController implements PalAnimationControlle
                 state.restTimer = this.config.stepDuration;
             }
         } else {
-            const footLeanDistance = leg.getFootXY().distanceTo(leg.getIdealFootRestingXY());
-            if (footLeanDistance > this.config.stepThreshold && this.canLiftLeg(pal, legs, leg)) {
+            const footLeanDistance = leg
+                .getFootXY()
+                .distanceTo(leg.getIdealFootRestingXY());
+            if (
+                footLeanDistance > this.config.stepThreshold &&
+                this.canLiftLeg(pal, legs, leg)
+            ) {
                 state.currentStepMaxLift = constrain(
                     0,
                     1,
@@ -126,7 +152,10 @@ export default class PalWalkAnimationController implements PalAnimationControlle
         return initialState;
     }
 
-    private getLegUpdate(pal: PalControlData, leg: PalLegGeom): PalLegGeomUpdate {
+    private getLegUpdate(
+        pal: PalControlData,
+        leg: PalLegGeom,
+    ): PalLegGeomUpdate {
         const state = this.getLegState(pal, leg);
         return {
             footXY: this.getFootXY(pal, leg, state),
@@ -135,19 +164,34 @@ export default class PalWalkAnimationController implements PalAnimationControlle
         };
     }
 
-    private getFootXY(pal: PalControlData, leg: PalLegGeom, state: LegState): Vector2 {
+    private getFootXY(
+        pal: PalControlData,
+        leg: PalLegGeom,
+        state: LegState,
+    ): Vector2 {
         if (isStepping(state)) {
             const start = state.lastFootOnFloorXY;
-            const target = this.getPredictedIdealFootXYAtEndOfOfStep(pal, leg, state);
+            const target = this.getPredictedIdealFootXYAtEndOfOfStep(
+                pal,
+                leg,
+                state,
+            );
             return start.lerp(target, state.stepProgress);
         }
 
         return state.lastFootOnFloorXY;
     }
 
-    private getFootOrigin(pal: PalControlData, leg: PalLegGeom, state: LegState): Vector2 {
+    private getFootOrigin(
+        pal: PalControlData,
+        leg: PalLegGeom,
+        state: LegState,
+    ): Vector2 {
         if (isStepping(state)) {
-            return state.lastFootOnFloorPalPosition.lerp(pal.position, state.stepProgress);
+            return state.lastFootOnFloorPalPosition.lerp(
+                pal.position,
+                state.stepProgress,
+            );
         }
 
         return state.lastFootOnFloorPalPosition;
@@ -158,18 +202,27 @@ export default class PalWalkAnimationController implements PalAnimationControlle
         leg: PalLegGeom,
         state: LegState,
     ): Vector2 {
-        const timeRemaining = (1.4 - state.stepProgress) * this.config.stepDuration;
+        const timeRemaining =
+            (1.4 - state.stepProgress) * this.config.stepDuration;
 
-        const predictedPosition = pal.getVelocity().scale(timeRemaining).add(pal.position);
+        const predictedPosition = pal
+            .getVelocity()
+            .scale(timeRemaining)
+            .add(pal.position);
 
-        const predictedHeading = pal.heading + pal.headingVelocity * timeRemaining;
+        const predictedHeading =
+            pal.heading + pal.headingVelocity * timeRemaining;
 
-        return Vector2.fromPolar(predictedHeading + leg.angleOffset, leg.floorRadius).add(
-            predictedPosition,
-        );
+        return Vector2.fromPolar(
+            predictedHeading + leg.angleOffset,
+            leg.floorRadius,
+        ).add(predictedPosition);
     }
 
-    private getLegLiftAmount({ stepProgress, currentStepMaxLift }: LegState): number {
+    private getLegLiftAmount({
+        stepProgress,
+        currentStepMaxLift,
+    }: LegState): number {
         return Math.sin(stepProgress * Math.PI) * currentStepMaxLift;
     }
 }

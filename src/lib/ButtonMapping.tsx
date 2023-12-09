@@ -32,7 +32,9 @@ export class ButtonMapping<Actions extends string> {
         this.actionInfo = actionInfo;
 
         document.addEventListener("keydown", (event) => {
-            const actionInfo = this.getActionInfoForKeyCodeIfExists(event.keyCode);
+            const actionInfo = this.getActionInfoForKeyCodeIfExists(
+                event.keyCode,
+            );
             if (!actionInfo) {
                 return;
             }
@@ -41,7 +43,9 @@ export class ButtonMapping<Actions extends string> {
             actionInfo.downEvent.emit();
         });
         document.addEventListener("keyup", (event) => {
-            const actionInfo = this.getActionInfoForKeyCodeIfExists(event.keyCode);
+            const actionInfo = this.getActionInfoForKeyCodeIfExists(
+                event.keyCode,
+            );
             if (!actionInfo) {
                 return;
             }
@@ -63,7 +67,9 @@ export class ButtonMapping<Actions extends string> {
         return this.getActionInfo(action).upEvent.listen(cb);
     }
 
-    private getActionInfoForKeyCodeIfExists(keyCode: number): ActionInfo | null {
+    private getActionInfoForKeyCodeIfExists(
+        keyCode: number,
+    ): ActionInfo | null {
         const action = this.keyCodeToAction.get(keyCode);
         if (!action) {
             return null;

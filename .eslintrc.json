@@ -3,7 +3,12 @@
         "browser": true,
         "es2021": true
     },
-    "plugins": ["react", "@typescript-eslint", "react-hooks", "no-relative-import-paths"],
+    "plugins": [
+        "react",
+        "@typescript-eslint",
+        "react-hooks",
+        "no-relative-import-paths"
+    ],
     "extends": [
         "eslint:recommended",
         "plugin:react-hooks/recommended",
@@ -29,7 +34,10 @@
         "no-constant-condition": ["error", { "checkLoops": false }],
         "prefer-const": ["error", { "destructuring": "all" }],
         "no-relative-import-paths/no-relative-import-paths": ["error"],
-        "react-hooks/exhaustive-deps": ["error", { "additionalHooks": "useLive" }]
+        "react-hooks/exhaustive-deps": [
+            "error",
+            { "additionalHooks": "useLive" }
+        ]
     },
     "settings": {
         "react": {

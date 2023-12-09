@@ -7,18 +7,28 @@ const PathFinder = {
     getNextRoad(initialNode: NetworkNode, destinationNode: NetworkNode): Road {
         const remainingNodes = new Set(initialNode.getAllReachableNodes());
         remainingNodes.add(initialNode);
-        assert(remainingNodes.has(destinationNode), "destination must be reachable");
+        assert(
+            remainingNodes.has(destinationNode),
+            "destination must be reachable",
+        );
         const bestCosts = new Map();
         const prevRoads = new Map();
 
         bestCosts.set(initialNode, 0);
 
         while (remainingNodes.size) {
-            const { node, cost } = PathFinder._nodeWithShortestDistance(remainingNodes, bestCosts);
+            const { node, cost } = PathFinder._nodeWithShortestDistance(
+                remainingNodes,
+                bestCosts,
+            );
             remainingNodes.delete(node);
 
             if (node === destinationNode) {
-                return PathFinder._nextRoadFromRoute(prevRoads, initialNode, destinationNode);
+                return PathFinder._nextRoadFromRoute(
+                    prevRoads,
+                    initialNode,
+                    destinationNode,
+                );
             }
 
             PathFinder._updateNeighbours(node, bestCosts, cost, prevRoads);

@@ -53,10 +53,13 @@ export class PalTargetController extends Component {
         }
 
         if (distance > 10) {
-            const angleDelta = normalizeAngle(angleToTarget - this.data.heading);
+            const angleDelta = normalizeAngle(
+                angleToTarget - this.data.heading,
+            );
             const lastHeading = this.data.heading;
             this.data.heading += angleDelta / 10;
-            this.data.headingVelocity = normalizeAngle(this.data.heading - lastHeading) / dtSeconds;
+            this.data.headingVelocity =
+                normalizeAngle(this.data.heading - lastHeading) / dtSeconds;
         } else {
             this.data.headingVelocity = 0;
         }
@@ -64,7 +67,11 @@ export class PalTargetController extends Component {
 
     private accelerate(amt: number, dtSeconds: number) {
         const lastSpeed = this.data.speed;
-        this.data.speed = constrain(0, MAX_SPEED, this.data.speed + amt * dtSeconds);
+        this.data.speed = constrain(
+            0,
+            MAX_SPEED,
+            this.data.speed + amt * dtSeconds,
+        );
         const avgSpeed = (lastSpeed + this.data.speed) / 2;
         this.data.position = this.data.position.add(
             Vector2.fromPolar(this.data.heading, avgSpeed * dtSeconds),
@@ -85,7 +92,8 @@ export class PalAbsoluteController extends Component {
         const lastHeading = this.data.heading;
 
         this.data.heading = heading;
-        this.data.headingVelocity = normalizeAngle(this.data.heading - lastHeading) / dtSeconds;
+        this.data.headingVelocity =
+            normalizeAngle(this.data.heading - lastHeading) / dtSeconds;
         this.data.speed = lastPosition.distanceTo(position) / dtSeconds;
         this.data.position = position;
     }

@@ -7,7 +7,10 @@ export default class Circle {
     static create(x: number, y: number, radius: number): Circle {
         return new Circle(new Vector2(x, y), radius);
     }
-    constructor(readonly center: Vector2, readonly radius: number) {}
+    constructor(
+        readonly center: Vector2,
+        readonly radius: number,
+    ) {}
 
     get circumference(): number {
         return 2 * Math.PI * this.radius;
@@ -41,7 +44,9 @@ export default class Circle {
     }
 
     intersectsCircle(other: Circle): boolean {
-        return this.center.distanceTo(other.center) < this.radius + other.radius;
+        return (
+            this.center.distanceTo(other.center) < this.radius + other.radius
+        );
     }
 
     withRadius(radius: number): Circle {

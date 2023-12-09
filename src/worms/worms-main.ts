@@ -62,7 +62,9 @@ const makeSnake = () => {
     const palette = makeColorPalette();
     let neighbours = [...trianglesById.values()];
     for (let i = 0; i < 2; i++) {
-        const availableNeighbours = neighbours.filter((neighbour) => !occupied.has(neighbour));
+        const availableNeighbours = neighbours.filter(
+            (neighbour) => !occupied.has(neighbour),
+        );
         if (!availableNeighbours.length) break;
         const triangle = sample(availableNeighbours);
         triangles.push(triangle);
@@ -113,7 +115,8 @@ frameLoop(() => {
                 }
             }
 
-            const lastTriangle = snake.triangles[snake.triangles.length - snake.base];
+            const lastTriangle =
+                snake.triangles[snake.triangles.length - snake.base];
             if (lastTriangle) {
                 occupied.delete(lastTriangle);
                 snake.length--;

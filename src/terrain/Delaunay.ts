@@ -46,7 +46,8 @@ function getCellsByPointId(
             do {
                 cellsByPointId[pointId].push({
                     neighbourCellId: triangles[incomingEdgeId],
-                    leadingPoint: triangleCenters[Math.floor(incomingEdgeId / 3)],
+                    leadingPoint:
+                        triangleCenters[Math.floor(incomingEdgeId / 3)],
                 });
                 const outgoing = nextHalfedge(incomingEdgeId);
                 incomingEdgeId = halfedges[outgoing];
@@ -77,7 +78,10 @@ export class Delaunay {
         this.triangleCenters = getTriangleCenters(this.delaunator, points);
         console.timeEnd("delauney.getTriangleCenters");
         console.time("delauney.getCellsByPointId");
-        this.cellsByPointId = getCellsByPointId(this.delaunator, this.triangleCenters);
+        this.cellsByPointId = getCellsByPointId(
+            this.delaunator,
+            this.triangleCenters,
+        );
         console.timeEnd("delauney.getCellsByPointId");
     }
 
@@ -92,11 +96,16 @@ export class Delaunay {
     }
 
     forEachPolygonEdge(cb: (p1: Vector2, p2: Vector2) => void) {
-        for (let halfEdgeId = 0; halfEdgeId < this.delaunator.triangles.length; halfEdgeId++) {
+        for (
+            let halfEdgeId = 0;
+            halfEdgeId < this.delaunator.triangles.length;
+            halfEdgeId++
+        ) {
             const otherHalfEdgeId = this.delaunator.halfedges[halfEdgeId];
             if (halfEdgeId > otherHalfEdgeId && otherHalfEdgeId !== -1) {
                 const p1 = this.triangleCenters[Math.floor(halfEdgeId / 3)];
-                const p2 = this.triangleCenters[Math.floor(otherHalfEdgeId / 3)];
+                const p2 =
+                    this.triangleCenters[Math.floor(otherHalfEdgeId / 3)];
                 cb(p1, p2);
             }
         }

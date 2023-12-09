@@ -51,7 +51,10 @@ export class Splat {
             this.insert(Shape.create({ id: firstShapeId }));
         }
 
-        const shapeVersion = this.getShapeVersionIfExists(firstShapeId, firstKeyPointId);
+        const shapeVersion = this.getShapeVersionIfExists(
+            firstShapeId,
+            firstKeyPointId,
+        );
         if (!shapeVersion) {
             this.insert(
                 ShapeVersion.create({
@@ -77,7 +80,9 @@ export class Splat {
     get location() {
         return assertExists(this.store.get(LOCATION_ID));
     }
-    updateLocation(location: Expand<Partial<Omit<Location, "typeName" | "id">>>) {
+    updateLocation(
+        location: Expand<Partial<Omit<Location, "typeName" | "id">>>,
+    ) {
         this.store.put([{ ...this.location, ...location }]);
     }
 
@@ -86,7 +91,9 @@ export class Splat {
     }
     update(
         record: {
-            [Rec in SplatRecord as string]: Expand<Partial<Rec> & { id: IdOf<Rec> }>;
+            [Rec in SplatRecord as string]: Expand<
+                Partial<Rec> & { id: IdOf<Rec> }
+            >;
         }[string],
     ) {
         const existing = assertExists(this.store.get(record.id));

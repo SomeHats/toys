@@ -25,7 +25,10 @@ export type SpriteStackManifest = {
 
 export class SpriteStack {
     static async load(manifest: SpriteStackManifest) {
-        const [{ default: data }, url] = await Promise.all([manifest.geometry, manifest.url]);
+        const [{ default: data }, url] = await Promise.all([
+            manifest.geometry,
+            manifest.url,
+        ]);
         const image = await loadImage(url);
         return new SpriteStack(
             image,
@@ -52,7 +55,12 @@ export class SpriteStack {
         this.frameDelayMs = 1000 / frameRate;
     }
 
-    draw(c: C, angleRadians: number, timeMs: number, opts?: Omit<SpriteOpts, "pixelScale">) {
+    draw(
+        c: C,
+        angleRadians: number,
+        timeMs: number,
+        opts?: Omit<SpriteOpts, "pixelScale">,
+    ) {
         const angleIndex = Math.floor(
             mapRange(
                 -Math.PI,
@@ -63,7 +71,8 @@ export class SpriteStack {
             ),
         );
 
-        const frameIndex = Math.floor(timeMs / this.frameDelayMs) % this.data.frames;
+        const frameIndex =
+            Math.floor(timeMs / this.frameDelayMs) % this.data.frames;
 
         const dataIndex = frameIndex * this.data.rows + angleIndex;
         const regionIndex = dataIndex * 4;

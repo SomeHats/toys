@@ -20,25 +20,19 @@ export interface Incremental<Value, Diff> {
     coalesce(diff1: Diff, diff2: Diff): Diff | null;
 }
 
-export type IncrementalValue<Inc extends Incremental<any, any>> = Inc extends Incremental<
-    infer Value,
-    any
->
-    ? Value
-    : never;
-export type IncrementalDiff<Inc extends Incremental<any, any>> = Inc extends Incremental<
-    any,
-    infer Diff
->
-    ? Diff
-    : never;
+export type IncrementalValue<Inc extends Incremental<any, any>> =
+    Inc extends Incremental<infer Value, any> ? Value : never;
+export type IncrementalDiff<Inc extends Incremental<any, any>> =
+    Inc extends Incremental<any, infer Diff> ? Diff : never;
 
 export type IncrementalSignal<Inc extends Incremental<any, any>> = Signal<
     IncrementalValue<Inc>,
     IncrementalDiff<Inc>
 >;
 
-export function incrementalStatic<Value>(schema: Schema<Value>): Incremental<Value, undefined> {
+export function incrementalStatic<Value>(
+    schema: Schema<Value>,
+): Incremental<Value, undefined> {
     return {
         valueSchema: schema,
         diffSchema: Schema.never,
@@ -51,7 +45,9 @@ export function incrementalStatic<Value>(schema: Schema<Value>): Incremental<Val
     };
 }
 
-export function incrementalAtom<Value>(schema: Schema<Value>): Incremental<Value, Value> {
+export function incrementalAtom<Value>(
+    schema: Schema<Value>,
+): Incremental<Value, Value> {
     return {
         valueSchema: schema,
         diffSchema: schema,
@@ -74,7 +70,10 @@ export function incrementalArrayOf<Value>(
         apply(value, diff) {
             switch (diff.type) {
                 case IncrementalArrayOfDiffType.Replace:
-                    return [diff.value, { type: IncrementalArrayOfDiffType.Replace, value }];
+                    return [
+                        diff.value,
+                        { type: IncrementalArrayOfDiffType.Replace, value },
+                    ];
                 case IncrementalArrayOfDiffType.Splice: {
                     assert(diff.index >= 0);
                     assert(diff.index <= value.length);
@@ -85,12 +84,18 @@ export function incrementalArrayOf<Value>(
                         type: IncrementalArrayOfDiffType.Splice,
                         index: diff.index,
                         deleteCount: diff.insert.length,
-                        insert: value.slice(diff.index, diff.index + diff.deleteCount),
+                        insert: value.slice(
+                            diff.index,
+                            diff.index + diff.deleteCount,
+                        ),
                     };
 
                     const result = value
                         .slice(0, diff.index)
-                        .concat(diff.insert, value.slice(diff.index + diff.deleteCount));
+                        .concat(
+                            diff.insert,
+                            value.slice(diff.index + diff.deleteCount),
+                        );
 
                     return [result, inverse];
                 }
@@ -109,7 +114,11 @@ export function incrementalArrayOf<Value>(
                                 type: IncrementalArrayOfDiffType.Replace,
                                 value: diff1.value
                                     .slice()
-                                    .splice(diff2.index, diff2.deleteCount, ...diff2.insert),
+                                    .splice(
+                                        diff2.index,
+                                        diff2.deleteCount,
+                                        ...diff2.insert,
+                                    ),
                             };
                         default:
                             throw exhaustiveSwitchError(diff2);
@@ -188,15 +197,23 @@ function incrementalArrayOfDiffSchema<Value>(
     });
 }
 
-export type IncrementalObjectConfig = ReadonlyRecord<string, Incremental<any, any>>;
+export type IncrementalObjectConfig = ReadonlyRecord<
+    string,
+    Incremental<any, any>
+>;
 export type IncrementalObjectValue<Config extends IncrementalObjectConfig> = {
-    [K in keyof Config]: Config[K] extends Incremental<infer Value, any> ? Value : never;
+    [K in keyof Config]: Config[K] extends Incremental<infer Value, any> ? Value
+    :   never;
 };
 export type IncrementalObjectDiff<Config extends IncrementalObjectConfig> = {
-    [K in keyof Config]?: Config[K] extends Incremental<any, infer Diff> ? Diff : never;
+    [K in keyof Config]?: Config[K] extends Incremental<any, infer Diff> ? Diff
+    :   never;
 };
 export interface IncrementalObject<Config extends IncrementalObjectConfig>
-    extends Incremental<IncrementalObjectValue<Config>, IncrementalObjectDiff<Config>> {
+    extends Incremental<
+        IncrementalObjectValue<Config>,
+        IncrementalObjectDiff<Config>
+    > {
     readonly config: Config;
 }
 export function incrementalObject<Config extends IncrementalObjectConfig>(
@@ -208,14 +225,19 @@ export function incrementalObject<Config extends IncrementalObjectConfig>(
             mapObjectValues(config, (incremental) => incremental.valueSchema),
         ) as unknown as Schema<IncrementalObjectValue<Config>>,
         diffSchema: Schema.object(
-            mapObjectValues(config, (incremental) => incremental.diffSchema.optional()),
+            mapObjectValues(config, (incremental) =>
+                incremental.diffSchema.optional(),
+            ),
         ) as unknown as Schema<IncrementalObjectDiff<Config>>,
         apply(value, diff) {
             const result = { ...value };
             const inverseDiff: IncrementalObjectDiff<Config> = {};
             for (const key in diff) {
                 const incremental = config[key];
-                const [newValue, inverse] = incremental.apply(value[key], diff[key]);
+                const [newValue, inverse] = incremental.apply(
+                    value[key],
+                    diff[key],
+                );
                 result[key] = newValue;
                 inverseDiff[key] = inverse;
             }
@@ -230,7 +252,10 @@ export function incrementalObject<Config extends IncrementalObjectConfig>(
                     diffWithAllPresentKeysCoallesced[key] = diff;
                 } else {
                     const incremental = config[key];
-                    const coalescedDiff = incremental.coalesce(existingDiff, diff);
+                    const coalescedDiff = incremental.coalesce(
+                        existingDiff,
+                        diff,
+                    );
                     if (coalescedDiff === null) {
                         return null;
                     }
@@ -246,24 +271,36 @@ export type IncrementalTableValue<
     Id extends string,
     Value extends { readonly id: Id },
 > = Immutable.Map<Id, Value>;
-export type IncrementalTableDiff<Id extends string, Value extends { readonly id: Id }, Diff> = {
+export type IncrementalTableDiff<
+    Id extends string,
+    Value extends { readonly id: Id },
+    Diff,
+> = {
     readonly insert?: ReadonlyObjectMap<Id, Value> | undefined;
     readonly update?: ReadonlyObjectMap<Id, readonly Diff[]> | undefined;
     readonly delete?: ReadonlyObjectMap<Id, 1> | undefined;
 };
-type MutableIncrementalTableDiff<Id extends string, Value extends { id: Id }, Diff> = {
+type MutableIncrementalTableDiff<
+    Id extends string,
+    Value extends { id: Id },
+    Diff,
+> = {
     insert?: ObjectMap<Id, Value> | undefined;
     update?: ObjectMap<Id, Diff[]> | undefined;
     delete?: ObjectMap<Id, 1> | undefined;
 };
 
-function incrementalTableDiffSchema<Id extends string, Value extends { readonly id: Id }, Diff>(
-    idSchema: Schema<Id>,
-    incremental: Incremental<Value, Diff>,
-) {
+function incrementalTableDiffSchema<
+    Id extends string,
+    Value extends { readonly id: Id },
+    Diff,
+>(idSchema: Schema<Id>, incremental: Incremental<Value, Diff>) {
     return Schema.object<IncrementalTableDiff<Id, Value, Diff>>({
         insert: Schema.objectMap(idSchema, incremental.valueSchema).optional(),
-        update: Schema.objectMap(idSchema, Schema.arrayOf(incremental.diffSchema)).optional(),
+        update: Schema.objectMap(
+            idSchema,
+            Schema.arrayOf(incremental.diffSchema),
+        ).optional(),
         delete: Schema.objectMap(idSchema, Schema.value(1)).optional(),
     }).indexed({
         insert: 0,
@@ -272,13 +309,23 @@ function incrementalTableDiffSchema<Id extends string, Value extends { readonly 
     });
 }
 
-export interface IncrementalTable<Id extends string, Value extends { readonly id: Id }, Diff>
-    extends Incremental<IncrementalTableValue<Id, Value>, IncrementalTableDiff<Id, Value, Diff>> {
+export interface IncrementalTable<
+    Id extends string,
+    Value extends { readonly id: Id },
+    Diff,
+> extends Incremental<
+        IncrementalTableValue<Id, Value>,
+        IncrementalTableDiff<Id, Value, Diff>
+    > {
     readonly idSchema: Schema<Id>;
     readonly record: Incremental<Value, Diff>;
 }
 
-export function incrementalTable<Id extends string, Value extends { readonly id: Id }, Diff>(
+export function incrementalTable<
+    Id extends string,
+    Value extends { readonly id: Id },
+    Diff,
+>(
     idSchema: Schema<Id>,
     record: Incremental<Value, Diff>,
 ): IncrementalTable<Id, Value, Diff> {
@@ -286,7 +333,10 @@ export function incrementalTable<Id extends string, Value extends { readonly id:
         idSchema,
         record,
         valueSchema: Schema.arrayOf(record.valueSchema).transform(
-            (array) => Result.ok(Immutable.Map(array.map((value) => [value.id, value]))),
+            (array) =>
+                Result.ok(
+                    Immutable.Map(array.map((value) => [value.id, value])),
+                ),
             Schema.cannotValidate("IncrementalTable"),
             (table) => table.valueSeq().toArray(),
         ),
@@ -315,16 +365,25 @@ export function incrementalTable<Id extends string, Value extends { readonly id:
                     let newValue = oldValue;
                     const inverseUpdates: Diff[] = [];
                     for (const update of updates) {
-                        const [_newValue, inverseUpdate] = record.apply(newValue, update);
+                        const [_newValue, inverseUpdate] = record.apply(
+                            newValue,
+                            update,
+                        );
                         newValue = _newValue;
-                        const lastInverseUpdate = inverseUpdates[inverseUpdates.length - 1];
-                        const coalescedInverseUpdate = lastInverseUpdate
-                            ? record.coalesce(lastInverseUpdate, inverseUpdate)
-                            : null;
+                        const lastInverseUpdate =
+                            inverseUpdates[inverseUpdates.length - 1];
+                        const coalescedInverseUpdate =
+                            lastInverseUpdate ?
+                                record.coalesce(
+                                    lastInverseUpdate,
+                                    inverseUpdate,
+                                )
+                            :   null;
                         if (coalescedInverseUpdate === null) {
                             inverseUpdates.push(inverseUpdate);
                         } else {
-                            inverseUpdates[inverseUpdates.length - 1] = coalescedInverseUpdate;
+                            inverseUpdates[inverseUpdates.length - 1] =
+                                coalescedInverseUpdate;
                         }
                     }
                     inverse.update[id] = inverseUpdates;
@@ -353,7 +412,12 @@ export function incrementalTable<Id extends string, Value extends { readonly id:
             }
 
             if (diff1.update !== undefined) {
-                result.update = { ...mapObjectValues(diff1.update, (updates) => updates?.slice()) };
+                result.update = {
+                    ...mapObjectValues(
+                        diff1.update,
+                        (updates) => updates?.slice(),
+                    ),
+                };
             }
 
             if (diff1.delete !== undefined) {
@@ -383,22 +447,31 @@ export function incrementalTable<Id extends string, Value extends { readonly id:
                     let insertedValue = result.insert?.[id];
                     if (insertedValue) {
                         for (const update of updates) {
-                            const [newValue, _] = record.apply(insertedValue!, update);
+                            const [newValue, _] = record.apply(
+                                insertedValue!,
+                                update,
+                            );
                             insertedValue = newValue;
                         }
                         result.insert![id] = insertedValue;
                     } else {
                         const existingUpdates = result.update?.[id];
                         if (existingUpdates) {
-                            const lastExistingUpdate = existingUpdates[existingUpdates.length - 1];
+                            const lastExistingUpdate =
+                                existingUpdates[existingUpdates.length - 1];
                             const nextUpdate = assertExists(updates[0]);
-                            const coalescedUpdate = lastExistingUpdate
-                                ? record.coalesce(lastExistingUpdate, nextUpdate)
-                                : null;
+                            const coalescedUpdate =
+                                lastExistingUpdate ?
+                                    record.coalesce(
+                                        lastExistingUpdate,
+                                        nextUpdate,
+                                    )
+                                :   null;
                             if (coalescedUpdate === null) {
                                 existingUpdates.push(...updates);
                             } else {
-                                existingUpdates[existingUpdates.length - 1] = coalescedUpdate;
+                                existingUpdates[existingUpdates.length - 1] =
+                                    coalescedUpdate;
                                 existingUpdates.push(...updates.slice(1));
                             }
                         } else {
@@ -435,7 +508,8 @@ export function appendIncrementalDiff<Value, Diff>(
     nextDiff: Diff,
 ): Diff[] {
     const lastDiff = array[array.length - 1];
-    const coalescedDiff = lastDiff ? incremental.coalesce(lastDiff, nextDiff) : null;
+    const coalescedDiff =
+        lastDiff ? incremental.coalesce(lastDiff, nextDiff) : null;
     if (coalescedDiff === null) {
         return [...array, nextDiff];
     } else {

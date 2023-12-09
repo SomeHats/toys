@@ -1,5 +1,8 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import { sizeFromContentRect, useResizeObserver } from "@/lib/hooks/useResizeObserver";
+import {
+    sizeFromContentRect,
+    useResizeObserver,
+} from "@/lib/hooks/useResizeObserver";
 import { getLocalStorageItem, setLocalStorageItem } from "@/lib/storage";
 import { debounce } from "@/lib/utils";
 import { Lime } from "@/lime/Lime";
@@ -29,7 +32,7 @@ export function LimeApp() {
         const initialValue = getLocalStorageItem(
             "lime.doc",
             LimeSerializedStoreSchema,
-            () => ({} as LimeSerializedStore),
+            () => ({}) as LimeSerializedStore,
         );
         const store = new LimeStore(initialValue);
         const lime = new Lime(store);
@@ -37,7 +40,11 @@ export function LimeApp() {
         setLime(lime);
 
         const saveDebounced = debounce(1000, () => {
-            setLocalStorageItem("lime.doc", LimeSerializedStoreSchema, store.serialize("all"));
+            setLocalStorageItem(
+                "lime.doc",
+                LimeSerializedStoreSchema,
+                store.serialize("all"),
+            );
         });
 
         const unsubscribe = store.listen(() => {
@@ -52,13 +59,22 @@ export function LimeApp() {
     }, []);
 
     return (
-        <div ref={setContainer} className="absolute inset-0 touch-none select-none overflow-hidden">
+        <div
+            ref={setContainer}
+            className="absolute inset-0 touch-none select-none overflow-hidden"
+        >
             {size && lime && <LimeMain size={size} lime={lime} />}
         </div>
     );
 }
 
-const LimeMain = track(function LimeMain({ size, lime }: { size: Vector2; lime: Lime }) {
+const LimeMain = track(function LimeMain({
+    size,
+    lime,
+}: {
+    size: Vector2;
+    lime: Lime;
+}) {
     useEffect(() => {
         lime.viewport.screenSize = size;
     }, [size, lime]);
@@ -78,7 +94,10 @@ const LimeMain = track(function LimeMain({ size, lime }: { size: Vector2; lime: 
                 <Button className="flex-none" onClick={() => lime.newSlide()}>
                     +
                 </Button>
-                <Button onClick={() => lime.clearDocument()} className="mt-auto flex-none">
+                <Button
+                    onClick={() => lime.clearDocument()}
+                    className="mt-auto flex-none"
+                >
                     reset
                 </Button>
             </div>
@@ -95,7 +114,8 @@ const LimeMain = track(function LimeMain({ size, lime }: { size: Vector2; lime: 
                         onChange={(e) =>
                             lime.updateSession((s) => ({
                                 ...s,
-                                tweenBezierControl: e.currentTarget.valueAsNumber,
+                                tweenBezierControl:
+                                    e.currentTarget.valueAsNumber,
                             }))
                         }
                     />
@@ -150,11 +170,13 @@ const SlideThumbnail = track(function SlideThumbnail({
 });
 
 const Canvas = track(function Canvas({ lime }: { lime: Lime }) {
-    const { canvasSize, canvasOffset, slideSize, slideOffset, scaleFactor } = lime.viewport;
+    const { canvasSize, canvasOffset, slideSize, slideOffset, scaleFactor } =
+        lime.viewport;
     const { slideId } = lime.session;
     const _nextSlideId =
         lime.document.slideIds[
-            (lime.document.slideIds.indexOf(slideId) + 1) % lime.document.slideIds.length
+            (lime.document.slideIds.indexOf(slideId) + 1) %
+                lime.document.slideIds.length
         ];
     return (
         <div
@@ -179,11 +201,12 @@ const Canvas = track(function Canvas({ lime }: { lime: Lime }) {
                 }}
             >
                 <SlideContainer scale={scaleFactor}>
-                    {lime.state.child.name === "drawing" ? (
-                        <SlideRenderer lime={lime} slideId={lime.session.slideId} />
-                    ) : (
-                        <PlayheadRenderer lime={lime} />
-                    )}
+                    {lime.state.child.name === "drawing" ?
+                        <SlideRenderer
+                            lime={lime}
+                            slideId={lime.session.slideId}
+                        />
+                    :   <PlayheadRenderer lime={lime} />}
                 </SlideContainer>
             </div>
         </div>
@@ -230,13 +253,20 @@ const SlideRenderer = track(function SlideRenderer({
             width={LIME_SLIDE_SIZE_PX.x}
             height={LIME_SLIDE_SIZE_PX.y}
         >
-            <path d={getSvgPathFromStroke(outline)} className="fill-stone-600" />
+            <path
+                d={getSvgPathFromStroke(outline)}
+                className="fill-stone-600"
+            />
             {/* <DebugPolyline points={strokePoints.map((p) => p.point)} color="cyan" /> */}
         </svg>
     );
 });
 
-const PlayheadRenderer = track(function PlayheadRenderer({ lime }: { lime: Lime }) {
+const PlayheadRenderer = track(function PlayheadRenderer({
+    lime,
+}: {
+    lime: Lime;
+}) {
     const points = lime.getPlayheadPoints();
     const strokePoints = getStrokePoints(points, LIME_FREEHAND);
     const outline = getStrokeOutlinePoints(strokePoints, LIME_FREEHAND);
@@ -248,7 +278,10 @@ const PlayheadRenderer = track(function PlayheadRenderer({ lime }: { lime: Lime 
             width={LIME_SLIDE_SIZE_PX.x}
             height={LIME_SLIDE_SIZE_PX.y}
         >
-            <path d={getSvgPathFromStroke(outline)} className="fill-stone-600" />
+            <path
+                d={getSvgPathFromStroke(outline)}
+                className="fill-stone-600"
+            />
         </svg>
     );
 });

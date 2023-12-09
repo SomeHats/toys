@@ -19,7 +19,9 @@ export abstract class GlUniform<T> {
     }
 
     get value(): T {
-        return typeof this._value === "function" ? (this._value as () => T)() : this._value;
+        return typeof this._value === "function" ?
+                (this._value as () => T)()
+            :   this._value;
     }
 
     set value(value: T) {
@@ -37,11 +39,18 @@ export class GlUniformVector2 extends GlUniform<Vector2> {
 
 export class GlUniformVector3 extends GlUniform<Vector3> {
     apply() {
-        this.gl.gl.uniform3f(this.location, this.value.x, this.value.y, this.value.z);
+        this.gl.gl.uniform3f(
+            this.location,
+            this.value.x,
+            this.value.y,
+            this.value.z,
+        );
     }
 }
 
-export class GlUniformVector4 extends GlUniform<[number, number, number, number]> {
+export class GlUniformVector4 extends GlUniform<
+    [number, number, number, number]
+> {
     apply(): void {
         this.gl.gl.uniform4f(this.location, ...this.value);
     }
@@ -49,13 +58,21 @@ export class GlUniformVector4 extends GlUniform<[number, number, number, number]
 
 export class GlUniformMatrix3 extends GlUniform<Matrix3> {
     apply(): void {
-        this.gl.gl.uniformMatrix3fv(this.location, false, new Float32Array(this.value.data));
+        this.gl.gl.uniformMatrix3fv(
+            this.location,
+            false,
+            new Float32Array(this.value.data),
+        );
     }
 }
 
 export class GlUniformMatrix4 extends GlUniform<Matrix4> {
     apply(): void {
-        this.gl.gl.uniformMatrix4fv(this.location, false, new Float32Array(this.value.data));
+        this.gl.gl.uniformMatrix4fv(
+            this.location,
+            false,
+            new Float32Array(this.value.data),
+        );
     }
 }
 

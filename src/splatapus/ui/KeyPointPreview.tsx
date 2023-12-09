@@ -25,15 +25,18 @@ export function KeyPointPreview({
         const document = splatapus.document.live();
         return compact(
             Array.from(document.shapes, (shape) => {
-                const actualCenterPoints = interpolationCache.getCenterPointsAtPosition(
-                    document,
-                    shape.id,
-                    PreviewPosition.keyPointId(keyPointId),
-                );
+                const actualCenterPoints =
+                    interpolationCache.getCenterPointsAtPosition(
+                        document,
+                        shape.id,
+                        PreviewPosition.keyPointId(keyPointId),
+                    );
                 if (actualCenterPoints) {
                     return {
                         centerPoints: actualCenterPoints.normalized,
-                        svg: svgPathFromCenterPoints(actualCenterPoints.normalized),
+                        svg: svgPathFromCenterPoints(
+                            actualCenterPoints.normalized,
+                        ),
                         shapeId: shape.id,
                     };
                 }
@@ -77,9 +80,11 @@ export function KeyPointPreview({
         <svg viewBox={`0 0 ${width} ${height}`} style={{ width, height }}>
             <g
                 transform={`translate(${
-                    padding + Math.max(availableWidth - shapeWidth * scale, 0) / 2
+                    padding +
+                    Math.max(availableWidth - shapeWidth * scale, 0) / 2
                 }, ${
-                    padding + Math.max(availableHeight - shapeHeight * scale, 0) / 2
+                    padding +
+                    Math.max(availableHeight - shapeHeight * scale, 0) / 2
                 }) scale(${scale}) translate(${-minX}, ${-minY})`}
             >
                 {paths.map(({ svg, shapeId }) => (

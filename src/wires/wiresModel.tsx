@@ -54,5 +54,8 @@ export function insert<
     Id extends string,
     T extends { readonly id: Id },
 >(model: WiresModel, key: K, item: T): WiresModel {
-    return applyUpdateWithin(model, key, (table) => ({ ...table, [item.id]: item }));
+    return applyUpdateWithin(model, key, (table) => ({
+        ...table,
+        [item.id]: item,
+    }));
 }

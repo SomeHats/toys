@@ -43,22 +43,23 @@ const PianoKeyboardKey = React.memo(function PianoKeyboardKey({
     note: number;
     setRefForKey: (key: HTMLDivElement | null, note: number) => void;
 }) {
-    const style = isAccidental
-        ? ({
-              left: offset - styles.accidentalWidth / 2,
-              width: styles.accidentalWidth,
-              height: styles.accidentalHeight,
-              position: "absolute",
-              zIndex: 1,
-              borderWidth: styles.scale * KEY_BORDER_SIZE,
-          } as const)
-        : ({
-              left: offset,
-              width: styles.standardWidth,
-              height: styles.standardHeight,
-              position: "absolute",
-              borderWidth: styles.scale * KEY_BORDER_SIZE,
-          } as const);
+    const style =
+        isAccidental ?
+            ({
+                left: offset - styles.accidentalWidth / 2,
+                width: styles.accidentalWidth,
+                height: styles.accidentalHeight,
+                position: "absolute",
+                zIndex: 1,
+                borderWidth: styles.scale * KEY_BORDER_SIZE,
+            } as const)
+        :   ({
+                left: offset,
+                width: styles.standardWidth,
+                height: styles.standardHeight,
+                position: "absolute",
+                borderWidth: styles.scale * KEY_BORDER_SIZE,
+            } as const);
 
     return (
         <div

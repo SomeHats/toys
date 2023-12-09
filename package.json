@@ -65,7 +65,7 @@
         "@types/d3-quadtree": "^3.0.6",
         "@types/d3-scale-chromatic": "^3.0.3",
         "@types/delaunator": "^5.0.2",
-        "@types/node": "^16.18.68",
+        "@types/node": "^18.19.3",
         "classnames": "^2.3.2",
         "color": "^4.2.3",
         "culori": "^3.3.0",

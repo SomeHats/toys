@@ -2033,10 +2033,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^16.18.68":
-  version: 16.18.68
-  resolution: "@types/node@npm:16.18.68"
-  checksum: a7df7d5761ec339aff812929fa7ab3f1b3951b2372fda7eeedf8bba134c52cbea9fb721ae99f3f1427f782094bffa0d85509b15bfe426858dd04f12c71d55988
+"@types/node@npm:^18.19.3":
+  version: 18.19.3
+  resolution: "@types/node@npm:18.19.3"
+  dependencies:
+    undici-types: "npm:~5.26.4"
+  checksum: b95d0c0be342275e27d882bb6ca73c0b757d1672a121cae1fc3249eda4f86a8abeb5745e5c5c1150914bcfda323a3fc51526cd34e2097f8355bf7cbf12fa6bcb
   languageName: node
   linkType: hard
 
@@ -6890,7 +6892,7 @@ __metadata:
     "@types/delaunator": "npm:^5.0.2"
     "@types/diff": "npm:^5.0.9"
     "@types/glob": "npm:^8.1.0"
-    "@types/node": "npm:^16.18.68"
+    "@types/node": "npm:^18.19.3"
     "@types/pixi.js": "npm:^5.0.0"
     "@types/react": "npm:^18.2.43"
     "@types/react-dom": "npm:^18.2.17"
@@ -7181,6 +7183,13 @@ __metadata:
     has-symbols: "npm:^1.0.3"
     which-boxed-primitive: "npm:^1.0.2"
   checksum: 06e1ee41c1095e37281cb71a975cb3350f7cb470a0665d2576f02cc9564f623bd90cfc0183693b8a7fdf2d242963dcc3010b509fa3ac683f540c765c0f3e7e43
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~5.26.4":
+  version: 5.26.5
+  resolution: "undici-types@npm:5.26.5"
+  checksum: 0097779d94bc0fd26f0418b3a05472410408877279141ded2bd449167be1aed7ea5b76f756562cb3586a07f251b90799bab22d9019ceba49c037c76445f7cddd
   languageName: node
   linkType: hard
 

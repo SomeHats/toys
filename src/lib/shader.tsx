@@ -21,7 +21,7 @@ export type GlslType = ScalarGlslType;
 
 export type GlslTypeToJsType<T extends ScalarGlslType> = JsTypeByScalarGlslTypeName[T["name"]];
 
-export abstract class GlslExpressionBase<Type extends GlslType> {}
+export abstract class GlslExpressionBase<_Type extends GlslType> {}
 
 export class GlslScalar<Type extends ScalarGlslType> extends GlslExpressionBase<Type> {
     constructor(readonly value: GlslTypeToJsType<Type>) {

@@ -120,7 +120,7 @@ export function fastFormat(color: Color): string {
         return formatRgbFast(color);
     }
 }
-function formatP3Css(c: Color): string {
+function _formatP3Css(c: Color): string {
     return formatCss(p3(c));
 }
 

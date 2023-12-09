@@ -145,8 +145,8 @@ function start(
     };
 
     const matrixUniform = program.uniformMatrix4("u_matrix", Matrix4.IDENTITY);
-    const colorUniform = program.uniformVector4("u_color", [0.2, 1, 0.2, 1]);
-    const reverseLightDirectionUniform = program.uniformVector3(
+    const _colorUniform = program.uniformVector4("u_color", [0.2, 1, 0.2, 1]);
+    const _reverseLightDirectionUniform = program.uniformVector3(
         "u_reverseLightDirection",
         new Vector3(0.5, 0.7, 1).normalize(),
     );

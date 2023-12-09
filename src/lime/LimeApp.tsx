@@ -152,7 +152,7 @@ const SlideThumbnail = track(function SlideThumbnail({
 const Canvas = track(function Canvas({ lime }: { lime: Lime }) {
     const { canvasSize, canvasOffset, slideSize, slideOffset, scaleFactor } = lime.viewport;
     const { slideId } = lime.session;
-    const nextSlideId =
+    const _nextSlideId =
         lime.document.slideIds[
             (lime.document.slideIds.indexOf(slideId) + 1) % lime.document.slideIds.length
         ];

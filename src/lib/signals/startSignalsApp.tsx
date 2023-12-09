@@ -2,7 +2,7 @@ import { assert } from "@/lib/assert";
 import { getListenToMidiInput } from "@/lib/midi";
 import { SignalManager } from "@/lib/signals/Signals";
 import SignalsCanvas, { SignalsCanvasScene } from "@/lib/signals/SignalsCanvas";
-import * as ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 export default async function startSignalsApp(scene: SignalsCanvasScene, debuggerEnabled: boolean) {
     const listenToMidi = await getListenToMidiInput();
@@ -11,13 +11,12 @@ export default async function startSignalsApp(scene: SignalsCanvasScene, debugge
     const root = document.getElementById("root");
     assert(root);
 
-    ReactDOM.render(
+    createRoot(root).render(
         <SignalsCanvas
             debuggerEnabled={debuggerEnabled}
             signalManager={s}
             listenToMidi={listenToMidi}
             scene={scene}
         />,
-        root,
     );
 }

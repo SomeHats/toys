@@ -24,12 +24,12 @@ test("normalizes stack traces", () => {
 test("automatically inserts an error message", () => {
     // this is actually testing code in `vite.config.ts`
     expect(() => assert(2 + 2 === 5)).toThrowErrorMatchingInlineSnapshot(
-        '"Assertion Error: 2 + 2 === 5"',
+        `[Error: Assertion Error: 2 + 2 === 5]`,
     );
 
     expect(() =>
         assertExists((() => undefined)()),
     ).toThrowErrorMatchingInlineSnapshot(
-        '"Assertion Error: (() => undefined)()"',
+        `[Error: Assertion Error: (() => undefined)()]`,
     );
 });

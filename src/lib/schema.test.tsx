@@ -12,12 +12,12 @@ test("Schema.enum", () => {
     expect(arraySchema.parse(true).unwrap()).toBe(true);
     expect(
         arraySchema.parse(false).unwrapError().toString(),
-    ).toMatchInlineSnapshot('"Expected \\"one\\" or 2 or true, got false"');
+    ).toMatchInlineSnapshot(`"Expected "one" or 2 or true, got false"`);
 
     expect(enumSchema.parse("one").unwrap()).toBe(TestEnum.One);
     expect(
         enumSchema.parse({ hello: "world" }).unwrapError().toString(),
-    ).toMatchInlineSnapshot('"Expected \\"one\\" or \\"two\\", got an object"');
+    ).toMatchInlineSnapshot(`"Expected "one" or "two", got an object"`);
 });
 
 test("nested errors", () => {
@@ -40,7 +40,7 @@ test("nested errors", () => {
             .unwrapError()
             .toString(),
     ).toMatchInlineSnapshot(
-        '"At .foo.four: Expected \\"one\\" or \\"two\\" or \\"three\\", got \\"four\\""',
+        `"At .foo.four: Expected "one" or "two" or "three", got "four""`,
     );
     expect(
         schema
@@ -104,7 +104,7 @@ test("UnionSchema", () => {
             .unwrapError()
             .toString(),
     ).toMatchInlineSnapshot(
-        '"At .type: Expected one of \\"cat\\" or \\"dog\\", got a string"',
+        `"At .type: Expected one of "cat" or "dog", got a string"`,
     );
     expect(
         nested
@@ -112,7 +112,7 @@ test("UnionSchema", () => {
             .unwrapError()
             .toString(),
     ).toMatchInlineSnapshot(
-        '"At .animal.type: Expected one of \\"cat\\" or \\"dog\\", got a string"',
+        `"At .animal.type: Expected one of "cat" or "dog", got a string"`,
     );
     expect(
         nested
@@ -157,12 +157,12 @@ test("IndexedUnionSchema", () => {
             .unwrapError()
             .toString(),
     ).toMatchInlineSnapshot(
-        '"At .type: Expected one of \\"cat\\" or \\"dog\\", got a string"',
+        `"At .type: Expected one of "cat" or "dog", got a string"`,
     );
     expect(
         animalSchema.parse(["cow", false]).unwrapError().toString(),
     ).toMatchInlineSnapshot(
-        '"At .0: Expected one of \\"cat\\" or \\"dog\\", got a string"',
+        `"At .0: Expected one of "cat" or "dog", got a string"`,
     );
 
     expect(
@@ -171,7 +171,7 @@ test("IndexedUnionSchema", () => {
             .unwrapError()
             .toString(),
     ).toMatchInlineSnapshot(
-        '"At .animal.type: Expected one of \\"cat\\" or \\"dog\\", got a string"',
+        `"At .animal.type: Expected one of "cat" or "dog", got a string"`,
     );
     expect(
         nested
@@ -179,7 +179,7 @@ test("IndexedUnionSchema", () => {
             .unwrapError()
             .toString(),
     ).toMatchInlineSnapshot(
-        '"At .animal(1).0: Expected one of \\"cat\\" or \\"dog\\", got a string"',
+        `"At .animal(1).0: Expected one of "cat" or "dog", got a string"`,
     );
 
     expect(

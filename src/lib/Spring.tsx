@@ -91,7 +91,7 @@ export class Spring {
     }
 
     private tick(deltaMs: number) {
-        const timeStep = deltaMs / 10000;
+        const timeStep = deltaMs / 1000;
         const { target, tension, friction, value: currentValue, velocity: currentVelocity } = this;
 
         let tempValue = currentValue;

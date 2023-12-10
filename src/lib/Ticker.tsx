@@ -1,8 +1,10 @@
 import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
 import { reactive } from "@/lib/signia";
 import { frameLoop } from "@/lib/utils";
+import { generateUUID } from "three/src/math/MathUtils";
 
 export class Ticker {
+    id = generateUUID();
     private event = new EventEmitter<[ticker: Ticker]>();
 
     @reactive accessor elapsedMs = 0;

@@ -1,5 +1,6 @@
 import { Ticker } from "@/lib/Ticker";
 import { reactive } from "@/lib/signia";
+import { noop } from "@/lib/utils";
 import { Atom, RESET_VALUE, Signal, atom as createAtom } from "@tldraw/state";
 
 function asSignal(signal: number | Signal<number>): Atom<number> {
@@ -48,7 +49,7 @@ export class Spring {
     private readonly _target: Atom<number>;
     private readonly _tension: Atom<number>;
     private readonly _friction: Atom<number>;
-    private readonly ticker: Ticker;
+    readonly ticker: Ticker;
     @reactive accessor value: number;
     @reactive accessor velocity = 0;
 
@@ -56,20 +57,25 @@ export class Spring {
         target: number | Signal<number>;
         tension?: number | Signal<number>;
         friction?: number | Signal<number>;
+        value?: number;
         ticker: Ticker;
+        shouldStart?: boolean;
     }) {
-        console.log("create spring");
         this._target = asSignal(opts.target);
         this._tension = asSignal(opts.tension ?? 230);
         this._friction = asSignal(opts.friction ?? 22);
-        this.value = this._target.__unsafe__getWithoutCapture();
+        this.value = opts.value ?? this._target.__unsafe__getWithoutCapture();
         this.ticker = opts.ticker;
+        const shouldStart = opts.shouldStart ?? true;
+        if (shouldStart) this.start();
+    }
+
+    start() {
         this.destroy = this.ticker.listen(({ deltaMs }) => {
             this.tick(deltaMs);
         });
     }
-
-    destroy: () => void;
+    destroy = noop;
 
     get target() {
         return this._target.value;
@@ -93,7 +99,7 @@ export class Spring {
     }
 
     private tick(deltaMs: number) {
-        const timeStep = deltaMs / 10000;
+        const timeStep = Math.min(deltaMs, 100) / 1000;
         const {
             target,
             tension,

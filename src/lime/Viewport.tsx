@@ -18,7 +18,7 @@ export class Viewport {
     }
 
     @memo get availableCanvasSize() {
-        return this.canvasSize.sub(LIME_SLIDE_PADDING_PX.mul(2));
+        return this.canvasSize.sub(LIME_SLIDE_PADDING_PX.scale(2));
     }
 
     @memo get scaleFactor() {
@@ -54,7 +54,7 @@ export class Viewport {
 
     slideToScreen(slideCoords: Vector2) {
         return slideCoords
-            .mul(this.scaleFactor)
+            .scale(this.scaleFactor)
             .add(this.slideOffset)
             .add(this.canvasOffset);
     }

@@ -73,8 +73,8 @@ export function arcLayer({ line, uiTarget, showExtras }: LayerProps) {
                         pathSegment.circle.radius,
                         pathSegment.circle.radius,
                         0,
-                        0,
-                        pathSegment.isAnticlockwise ? 0 : 1,
+                        false,
+                        !pathSegment.isAnticlockwise,
                         arcEndPoint,
                     );
                 } else {

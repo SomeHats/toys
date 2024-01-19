@@ -1,21 +1,20 @@
-import { DebugLabel } from "@/lib/DebugSvg";
 import { Spring } from "@/lib/Spring";
 import { Ticker } from "@/lib/Ticker";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
-import { constrain, lerp, mapRange, noop, times } from "@/lib/utils";
+import { constrain, invLerp, mapRange, times } from "@/lib/utils";
 import { track } from "@tldraw/state";
 import { makeNoise3D, makeNoise4D } from "open-simplex-noise";
-import { useEffect, useRef, useState } from "react";
-import { x } from "vitest/dist/reporters-OH1c16Kq";
+import { useEffect, useState } from "react";
+import { degToRad } from "three/src/math/MathUtils";
 
 const SCALE_T = 0.0001;
-const SCALE_XY = 0.003;
+const SCALE_XY = 0.001;
 
-type NoiseOpts = {
+interface NoiseOpts {
     scaleT?: number;
     scaleXy?: number;
-};
+}
 
 interface Tree {
     x: number;
@@ -36,7 +35,7 @@ function useNoise3d(
     );
 }
 
-function useNoise4d(
+export function useNoise4d(
     position: Vector2,
     ticker: Ticker,
     { scaleT = 1, scaleXy = 1 }: NoiseOpts = {},
@@ -178,49 +177,80 @@ function Tree({
         const leanLeft = Math.sqrt(constrain(0, 1, splitLeft));
         const leanRight = Math.sqrt(constrain(0, 1, splitRight));
 
-        const leftWidth = lerp(tree.width, tree.width * 0.3, leanLeft);
-        const rightWidth = lerp(tree.width, tree.width * 0.3, leanRight);
-
-        const leftX = tree.x - tree.width / 2 + leftWidth / 2;
-        const rightX = tree.x + tree.width / 2 - rightWidth / 2;
+        const splitY = baseY - splitPoint;
 
         left = (
-            <g
-                transform={`translate(${leftX} ${baseY - splitPoint}) rotate(${
-                    -45 * leanLeft
-                })`}
-            >
-                <Tree
+            <g transform={`translate(${tree.x} ${splitY})`}>
+                <Branch
                     tree={{
                         x: 0,
                         height: tree.height - splitPoint,
-                        width: leftWidth,
+                        width: tree.width,
                     }}
                     xy={xy}
                     t={t}
-                    baseY={0}
+                    lean={leanLeft}
+                />
+            </g>
+        );
+        right = (
+            <g transform={`translate(${tree.x} ${splitY}) scale(-1 1)`}>
+                <Branch
+                    tree={{
+                        x: 0,
+                        height: tree.height - splitPoint,
+                        width: tree.width,
+                    }}
+                    xy={xy}
+                    t={t}
+                    lean={leanRight}
                 />
             </g>
         );
 
-        right = (
-            <g
-                transform={`translate(${rightX} ${baseY - splitPoint}) rotate(${
-                    45 * leanRight
-                })`}
-            >
-                <Tree
-                    tree={{
-                        x: 0,
-                        height: tree.height - splitPoint,
-                        width: rightWidth,
-                    }}
-                    xy={xy}
-                    t={t}
-                    baseY={0}
-                />
-            </g>
-        );
+        // const leftWidth = lerp(tree.width, tree.width * 0.3, leanLeft);
+        // const rightWidth = lerp(tree.width, tree.width * 0.3, leanRight);
+
+        // const leftX = tree.x - tree.width / 2 + leftWidth / 2;
+        // const rightX = tree.x + tree.width / 2 - rightWidth / 2;
+
+        // left = (
+        //     <g
+        //         transform={`translate(${leftX} ${baseY - splitPoint}) rotate(${
+        //             -45 * leanLeft
+        //         })`}
+        //     >
+        //         <Tree
+        //             tree={{
+        //                 x: 0,
+        //                 height: tree.height - splitPoint,
+        //                 width: leftWidth,
+        //             }}
+        //             xy={xy}
+        //             t={t}
+        //             baseY={0}
+        //         />
+        //     </g>
+        // );
+
+        // right = (
+        //     <g
+        //         transform={`translate(${rightX} ${baseY - splitPoint}) rotate(${
+        //             45 * leanRight
+        //         })`}
+        //     >
+        //         <Tree
+        //             tree={{
+        //                 x: 0,
+        //                 height: tree.height - splitPoint,
+        //                 width: rightWidth,
+        //             }}
+        //             xy={xy}
+        //             t={t}
+        //             baseY={0}
+        //         />
+        //     </g>
+        // );
     }
 
     return (
@@ -237,6 +267,41 @@ function Tree({
                 className="stroke-red-500"
             /> */}
         </>
+    );
+}
+
+function Branch({
+    tree,
+    xy,
+    t,
+    lean,
+}: {
+    tree: Tree;
+    xy: Vector2;
+    t: Ticker;
+    lean: number;
+}) {
+    const angleDeg = mapRange(-1, 1, 20, 60, useNoise3d(xy, t));
+    const angleRad = degToRad(angleDeg);
+    const r = mapRange(-1, 1, 5, 10, useNoise3d(xy, t));
+
+    const lowCenter = new Vector2(r, 0);
+    const arcLength = r * angleRad;
+    const amtOfLowArc = constrain(0, 1, invLerp(0, arcLength, tree.height));
+
+    const target = Vector2.ZERO.rotateAround(lowCenter, angleRad * amtOfLowArc);
+
+    const path = new SvgPathBuilder()
+        .moveTo(0, tree.width / 2)
+        .arcTo(r, r, 0, false, true, target);
+
+    return (
+        <path
+            d={path.toString()}
+            className="stroke-stone-600"
+            fill="none"
+            strokeWidth={1}
+        />
     );
 }
 

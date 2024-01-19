@@ -1,3 +1,4 @@
+import { scale } from "@/blob-tree/canvas";
 import {
     DebugDraw,
     FillOptions,
@@ -5,6 +6,7 @@ import {
     StrokeOptions,
 } from "@/lib/DebugDraw";
 import { Vector2, Vector2Ish } from "@/lib/geom/Vector2";
+import { useSvgScale } from "@/lib/react/Svg";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { ComponentProps } from "react";
 
@@ -12,7 +14,7 @@ function asProps<El extends keyof JSX.IntrinsicElements>() {
     return <T extends ComponentProps<El>>(props: T) => props;
 }
 
-function getStrokeProps({
+function useStrokeProps({
     strokeWidth = 1,
     stroke = "transparent",
     strokeCap = "butt",
@@ -20,13 +22,14 @@ function getStrokeProps({
     strokeDashOffset = 0,
     strokeJoin = "round",
 }: StrokeOptions = {}) {
+    const scale = useSvgScale();
     return asProps<"path">()({
         stroke: stroke,
-        strokeWidth,
+        strokeWidth: strokeWidth / scale,
         strokeLinecap: strokeCap,
         strokeLinejoin: strokeJoin,
-        strokeDasharray: strokeDash.join(" "),
-        strokeDashoffset: strokeDashOffset,
+        strokeDasharray: strokeDash.map((dash) => dash / scale).join(" "),
+        strokeDashoffset: strokeDashOffset / scale,
     });
 }
 
@@ -36,9 +39,9 @@ function getFillProps({ fill = "transparent" }: FillOptions = {}) {
     });
 }
 
-function getStrokeAndFillProps(options: StrokeAndFillOptions) {
+function useStrokeAndFillProps(options: StrokeAndFillOptions) {
     return {
-        ...getStrokeProps(options),
+        ...useStrokeProps(options),
         ...getFillProps(options),
     };
 }
@@ -58,16 +61,19 @@ export function DebugLabel({
     position: Vector2Ish;
     color?: string;
 }) {
+    const scale = useSvgScale();
     if (!label) return null;
 
-    const adjustedPosition = Vector2.from(position).add(DebugDraw.LABEL_OFFSET);
+    const adjustedPosition = Vector2.from(position).add(
+        DebugDraw.LABEL_OFFSET.scale(1 / scale),
+    );
     return (
         <text
             x={adjustedPosition.x}
             y={adjustedPosition.y}
             className="font-sans"
-            textAnchor="middle"
-            fontSize={8}
+            textAnchor="left"
+            fontSize={8 / scale}
             {...getFillProps({ fill: color ?? DebugDraw.DEFAULT_DEBUG_COLOR })}
         >
             {label}
@@ -75,7 +81,10 @@ export function DebugLabel({
     );
 }
 
-interface DebugOptions { color?: string; label?: string }
+interface DebugOptions {
+    color?: string;
+    label?: string;
+}
 
 export function DebugSvgPath({
     color,
@@ -87,7 +96,7 @@ export function DebugSvgPath({
     return (
         <path
             d={path}
-            {...getStrokeProps(getDebugStrokeOptions(color))}
+            {...useStrokeProps(getDebugStrokeOptions(color))}
             fill="transparent"
         />
     );
@@ -97,6 +106,7 @@ export function DebugPointX({
     position,
     ...debugOpts
 }: { position: Vector2Ish } & DebugOptions) {
+    const scale = useSvgScale();
     const { x, y } = Vector2.from(position);
     return (
         <>
@@ -104,20 +114,20 @@ export function DebugPointX({
                 {...debugOpts}
                 path={new SvgPathBuilder()
                     .moveTo(
-                        x - DebugDraw.DEBUG_POINT_SIZE,
-                        y - DebugDraw.DEBUG_POINT_SIZE,
+                        x - DebugDraw.DEBUG_POINT_SIZE / scale,
+                        y - DebugDraw.DEBUG_POINT_SIZE / scale,
                     )
                     .lineTo(
-                        x + DebugDraw.DEBUG_POINT_SIZE,
-                        y + DebugDraw.DEBUG_POINT_SIZE,
+                        x + DebugDraw.DEBUG_POINT_SIZE / scale,
+                        y + DebugDraw.DEBUG_POINT_SIZE / scale,
                     )
                     .moveTo(
-                        x - DebugDraw.DEBUG_POINT_SIZE,
-                        y + DebugDraw.DEBUG_POINT_SIZE,
+                        x - DebugDraw.DEBUG_POINT_SIZE / scale,
+                        y + DebugDraw.DEBUG_POINT_SIZE / scale,
                     )
                     .lineTo(
-                        x + DebugDraw.DEBUG_POINT_SIZE,
-                        y - DebugDraw.DEBUG_POINT_SIZE,
+                        x + DebugDraw.DEBUG_POINT_SIZE / scale,
+                        y - DebugDraw.DEBUG_POINT_SIZE / scale,
                     )
                     .toString()}
             />
@@ -130,14 +140,15 @@ export function DebugPointO({
     position,
     ...debugOpts
 }: { position: Vector2Ish } & DebugOptions) {
+    const scale = useSvgScale();
     const { x, y } = Vector2.from(position);
     return (
         <>
             <circle
                 cx={x}
                 cy={y}
-                r={DebugDraw.DEBUG_POINT_SIZE}
-                {...getStrokeProps(getDebugStrokeOptions(debugOpts.color))}
+                r={DebugDraw.DEBUG_POINT_SIZE / scale}
+                {...useStrokeProps(getDebugStrokeOptions(debugOpts.color))}
             />
             <DebugLabel {...debugOpts} position={position} />
         </>
@@ -149,17 +160,18 @@ export function DebugArrow({
     end: _end,
     ...debugOpts
 }: { start: Vector2Ish; end: Vector2Ish } & DebugOptions) {
+    const scale = useSvgScale();
     const start = Vector2.from(_start);
     const end = Vector2.from(_end);
 
     const vector = end.sub(start);
     const arrowLeftPoint = vector
         .rotate(-DebugDraw.DEBUG_ARROW_ANGLE)
-        .withMagnitude(DebugDraw.DEBUG_ARROW_SIZE)
+        .withMagnitude(DebugDraw.DEBUG_ARROW_SIZE / scale)
         .add(end);
     const arrowRightPoint = vector
         .rotate(+DebugDraw.DEBUG_ARROW_ANGLE)
-        .withMagnitude(DebugDraw.DEBUG_ARROW_SIZE)
+        .withMagnitude(DebugDraw.DEBUG_ARROW_SIZE / scale)
         .add(end);
 
     return (
@@ -208,7 +220,7 @@ export function DebugCircle({
                 cx={x}
                 cy={y}
                 r={radius}
-                {...getStrokeAndFillProps(
+                {...useStrokeAndFillProps(
                     getDebugStrokeOptions(debugOpts.color),
                 )}
             />

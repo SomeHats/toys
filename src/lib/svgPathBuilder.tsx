@@ -67,14 +67,16 @@ export class SvgPathBuilder {
         rx: number,
         ry: number,
         xAxisRotation: number,
-        largeArcFlag: number,
-        sweepFlag: number,
+        largeArcFlag: boolean,
+        sweepFlag: boolean,
         ...args: Vector2Args
     ) {
         const position = Vector2.fromArgs(args);
         this.lastPoint = position;
         return this.add(
-            `A${rx} ${ry} ${xAxisRotation} ${largeArcFlag} ${sweepFlag} ${position.x} ${position.y}`,
+            `A${rx} ${ry} ${xAxisRotation} ${largeArcFlag ? 1 : 0} ${
+                sweepFlag ? 1 : 0
+            } ${position.x} ${position.y}`,
         );
     }
 

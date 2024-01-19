@@ -1,4 +1,5 @@
 import { Vector2 } from "@/lib/geom/Vector2";
+import { mapRange } from "@/lib/utils";
 
 export default class AABB {
     static fromLeftTopRightBottom(
@@ -20,6 +21,20 @@ export default class AABB {
         height: number,
     ): AABB {
         return new AABB(new Vector2(left, top), new Vector2(width, height));
+    }
+
+    static from({
+        x,
+        y,
+        width,
+        height,
+    }: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }) {
+        return AABB.fromLeftTopWidthHeight(x, y, width, height);
     }
 
     constructor(

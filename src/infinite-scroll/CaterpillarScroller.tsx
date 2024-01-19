@@ -317,8 +317,8 @@ function WormyScrollbar({
                             3.5,
                             2,
                             0,
-                            0,
-                            0,
+                            false,
+                            false,
                             lineBasePx + 1,
                             effectiveTopPx + effectiveHeightPx + 2,
                         )

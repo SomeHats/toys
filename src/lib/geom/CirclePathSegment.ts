@@ -89,8 +89,8 @@ export default class CirclePathSegment implements PathSegment {
             this.circle.radius,
             this.circle.radius,
             0,
-            0,
-            this.isAnticlockwise ? 0 : 1,
+            false,
+            !this.isAnticlockwise,
             this.getEnd(),
         );
     }

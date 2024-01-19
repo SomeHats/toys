@@ -204,9 +204,7 @@ export function keys<K extends string, V>(
     return Object.keys(object) as K[];
 }
 
-export function values<K extends string, V>(
-    object: ReadonlyRecord<K, V>,
-): V[] {
+export function values<K extends string, V>(object: ReadonlyRecord<K, V>): V[] {
     return Object.values(object);
 }
 
@@ -382,10 +380,7 @@ export function copyArrayAndReplace<T>(
     return copied;
 }
 
-export function copyAndRemove<T>(
-    array: readonly T[],
-    index: number,
-): T[] {
+export function copyAndRemove<T>(array: readonly T[], index: number): T[] {
     const copied = array.slice();
     copied.splice(index, 1);
     return copied;
@@ -466,10 +461,7 @@ export function radiansToDegrees(radians: number) {
     return (radians * 180) / Math.PI;
 }
 
-export function windows<T>(
-    array: readonly T[],
-    size: number,
-): T[][] {
+export function windows<T>(array: readonly T[], size: number): T[][] {
     const result = [];
     for (let i = 0; i < array.length - size + 1; i++) {
         result.push(array.slice(i, i + size));

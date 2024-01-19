@@ -1,7 +1,13 @@
 import { Result } from "@/lib/Result";
 import { assert } from "@/lib/assert";
+import AABB from "@/lib/geom/AABB";
 import { Schema } from "@/lib/schema";
-import { lerp, normalizeAngle } from "@/lib/utils";
+import {
+    constrain as clamp,
+    lerp,
+    mapRange,
+    normalizeAngle,
+} from "@/lib/utils";
 
 export type Vector2Ish =
     | { readonly x: number; readonly y: number }
@@ -161,8 +167,9 @@ export class Vector2 {
     scale(scale: number): Vector2 {
         return new Vector2(this.x * scale, this.y * scale);
     }
-    mul(scale: number): Vector2 {
-        return this.scale(scale);
+    mul(...args: Vector2Args): Vector2 {
+        const other = Vector2.fromArgs(args);
+        return new Vector2(this.x * other.x, this.y * other.y);
     }
 
     negate(): Vector2 {
@@ -233,5 +240,19 @@ export class Vector2 {
     /** Project this point in the direction `direction` by scalar `distance` */
     project(direction: Vector2Ish, distance: number): Vector2 {
         return Vector2.from(direction).scale(distance).add(this);
+    }
+
+    mapRange(from: AABB, to: AABB) {
+        return new Vector2(
+            mapRange(from.left, from.right, to.left, to.right, this.x),
+            mapRange(from.top, from.bottom, to.top, to.bottom, this.y),
+        );
+    }
+
+    clamp(within: AABB) {
+        return new Vector2(
+            clamp(within.left, within.right, this.x),
+            clamp(within.top, within.bottom, this.y),
+        );
     }
 }

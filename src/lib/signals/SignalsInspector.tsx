@@ -1,4 +1,4 @@
-import DragCover from "@/lib/DragCover";
+import MouseDragCover from "@/lib/MouseDragCover";
 import { assert } from "@/lib/assert";
 import { useLocalStorageState } from "@/lib/hooks/useStoredState";
 import { ListenToMidiInputFn } from "@/lib/midi";
@@ -198,7 +198,7 @@ function SignalControl({
             signal.set(startSignalValue + delta);
         };
 
-        const dragCover = new DragCover({
+        const dragCover = new MouseDragCover({
             move: (e: MouseEvent) => {
                 onMove(e.screenY);
             },

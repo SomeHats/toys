@@ -233,6 +233,11 @@ export class Vector2 {
         return new Vector2(lerp(this.x, other.x, n), lerp(this.y, other.y, n));
     }
 
+    moveToward(other: Vector2Ish, distance: number): Vector2 {
+        const direction = Vector2.from(other).sub(this).normalize();
+        return this.add(direction.scale(distance));
+    }
+
     perpendicular(): Vector2 {
         return new Vector2(this.y, -this.x);
     }

@@ -43,10 +43,47 @@ export default class Circle {
         return point.distanceTo(this.center) < this.radius;
     }
 
+    containsCircle(other: Circle): boolean {
+        return (
+            this.center.distanceTo(other.center) + other.radius <= this.radius
+        );
+    }
+
     intersectsCircle(other: Circle): boolean {
         return (
             this.center.distanceTo(other.center) < this.radius + other.radius
         );
+    }
+
+    intersectWithCircle(
+        other: Circle,
+    ): [Vector2] | [Vector2, Vector2] | undefined {
+        const distance = this.center.distanceTo(other.center);
+        if (
+            distance + other.radius <= this.radius ||
+            distance + this.radius <= other.radius
+        ) {
+            return undefined;
+        }
+
+        const a =
+            (this.radius ** 2 - other.radius ** 2 + distance ** 2) /
+            (2 * distance);
+        const h = Math.sqrt(this.radius ** 2 - a ** 2);
+        const x2 =
+            this.center.x + (a * (other.center.x - this.center.x)) / distance;
+        const y2 =
+            this.center.y + (a * (other.center.y - this.center.y)) / distance;
+        const x3 = x2 + (h * (other.center.y - this.center.y)) / distance;
+        const y3 = y2 - (h * (other.center.x - this.center.x)) / distance;
+        const x4 = x2 - (h * (other.center.y - this.center.y)) / distance;
+        const y4 = y2 + (h * (other.center.x - this.center.x)) / distance;
+
+        if (h === 0) {
+            return [new Vector2(x2, y2)];
+        }
+
+        return [new Vector2(x3, y3), new Vector2(x4, y4)];
     }
 
     withRadius(radius: number): Circle {

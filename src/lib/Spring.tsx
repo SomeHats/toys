@@ -1,7 +1,15 @@
-import { Ticker } from "@/lib/Ticker";
+import { Ticker, useTicker } from "@/lib/Ticker";
+import { assert, assertExists } from "@/lib/assert";
 import { reactive } from "@/lib/signia";
 import { noop } from "@/lib/utils";
-import { Atom, RESET_VALUE, Signal, atom as createAtom } from "@tldraw/state";
+import {
+    Atom,
+    RESET_VALUE,
+    Signal,
+    atom as createAtom,
+    useValue,
+} from "@tldraw/state";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 
 function asSignal(signal: number | Signal<number>): Atom<number> {
     const writeTarget = createAtom(
@@ -68,6 +76,11 @@ export class Spring {
         this.ticker = opts.ticker;
         const shouldStart = opts.shouldStart ?? true;
         if (shouldStart) this.start();
+    }
+
+    reset() {
+        this.value = this.target;
+        this.velocity = 0;
     }
 
     start() {
@@ -154,4 +167,37 @@ export class Spring {
             this.velocity += dvdt * timeStep;
         }
     }
+}
+
+export function useSpring(opts: {
+    target: number;
+    tension?: number;
+    friction?: number;
+    value?: number;
+}) {
+    const ticker = useTicker();
+    const [storedSpring, setSpring] = useState<Spring | null>(null);
+    let spring = storedSpring;
+    if (!storedSpring || storedSpring.ticker !== ticker) {
+        if (storedSpring) storedSpring.destroy();
+        spring = new Spring({ ...opts, ticker });
+        setSpring(spring);
+    }
+
+    useEffect(() => {
+        assert(spring);
+        spring.target = opts.target;
+        spring.tension = opts.tension ?? 230;
+        spring.friction = opts.friction ?? 22;
+    }, [spring, opts.target, opts.tension, opts.friction, opts.value]);
+
+    useEffect(() => {
+        console.log("start spring", spring);
+        assertExists(spring).start();
+        return () => {
+            assertExists(spring).destroy();
+        };
+    }, [spring]);
+
+    return useValue("spring", () => assertExists(spring).value, [spring]);
 }

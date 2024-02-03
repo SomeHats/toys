@@ -13,6 +13,7 @@ import {
 interface ButtonProps extends ComponentPropsWithoutRef<"button"> {
     iconLeft?: ReactNode;
     iconRight?: ReactNode;
+    href?: string;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -47,18 +48,34 @@ export function BouncyLabel({ children }: { children: ReactNode }) {
 
 export const PlainButton = forwardRef<
     HTMLButtonElement,
-    ComponentPropsWithoutRef<"button">
+    ComponentPropsWithoutRef<"button"> & { href?: string }
 >(function PlainButton({ className, style, ...props }, ref) {
     const [element, setElement] = useState<null | HTMLButtonElement>(null);
     const clipPath = useSquircleClipPath(element);
+
+    const finalRef = useMergedRefs(setElement, ref);
+    const finalClassName = classNames(
+        "group inline-flex items-center rounded text-center font-bold tracking-wide text-stone-400 hover:bg-stone-300/25 hover:text-stone-500 focus:outline-none focus-visible:text-stone-600",
+        className,
+    );
+    const finalStyle = { ...style, clipPath };
+
+    if (props.href) {
+        return (
+            <a
+                // @ts-expect-error im just hacking in link support tbh
+                ref={finalRef}
+                className={finalClassName}
+                style={finalStyle}
+                {...props}
+            />
+        );
+    }
     return (
         <button
-            ref={useMergedRefs(setElement, ref)}
-            className={classNames(
-                "group inline-flex items-center rounded text-center font-bold tracking-wide text-stone-400 hover:bg-stone-300/25 hover:text-stone-500 focus:outline-none focus-visible:text-stone-600",
-                className,
-            )}
-            style={{ ...style, clipPath }}
+            ref={finalRef}
+            className={finalClassName}
+            style={finalStyle}
             {...props}
         />
     );

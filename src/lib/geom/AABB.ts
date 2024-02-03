@@ -2,6 +2,8 @@ import { Vector2 } from "@/lib/geom/Vector2";
 import { mapRange } from "@/lib/utils";
 
 export default class AABB {
+    static ZERO = new AABB(Vector2.ZERO, Vector2.ZERO);
+
     static fromLeftTopRightBottom(
         left: number,
         top: number,
@@ -64,6 +66,10 @@ export default class AABB {
 
     getCenter(): Vector2 {
         return this.origin.add(this.size.scale(0.5));
+    }
+
+    equals(other: AABB): boolean {
+        return this.origin.equals(other.origin) && this.size.equals(other.size);
     }
 
     get left(): number {

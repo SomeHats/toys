@@ -1,6 +1,7 @@
 import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
 import { reactive } from "@/lib/signia";
 import { frameLoop } from "@/lib/utils";
+import { useEffect, useState, createContext, useContext } from "react";
 import { generateUUID } from "three/src/math/MathUtils";
 
 export class Ticker {
@@ -36,4 +37,28 @@ export class Ticker {
     listen(cb: (ticker: Ticker) => void) {
         return this.event.listen(cb);
     }
+}
+
+const TickerContext = createContext<Ticker | null>(null);
+export function TickerProvider({ children }: { children: React.ReactNode }) {
+    const [ticker] = useState(() => new Ticker());
+
+    useEffect(() => {
+        ticker.start();
+        return () => {
+            ticker.stop();
+        };
+    }, [ticker]);
+
+    return (
+        <TickerContext.Provider value={ticker}>
+            {children}
+        </TickerContext.Provider>
+    );
+}
+
+export function useTicker() {
+    const ticker = useContext(TickerContext);
+    if (!ticker) throw new Error("Ticker not found");
+    return ticker;
 }

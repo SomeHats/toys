@@ -1,10 +1,14 @@
+import { promiseWithResolve } from "@/lib/utils";
 import { unstable_batchedUpdates } from "react-dom";
+import { s } from "vitest/dist/reporters-OH1c16Kq";
 
 export type Unsubscribe = () => void;
 
 type Listener<Args extends unknown[]> = (...args: Args) => void;
 
-export default class EventEmitter<Args extends unknown[] = []> {
+export default class EventEmitter<Args extends unknown[] = []>
+    implements AsyncIterable<Args[0]>
+{
     private handlers = new Set<Listener<Args>>();
 
     listen(listener: Listener<Args>) {
@@ -29,5 +33,16 @@ export default class EventEmitter<Args extends unknown[] = []> {
 
     hasListeners(): boolean {
         return this.handlers.size > 0;
+    }
+
+    async *[Symbol.asyncIterator]() {
+        while (true) {
+            const promise = promiseWithResolve<Args[0]>();
+            const unsubscribe = this.listen((...args) => {
+                promise.resolve(args[0]);
+                unsubscribe();
+            });
+            yield await promise;
+        }
     }
 }

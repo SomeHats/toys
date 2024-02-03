@@ -12,6 +12,12 @@ module.exports = {
                 "in-back-xl": "cubic-bezier(0.36, 0, 0.66, -1.96)",
                 "out-back-xl": "cubic-bezier(0.34, 2.96, 0.64, 1)",
             },
+            keyframes: {
+                fade: {
+                    "0%": { opacity: 0 },
+                    "100%": { opacity: 1 },
+                },
+            },
             colors: {
                 "cyber-grey": {
                     0: "#fbfbfc",

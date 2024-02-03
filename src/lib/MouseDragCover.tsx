@@ -20,7 +20,7 @@ const dragCoverStyle = {
     touchAction: "none",
 };
 
-export default class DragCover {
+export default class MouseDragCover {
     private onDown?: MouseEventHandler;
     private onMove?: MouseEventHandler;
     private onUp?: MouseEventHandler;

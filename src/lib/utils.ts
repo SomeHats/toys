@@ -1,5 +1,7 @@
 export { default as deepEqual } from "fast-deep-equal/es6";
 
+export const PI2 = Math.PI * 2;
+
 export type TimeoutId = ReturnType<typeof setTimeout>;
 export type IntervalId = ReturnType<typeof setInterval>;
 
@@ -324,6 +326,19 @@ export function promiseFromEvents<T>(
     });
 }
 
+export function promiseWithResolve<T>(): Promise<T> & {
+    resolve: (value: T) => void;
+    reject: (error: unknown) => void;
+} {
+    let resolve: (value: T) => void;
+    let reject: (error: unknown) => void;
+    const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+    });
+    return Object.assign(promise, { resolve: resolve!, reject: reject! });
+}
+
 export function mapObjectValues<K extends string, V, U>(
     object: ReadonlyRecord<K, V>,
     fn: (value: V, key: K, obj: ReadonlyRecord<K, V>) => U,
@@ -517,4 +532,77 @@ export function binarySearch(
         }
     }
     return low - 1;
+}
+
+export function lazy<T>(fn: () => T): () => T {
+    let value: T | undefined;
+    return () => {
+        if (value === undefined) {
+            value = fn();
+        }
+        return value;
+    };
+}
+
+/**
+ * @param a - Any angle in radians
+ * @returns A number between 0 and 2 * PI
+ * @public
+ */
+export function canonicalizeRotation(a: number) {
+    a = a % PI2;
+    if (a < 0) {
+        a = a + PI2;
+    } else if (a === 0) {
+        // prevent negative zero
+        a = 0;
+    }
+    return a;
+}
+
+/**
+ * Get the clockwise angle distance between two angles.
+ *
+ * @param a0 - The first angle.
+ * @param a1 - The second angle.
+ * @public
+ */
+export function clockwiseAngleDist(a0: number, a1: number): number {
+    a0 = canonicalizeRotation(a0);
+    a1 = canonicalizeRotation(a1);
+    if (a0 > a1) {
+        a1 += PI2;
+    }
+    return a1 - a0;
+}
+
+/**
+ * Get the counter-clockwise angle distance between two angles.
+ *
+ * @param a0 - The first angle.
+ * @param a1 - The second angle.
+ * @public
+ */
+export function counterClockwiseAngleDist(a0: number, a1: number): number {
+    return PI2 - clockwiseAngleDist(a0, a1);
+}
+
+/**
+ * Get the angle of a point on an arc.
+ * @param fromAngle - The angle from center to arc's start point (A) on the circle
+ * @param toAngle - The angle from center to arc's end point (B) on the circle
+ * @param direction - The direction of the arc (1 = counter-clockwise, -1 = clockwise)
+ * @returns The distance in radians between the two angles according to the direction
+ * @public
+ */
+export function angleDistance(
+    fromAngle: number,
+    toAngle: number,
+    direction: number,
+) {
+    const dist =
+        direction < 0 ?
+            clockwiseAngleDist(fromAngle, toAngle)
+        :   counterClockwiseAngleDist(fromAngle, toAngle);
+    return dist;
 }

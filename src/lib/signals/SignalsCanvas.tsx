@@ -1,4 +1,4 @@
-import DragCover from "@/lib/DragCover";
+import MouseDragCover from "@/lib/MouseDragCover";
 import { assert } from "@/lib/assert";
 import { ListenToMidiInputFn } from "@/lib/midi";
 import { Signal, SignalManager } from "@/lib/signals/Signals";
@@ -105,7 +105,7 @@ function SignalsCanvas({
 
         container.addEventListener("mousedown", () => {
             signals.mouseDown.set(1);
-            const dragCover = new DragCover({
+            const dragCover = new MouseDragCover({
                 up: () => {
                     signals.mouseDown.set(0);
                     dragCover.remove();

@@ -1,4 +1,7 @@
+import { assertExists } from "@/lib/assert";
+import Circle from "@/lib/geom/Circle";
 import { Vector2, Vector2Args, Vector2Ish } from "@/lib/geom/Vector2";
+import { clockwiseAngleDist } from "@/lib/utils";
 
 export class SvgPathBuilder {
     private parts: string[] = [];
@@ -78,6 +81,47 @@ export class SvgPathBuilder {
                 sweepFlag ? 1 : 0
             } ${position.x} ${position.y}`,
         );
+    }
+
+    cArcTo(
+        r: number,
+        largeArcFlag: boolean,
+        sweepFlag: boolean,
+        ...args: Vector2Args
+    ) {
+        return this.arcTo(r, r, 0, largeArcFlag, sweepFlag, ...args);
+    }
+
+    clockwiseArcTo(center: Vector2Ish, ...args: Vector2Args) {
+        const c = Vector2.from(center);
+        const t = Vector2.fromArgs(args);
+        const r = c.distanceTo(t);
+        const largeArcFlag =
+            clockwiseAngleDist(
+                c.angleTo(assertExists(this.lastPoint)),
+                c.angleTo(t),
+            ) > Math.PI;
+        return this.cArcTo(r, largeArcFlag, true, t);
+    }
+
+    counterClockwiseArcTo(center: Vector2Ish, ...args: Vector2Args) {
+        const c = Vector2.from(center);
+        const t = Vector2.fromArgs(args);
+        const r = c.distanceTo(t);
+        const largeArcFlag =
+            clockwiseAngleDist(
+                c.angleTo(assertExists(this.lastPoint)),
+                c.angleTo(t),
+            ) < Math.PI;
+        return this.cArcTo(r, largeArcFlag, false, t);
+    }
+
+    circle(circle: Circle) {
+        const left = circle.center.add(circle.radius, 0);
+        const right = circle.center.add(-circle.radius, 0);
+        return this.moveTo(left)
+            .clockwiseArcTo(circle.center, right)
+            .clockwiseArcTo(circle.center, left);
     }
 
     quadraticCurveTo(control: Vector2Ish, target: Vector2Ish) {

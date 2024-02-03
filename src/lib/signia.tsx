@@ -21,7 +21,7 @@ export function memo<This extends object, Value>(
         );
     });
     return function (this: This) {
-        return assertExists(computeds.get(this )).value;
+        return assertExists(computeds.get(this)).value;
     };
 }
 

@@ -12,8 +12,10 @@ export type TapGestureHandler<Args extends readonly unknown[] = []> = (
     event: PointerEvent,
     ...args: Args
 ) => void;
-export type DragStartGestureHandler<Args extends readonly unknown[] = []> =
-    (event: PointerEvent, ...args: Args) => DragGestureHandler | null;
+export type DragStartGestureHandler<Args extends readonly unknown[] = []> = (
+    event: PointerEvent,
+    ...args: Args
+) => DragGestureHandler | null;
 export interface DragGestureHandler {
     couldBeTap: boolean;
     pointerCapture: boolean;

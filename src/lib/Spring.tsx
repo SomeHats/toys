@@ -9,7 +9,7 @@ import {
     atom as createAtom,
     useValue,
 } from "@tldraw/state";
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 function asSignal(signal: number | Signal<number>): Atom<number> {
     const writeTarget = createAtom(

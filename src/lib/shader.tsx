@@ -11,10 +11,22 @@ export interface ScalarGlslType {
     readonly name: ScalarGlslTypeName;
 }
 
-export interface BoolGlslType { readonly type: "scalar"; readonly name: "bool" }
-export interface IntGlslType { readonly type: "scalar"; readonly name: "int" }
-export interface UintGlslType { readonly type: "scalar"; readonly name: "uint" }
-export interface FloatGlslType { readonly type: "scalar"; readonly name: "float" }
+export interface BoolGlslType {
+    readonly type: "scalar";
+    readonly name: "bool";
+}
+export interface IntGlslType {
+    readonly type: "scalar";
+    readonly name: "int";
+}
+export interface UintGlslType {
+    readonly type: "scalar";
+    readonly name: "uint";
+}
+export interface FloatGlslType {
+    readonly type: "scalar";
+    readonly name: "float";
+}
 export interface DoubleGlslType {
     readonly type: "scalar";
     readonly name: "double";

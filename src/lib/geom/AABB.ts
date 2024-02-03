@@ -1,5 +1,4 @@
 import { Vector2 } from "@/lib/geom/Vector2";
-import { mapRange } from "@/lib/utils";
 
 export default class AABB {
     static ZERO = new AABB(Vector2.ZERO, Vector2.ZERO);

@@ -129,11 +129,11 @@ export class GlProgram {
     }
     private addUniform<T, Uniform extends GlUniform<T>>(
         GlUniformType: new (
-                gl: Gl,
-                name: string,
-                location: WebGLUniformLocation,
-                initialValue: GlUniformInitialValue<T>,
-            ) => Uniform,
+            gl: Gl,
+            name: string,
+            location: WebGLUniformLocation,
+            initialValue: GlUniformInitialValue<T>,
+        ) => Uniform,
         name: string,
         initialValue: GlUniformInitialValue<T>,
     ): Uniform {

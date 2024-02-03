@@ -1,6 +1,5 @@
 import { promiseWithResolve } from "@/lib/utils";
 import { unstable_batchedUpdates } from "react-dom";
-import { s } from "vitest/dist/reporters-OH1c16Kq";
 
 export type Unsubscribe = () => void;
 

@@ -1,7 +1,8 @@
 {
-	"printWidth": 80,
-	"tabWidth": 4,
-	"trailingComma": "all",
-	"proseWrap": "always",
-	"experimentalTernaries": true
+    "printWidth": 80,
+    "tabWidth": 4,
+    "trailingComma": "all",
+    "proseWrap": "always",
+    "experimentalTernaries": true,
+    "plugins": ["prettier-plugin-organize-imports"]
 }

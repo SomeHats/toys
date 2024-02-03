@@ -14,11 +14,13 @@ import { StrokeCenterPoint } from "@/splatapus/model/perfectFreehand";
 interface CachedValues {
     keyPoints: ReadonlySet<SplatKeyPoint>;
     versions: ReadonlySet<SplatShapeVersion>;
-    interpolators: readonly {
-        x: Interpolator;
-        y: Interpolator;
-        r: Interpolator;
-    }[] | null;
+    interpolators:
+        | readonly {
+              x: Interpolator;
+              y: Interpolator;
+              r: Interpolator;
+          }[]
+        | null;
 }
 
 class InterpolationCache {

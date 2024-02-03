@@ -45,7 +45,7 @@ export const KeyPoint = createRecordType("keyPoint", {
     validator: KeyPointSchema.asValidator(),
 });
 
-export type Shape = BaseRecord<"shape", RecordId<Shape>>
+export type Shape = BaseRecord<"shape", RecordId<Shape>>;
 export const ShapeSchema = Schema.object<Shape>({
     typeName: Schema.value("shape"),
     id: idSchema<ShapeId>("shape"),

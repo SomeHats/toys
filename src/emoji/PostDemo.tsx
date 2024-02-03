@@ -1,20 +1,17 @@
 import { Post } from "@/emoji/Post";
-import { EventIterator } from "@/lib/EventIterator";
 import PointerDragCover from "@/lib/PointerDragCover";
 import { Spring } from "@/lib/Spring";
 import { Ticker } from "@/lib/Ticker";
-import { assertExists } from "@/lib/assert";
-import { inOutSin, outExpo } from "@/lib/easings";
+import { inOutSin } from "@/lib/easings";
 import AABB from "@/lib/geom/AABB";
 import Circle from "@/lib/geom/Circle";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { reactive, memo } from "@/lib/signia";
+import { memo, reactive } from "@/lib/signia";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
-import { tailwindColors } from "@/lib/theme";
 import { clamp, exhaustiveSwitchError, invLerp, lerp } from "@/lib/utils";
 import { computed, track } from "@tldraw/state";
 import classNames from "classnames";
-import { useState, PointerEvent, useLayoutEffect } from "react";
+import { PointerEvent, useLayoutEffect, useState } from "react";
 import { FiPlus } from "react-icons/fi";
 
 const TRIGGER_SIZE = 32;

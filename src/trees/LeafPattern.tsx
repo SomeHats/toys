@@ -1,16 +1,16 @@
-import { DebugArrow, DebugPointX } from "@/lib/DebugSvg";
+import { DebugPointX } from "@/lib/DebugSvg";
+import { Ticker } from "@/lib/Ticker";
+import { assert } from "@/lib/assert";
+import * as easings from "@/lib/easings";
 import AABB from "@/lib/geom/AABB";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { SvgApp } from "@/lib/react/Svg";
-import { clamp, mapRange } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import * as easings from "@/lib/easings";
-import { assert } from "@/lib/assert";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
-import { degToRad } from "three/src/math/MathUtils";
+import { clamp, mapRange } from "@/lib/utils";
 import { useNoise4d } from "@/trees/TreesApp";
-import { Ticker } from "@/lib/Ticker";
 import { track } from "@tldraw/state";
+import { useEffect, useState } from "react";
+import { degToRad } from "three/src/math/MathUtils";
 
 const viewbox = AABB.fromLeftTopWidthHeight(0, 0, 100, 100);
 const unitRange = AABB.fromLeftTopRightBottom(-1, -1, 1, 1);

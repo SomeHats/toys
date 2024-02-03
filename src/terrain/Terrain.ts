@@ -12,9 +12,7 @@ import { Quadtree, quadtree } from "d3-quadtree";
 function assignPlates(plateCount: number, terrain: Terrain) {
     const remainingCellIds = new Set(terrain.activeCellIds);
     const queue = new RandomQueue(terrain.activeCellIds);
-    const plateIdByCellId = new Array<number>(
-        terrain.activeCellIds.length,
-    );
+    const plateIdByCellId = new Array<number>(terrain.activeCellIds.length);
 
     const plates = times(plateCount, (id) => {
         const initialCellId = queue.pop();

@@ -270,9 +270,7 @@ export class Schema<Parsed> {
         return new Schema<V[number]>(validate, validate, identity);
     }
 
-    static arrayOf<Item>(
-        itemSchema: Schema<Item>,
-    ): Schema<readonly Item[]> {
+    static arrayOf<Item>(itemSchema: Schema<Item>): Schema<readonly Item[]> {
         return new Schema<readonly Item[]>(
             (input) => {
                 if (!Array.isArray(input)) {

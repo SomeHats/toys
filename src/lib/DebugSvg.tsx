@@ -1,4 +1,3 @@
-import { scale } from "@/blob-tree/canvas";
 import {
     DebugDraw,
     FillOptions,

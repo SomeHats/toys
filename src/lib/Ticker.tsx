@@ -1,7 +1,7 @@
 import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
 import { reactive } from "@/lib/signia";
 import { frameLoop } from "@/lib/utils";
-import { useEffect, useState, createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { generateUUID } from "three/src/math/MathUtils";
 
 export class Ticker {

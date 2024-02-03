@@ -1,5 +1,5 @@
-import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { Vector2 } from "@/lib/geom/Vector2";
+import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 
 export const paths = {
     x(position: Vector2, size = 5) {

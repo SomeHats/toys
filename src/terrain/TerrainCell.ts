@@ -25,7 +25,10 @@ export class TerrainCell {
     public readonly position: Vector2;
     public readonly neighbourCellIds: readonly number[];
     public readonly neighbourCellIdsByEdgeIndex: readonly (number | null)[];
-    public readonly edgeIndexByNeighbourCellId: Record<number, number | undefined>;
+    public readonly edgeIndexByNeighbourCellId: Record<
+        number,
+        number | undefined
+    >;
     public readonly polygon: readonly Vector2[];
     private readonly noiseHeight: number;
     private heightAdjustment = 0;

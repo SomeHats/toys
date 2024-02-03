@@ -7,7 +7,6 @@ import {
     useGestureDetector,
 } from "@/lib/hooks/useGestureDetector";
 import { reactive } from "@/lib/signia";
-import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { tailwindColors } from "@/lib/theme";
 import { track } from "@tldraw/state";
 import {

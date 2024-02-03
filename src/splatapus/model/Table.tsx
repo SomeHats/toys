@@ -9,7 +9,9 @@ import {
     keys,
 } from "@/lib/utils";
 
-export interface UnknownTableEntry { readonly id: string }
+export interface UnknownTableEntry {
+    readonly id: string;
+}
 export type TableData<T extends UnknownTableEntry> = ReadonlyObjectMap<
     T["id"],
     T

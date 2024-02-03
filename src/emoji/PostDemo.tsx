@@ -2,7 +2,7 @@ import { Post } from "@/emoji/Post";
 import PointerDragCover from "@/lib/PointerDragCover";
 import { Spring } from "@/lib/Spring";
 import { Ticker } from "@/lib/Ticker";
-import { inOutSin } from "@/lib/easings";
+import { inOutSin, outSin } from "@/lib/easings";
 import AABB from "@/lib/geom/AABB";
 import Circle from "@/lib/geom/Circle";
 import { Vector2 } from "@/lib/geom/Vector2";
@@ -52,7 +52,7 @@ const Blobbo = track(function Blobbo() {
     }, [ref]);
 
     return (
-        <div className="relative">
+        <div className="relative touch-none">
             <button
                 ref={setRef}
                 className={classNames(
@@ -374,12 +374,8 @@ const BlobRenderer = track(function BlobRenderer({
     blob: BlobThing;
 }) {
     const { picker, trigger, isActive } = blob;
-    // if (!isActive) return null;
+    if (!isActive) return null;
     // const isButtonVisible = !picker.containsCircle(trigger);
-    const goopPath = makeGoopPath(
-        picker.withRadius(picker.radius - 0.5),
-        trigger.withRadius(Math.min(trigger.radius - 0.5, picker.radius - 0.5)),
-    );
 
     const animationProgress = clamp(
         0,
@@ -414,11 +410,29 @@ const BlobRenderer = track(function BlobRenderer({
         triggerIconOpacityFromPosition,
     );
 
+    // move the icon a little bit towards the the picker for some 3d goodness, but only when the
+    // picker is small
+    const iconOffsetProgress =
+        picker.center.distanceTo(trigger.center) / (PICKER_SIZE / 2);
+    const iconOffsetAmount = outSin(clamp(0, 1, iconOffsetProgress)) * 3;
+    const iconOffset = Vector2.fromPolar(
+        trigger.center.angleTo(picker.center),
+        lerp(iconOffsetAmount * 1.5, iconOffsetAmount, animationProgress),
+    );
+
+    const goopPath = makeGoopPath(
+        picker.withRadius(picker.radius - 0.5),
+        new Circle(
+            trigger.center.add(iconOffset.scale(0.5)),
+            Math.min(trigger.radius - 0.5, picker.radius - 0.5),
+        ),
+    );
+
     return (
         <>
             <svg
                 viewBox={`0 0 ${TRIGGER_SIZE} ${TRIGGER_SIZE}`}
-                className="overflow-visible pointer-events-none absolute top-0 left-0"
+                className="overflow-visible pointer-events-none absolute top-0 left-0 touch-none"
                 style={{ filter }}
             >
                 <path
@@ -428,8 +442,11 @@ const BlobRenderer = track(function BlobRenderer({
                 />
             </svg>
             <div
-                className="absolute top-0 left-0 w-8 aspect-square flex items-center justify-center text-gray-500 pointer-events-none"
-                style={{ opacity: triggerIconOpacity }}
+                className="absolute top-0 left-0 w-8 aspect-square flex items-center justify-center text-gray-500 pointer-events-none touch-none"
+                style={{
+                    opacity: triggerIconOpacity,
+                    transform: `translate(${iconOffset.x}px, ${iconOffset.y}px)`,
+                }}
             >
                 <FiPlus />
             </div>

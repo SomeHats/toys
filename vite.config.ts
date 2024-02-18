@@ -65,12 +65,40 @@ function resolveATags(): PluginOption {
     return {
         name: "resolve-a-tags",
         transformIndexHtml: (html, ctx) => {
-            return html.replace(
-                /(<a [^>]*?href=")([^"]+?)("[^>]*?>)/g,
-                (_, pre, url, post) => {
-                    return `${pre}${path.join(baseUrl, url)}${post}`;
-                },
-            );
+            for (let i = 0; i < html.length; i++) {
+                if (
+                    html[i] !== "<" ||
+                    html[i + 1] !== "a" ||
+                    !html[i + 2].match(/\s/)
+                ) {
+                    continue;
+                }
+
+                const tagStart = i;
+                let tagEnd = null;
+                for (; i < html.length; i++) {
+                    if (html[i] !== ">") continue;
+                    tagEnd = i;
+                    break;
+                }
+                if (tagEnd === null) continue;
+
+                const tag = html.slice(tagStart, tagEnd + 1);
+                if (!tag.includes("href")) continue;
+                const hrefStart = tag.indexOf('href="') + 'href="'.length;
+                const hrefEnd = tag.indexOf('"', hrefStart);
+                const href = tag.slice(hrefStart, hrefEnd);
+                const newHref = path.join(baseUrl, href);
+
+                html =
+                    html.slice(0, tagStart + hrefStart) +
+                    newHref +
+                    html.slice(tagStart + hrefEnd);
+
+                i = tagEnd;
+            }
+
+            return html;
         },
     };
 }

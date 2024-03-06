@@ -236,6 +236,10 @@ export function clamp(a: number, b: number, n: number): number {
     return Math.max(Math.min(a, b), Math.min(Math.max(a, b), n));
 }
 
+export function clamp01(n: number): number {
+    return clamp(0, 1, n);
+}
+
 export function shuffle<T>(arr: readonly T[]): T[] {
     const newArr = arr.slice();
     for (let i = newArr.length - 1; i > 0; i--) {
@@ -591,18 +595,27 @@ export function counterClockwiseAngleDist(a0: number, a1: number): number {
  * Get the angle of a point on an arc.
  * @param fromAngle - The angle from center to arc's start point (A) on the circle
  * @param toAngle - The angle from center to arc's end point (B) on the circle
- * @param direction - The direction of the arc (1 = counter-clockwise, -1 = clockwise)
+ * @param direction - The direction of the arc (1 = counter-clockwise, -1 = clockwise). if not
+ * specified, return the shortest distance.
  * @returns The distance in radians between the two angles according to the direction
  * @public
  */
 export function angleDistance(
     fromAngle: number,
     toAngle: number,
-    direction: number,
+    direction?: number,
 ) {
+    if (direction === undefined) {
+        return Math.min(
+            clockwiseAngleDist(fromAngle, toAngle),
+            counterClockwiseAngleDist(fromAngle, toAngle),
+        );
+    }
+
     const dist =
         direction < 0 ?
             clockwiseAngleDist(fromAngle, toAngle)
         :   counterClockwiseAngleDist(fromAngle, toAngle);
+
     return dist;
 }

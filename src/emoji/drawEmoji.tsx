@@ -1,6 +1,7 @@
+import { Emoji, characters, colors } from "@/emoji/Emoji";
 import { loadImage } from "@/lib/load";
-import { tailwindColors } from "@/lib/theme";
 import { lazy } from "@/lib/utils";
+import { use, useMemo } from "react";
 
 interface Assets {
     emoji: HTMLImageElement;
@@ -8,25 +9,6 @@ interface Assets {
 }
 
 const ASSET_TILE_SIZE_PX = 256;
-
-export const characters = ["blob", "yeti"] as const;
-export const emotions = [0, 1, 2, 3, 4] as const;
-export const colors = {
-    auto: null,
-    red: tailwindColors.cyberRed,
-    orange: tailwindColors.cyberOrange,
-    yellow: tailwindColors.cyberYellow,
-    green: tailwindColors.cyberGreen,
-    blue: tailwindColors.cyberBlue,
-    purple: tailwindColors.cyberPurple,
-    pink: tailwindColors.cyberPink,
-};
-
-export interface Emoji {
-    character: (typeof characters)[number];
-    emotion: (typeof emotions)[number];
-    color: { name: keyof typeof colors; level: 30 | 40 | 50 | 70 };
-}
 
 export type DrawEmoji = Awaited<ReturnType<typeof createDrawEmoji>>;
 
@@ -41,6 +23,11 @@ const loadAssets = lazy(async (): Promise<Assets> => {
 export async function createDrawEmoji() {
     const assets = await loadAssets();
     return drawEmoji.bind(null, assets);
+}
+
+export function useDrawEmoji() {
+    const assets = use(loadAssets());
+    return useMemo(() => drawEmoji.bind(null, assets), [assets]);
 }
 
 function drawEmoji(
@@ -63,7 +50,6 @@ function drawEmoji(
 
     if (emoji.color.name === "auto") return;
 
-    console.log(ctx.globalCompositeOperation);
     ctx.globalCompositeOperation = "source-in";
     ctx.fillStyle = colors[emoji.color.name](emoji.color.level);
     ctx.fillRect(0, 0, sizePx, sizePx);

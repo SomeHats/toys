@@ -6,7 +6,7 @@ import AABB from "@/lib/geom/AABB";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { SvgApp } from "@/lib/react/Svg";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
-import { clamp, mapRange } from "@/lib/utils";
+import { clamp01, mapRange } from "@/lib/utils";
 import { useNoise4d } from "@/trees/TreesApp";
 import { track } from "@tldraw/state";
 import { useEffect, useState } from "react";
@@ -180,9 +180,7 @@ export function Leaf({
 
 function getWeightsFromPoint(relative: Vector2) {
     const rawFlavourWeights = flavours.map((f) =>
-        easings.inSin(
-            clamp(0, 1, mapRange(0, 2, 1, 0, f.distanceTo(relative))),
-        ),
+        easings.inSin(clamp01(mapRange(0, 2, 1, 0, f.distanceTo(relative)))),
     );
     const totalDistance = rawFlavourWeights.reduce((a, b) => a + b, 0);
     const normalizedWeights = rawFlavourWeights.map((w) => w / totalDistance);

@@ -1,41 +1,15 @@
-import {
-    DrawEmoji,
-    Emoji,
-    characters,
-    colors,
-    createDrawEmoji,
-    emotions,
-} from "@/emoji/drawEmoji";
-import { DebugCanvas } from "@/lib/react/DebugCanvasComponent";
+import { Emoji, characters, colors, emotions } from "@/emoji/Emoji";
 import { keys } from "@/lib/utils";
 import { RadioGroup } from "@headlessui/react";
 import classNames from "classnames";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 
 export function EmojiListing() {
-    const [drawEmoji, setDrawEmoji] = useState<DrawEmoji>();
     const [emoji, setEmoji] = useState<Emoji>({
         character: "blob",
         emotion: 0,
         color: { name: "auto", level: 40 },
     });
-
-    useEffect(() => {
-        let isCancelled = false;
-        void (async () => {
-            const drawEmoji = await createDrawEmoji();
-            if (!isCancelled) {
-                setDrawEmoji(() => drawEmoji);
-            }
-        })();
-        return () => {
-            isCancelled = true;
-        };
-    }, []);
-
-    if (!drawEmoji) {
-        return <div>Loading...</div>;
-    }
 
     return (
         <>
@@ -98,13 +72,7 @@ export function EmojiListing() {
             </div>
             <CrossFade
                 value={emoji}
-                render={(emoji) => (
-                    <EmojiRender
-                        sizePx={256}
-                        emoji={emoji}
-                        drawEmoji={drawEmoji}
-                    />
-                )}
+                render={(emoji) => <Emoji sizePx={256} emoji={emoji} />}
             />
             <div className="flex">
                 {[...keys(colors)].map((color, index) => (
@@ -113,7 +81,7 @@ export function EmojiListing() {
                             <Fragment key={index}>
                                 {emotions.map((emotion, index) => (
                                     <div key={index}>
-                                        <EmojiRender
+                                        <Emoji
                                             sizePx={128}
                                             emoji={{
                                                 color: {
@@ -123,7 +91,6 @@ export function EmojiListing() {
                                                 character,
                                                 emotion,
                                             }}
-                                            drawEmoji={drawEmoji}
                                         />
                                     </div>
                                 ))}
@@ -133,26 +100,6 @@ export function EmojiListing() {
                 ))}
             </div>
         </>
-    );
-}
-
-function EmojiRender({
-    sizePx,
-    emoji,
-    drawEmoji,
-}: {
-    sizePx: number;
-    emoji: Emoji;
-    drawEmoji: DrawEmoji;
-}) {
-    return (
-        <DebugCanvas
-            width={sizePx}
-            height={sizePx}
-            draw={(c) => {
-                drawEmoji(c.ctx, emoji, sizePx);
-            }}
-        />
     );
 }
 

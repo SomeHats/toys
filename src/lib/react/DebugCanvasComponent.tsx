@@ -10,17 +10,19 @@ export function DebugCanvas({
     width,
     height,
     style = {},
+    className,
 }: {
     draw: DrawFn;
     width: number;
     height: number;
     style?: React.CSSProperties;
+    className?: string;
 }) {
     const pxWidth = width * window.devicePixelRatio;
     const pxHeight = height * window.devicePixelRatio;
     const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         assert(canvasRef.current);
         const ctx = canvasRef.current.getContext("2d");
         assert(ctx);
@@ -37,6 +39,7 @@ export function DebugCanvas({
             height={pxHeight}
             ref={canvasRef}
             style={{ ...style, width, height }}
+            className={className}
         />
     );
 }

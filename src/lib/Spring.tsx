@@ -1,57 +1,10 @@
 import { Ticker, useTicker } from "@/lib/Ticker";
 import { assert, assertExists } from "@/lib/assert";
-import { reactive } from "@/lib/signia";
+import { numberAsSignal, reactive } from "@/lib/signia";
+import { TIME_MULTIPLIER } from "@/lib/time";
 import { noop } from "@/lib/utils";
-import {
-    Atom,
-    RESET_VALUE,
-    Signal,
-    atom as createAtom,
-    useValue,
-} from "@tldraw/state";
+import { Atom, Signal, useValue } from "@tldraw/state";
 import { useEffect, useState } from "react";
-
-function asSignal(signal: number | Signal<number>): Atom<number> {
-    const writeTarget = createAtom(
-        "target",
-        typeof signal === "number" ? createAtom("signal", signal) : null,
-    );
-    const self: Atom<number> = {
-        name: "signal",
-        get value() {
-            return writeTarget.value ?
-                    writeTarget.value.value
-                :   (signal as Signal<number>).value;
-        },
-        get lastChangedEpoch() {
-            return writeTarget.value ?
-                    writeTarget.value.lastChangedEpoch
-                :   (signal as Signal<number>).lastChangedEpoch;
-        },
-        getDiffSince() {
-            return RESET_VALUE;
-        },
-        __unsafe__getWithoutCapture() {
-            const t = writeTarget.__unsafe__getWithoutCapture();
-            return t ?
-                    t.__unsafe__getWithoutCapture()
-                :   (signal as Signal<number>).__unsafe__getWithoutCapture();
-        },
-        set(value) {
-            const t = writeTarget.value;
-            if (!t) {
-                writeTarget.set(createAtom("signal", value));
-            } else {
-                t.set(value);
-            }
-            return value;
-        },
-        update(updater) {
-            return self.set(updater(self.value));
-        },
-    };
-    return self;
-}
 
 export class Spring {
     private readonly _target: Atom<number>;
@@ -69,9 +22,9 @@ export class Spring {
         ticker: Ticker;
         shouldStart?: boolean;
     }) {
-        this._target = asSignal(opts.target);
-        this._tension = asSignal(opts.tension ?? 230);
-        this._friction = asSignal(opts.friction ?? 22);
+        this._target = numberAsSignal(opts.target);
+        this._tension = numberAsSignal(opts.tension ?? 230);
+        this._friction = numberAsSignal(opts.friction ?? 22);
         this.value = opts.value ?? this._target.__unsafe__getWithoutCapture();
         this.ticker = opts.ticker;
         const shouldStart = opts.shouldStart ?? true;
@@ -112,7 +65,7 @@ export class Spring {
     }
 
     private tick(deltaMs: number) {
-        const timeStep = Math.min(deltaMs, 100) / 1000;
+        const timeStep = Math.min(deltaMs, 100) / (1000 * TIME_MULTIPLIER);
         const {
             target,
             tension,

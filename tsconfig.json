@@ -16,7 +16,7 @@
         "paths": {
             "@/*": ["./src/*"]
         },
-        "types": ["vitest/importMeta", "webgl-strict-types"]
+        "types": ["vitest/importMeta", "webgl-strict-types", "react/canary"]
     },
     "include": [
         "src/**/*",

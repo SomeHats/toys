@@ -4,7 +4,7 @@ import { inOutSin } from "@/lib/easings";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { tailwindColors } from "@/lib/theme";
-import { clamp, lerp } from "@/lib/utils";
+import { clamp01, lerp } from "@/lib/utils";
 import { DottedGuideLine } from "@/spline-time/guides";
 import { track } from "@tldraw/state";
 import { Fragment, useState } from "react";
@@ -45,9 +45,7 @@ export default track(function CircleGoops({ size }: { size: Vector2 }) {
         r1,
         r2,
         inOutSin(
-            clamp(
-                0,
-                1,
+            clamp01(
                 (aToB.magnitude() - (a.circle.radius + b.circle.radius)) /
                     ((a.circle.radius + b.circle.radius) * 1),
             ),

@@ -1,14 +1,25 @@
+import { Emoji } from "@/emoji/Emoji";
 import { Post } from "@/emoji/Post";
 import PointerDragCover from "@/lib/PointerDragCover";
 import { Spring } from "@/lib/Spring";
 import { Ticker } from "@/lib/Ticker";
-import { inOutSin, outSin } from "@/lib/easings";
+import { assertExists } from "@/lib/assert";
+import { inOutSin, inSin, outSin } from "@/lib/easings";
 import AABB from "@/lib/geom/AABB";
 import Circle from "@/lib/geom/Circle";
 import { Vector2 } from "@/lib/geom/Vector2";
-import { memo, reactive } from "@/lib/signia";
+import { delay, memo, reactive } from "@/lib/signia";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
-import { clamp, exhaustiveSwitchError, invLerp, lerp } from "@/lib/utils";
+import {
+    angleDistance,
+    clamp,
+    clamp01,
+    exhaustiveSwitchError,
+    invLerp,
+    lazy,
+    lerp,
+    minBy,
+} from "@/lib/utils";
 import { computed, track } from "@tldraw/state";
 import classNames from "classnames";
 import { PointerEvent, useLayoutEffect, useState } from "react";
@@ -16,6 +27,17 @@ import { FiPlus } from "react-icons/fi";
 
 const TRIGGER_SIZE = 32;
 const PICKER_SIZE = 160;
+
+const CHARACTERS = [
+    { character: "yeti", emotion: 0, color: { name: "blue", level: 30 } },
+    { character: "yeti", emotion: 1, color: { name: "blue", level: 30 } },
+    { character: "yeti", emotion: 2, color: { name: "blue", level: 30 } },
+    { character: "yeti", emotion: 3, color: { name: "blue", level: 30 } },
+    { character: "yeti", emotion: 4, color: { name: "blue", level: 30 } },
+    { character: "blob", emotion: 0, color: { name: "blue", level: 30 } },
+    { character: "blob", emotion: 1, color: { name: "blue", level: 30 } },
+    { character: "blob", emotion: 2, color: { name: "blue", level: 30 } },
+] as const satisfies Emoji[];
 
 export function PostDemo() {
     return (
@@ -91,8 +113,12 @@ class BlobThing {
     @reactive accessor triggerClientCenter = defaultPosition;
     @reactive accessor screenBounds = AABB.ZERO;
     @reactive accessor isOpen = false;
+    @reactive accessor pickedCharacter: BlobCharacter | null = null;
 
-    private ticker = new Ticker();
+    readonly ticker = new Ticker();
+    readonly characters: readonly BlobCharacter[] = CHARACTERS.map(
+        (emoji, i) => new BlobCharacter(this, emoji, i),
+    );
 
     constructor(readonly triggerEl: HTMLElement) {
         this.ticker.start();
@@ -121,6 +147,7 @@ class BlobThing {
         tension: this.#radiusTension,
         friction: this.#radiusFriction,
     });
+
     #pickerCenter = {
         x: new Spring({
             target: computed("picker.cx", () => {
@@ -180,8 +207,16 @@ class BlobThing {
         TRIGGER_SIZE / 2,
     );
 
-    @memo get isActive() {
+    get isActive() {
         return this.isOpen || Math.abs(this.#pickerRadius.velocity) > 0;
+    }
+
+    get animationProgress() {
+        return invLerp(
+            TRIGGER_SIZE / 2,
+            PICKER_SIZE / 2,
+            this.#pickerRadius.value,
+        );
     }
 
     stop() {
@@ -294,11 +329,28 @@ class BlobThing {
         const target = this.triggerClientCenter;
         const relativeToTarget = position.sub(target);
         const distance = relativeToTarget.magnitude();
-        const constrained = distance ** 0.8;
+
+        const easeDist = 200;
+        const easedRelative = Math.max(distance - 20, 0) / easeDist;
+        const eased =
+            easedRelative < 1 ?
+                inSin(easedRelative)
+            :   (easedRelative - 1) * (Math.PI / 2) + 1;
+        const easedDistance = easeDist * eased;
 
         this.position = this.triggerOffsetCenter.add(
-            relativeToTarget.withMagnitude(constrained),
+            relativeToTarget.withMagnitude(easedDistance ** 0.8),
         );
+
+        if (distance > 20) {
+            const angle = relativeToTarget.angle();
+            const character = assertExists(
+                minBy(this.characters, (c) => angleDistance(angle, c.angle)),
+            );
+            this.pickedCharacter = character;
+        } else {
+            this.pickedCharacter = null;
+        }
     }
 
     measure() {
@@ -367,38 +419,124 @@ class BlobThing {
         }
     };
 }
+class BlobCharacter {
+    static readonly MAX_RADIUS = (PICKER_SIZE / 2) * 0.65;
+    constructor(
+        readonly parent: BlobThing,
+        readonly emoji: Emoji,
+        readonly i: number,
+    ) {}
+
+    #animationProgress = lazy(() =>
+        delay(
+            computed("delay", () =>
+                this.parent.isOpen ? Math.ceil(this.i / 2) * 40 : 0,
+            ),
+            this.parent.ticker,
+            computed("ap", () => this.parent.animationProgress),
+        ),
+    );
+    #targetSize = lazy(
+        () =>
+            new Spring({
+                target: computed("ts", () => (this.isPicked ? 38 : 30)),
+                ticker: this.parent.ticker,
+                tension: 300,
+                friction: 22,
+            }),
+    );
+    #targetRadius = lazy(
+        () =>
+            new Spring({
+                target: computed("ts", () =>
+                    this.isPicked ?
+                        (PICKER_SIZE / 2) * 0.75
+                    :   (PICKER_SIZE / 2) * 0.65,
+                ),
+                ticker: this.parent.ticker,
+                tension: 300,
+                friction: 22,
+            }),
+    );
+    get animationProgress() {
+        return this.#animationProgress().value;
+    }
+
+    get isPicked() {
+        return this.parent.pickedCharacter === this;
+    }
+
+    @memo get angle() {
+        const start = -Math.PI / 2;
+        const offsetIdx = Math.ceil(this.i / 2);
+        const offsetDirection = this.i % 2 === 0 ? 1 : -1;
+        const maxOffset = Math.floor(this.parent.characters.length / 2);
+
+        return start + ((offsetIdx * offsetDirection) / maxOffset) * Math.PI;
+    }
+
+    get radius() {
+        return lerp(
+            -TRIGGER_SIZE,
+            this.#targetRadius().value,
+            this.animationProgress,
+        );
+    }
+
+    @memo get position() {
+        const size = this.size;
+
+        return this.parent.picker.center
+            .add(Vector2.fromPolar(this.angle, this.radius))
+            .sub(size * 0.5 - 3, size * 0.5 + 5);
+    }
+
+    get size() {
+        const targetSize = this.#targetSize().value;
+        return lerp(16, targetSize, this.animationProgress);
+    }
+
+    get opacity() {
+        return clamp01(
+            invLerp(TRIGGER_SIZE, BlobCharacter.MAX_RADIUS, this.radius),
+        );
+    }
+}
 
 const BlobRenderer = track(function BlobRenderer({
     blob,
 }: {
     blob: BlobThing;
 }) {
-    const { picker, trigger, isActive } = blob;
+    const { picker, trigger, isActive, animationProgress } = blob;
     if (!isActive) return null;
-    // const isButtonVisible = !picker.containsCircle(trigger);
 
-    const animationProgress = clamp(
-        0,
-        1,
-        invLerp(TRIGGER_SIZE / 2, PICKER_SIZE / 2, picker.radius),
-    );
     const filter = [
         `drop-shadow(0 1px 2px rgba(0, 0, 0, ${lerp(
             0,
             0.1,
-            animationProgress,
+            clamp01(animationProgress),
         )}))`,
         `drop-shadow(0 1px 1px rgba(0, 0, 0, ${lerp(
             0,
             0.06,
-            animationProgress,
+            clamp01(animationProgress),
         )}))`,
     ].join(" ");
 
-    const triggerIconOpacityFromProgress = lerp(1, 0, animationProgress);
-    const triggerIconOpacityFromPosition = clamp(
-        0,
+    const triggerIconOpacityFromProgress = lerp(
         1,
+        0,
+        clamp01(animationProgress),
+    );
+    const triggerIconOpacityFromInnerPosition = clamp01(
+        invLerp(
+            trigger.radius + 16,
+            trigger.radius,
+            picker.center.distanceTo(trigger.center),
+        ),
+    );
+    const triggerIconOpacityFromOuterPosition = clamp01(
         invLerp(
             picker.radius - trigger.radius + 8,
             picker.radius + trigger.radius - 8,
@@ -407,14 +545,15 @@ const BlobRenderer = track(function BlobRenderer({
     );
     const triggerIconOpacity = Math.max(
         triggerIconOpacityFromProgress,
-        triggerIconOpacityFromPosition,
+        triggerIconOpacityFromInnerPosition,
+        triggerIconOpacityFromOuterPosition,
     );
 
     // move the icon a little bit towards the the picker for some 3d goodness, but only when the
     // picker is small
     const iconOffsetProgress =
         picker.center.distanceTo(trigger.center) / (PICKER_SIZE / 2);
-    const iconOffsetAmount = outSin(clamp(0, 1, iconOffsetProgress)) * 3;
+    const iconOffsetAmount = outSin(clamp01(iconOffsetProgress)) * 3;
     const iconOffset = Vector2.fromPolar(
         trigger.center.angleTo(picker.center),
         lerp(iconOffsetAmount * 1.5, iconOffsetAmount, animationProgress),
@@ -438,19 +577,51 @@ const BlobRenderer = track(function BlobRenderer({
                 <path
                     d={goopPath}
                     className="fill-white stroke-1 stroke-gray-200"
-                    strokeOpacity={1 - animationProgress}
+                    strokeOpacity={clamp01(1 - animationProgress)}
                 />
             </svg>
             <div
                 className="absolute top-0 left-0 w-8 aspect-square flex items-center justify-center text-gray-500 pointer-events-none touch-none"
                 style={{
                     opacity: triggerIconOpacity,
-                    transform: `translate(${iconOffset.x}px, ${iconOffset.y}px)`,
+                    transform: `translate(${iconOffset.x}px, ${
+                        iconOffset.y
+                    }px) rotate(${animationProgress * 135}deg) scale(${lerp(
+                        1,
+                        1.2,
+                        animationProgress,
+                    )})`,
                 }}
             >
                 <FiPlus />
             </div>
+            {blob.characters.map((character, i) => (
+                <BlobCharacterRenderer key={i} character={character} />
+            ))}
         </>
+    );
+});
+
+const BlobCharacterRenderer = track(function BlobCharacterRenderer({
+    character,
+}: {
+    character: BlobCharacter;
+}) {
+    const PX_SIZE = 48;
+    const position = character.position;
+    return (
+        <Emoji
+            sizePx={PX_SIZE}
+            emoji={character.emoji}
+            className="absolute top-0 left-0 pointer-events-none"
+            style={{
+                transformOrigin: "top left",
+                transform: `translate(${position.x}px, ${position.y}px) scale(${
+                    character.size / PX_SIZE
+                })`,
+                opacity: character.opacity,
+            }}
+        />
     );
 });
 
@@ -476,7 +647,7 @@ function makeGoopPath(a: Circle, b: Circle) {
     // between the two with sin easing to get a smooth transition:
     const nearToFar =
         (distance - (a.radius + b.radius)) / ((a.radius + b.radius) * 1);
-    const size = lerp(sizeNear, sizeFar, inOutSin(clamp(0, 1, nearToFar)));
+    const size = lerp(sizeNear, sizeFar, inOutSin(clamp01(nearToFar)));
 
     // Now we have our size, we can find the two points that are size away from the circles.
     const goopArcCenters = a

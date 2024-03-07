@@ -9,8 +9,13 @@ import {
     normalizeAngle,
 } from "@/lib/utils";
 
+export interface Vector2Model {
+    readonly x: number;
+    readonly y: number;
+}
+
 export type Vector2Ish =
-    | { readonly x: number; readonly y: number }
+    | Vector2Model
     | readonly [x: number, y: number]
     | Vector2;
 
@@ -83,6 +88,10 @@ export class Vector2 {
         const x = fixedAmt == null ? this.x : this.x.toFixed(fixedAmt);
         const y = fixedAmt == null ? this.y : this.y.toFixed(fixedAmt);
         return `Vector2(${x}, ${y})`;
+    }
+
+    toJson(): Vector2Model {
+        return { x: this.x, y: this.y };
     }
 
     magnitudeSquared(): number {

@@ -1,14 +1,13 @@
-import { Emoji, characters, colors, emotions } from "@/emoji/Emoji";
-import { keys } from "@/lib/utils";
+import { Emoji, characters, emotions } from "@/emoji/Emoji";
 import { RadioGroup } from "@headlessui/react";
 import classNames from "classnames";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 
 export function EmojiListing() {
     const [emoji, setEmoji] = useState<Emoji>({
-        character: "blob",
+        character: "yeti",
         emotion: 0,
-        color: { name: "auto", level: 40 },
+        // color: { name: "auto", level: 40 },
     });
 
     return (
@@ -29,7 +28,7 @@ export function EmojiListing() {
                         </RadioGroup.Option>
                     ))}
                 </RadioGroup>
-                <RadioGroup
+                {/* <RadioGroup
                     value={emoji.color.name}
                     onChange={(color) =>
                         setEmoji({
@@ -48,7 +47,7 @@ export function EmojiListing() {
                             {color}
                         </RadioGroup.Option>
                     ))}
-                </RadioGroup>
+                </RadioGroup> */}
                 <RadioGroup
                     value={emoji.emotion}
                     onChange={(emotion) =>
@@ -72,32 +71,33 @@ export function EmojiListing() {
             </div>
             <CrossFade
                 value={emoji}
-                render={(emoji) => <Emoji sizePx={256} emoji={emoji} />}
+                render={(emoji) => (
+                    <Emoji sizePx={256} emoji={emoji} className="!w-32 !h-32" />
+                )}
             />
-            <div className="flex">
-                {[...keys(colors)].map((color, index) => (
-                    <div key={index} className="flex flex-col">
-                        {characters.map((character, index) => (
-                            <Fragment key={index}>
-                                {emotions.map((emotion, index) => (
-                                    <div key={index}>
-                                        <Emoji
-                                            sizePx={128}
-                                            emoji={{
-                                                color: {
-                                                    name: color,
-                                                    level: 40,
-                                                },
-                                                character,
-                                                emotion,
-                                            }}
-                                        />
-                                    </div>
-                                ))}
-                            </Fragment>
+            <div className="flex flex-col">
+                {/* {[...keys(colors)].map((color, index) => ( */}
+
+                {characters.map((character, index) => (
+                    <div className="flex" key={index}>
+                        {emotions.map((emotion, index) => (
+                            <div key={index}>
+                                <Emoji
+                                    sizePx={128}
+                                    emoji={{
+                                        // color: {
+                                        //     name: color,
+                                        //     level: 40,
+                                        // },
+                                        character,
+                                        emotion,
+                                    }}
+                                />
+                            </div>
                         ))}
                     </div>
                 ))}
+                {/* ))} */}
             </div>
         </>
     );

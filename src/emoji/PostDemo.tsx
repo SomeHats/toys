@@ -29,14 +29,14 @@ const TRIGGER_SIZE = 32;
 const PICKER_SIZE = 160;
 
 const CHARACTERS = [
-    { character: "yeti", emotion: 0, color: { name: "blue", level: 30 } },
-    { character: "yeti", emotion: 1, color: { name: "blue", level: 30 } },
-    { character: "yeti", emotion: 2, color: { name: "blue", level: 30 } },
-    { character: "yeti", emotion: 3, color: { name: "blue", level: 30 } },
-    { character: "yeti", emotion: 4, color: { name: "blue", level: 30 } },
-    { character: "blob", emotion: 0, color: { name: "blue", level: 30 } },
-    { character: "blob", emotion: 1, color: { name: "blue", level: 30 } },
-    { character: "blob", emotion: 2, color: { name: "blue", level: 30 } },
+    { character: "yeti", emotion: 0 },
+    { character: "yeti", emotion: 1 },
+    { character: "yeti", emotion: 2 },
+    { character: "yeti", emotion: 3 },
+    { character: "yeti", emotion: 4 },
+    { character: "yeti", emotion: 5 },
+    { character: "yeti", emotion: 6 },
+    { character: "yeti", emotion: 7 },
 ] as const satisfies Emoji[];
 
 export function PostDemo() {

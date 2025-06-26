@@ -3,7 +3,8 @@ import { assert, assertExists } from "@/lib/assert";
 import { numberAsSignal, reactive } from "@/lib/signia";
 import { TIME_MULTIPLIER } from "@/lib/time";
 import { noop } from "@/lib/utils";
-import { Atom, Signal, useValue } from "@tldraw/state";
+import { Atom, Signal } from "@tldraw/state";
+import { useValue } from "@tldraw/state-react";
 import { useEffect, useState } from "react";
 
 export class Spring {
@@ -44,21 +45,21 @@ export class Spring {
     destroy = noop;
 
     get target() {
-        return this._target.value;
+        return this._target.get();
     }
     set target(value: number) {
         this._target.set(value);
     }
 
     get tension() {
-        return this._tension.value;
+        return this._tension.get();
     }
     set tension(value: number) {
         this._tension.set(value);
     }
 
     get friction() {
-        return this._friction.value;
+        return this._friction.get();
     }
     set friction(value: number) {
         this._friction.set(value);

@@ -33,7 +33,7 @@ abstract class State<
     }
 
     get state(): Child | null {
-        return this._child.value;
+        return this._child.get();
     }
 
     get path(): string {

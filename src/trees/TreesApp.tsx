@@ -3,7 +3,7 @@ import { Ticker } from "@/lib/Ticker";
 import { Vector2 } from "@/lib/geom/Vector2";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { constrain, invLerp, mapRange, times } from "@/lib/utils";
-import { track } from "@tldraw/state";
+import { track } from "@tldraw/state-react";
 import { makeNoise3D, makeNoise4D } from "open-simplex-noise";
 import { useEffect, useState } from "react";
 import { degToRad } from "three/src/math/MathUtils";

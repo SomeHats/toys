@@ -28,7 +28,7 @@ export function computedIncrementalObjectProperty<
         (previousValue, lastComputedEpoch) => {
             const signal = getSignal();
 
-            const newValue = signal.value[key];
+            const newValue = signal.get()[key];
             if (isUninitialized(previousValue)) {
                 return newValue;
             }
@@ -82,10 +82,10 @@ export function incrementalTableAccessor<
 ) {
     return {
         signal,
-        [Symbol.iterator]: () => signal.value[Symbol.iterator](),
-        getIfExists: (id: Id) => signal.value.get(id),
+        [Symbol.iterator]: () => signal.get()[Symbol.iterator](),
+        getIfExists: (id: Id) => signal.get().get(id),
         get: (id: Id) => {
-            const value = signal.value.get(id);
+            const value = signal.get().get(id);
             assert(value !== undefined, `ID ${id} not found in ${signal.name}`);
             return value;
         },

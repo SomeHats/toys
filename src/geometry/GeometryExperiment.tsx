@@ -8,7 +8,7 @@ import {
 } from "@/lib/hooks/useGestureDetector";
 import { reactive } from "@/lib/signia";
 import { tailwindColors } from "@/lib/theme";
-import { track } from "@tldraw/state";
+import { track } from "@tldraw/state-react";
 import {
     Fragment,
     ReactNode,

@@ -34,7 +34,7 @@ export class Index<
             const index = Immutable.Map<Field, Immutable.Set<Id>>().asMutable();
             const fields = Immutable.Map<Id, Field>().asMutable();
 
-            for (const [id, value] of tableSignal.value) {
+            for (const [id, value] of tableSignal.get()) {
                 const field = getField(value);
                 index.update(field, (ids) =>
                     ids ? ids.add(id) : Immutable.Set([id]),
@@ -79,7 +79,7 @@ export class Index<
                     if (tableDiff.update) {
                         for (const [id, diff] of entries(tableDiff.update)) {
                             if (!diff) continue;
-                            const value = tableSignal.value.get(id);
+                            const value = tableSignal.get().get(id);
                             assert(value);
                             const oldField = assertExists(fields.get(id));
                             const newField = getField(value);
@@ -118,20 +118,20 @@ export class Index<
     }
 
     *iterate(field: Field) {
-        const ids = this.result.value.index.get(field);
+        const ids = this.result.get().index.get(field);
         if (!ids) return;
         for (const id of ids) {
-            const value = this.tableSignal.value.get(id);
+            const value = this.tableSignal.get().get(id);
             assert(value);
             yield value;
         }
     }
 
     getOneIfExists(field: Field): Value | undefined {
-        const ids = this.result.value.index.get(field);
+        const ids = this.result.get().index.get(field);
         if (!ids) return;
         assert(ids.size === 1);
-        return this.tableSignal.value.get(ids.first());
+        return this.tableSignal.get().get(ids.first());
     }
 
     getOne(field: Field): Value {

@@ -17,7 +17,8 @@ import {
 import { Splat } from "@/splatapus2/app/Splat";
 import { Shape } from "@/splatapus2/store/Records";
 import { idleScheduler } from "@/splatapus2/store/Signia";
-import { react, track } from "@tldraw/state";
+import { react } from "@tldraw/state";
+import { track } from "@tldraw/state-react";
 import classNames from "classnames";
 import { ReactNode, useEffect, useState } from "react";
 

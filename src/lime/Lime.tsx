@@ -39,7 +39,7 @@ export class Lime {
     readonly ticker = new Ticker();
 
     ensureStoreIsReady() {
-        const slides = this.store.query.records("slide").value;
+        const slides = this.store.query.records("slide").get();
 
         if (!slides.length) {
             const slide = Slide.create({});

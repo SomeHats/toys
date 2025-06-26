@@ -24,7 +24,7 @@ export function memo<This extends object, Value>(
         );
     });
     return function (this: This) {
-        return assertExists(computeds.get(this)).value;
+        return assertExists(computeds.get(this)).get();
     };
 }
 
@@ -62,7 +62,7 @@ export function Model<Shape extends ReadonlyRecord<string, unknown>>(schema: {
         @memo get serialized(): Shape {
             const data = {} as Shape;
             for (const key of keys(schema)) {
-                const value = this.atoms[key].value;
+                const value = this.atoms[key].get();
                 if ((value as any).serialized) {
                     // @ts-expect-error - we know that key is a key of Shape
                     data[key] = (value as any).serialized();

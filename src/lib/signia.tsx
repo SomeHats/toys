@@ -25,7 +25,7 @@ export function memo<This extends object, Value>(
         );
     });
     return function (this: This) {
-        return assertExists(computeds.get(this)).value;
+        return assertExists(computeds.get(this)).get();
     };
 }
 
@@ -37,7 +37,7 @@ export function reactive<This, Value>(
     assert(ctx.kind === "accessor");
     return {
         get() {
-            return (get.call(this) as Atom<Value>).value;
+            return (get.call(this) as Atom<Value>).get();
         },
         set(newValue) {
             (get.call(this) as Atom<Value>).set(newValue);
@@ -65,12 +65,12 @@ export function delay<T>(
     signal: Signal<T>,
 ): Signal<T> {
     const delayMsSignal = numberAsSignal(ms);
-    const result = atom("delay", signal.value);
+    const result = atom("delay", signal.get());
     const buffer = new RingBuffer<{ at: number; value: T }>();
 
     ticker.listen(() => {
-        const delayMs = delayMsSignal.value * TIME_MULTIPLIER;
-        buffer.push({ at: performance.now(), value: signal.value });
+        const delayMs = delayMsSignal.get() * TIME_MULTIPLIER;
+        buffer.push({ at: performance.now(), value: signal.get() });
         while (true) {
             const first = buffer.first();
             if (!first) break;
@@ -93,14 +93,14 @@ export function numberAsSignal(signal: number | Signal<number>): Atom<number> {
     );
     const self: Atom<number> = {
         name: "signal",
-        get value() {
-            return writeTarget.value ?
-                    writeTarget.value.value
-                :   (signal as Signal<number>).value;
+        get() {
+            const target = writeTarget.get();
+            return target ? target.get() : (signal as Signal<number>).get();
         },
         get lastChangedEpoch() {
-            return writeTarget.value ?
-                    writeTarget.value.lastChangedEpoch
+            const target = writeTarget.get();
+            return target ?
+                    target.lastChangedEpoch
                 :   (signal as Signal<number>).lastChangedEpoch;
         },
         getDiffSince() {
@@ -113,7 +113,7 @@ export function numberAsSignal(signal: number | Signal<number>): Atom<number> {
                 :   (signal as Signal<number>).__unsafe__getWithoutCapture();
         },
         set(value) {
-            const t = writeTarget.value;
+            const t = writeTarget.get();
             if (!t) {
                 writeTarget.set(atom("signal", value));
             } else {
@@ -122,7 +122,7 @@ export function numberAsSignal(signal: number | Signal<number>): Atom<number> {
             return value;
         },
         update(updater) {
-            return self.set(updater(self.value));
+            return self.set(updater(self.get()));
         },
     };
     return self;

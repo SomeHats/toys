@@ -6,7 +6,7 @@ import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { tailwindColors } from "@/lib/theme";
 import { clamp01, lerp } from "@/lib/utils";
 import { DottedGuideLine } from "@/spline-time/guides";
-import { track } from "@tldraw/state";
+import { track } from "@tldraw/state-react";
 import { Fragment, useState } from "react";
 
 export const name = "Circle goops";

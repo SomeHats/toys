@@ -46,8 +46,8 @@ export class Splat {
         ({ doc, history }) => Result.ok(new Splat(doc, Stack(history))),
         Schema.cannotValidate("Splat"),
         (splat) => ({
-            doc: splat.doc.value,
-            history: splat.history.value.toArray(),
+            doc: splat.doc.get(),
+            history: splat.history.get().toArray(),
         }),
     );
 
@@ -108,13 +108,13 @@ export class Splat {
     }
 
     updateWithoutHistory(op: DocDiff) {
-        const [updatedDoc, _] = Doc.apply(this.doc.value, op);
+        const [updatedDoc, _] = Doc.apply(this.doc.get(), op);
         this.doc.set(updatedDoc, op);
         return this;
     }
 
     update(op: DocDiff) {
-        const [updatedDoc, inverseOp] = Doc.apply(this.doc.value, op);
+        const [updatedDoc, inverseOp] = Doc.apply(this.doc.get(), op);
         this.doc.set(updatedDoc, op);
         this.history.update((history) => {
             const lastHistoryItem = history.peek();
@@ -140,8 +140,8 @@ export class Splat {
 
     clear() {
         const empty = Splat.empty();
-        this.doc.set(empty.doc.value);
-        this.history.set(empty.history.value);
+        this.doc.set(empty.doc.get());
+        this.history.set(empty.history.get());
     }
 
     mark(name?: string): HistoryEntryId {
@@ -152,10 +152,10 @@ export class Splat {
 
     bail(to: HistoryEntryId) {
         transact(() => {
-            const markIndex = this.history.value.findIndex((h) => h.id === to);
+            const markIndex = this.history.get().findIndex((h) => h.id === to);
             assertExists(markIndex, "mark not found");
-            const relevantHistory = this.history.value.take(markIndex + 1);
-            this.history.set(this.history.value.skip(markIndex + 1));
+            const relevantHistory = this.history.get().take(markIndex + 1);
+            this.history.set(this.history.get().skip(markIndex + 1));
             for (const entry of relevantHistory) {
                 for (const diff of entry.inverse) {
                     this.updateWithoutHistory(diff);

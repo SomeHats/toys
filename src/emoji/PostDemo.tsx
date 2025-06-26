@@ -20,7 +20,8 @@ import {
     lerp,
     minBy,
 } from "@/lib/utils";
-import { computed, track } from "@tldraw/state";
+import { computed } from "@tldraw/state";
+import { track } from "@tldraw/state-react";
 import classNames from "classnames";
 import { PointerEvent, useLayoutEffect, useState } from "react";
 import { FiPlus } from "react-icons/fi";
@@ -459,7 +460,7 @@ class BlobCharacter {
             }),
     );
     get animationProgress() {
-        return this.#animationProgress().value;
+        return this.#animationProgress().get();
     }
 
     get isPicked() {

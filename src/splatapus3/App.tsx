@@ -13,7 +13,7 @@ import {
     SplatRecord,
     Store,
 } from "@/splatapus3/model/schema";
-import { track } from "@tldraw/state";
+import { track } from "@tldraw/state-react";
 import { SerializedStore } from "@tldraw/store";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 

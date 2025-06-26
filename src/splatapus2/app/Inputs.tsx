@@ -21,6 +21,6 @@ export class Inputs {
     }
 
     get pointer() {
-        return this._pointer.value;
+        return this._pointer.get();
     }
 }

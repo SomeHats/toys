@@ -8,7 +8,7 @@ import { SvgApp } from "@/lib/react/Svg";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { clamp01, mapRange } from "@/lib/utils";
 import { useNoise4d } from "@/trees/TreesApp";
-import { track } from "@tldraw/state";
+import { track } from "@tldraw/state-react";
 import { useEffect, useState } from "react";
 import { degToRad } from "three/src/math/MathUtils";
 

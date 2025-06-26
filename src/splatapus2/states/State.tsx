@@ -34,7 +34,7 @@ abstract class State<
     }
 
     get state(): Child | null {
-        return this._child.value;
+        return this._child.get();
     }
 
     get path(): string {
@@ -98,7 +98,7 @@ export class IdleNode extends ChildState<"idle", RootNode> {
     override name = "idle" as const;
 
     override onPointerDown(event: React.PointerEvent) {
-        const shapeVersion = this.splat.shapeVersions.signal.value.first();
+        const shapeVersion = this.splat.shapeVersions.signal.get().first();
         if (shapeVersion) {
             this.transitionTo(DrawNode, shapeVersion.id);
         }

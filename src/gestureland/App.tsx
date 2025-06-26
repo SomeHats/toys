@@ -9,7 +9,7 @@ import {
 } from "@/lib/hooks/useResizeObserver";
 import { SvgPathBuilder } from "@/lib/svgPathBuilder";
 import { compact } from "@/lib/utils";
-import { track } from "@tldraw/state";
+import { track } from "@tldraw/state-react";
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 
 export function AppWrapper() {

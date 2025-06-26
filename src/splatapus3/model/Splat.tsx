@@ -115,7 +115,7 @@ export class Splat {
         return this.store.query.ids("keyPoint");
     }
     @memo get allKeyPointIds() {
-        return Array.from(this.allKeyPointIdsQuery.value).sort();
+        return Array.from(this.allKeyPointIdsQuery.get()).sort();
     }
     @memo get activeKeyPoint() {
         return (
@@ -128,7 +128,7 @@ export class Splat {
         return this.store.query.ids("shape");
     }
     @memo get allShapeIds() {
-        return Array.from(this.allShapeIdsQuery.value).sort();
+        return Array.from(this.allShapeIdsQuery.get()).sort();
     }
     @memo get firstShape() {
         return assertExists(this.get(assertExists(this.allShapeIds[0])));
@@ -139,7 +139,7 @@ export class Splat {
             shapeId: { eq: shapeId },
             keyPointId: { eq: keyPointId },
         }));
-        return shapeVersion.value;
+        return shapeVersion.get();
     }
     getShapeVersion(shapeId: ShapeId, keyPointId: KeyPointId) {
         return assertExists(this.getShapeVersionIfExists(shapeId, keyPointId));

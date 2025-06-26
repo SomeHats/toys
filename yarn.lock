@@ -2267,31 +2267,49 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tldraw/state@npm:2.0.0-alpha.14":
-  version: 2.0.0-alpha.14
-  resolution: "@tldraw/state@npm:2.0.0-alpha.14"
-  peerDependencies:
-    react: ^18
-  checksum: 7232922aa0a8d345291455e7b1d8bbcf83e3912ff0e4596787c666f48365035efba4b6ddb4c39c95cc7931aaf7f3b357ce0080a3b9a7415aafcdd60269437e84
-  languageName: node
-  linkType: hard
-
-"@tldraw/store@npm:2.0.0-alpha.14":
-  version: 2.0.0-alpha.14
-  resolution: "@tldraw/store@npm:2.0.0-alpha.14"
+"@tldraw/state-react@npm:3.13.3":
+  version: 3.13.3
+  resolution: "@tldraw/state-react@npm:3.13.3"
   dependencies:
-    "@tldraw/state": "npm:2.0.0-alpha.14"
-    "@tldraw/utils": "npm:2.0.0-alpha.14"
-    lodash.isequal: "npm:^4.5.0"
-    nanoid: "npm:4.0.2"
-  checksum: d6044662a3c172c0767aea5ab56f629954e8f1e893f27f267556a0971639d819b8da331b0e50557555cc15cbcccf9c96191ff1eb81689ad6b3119234866ae8bb
+    "@tldraw/state": "npm:3.13.3"
+    "@tldraw/utils": "npm:3.13.3"
+  peerDependencies:
+    react: ^18.2.0 || ^19.0.0
+    react-dom: ^18.2.0 || ^19.0.0
+  checksum: 0800a8d0d860b3737afad2a0ec9be78af372a05f69d07aba89c6dba46bf1bf8bb14f26848d61cd6bd60d32f7fc0d996c86f3424c30fe3038d077fd06842aaab8
   languageName: node
   linkType: hard
 
-"@tldraw/utils@npm:2.0.0-alpha.14":
-  version: 2.0.0-alpha.14
-  resolution: "@tldraw/utils@npm:2.0.0-alpha.14"
-  checksum: e31cce9a772e2df1d7562e312bf7a0eec8787fa8d2e3da3a56cb188ee3ad2772529b4eecf3be11cf24b66a11941f76348820c048805526a9e940dc4667f5cf7c
+"@tldraw/state@npm:3.13.3":
+  version: 3.13.3
+  resolution: "@tldraw/state@npm:3.13.3"
+  dependencies:
+    "@tldraw/utils": "npm:3.13.3"
+  checksum: cc01652ed5169f6e0cdefd28324272115a4e1b5f92979e1e393267d4a58930470c1e1c189a4a53eaf13d46b00c1e69e7c1e50f2517eb8b5506e93bdecc4f2036
+  languageName: node
+  linkType: hard
+
+"@tldraw/store@npm:3.13.3":
+  version: 3.13.3
+  resolution: "@tldraw/store@npm:3.13.3"
+  dependencies:
+    "@tldraw/state": "npm:3.13.3"
+    "@tldraw/utils": "npm:3.13.3"
+    lodash.isequal: "npm:^4.5.0"
+  peerDependencies:
+    react: ^18.2.0 || ^19.0.0
+  checksum: be164482c000a17d2e19af0f502326b6c81cd57d0993a6a1c1a8c82489985b927149c01c4b7538e53f8a9e410804856cea4ba7d32216edfa199779837424c04d
+  languageName: node
+  linkType: hard
+
+"@tldraw/utils@npm:3.13.3":
+  version: 3.13.3
+  resolution: "@tldraw/utils@npm:3.13.3"
+  dependencies:
+    fractional-indexing-jittered: "npm:^0.9.1"
+    lodash.throttle: "npm:^4.1.1"
+    lodash.uniq: "npm:^4.5.0"
+  checksum: 1073a2f34f9615125fa91d7109b9edaf5508d570b16724069b3580bb1882e4328c4e924e19576f52b5835a5c22ee0c38148315153a1a0f829578d4f17324f972
   languageName: node
   linkType: hard
 
@@ -5117,6 +5135,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fractional-indexing-jittered@npm:^0.9.1":
+  version: 0.9.1
+  resolution: "fractional-indexing-jittered@npm:0.9.1"
+  checksum: 2908f1109ba52e7dfc96cf212c1fb95aebfe3a0dabd4e1b7663fe8d855f74d4554e3ebf600f47af28acdbc307bb149eaf78b975208a44a0a85a5c993471b32a4
+  languageName: node
+  linkType: hard
+
 "fs-extra@npm:^10.0.1":
   version: 10.1.0
   resolution: "fs-extra@npm:10.1.0"
@@ -6568,6 +6593,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.throttle@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "lodash.throttle@npm:4.1.1"
+  checksum: 9be9fb2ffd686c20543167883305542f4564062a5f712a40e8c6f2f0d9fd8254a6e9d801c2470b1b24e0cdf2ae83c1277b55aa0fb4799a2db6daf545f53820e1
+  languageName: node
+  linkType: hard
+
+"lodash.uniq@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.uniq@npm:4.5.0"
+  checksum: 86246ca64ac0755c612e5df6d93cfe92f9ecac2e5ff054b965efbbb1d9a647b6310969e78545006f70f52760554b03233ad0103324121ae31474c20d5f7a2812
+  languageName: node
+  linkType: hard
+
 "lodash@npm:~4.17.15":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
@@ -6906,15 +6945,6 @@ __metadata:
     object-assign: "npm:^4.0.1"
     thenify-all: "npm:^1.0.0"
   checksum: 8427de0ece99a07e9faed3c0c6778820d7543e3776f9a84d22cf0ec0a8eb65f6e9aee9c9d353ff9a105ff62d33a9463c6ca638974cc652ee8140cd1e35951c87
-  languageName: node
-  linkType: hard
-
-"nanoid@npm:4.0.2":
-  version: 4.0.2
-  resolution: "nanoid@npm:4.0.2"
-  bin:
-    nanoid: bin/nanoid.js
-  checksum: 8c0c267de44cddcad79c3361d2cbd281694c36bf7ab6a163f36dd8f6e6ee43e9783561302c55fab2986a2fa847e7a6b30fedabd1e117fdb8aecc5ab21555428d
   languageName: node
   linkType: hard
 
@@ -8791,8 +8821,9 @@ __metadata:
     "@headlessui/tailwindcss": "npm:^0.2.0"
     "@juggle/resize-observer": "npm:^3.4.0"
     "@radix-ui/react-slot": "npm:^1.0.2"
-    "@tldraw/state": "npm:2.0.0-alpha.14"
-    "@tldraw/store": "npm:2.0.0-alpha.14"
+    "@tldraw/state": "npm:3.13.3"
+    "@tldraw/state-react": "npm:3.13.3"
+    "@tldraw/store": "npm:3.13.3"
     "@types/babel__core": "npm:^7.20.5"
     "@types/babel__generator": "npm:^7.6.8"
     "@types/classnames": "npm:^2.3.1"

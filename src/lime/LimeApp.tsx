@@ -19,7 +19,7 @@ import {
     getSvgPathFromStroke,
 } from "@/splatapus/model/perfectFreehand";
 import { Button } from "@/splatapus/ui/Button";
-import { track } from "@tldraw/state";
+import { track } from "@tldraw/state-react";
 import classNames from "classnames";
 import { ReactNode, useEffect, useState } from "react";
 

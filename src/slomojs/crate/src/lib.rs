@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+#![allow(deprecated)]
+
 #[macro_use]
 extern crate lazy_static;
 extern crate unzip_n;

@@ -1,5 +1,5 @@
 use wasm_bindgen::JsCast;
-pub use web_sys::{Animation, Document, Element, HtmlElement};
+pub use web_sys::{Document, Element, HtmlElement};
 
 fn create_el(document: &Document, name: &str) -> HtmlElement {
     document.create_element(name).unwrap().dyn_into().unwrap()

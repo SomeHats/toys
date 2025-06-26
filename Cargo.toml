@@ -1,5 +1,5 @@
 [workspace]
-members = ["src/slomojs/crate"]
+members = ["src/slomojs/crate", "src/sim/crate"]
 
 [profile.release]
 # Tell `rustc` to optimize for small code size.

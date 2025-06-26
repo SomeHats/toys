@@ -25,7 +25,7 @@ web-sys = { version = "0.3.45", features = [
     "AnimationEffect",
     "KeyframeEffect",
     "KeyframeEffectOptions",
-    "FillMode"
+    "FillMode",
 ] }
 swc_ecma_parser = "0.42.0"
 swc_common = { version = "0.10.5", features = ["tty-emitter"] }

@@ -73,10 +73,10 @@ impl Animation {
 }
 
 fn animate(element: &web_sys::Element, duration_ms: f64, keyframes: JsValue) -> Animation {
-    let mut options = web_sys::KeyframeEffectOptions::new();
-    options.easing("ease-in-out");
-    options.fill(web_sys::FillMode::Backwards);
-    options.duration(&JsValue::from_f64(duration_ms));
+    let options = web_sys::KeyframeEffectOptions::new();
+    options.set_easing("ease-in-out");
+    options.set_fill(web_sys::FillMode::Backwards);
+    options.set_duration(&JsValue::from_f64(duration_ms));
     let animation = web_sys::Animation::new_with_effect(Some(
         &web_sys::KeyframeEffect::new_with_opt_element_and_keyframes_and_keyframe_effect_options(
             Some(element),

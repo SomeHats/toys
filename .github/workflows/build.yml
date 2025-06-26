@@ -110,7 +110,7 @@ jobs:
                   git ls-files | xargs git rm
 
             - name: Download
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: github-pages
 

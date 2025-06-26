@@ -188,7 +188,7 @@ export class Gestureland {
             isDown:
                 phase === "down" ? true
                 : phase === "up" || phase === "cancel" ? false
-                : existingPointer?.isDown ?? false,
+                : (existingPointer?.isDown ?? false),
             state: existingPointer?.state ?? { type: "idle" },
             lastUpdatedAt: Date.now(),
         };
@@ -202,7 +202,6 @@ export class Gestureland {
         rawEvent.preventDefault();
         this.container.setPointerCapture(rawEvent.pointerId);
         const event = this.updatePointerAndReturnEvent(rawEvent, "down");
-        const enabledGestures = this.enabledGestures;
 
         const state = event.state;
         switch (state.type) {

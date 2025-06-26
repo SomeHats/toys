@@ -249,9 +249,7 @@ export function getStrokeOutlinePoints(
             radius = size / 2;
         }
 
-        if (firstRadius === undefined) {
-            firstRadius = radius;
-        }
+        firstRadius ??= radius;
 
         /*
             Apply tapering. If the current length is within the taper distance
@@ -614,9 +612,7 @@ export function getStrokeCenterPoints(
             radius = size / 2;
         }
 
-        if (firstRadius === undefined) {
-            firstRadius = radius;
-        }
+        firstRadius ??= radius;
 
         /*
             Apply tapering. If the current length is within the taper distance

@@ -52,7 +52,7 @@ export class SvgPathBuilder {
 
     moveToIfNeeded(...args: Vector2Args) {
         const position = Vector2.fromArgs(args);
-        if (this.lastPoint && this.lastPoint.equals(position)) return this;
+        if (this.lastPoint?.equals(position)) return this;
         return this.moveTo(position);
     }
 

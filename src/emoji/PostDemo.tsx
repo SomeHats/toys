@@ -296,7 +296,7 @@ class BlobThing {
                     case "up":
                         return state;
                     default:
-                        throw exhaustiveSwitchError(event.type);
+                        return exhaustiveSwitchError(event.type);
                 }
             case "pointing":
                 switch (event.type) {
@@ -307,7 +307,7 @@ class BlobThing {
                         // if we're pointing and the pointer is released, we're clicked
                         return { type: "clicked" };
                     default:
-                        throw exhaustiveSwitchError(event.type);
+                        return exhaustiveSwitchError(event.type);
                 }
             case "dragging":
                 switch (event.type) {
@@ -320,7 +320,7 @@ class BlobThing {
                         this.cover.remove();
                         return { type: "idle" };
                     default:
-                        throw exhaustiveSwitchError(event.type);
+                        return exhaustiveSwitchError(event.type);
                 }
         }
     }

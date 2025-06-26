@@ -36,7 +36,7 @@ export class AssetBundle<
                 dep: Dep,
             ) => Promise<AssetMap[Dep]>,
         ) => Promise<Type>,
-    ): AssetBundle<Id<AssetMap & { [K in Key]: Type }>> {
+    ): AssetBundle<Id<AssetMap & Record<Key, Type>>> {
         assert(!has(this.loaders, key));
         (this.loaders as any)[key] = loader;
         return this as any;
@@ -57,11 +57,9 @@ export class AssetBundle<
     }
 
     async loadAll(): Promise<void> {
-        if (!this.loadAllPromise) {
-            this.loadAllPromise = Promise.all(
-                keys(this.loaders).map((key) => this.load(key)),
-            );
-        }
+        this.loadAllPromise ??= Promise.all(
+            keys(this.loaders).map((key) => this.load(key)),
+        );
         await this.loadAllPromise;
     }
 

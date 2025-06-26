@@ -226,7 +226,7 @@ export class Index<Entry, Value extends string, Lookup> {
         const key = this.#getKey(entry);
         const value = this.#getValue(entry);
         const set = this.index.get(key);
-        assert(set && set.has(value), "value does not exist");
+        assert(set?.has(value), "value does not exist");
 
         const nextSet = new Set(set);
         nextSet.delete(value);

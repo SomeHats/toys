@@ -37,7 +37,7 @@ export class LiveValue<T> implements LiveWritable<T> {
 
     update(update: UpdateAction<T>): void {
         if (this.isUpdating) {
-            if (!this.pendingUpdates) this.pendingUpdates = [];
+            this.pendingUpdates ??= [];
             this.pendingUpdates.push(update);
             return;
         }

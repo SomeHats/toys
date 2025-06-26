@@ -75,7 +75,7 @@ const PianoKeyboardKey = React.memo(function PianoKeyboardKey({
     );
 });
 
-function _PianoKeyboard({
+const PianoKeyboard = React.memo(function PianoKeyboard({
     lowestNote,
     highestNote,
     scale,
@@ -142,8 +142,6 @@ function _PianoKeyboard({
             })}
         </div>
     );
-}
-
-const PianoKeyboard = React.memo(_PianoKeyboard);
+});
 
 export default PianoKeyboard;

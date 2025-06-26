@@ -30,7 +30,7 @@ const format = (value: number, significantFigures: number): string => {
     throw new Error(`unexpected number of value parts: ${valueParts.length}`);
 };
 
-const SignalValue = React.memo(function _SignalValue({
+const SignalValue = React.memo(function SignalValue({
     signal,
     className,
 }: {
@@ -44,7 +44,7 @@ const SignalValue = React.memo(function _SignalValue({
     );
 });
 
-const SignalGraph = React.memo(function _SignalGraph({
+const SignalGraph = React.memo(function SignalGraph({
     signals,
     width,
 }: {
@@ -243,7 +243,7 @@ function SignalControl({
     );
 }
 
-const SignalInspector = React.memo(function _SignalInspector({
+const SignalInspector = React.memo(function SignalInspector({
     signals,
     name,
     displayName = name,
@@ -332,7 +332,7 @@ function SignalInspectorGroup({
     );
 }
 
-const SignalsInspector = React.memo(function _SignalsInspector({
+const SignalsInspector = React.memo(function SignalsInspector({
     signalManager,
     width,
     listenToMidi,

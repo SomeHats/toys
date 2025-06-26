@@ -33,6 +33,7 @@ export function path(ctx: CanvasRenderingContext2D, path: Path) {
                 segment.isAnticlockwise,
             );
         } else {
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
             throw new Error(`Unknown path segment type: ${String(segment)}`);
         }
     }

@@ -33,9 +33,7 @@ export abstract class Signal {
     }
 
     read(): number {
-        if (this.currentValue === null) {
-            this.currentValue = this.update();
-        }
+        this.currentValue ??= this.update();
         return this.currentValue;
     }
 }

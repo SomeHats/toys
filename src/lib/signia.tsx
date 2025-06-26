@@ -30,6 +30,7 @@ export function memo<This extends object, Value>(
 }
 
 export function reactive<This, Value>(
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     { get }: ClassAccessorDecoratorTarget<This, Value>,
     ctx: ClassAccessorDecoratorContext<This, Value>,
 ): ClassAccessorDecoratorResult<This, Value> {

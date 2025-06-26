@@ -127,7 +127,7 @@ function readDebugSettings(): DebugSettings {
         return debugSettingsSchema
             .parse(JSON.parse(contents as string))
             .unwrap();
-    } catch (err) {
+    } catch {
         return defaultDebugSettings;
     }
 }

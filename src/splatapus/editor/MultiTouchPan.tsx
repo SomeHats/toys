@@ -66,7 +66,7 @@ export class MultiTouchPan {
             case "bothFingersDown":
                 return ctx;
             default:
-                throw exhaustiveSwitchError(this.state);
+                return exhaustiveSwitchError(this.state);
         }
     }
     onPointerMove(ctx: PointerEventContext): PointerEventContext | null {
@@ -137,7 +137,7 @@ export class MultiTouchPan {
                 }
                 return ctx;
             default:
-                throw exhaustiveSwitchError(this.state);
+                return exhaustiveSwitchError(this.state);
         }
     }
     onPointerUp(ctx: PointerEventContext): PointerEventContext | null {
@@ -160,7 +160,7 @@ export class MultiTouchPan {
                 }
                 return ctx;
             default:
-                throw exhaustiveSwitchError(this.state);
+                return exhaustiveSwitchError(this.state);
         }
     }
     onPointerCancel(ctx: PointerEventContext): PointerEventContext | null {

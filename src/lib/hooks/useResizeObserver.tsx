@@ -30,9 +30,7 @@ function handleResize(entries: ResizeObserverEntry[]) {
 }
 
 function getObserver(): ResizeObserver {
-    if (!cachedObserver) {
-        cachedObserver = new ResizeObserver(handleResize);
-    }
+    cachedObserver ??= new ResizeObserver(handleResize);
     return cachedObserver;
 }
 

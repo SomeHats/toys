@@ -6,7 +6,7 @@ function nextHalfedge(edgeId: number) {
 }
 
 function getTriangleCenters(
-    { triangles }: Delaunator<Vector2>,
+    { triangles }: Delaunator<Float64Array>,
     points: Vector2[],
 ): Vector2[] {
     const result = [];
@@ -30,7 +30,7 @@ export interface DelaunayCellEdge {
 export type DelaunayCell = DelaunayCellEdge[];
 
 function getCellsByPointId(
-    { triangles, halfedges }: Delaunator<Vector2>,
+    { triangles, halfedges }: Delaunator<Float64Array>,
     triangleCenters: Vector2[],
 ): DelaunayCell[] {
     const cellsByPointId: DelaunayCell[] = [];
@@ -62,7 +62,7 @@ export class Delaunay {
     // delaunator.halfedges[halfEdgeIdx] => oppositeHalfEdgeIdx
     // triangleId = Math.floor(halfEdgeId / 3)
     // [halfEdge1, halfEdge2, halfEdge3] = [triangleId * 3, triangleId * 3 + 1, triangleId * 3 + 2]
-    public readonly delaunator: Delaunator<Vector2>;
+    public readonly delaunator: Delaunator<Float64Array>;
     public readonly triangleCenters: Vector2[];
     public readonly cellsByPointId: DelaunayCell[];
 

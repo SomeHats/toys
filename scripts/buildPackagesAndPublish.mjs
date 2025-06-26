@@ -16,7 +16,7 @@ const rootDir = path.resolve(scriptDir, "..");
 
 const packagesDir = path.resolve(scriptDir, "../packages");
 const pacakgesOutDir = path.resolve(scriptDir, "../packages_out");
-buildAll();
+void buildAll();
 
 async function buildAll() {
     rimraf(pacakgesOutDir);
@@ -93,7 +93,7 @@ async function isUpToDate(name, version) {
     try {
         const currentVersion = await run("npm", ["view", name, "version"]);
         return currentVersion === version;
-    } catch (err) {
+    } catch {
         // does not exist
         return false;
     }
@@ -108,7 +108,7 @@ async function run(command, args) {
     return new Promise((resolve, reject) => {
         execFile(command, args, (err, stdout) => {
             if (err) {
-                reject(err);
+                reject(new Error(err));
             }
             resolve(stdout.trim());
         });

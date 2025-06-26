@@ -88,7 +88,7 @@ export class OkResult<T> extends AbstractResult<T, never> {
     unwrap() {
         return this.value;
     }
-    unwrapError(message?: string | undefined): never {
+    unwrapError(message?: string  ): never {
         fail(`${message ?? "expected error"}: ${String(this.value)}`);
     }
     map<T2>(map: (value: T) => T2): Result<T2, never> {
@@ -114,7 +114,7 @@ export class ErrorResult<E> extends AbstractResult<never, E> {
         }
         fail(`${message ?? "expected value"}: ${String(this.error)}`);
     }
-    unwrapError(message?: string | undefined): E {
+    unwrapError(message?: string  ): E {
         return this.error;
     }
     map(map: (value: never) => void): Result<never, E> {

@@ -9,7 +9,7 @@ import {
 } from "@/lib/live/LiveInvalidation";
 import { Result } from "@/lib/Result";
 
-const PRINT_TRIGGER_LOG = false && process.env.NODE_ENV !== "production";
+const PRINT_TRIGGER_LOG = false; // && process.env.NODE_ENV !== "production";
 
 let globalVersion = 0;
 export function incrementGlobalVersion() {
@@ -87,11 +87,11 @@ export function trackRead(liveValue: Live<unknown>) {
     ) {
         const unsubscribe =
             computationContext.shouldListen ?
-                computationContext.previousDependencies?.get(liveValue)
+                (computationContext.previousDependencies?.get(liveValue)
                     ?.unsubscribe ??
                 liveValue.addEagerInvalidateListener(
                     computationContext.invalidateListener,
-                )
+                ))
             :   null;
         const value = liveValue.getOnce();
         computationContext.nextDependencies.set(liveValue, {

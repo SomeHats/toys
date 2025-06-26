@@ -52,7 +52,7 @@ export function useNoise4d(
 
 export function TreesApp() {
     const [xy, setPosition] = useState(Vector2.ZERO);
-    const [t, setT] = useState(() => new Ticker());
+    const [t, _setT] = useState(() => new Ticker());
 
     useEffect(() => {
         t.start();
@@ -305,6 +305,7 @@ function Branch({
     );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useSpring(
     ticker: Ticker,
     target: number,

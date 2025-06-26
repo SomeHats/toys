@@ -13,19 +13,17 @@ if (!has(Animation.prototype, "finished")) {
     console.log("add finished polyfill");
     Object.defineProperty(Animation.prototype, "finished", {
         get() {
-            if (!this._finished) {
-                this._finished =
-                    this.playState === "finished" ?
-                        Promise.resolve()
-                    :   new Promise((resolve, reject) => {
-                            this.addEventListener("finish", resolve, {
-                                once: true,
-                            });
-                            this.addEventListener("cancel", reject, {
-                                once: true,
-                            });
+            this._finished ??=
+                this.playState === "finished" ?
+                    Promise.resolve()
+                :   new Promise((resolve, reject) => {
+                        this.addEventListener("finish", resolve, {
+                            once: true,
                         });
-            }
+                        this.addEventListener("cancel", reject, {
+                            once: true,
+                        });
+                    });
             return this._finished;
         },
     });

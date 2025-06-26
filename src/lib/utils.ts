@@ -5,17 +5,13 @@ export const PI2 = Math.PI * 2;
 export type TimeoutId = ReturnType<typeof setTimeout>;
 export type IntervalId = ReturnType<typeof setInterval>;
 
-export type ReadonlyRecord<K extends PropertyKey, T> = {
-    readonly [P in K]: T;
-};
+export type ReadonlyRecord<K extends PropertyKey, T> = Readonly<Record<K, T>>;
 
-export type ObjectMap<K extends PropertyKey, T> = {
-    [P in K]?: T;
-};
+export type ObjectMap<K extends PropertyKey, T> = Partial<Record<K, T>>;
 
-export type ReadonlyObjectMap<K extends PropertyKey, T> = {
-    readonly [P in K]?: T;
-};
+export type ReadonlyObjectMap<K extends PropertyKey, T> = Readonly<
+    Partial<Record<K, T>>
+>;
 
 export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
 
@@ -541,9 +537,7 @@ export function binarySearch(
 export function lazy<T>(fn: () => T): () => T {
     let value: T | undefined;
     return () => {
-        if (value === undefined) {
-            value = fn();
-        }
+        value ??= fn();
         return value;
     };
 }

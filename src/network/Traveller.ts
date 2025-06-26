@@ -207,9 +207,7 @@ export default class Traveller extends SceneObject {
     }
 
     _getPal(): Entity {
-        if (!this._pal) {
-            this._pal = makeAbsolutePal(this.position);
-        }
+        this._pal ??= makeAbsolutePal(this.position);
 
         return this._pal;
     }

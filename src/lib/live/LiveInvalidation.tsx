@@ -2,7 +2,7 @@ import { assert } from "@/lib/assert";
 import EventEmitter, { Unsubscribe } from "@/lib/EventEmitter";
 import { unstable_batchedUpdates } from "react-dom";
 
-const PRINT_DEBUG_LOG = false && process.env.NODE_ENV !== "production";
+const PRINT_DEBUG_LOG = false; // && process.env.NODE_ENV !== "production";
 
 let pendingSyncInvalidations: null | Set<EventEmitter> = null;
 let pendingBatchedInvalidations: null | Set<EventEmitter> = null;
@@ -50,7 +50,7 @@ export function getDebugLabel(type: string) {
         const stackLines = new Error().stack?.split("\n");
         if (stackLines) {
             for (const stackLine of stackLines) {
-                const match = stackLine.match(/^\s*at (.*) \((.*)\)\s*$/);
+                const match = /^\s*at (.*) \((.*)\)\s*$/.exec(stackLine);
                 if (!match) continue;
                 if (
                     match[2].includes("/lib/live/") ||

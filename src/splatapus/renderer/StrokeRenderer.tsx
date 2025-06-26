@@ -58,7 +58,7 @@ export const StrokeRenderer = React.memo(function StrokeRenderer({
                 case ModeType.Play:
                     return null;
                 default:
-                    throw exhaustiveSwitchError(activeMode);
+                    return exhaustiveSwitchError(activeMode);
             }
         }
         return null;

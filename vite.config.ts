@@ -69,7 +69,7 @@ function resolveATags(): PluginOption {
                 if (
                     html[i] !== "<" ||
                     html[i + 1] !== "a" ||
-                    !html[i + 2].match(/\s/)
+                    !(/\s/.exec(html[i + 2]))
                 ) {
                     continue;
                 }

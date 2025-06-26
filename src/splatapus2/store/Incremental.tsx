@@ -120,7 +120,7 @@ export function incrementalArrayOf<Value>(
                                     ),
                             };
                         default:
-                            throw exhaustiveSwitchError(diff2);
+                            return exhaustiveSwitchError(diff2);
                     }
                 case IncrementalArrayOfDiffType.Splice:
                     switch (diff2.type) {
@@ -147,10 +147,10 @@ export function incrementalArrayOf<Value>(
                             };
                         }
                         default:
-                            throw exhaustiveSwitchError(diff2);
+                            return exhaustiveSwitchError(diff2);
                     }
                 default:
-                    throw exhaustiveSwitchError(diff1);
+                    return exhaustiveSwitchError(diff1);
             }
         },
     };
@@ -412,9 +412,8 @@ export function incrementalTable<
 
             if (diff1.update !== undefined) {
                 result.update = {
-                    ...mapObjectValues(
-                        diff1.update,
-                        (updates) => updates?.slice(),
+                    ...mapObjectValues(diff1.update, (updates) =>
+                        updates?.slice(),
                     ),
                 };
             }
@@ -424,9 +423,7 @@ export function incrementalTable<
             }
 
             if (diff2.insert !== undefined) {
-                if (result.insert === undefined) {
-                    result.insert = {};
-                }
+                result.insert ??= {};
                 for (const id of keys(diff2.insert)) {
                     assert(!result.insert[id] && !result.update?.[id]);
                     result.insert[id] = diff2.insert[id];
@@ -437,9 +434,7 @@ export function incrementalTable<
             }
 
             if (diff2.update !== undefined) {
-                if (result.update === undefined) {
-                    result.update = {};
-                }
+                result.update ??= {};
                 for (const id of keys(diff2.update)) {
                     assert(!result.delete?.[id]);
                     const updates = assertExists(diff2.update[id]);
@@ -481,9 +476,7 @@ export function incrementalTable<
             }
 
             if (diff2.delete !== undefined) {
-                if (result.delete === undefined) {
-                    result.delete = {};
-                }
+                result.delete ??= {};
                 for (const id of keys(diff2.delete)) {
                     if (result.insert?.[id]) {
                         delete result.insert[id];

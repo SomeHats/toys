@@ -371,7 +371,7 @@ export class Schema<Parsed> {
                     }
                 }
 
-                return Result.ok(input);
+                return Result.ok(input as ReadonlyObjectMap<K, V>);
             },
             (input) => {
                 const result: Record<string, unknown> = {};
@@ -559,9 +559,7 @@ export class IndexedObjectSchema<Shape extends object> extends Schema<Shape> {
             keyByIndex[index] = key;
         }
         for (let i = 0; i < keyByIndex.length; i++) {
-            if (keyByIndex[i] === undefined) {
-                keyByIndex[i] = undefined;
-            }
+            keyByIndex[i] ??= undefined;
         }
 
         super(
@@ -612,7 +610,7 @@ export class IndexedObjectSchema<Shape extends object> extends Schema<Shape> {
 // pass this into itself e.g. Config extends UnionObjectSchemaConfig<Key, Config>
 type UnionObjectSchemaConfig<Key extends string, Config> = {
     readonly [Variant in keyof Config]: ObjectSchema<any> & {
-        parseUnwrap: (input: any) => { readonly [K in Key]: Variant };
+        parseUnwrap: (input: any) => Readonly<Record<Key, Variant>>;
     };
 };
 export class UnionObjectSchema<
@@ -696,7 +694,7 @@ export class UnionObjectSchema<
 // pass this into itself e.g. Config extends UnionObjectSchemaConfig<Key, Config>
 type IndexedUnionObjectSchemaConfig<Key extends string, Config> = {
     readonly [Variant in keyof Config]: IndexedObjectSchema<any> & {
-        parseUnwrap: (input: any) => { readonly [K in Key]: Variant };
+        parseUnwrap: (input: any) => Readonly<Record<Key, Variant>>;
     };
 };
 export class IndexedUnionObjectSchema<

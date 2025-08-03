@@ -1,4 +1,5 @@
 import { times } from "@/lib/utils";
+import { TextGrid } from "@/txdraw/TextGrid";
 import { resizeBox } from "@/txdraw/utils/resizeBox";
 import {
     getTexelSize,
@@ -54,10 +55,13 @@ export class TxBoxShapeUtil extends ShapeUtil<TxBoxShape> {
     }
 
     getGeometry(shape: TxBoxShape): Geometry2d {
+        const size = getTexelSize(this.editor);
         return new Rectangle2d({
-            width: txToPxWidth(this.editor, shape.props.wTx),
-            height: txToPxHeight(this.editor, shape.props.hTx),
-            isFilled: true,
+            x: size.x / 2,
+            y: size.y / 2,
+            width: txToPxWidth(this.editor, shape.props.wTx) - size.x,
+            height: txToPxHeight(this.editor, shape.props.hTx) - size.y,
+            isFilled: false,
         });
     }
 
@@ -87,6 +91,7 @@ export class TxBoxShapeUtil extends ShapeUtil<TxBoxShape> {
     }
 
     override component(shape: TxBoxShape): React.ReactNode {
+        return null;
         const lastX = shape.props.wTx - 1;
         const lastY = shape.props.hTx - 1;
         return (
@@ -108,11 +113,18 @@ export class TxBoxShapeUtil extends ShapeUtil<TxBoxShape> {
         );
     }
 
+    override renderText(shape: TxBoxShape): TextGrid {
+        return new TextGrid().box(0, 0, shape.props.wTx, shape.props.hTx);
+    }
+
     override indicator(shape: TxBoxShape): React.ReactNode {
+        const size = getTexelSize(this.editor);
         return (
             <rect
-                width={txToPxWidth(this.editor, shape.props.wTx)}
-                height={txToPxHeight(this.editor, shape.props.hTx)}
+                x={size.x / 2}
+                y={size.y / 2}
+                width={txToPxWidth(this.editor, shape.props.wTx) - size.x}
+                height={txToPxHeight(this.editor, shape.props.hTx) - size.y}
             />
         );
     }

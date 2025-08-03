@@ -44,6 +44,9 @@ export default defineConfig(async ({ mode }) => {
         resolve: {
             alias: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
         },
+        optimizeDeps: {
+            exclude: ["@tldraw/assets"],
+        },
         build: {
             outDir: path.resolve(__dirname, "dist"),
             rollupOptions: {
@@ -69,7 +72,7 @@ function resolveATags(): PluginOption {
                 if (
                     html[i] !== "<" ||
                     html[i + 1] !== "a" ||
-                    !(/\s/.exec(html[i + 2]))
+                    !/\s/.exec(html[i + 2])
                 ) {
                     continue;
                 }

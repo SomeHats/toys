@@ -1,0 +1,34 @@
+diff --git a/lib/css/preflight.css b/lib/css/preflight.css
+index 7a0d82d46e040f2bf7b133e47380b1dc599e855c..d6a4897ebec3d830320518b5763c9c65ae786ee7 100644
+--- a/lib/css/preflight.css
++++ b/lib/css/preflight.css
+@@ -340,10 +340,10 @@ textarea::placeholder {
+ Set the default cursor for buttons.
+ */
+ 
+-button,
++/* button,
+ [role="button"] {
+   cursor: pointer;
+-}
++} */
+ 
+ /*
+ Make sure disabled buttons don't get the pointer cursor.
+diff --git a/src/css/preflight.css b/src/css/preflight.css
+index 7a0d82d46e040f2bf7b133e47380b1dc599e855c..d6a4897ebec3d830320518b5763c9c65ae786ee7 100644
+--- a/src/css/preflight.css
++++ b/src/css/preflight.css
+@@ -340,10 +340,10 @@ textarea::placeholder {
+ Set the default cursor for buttons.
+ */
+ 
+-button,
++/* button,
+ [role="button"] {
+   cursor: pointer;
+-}
++} */
+ 
+ /*
+ Make sure disabled buttons don't get the pointer cursor.

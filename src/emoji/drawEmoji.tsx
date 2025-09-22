@@ -1,7 +1,7 @@
 import { Emoji, characters } from "@/emoji/Emoji";
 import { loadImage } from "@/lib/load";
 import { lazy } from "@/lib/utils";
-import { use, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface Assets {
     emoji: HTMLImageElement;
@@ -26,8 +26,31 @@ export async function createDrawEmoji() {
 }
 
 export function useDrawEmoji() {
-    const assets = use(loadAssets());
-    return useMemo(() => drawEmoji.bind(null, assets), [assets]);
+    const [assets, setAssets] = useState<Assets | null>(null);
+
+    useEffect(() => {
+        let isCancelled = false;
+
+        loadAssets().then(
+            (assets) => {
+                if (isCancelled) return;
+                setAssets(assets);
+            },
+            (error) => {
+                if (isCancelled) return;
+                console.error(error);
+            },
+        );
+
+        return () => {
+            isCancelled = true;
+        };
+    }, []);
+
+    return useMemo(
+        () => (assets ? drawEmoji.bind(null, assets) : null),
+        [assets],
+    );
 }
 
 function drawEmoji(

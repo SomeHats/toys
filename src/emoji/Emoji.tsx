@@ -33,6 +33,8 @@ export function Emoji({
     className?: string;
 }) {
     const drawEmoji = useDrawEmoji();
+    if (!drawEmoji) return null;
+
     return (
         <DebugCanvas
             width={sizePx}

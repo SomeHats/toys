@@ -1,0 +1,18 @@
+name: Cleanup preview deploy
+
+on:
+    pull_request:
+        types: [closed]
+
+jobs:
+    cleanup:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Delete preview worker
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  command: delete --name toys-pr-${{ github.event.pull_request.number }} --force

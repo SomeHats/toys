@@ -1,0 +1,47 @@
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap");
+
+.journal-text {
+    font-family: "Caveat", cursive;
+}
+
+/* Print styles: hide all editor UI, show only the print view */
+@media print {
+    @page {
+        size: 210mm 210mm;
+        margin: 0;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+
+    .editor-ui {
+        display: none !important;
+    }
+
+    .print-view {
+        display: block !important;
+    }
+
+    .print-page {
+        width: 210mm;
+        height: 210mm;
+        page-break-after: always;
+        break-after: page;
+        overflow: hidden;
+    }
+
+    .print-page:last-child {
+        page-break-after: avoid;
+        break-after: avoid;
+    }
+}
+
+/* On screen the print view is hidden */
+@media screen {
+    .print-view {
+        display: none;
+    }
+}

@@ -2,11 +2,14 @@ import { useLive } from "@/lib/live";
 import { ModeType } from "@/splatapus/editor/modes/Mode";
 import { Splatapus } from "@/splatapus/editor/useEditor";
 
-export type ModeClassNames = Record<ModeType, {
+export type ModeClassNames = Record<
+    ModeType,
+    {
         gradient500: string;
         border500: string;
         ring500: string;
-    }>;
+    }
+>;
 
 export const modeClassNames: ModeClassNames = {
     [ModeType.Draw]: {

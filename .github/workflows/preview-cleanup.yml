@@ -15,4 +15,6 @@ jobs:
               with:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  command: delete --name toys-pr-${{ github.event.pull_request.number }} --force
+                  command:
+                      delete --name toys-pr-${{ github.event.pull_request.number
+                      }} --force

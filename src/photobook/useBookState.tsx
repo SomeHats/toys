@@ -25,6 +25,7 @@ import {
     useCallback,
     useContext,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from "react";
@@ -40,6 +41,7 @@ interface BookState {
     changeLayout: (pageId: PageId, layout: LayoutId) => void;
     addPhoto: (file: File) => Promise<PhotoId>;
     updateTitle: (title: string) => void;
+    usedPhotoIds: Set<PhotoId>;
 }
 
 const BookContext = createContext<BookState | null>(null);
@@ -201,6 +203,18 @@ export function BookProvider({ children }: { children: ReactNode }) {
         return id;
     }, []);
 
+    const usedPhotoIds = useMemo(() => {
+        const ids = new Set<PhotoId>();
+        for (const page of book.pages) {
+            for (const slot of page.slots) {
+                if (slot.type === "photo" && slot.photoId) {
+                    ids.add(slot.photoId);
+                }
+            }
+        }
+        return ids;
+    }, [book.pages]);
+
     const updateTitle = useCallback(
         (title: string) => {
             save({ ...book, title });
@@ -221,6 +235,7 @@ export function BookProvider({ children }: { children: ReactNode }) {
                 changeLayout,
                 addPhoto,
                 updateTitle,
+                usedPhotoIds,
             }}
         >
             {children}

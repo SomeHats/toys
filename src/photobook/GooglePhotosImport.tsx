@@ -15,11 +15,7 @@ type ImportState =
     | { step: "complete"; imported: number }
     | { step: "error"; message: string };
 
-export function GooglePhotosImport({
-    onClose,
-}: {
-    onClose: () => void;
-}) {
+export function GooglePhotosImport({ onClose }: { onClose: () => void }) {
     const { addPhoto } = useBookState();
     const [state, setState] = useState<ImportState>({ step: "idle" });
     const abortRef = useRef(false);
@@ -93,9 +89,9 @@ export function GooglePhotosImport({
             setState({
                 step: "error",
                 message:
-                    e instanceof Error
-                        ? e.message
-                        : "An unknown error occurred",
+                    e instanceof Error ?
+                        e.message
+                    :   "An unknown error occurred",
             });
         }
     }, []);

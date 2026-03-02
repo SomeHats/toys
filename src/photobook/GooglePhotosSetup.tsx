@@ -22,9 +22,7 @@ export function GooglePhotosSetup({
             return;
         }
         if (!trimmed.endsWith(".apps.googleusercontent.com")) {
-            setError(
-                "Client ID should end with .apps.googleusercontent.com",
-            );
+            setError("Client ID should end with .apps.googleusercontent.com");
             return;
         }
         setGoogleClientId(trimmed);
@@ -62,9 +60,9 @@ export function GooglePhotosSetup({
 
                 <div className="flex-1 space-y-4 overflow-auto px-5 py-4 text-sm text-stone-600">
                     <p>
-                        To import photos from Google Photos you need to
-                        create a Google Cloud OAuth client. This only needs
-                        to be done once.
+                        To import photos from Google Photos you need to create a
+                        Google Cloud OAuth client. This only needs to be done
+                        once.
                     </p>
 
                     <ol className="list-inside list-decimal space-y-3">
@@ -83,10 +81,8 @@ export function GooglePhotosSetup({
                         </li>
                         <li>
                             Go to{" "}
-                            <strong>
-                                APIs &amp; Services &rarr; Library
-                            </strong>
-                            , search for{" "}
+                            <strong>APIs &amp; Services &rarr; Library</strong>,
+                            search for{" "}
                             <a
                                 href="https://console.cloud.google.com/apis/library/photospicker.googleapis.com"
                                 target="_blank"
@@ -105,12 +101,11 @@ export function GooglePhotosSetup({
                                 rel="noopener noreferrer"
                                 className="font-medium text-blue-600 underline"
                             >
-                                APIs &amp; Services &rarr; OAuth consent
-                                screen
+                                APIs &amp; Services &rarr; OAuth consent screen
                             </a>
-                            . Set it to <strong>External</strong>, fill in
-                            the required fields, then add your Google
-                            account as a <strong>test user</strong>.
+                            . Set it to <strong>External</strong>, fill in the
+                            required fields, then add your Google account as a{" "}
+                            <strong>test user</strong>.
                         </li>
                         <li>
                             Go to{" "}
@@ -122,26 +117,22 @@ export function GooglePhotosSetup({
                             >
                                 Credentials
                             </a>{" "}
-                            &rarr; <strong>Create Credentials</strong>{" "}
-                            &rarr; <strong>OAuth client ID</strong>.
+                            &rarr; <strong>Create Credentials</strong> &rarr;{" "}
+                            <strong>OAuth client ID</strong>.
                         </li>
                         <li>
-                            Choose{" "}
-                            <strong>Web application</strong> as the type.
+                            Choose <strong>Web application</strong> as the type.
                         </li>
                         <li>
-                            Under{" "}
-                            <strong>
-                                Authorized JavaScript origins
-                            </strong>
+                            Under <strong>Authorized JavaScript origins</strong>
                             , add:
                             <code className="mt-1 block rounded bg-stone-100 px-2 py-1 font-mono text-xs">
                                 {window.location.origin}
                             </code>
                         </li>
                         <li>
-                            Under{" "}
-                            <strong>Authorized redirect URIs</strong>, add:
+                            Under <strong>Authorized redirect URIs</strong>,
+                            add:
                             <code className="mt-1 block rounded bg-stone-100 px-2 py-1 font-mono text-xs">
                                 {redirectUri}
                             </code>
@@ -167,9 +158,7 @@ export function GooglePhotosSetup({
                             className="w-full rounded-md border border-stone-300 px-3 py-2 font-mono text-xs focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
                         />
                         {error && (
-                            <p className="mt-1 text-xs text-red-500">
-                                {error}
-                            </p>
+                            <p className="mt-1 text-xs text-red-500">{error}</p>
                         )}
                     </div>
 

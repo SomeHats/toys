@@ -1,4 +1,5 @@
 import { PageEditor } from "@/photobook/PageEditor";
+import { PhotoSidebar } from "@/photobook/PhotoSidebar";
 import { PrintView } from "@/photobook/PrintView";
 import type { LayoutId } from "@/photobook/types";
 import { LAYOUTS } from "@/photobook/types";
@@ -18,6 +19,7 @@ export function App() {
 function Editor() {
     const { book, loading } = useBookState();
     const [showAddMenu, setShowAddMenu] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     if (loading) {
         return (
@@ -30,53 +32,85 @@ function Editor() {
     }
 
     return (
-        <div className="editor-ui min-h-screen bg-stone-100">
-            {/* Header */}
-            <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/80 backdrop-blur-sm">
-                <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-3">
-                    <h1 className="text-lg font-bold tracking-wide text-stone-700">
-                        {book.title}
-                    </h1>
-                    <div className="flex gap-2">
-                        <HeaderButton onClick={() => window.print()}>
-                            Print / PDF
-                        </HeaderButton>
+        <div className="editor-ui flex h-screen bg-stone-100">
+            {/* Desktop sidebar */}
+            <aside className="hidden lg:flex">
+                <PhotoSidebar />
+            </aside>
+
+            {/* Main content */}
+            <div className="flex flex-1 flex-col overflow-hidden">
+                {/* Header */}
+                <header className="z-40 border-b border-stone-200 bg-white/80 backdrop-blur-sm">
+                    <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-3">
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setSidebarOpen(true)}
+                                className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600 lg:hidden"
+                                title="Photos"
+                            >
+                                <PhotosIcon />
+                            </button>
+                            <h1 className="text-lg font-bold tracking-wide text-stone-700">
+                                {book.title}
+                            </h1>
+                        </div>
+                        <div className="flex gap-2">
+                            <HeaderButton onClick={() => window.print()}>
+                                Print / PDF
+                            </HeaderButton>
+                        </div>
                     </div>
+                </header>
+
+                {/* Page list — scrollable */}
+                <main className="flex-1 overflow-y-auto">
+                    <div className="mx-auto max-w-2xl px-5 py-8">
+                        {book.pages.length === 0 && <EmptyState />}
+
+                        <div className="flex flex-col gap-8">
+                            {book.pages.map((page, i) => (
+                                <PageEditor
+                                    key={page.id}
+                                    page={page}
+                                    pageIndex={i}
+                                    totalPages={book.pages.length}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Add page button */}
+                        <div className="relative mt-8 flex justify-center">
+                            <button
+                                onClick={() => setShowAddMenu(!showAddMenu)}
+                                className="group flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold tracking-wide text-stone-500 shadow-md ring-1 ring-stone-200 transition-all hover:shadow-lg hover:ring-stone-300"
+                            >
+                                <PlusIcon />
+                                <span className="transition-transform duration-200 ease-out-back group-hover:scale-105">
+                                    Add Page
+                                </span>
+                            </button>
+
+                            {showAddMenu && (
+                                <AddPageMenu
+                                    onClose={() => setShowAddMenu(false)}
+                                />
+                            )}
+                        </div>
+                    </div>
+                </main>
+            </div>
+
+            {/* Mobile sidebar overlay */}
+            {sidebarOpen && (
+                <div className="fixed inset-0 z-50 flex lg:hidden">
+                    <PhotoSidebar onClose={() => setSidebarOpen(false)} />
+                    <div
+                        className="flex-1 bg-black/30"
+                        onClick={() => setSidebarOpen(false)}
+                    />
                 </div>
-            </header>
-
-            {/* Page list */}
-            <main className="mx-auto max-w-2xl px-5 py-8">
-                {book.pages.length === 0 && <EmptyState />}
-
-                <div className="flex flex-col gap-8">
-                    {book.pages.map((page, i) => (
-                        <PageEditor
-                            key={page.id}
-                            page={page}
-                            pageIndex={i}
-                            totalPages={book.pages.length}
-                        />
-                    ))}
-                </div>
-
-                {/* Add page button */}
-                <div className="relative mt-8 flex justify-center">
-                    <button
-                        onClick={() => setShowAddMenu(!showAddMenu)}
-                        className="group flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold tracking-wide text-stone-500 shadow-md ring-1 ring-stone-200 transition-all hover:shadow-lg hover:ring-stone-300"
-                    >
-                        <PlusIcon />
-                        <span className="transition-transform duration-200 ease-out-back group-hover:scale-105">
-                            Add Page
-                        </span>
-                    </button>
-
-                    {showAddMenu && (
-                        <AddPageMenu onClose={() => setShowAddMenu(false)} />
-                    )}
-                </div>
-            </main>
+            )}
         </div>
     );
 }
@@ -198,6 +232,25 @@ function HeaderButton({
                 {children}
             </span>
         </button>
+    );
+}
+
+function PhotosIcon() {
+    return (
+        <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+        </svg>
     );
 }
 

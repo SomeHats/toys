@@ -1,6 +1,6 @@
 import { JournalEditor } from "@/photobook/JournalEditor";
 import { PageRenderer } from "@/photobook/PageRenderer";
-import { PhotoPicker } from "@/photobook/PhotoPicker";
+import { SlotPhotoPicker } from "@/photobook/SlotPhotoPicker";
 import type { LayoutId, Page, PhotoId } from "@/photobook/types";
 import { LAYOUTS } from "@/photobook/types";
 import { useBookState } from "@/photobook/useBookState";
@@ -34,6 +34,10 @@ export function PageEditor({
             photoId,
         });
         setEditingSlot(null);
+    };
+
+    const handlePhotoDrop = (slotIndex: number, photoId: PhotoId) => {
+        updateSlot(page.id, slotIndex, { type: "photo", photoId });
     };
 
     const handleJournalSave = (text: string) => {
@@ -81,11 +85,12 @@ export function PageEditor({
                     page={page}
                     interactive
                     onSlotClick={handleSlotClick}
+                    onPhotoDrop={handlePhotoDrop}
                 />
             </div>
 
             {editingSlot?.type === "photo" && (
-                <PhotoPicker
+                <SlotPhotoPicker
                     onSelect={handlePhotoSelect}
                     onClose={() => setEditingSlot(null)}
                 />

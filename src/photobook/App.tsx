@@ -1,6 +1,8 @@
+import { ImportButton, useExportBook } from "@/photobook/ImportExport";
 import { PageEditor } from "@/photobook/PageEditor";
 import { PhotoSidebar } from "@/photobook/PhotoSidebar";
 import { PrintView } from "@/photobook/PrintView";
+import { clearAllData } from "@/photobook/storage";
 import type { LayoutId } from "@/photobook/types";
 import { LAYOUTS } from "@/photobook/types";
 import { BookProvider, useBookState } from "@/photobook/useBookState";
@@ -20,6 +22,7 @@ function Editor() {
     const { book, loading } = useBookState();
     const [showAddMenu, setShowAddMenu] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const exportBook = useExportBook();
 
     if (loading) {
         return (
@@ -56,6 +59,25 @@ function Editor() {
                             </h1>
                         </div>
                         <div className="flex gap-2">
+                            <ImportButton />
+                            <HeaderButton onClick={() => void exportBook()}>
+                                Export
+                            </HeaderButton>
+                            <HeaderButton
+                                onClick={() => {
+                                    if (
+                                        window.confirm(
+                                            "Delete all pages and photos? This cannot be undone.",
+                                        )
+                                    ) {
+                                        void clearAllData().then(() =>
+                                            window.location.reload(),
+                                        );
+                                    }
+                                }}
+                            >
+                                Clear
+                            </HeaderButton>
                             <HeaderButton onClick={() => window.print()}>
                                 Print / PDF
                             </HeaderButton>

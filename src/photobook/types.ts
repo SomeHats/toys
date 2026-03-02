@@ -1,12 +1,18 @@
+import { IdGenerator } from "@/lib/IdGenerator";
+import { Schema } from "@/lib/schema";
+
 export type PhotoId = string & { __brand: "PhotoId" };
 export type PageId = string & { __brand: "PageId" };
 
+const photoIdGenerator = new IdGenerator("photo_");
+const pageIdGenerator = new IdGenerator("page_");
+
 export function newPhotoId(): PhotoId {
-    return crypto.randomUUID() as PhotoId;
+    return photoIdGenerator.next() as PhotoId;
 }
 
 export function newPageId(): PageId {
-    return crypto.randomUUID() as PageId;
+    return pageIdGenerator.next() as PageId;
 }
 
 export interface PhotoMeta {
@@ -92,3 +98,46 @@ export function createDefaultBook(): BookData {
         photos: [],
     };
 }
+
+// --- Schema validators ---
+
+const LayoutIdSchema = Schema.valueUnion(
+    "single-photo",
+    "two-photos-horizontal",
+    "two-photos-vertical",
+    "photo-with-journal",
+    "journal-full",
+    "cover",
+);
+
+const PhotoMetaSchema = Schema.object({
+    id: Schema.string,
+    filename: Schema.string,
+    width: Schema.number,
+    height: Schema.number,
+    addedAt: Schema.number,
+});
+
+const PageSlotSchema = Schema.union("type", {
+    photo: Schema.object({
+        type: Schema.value("photo"),
+        photoId: Schema.string.nullable(),
+    }),
+    journal: Schema.object({
+        type: Schema.value("journal"),
+        text: Schema.string,
+    }),
+});
+
+const PageSchema = Schema.object({
+    id: Schema.string,
+    layout: LayoutIdSchema,
+    slots: Schema.arrayOf(PageSlotSchema),
+    backgroundColor: Schema.string,
+});
+
+export const BookDataSchema = Schema.object({
+    title: Schema.string,
+    pages: Schema.arrayOf(PageSchema),
+    photos: Schema.arrayOf(PhotoMetaSchema),
+});

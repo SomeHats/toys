@@ -1,5 +1,5 @@
 import type { BookData, PhotoId } from "@/photobook/types";
-import { createDefaultBook } from "@/photobook/types";
+import { BookDataSchema, createDefaultBook } from "@/photobook/types";
 
 const BOOK_DATA_FILE = "book.json";
 const PHOTOS_DIR = "photos";
@@ -21,7 +21,16 @@ export async function loadBookData(): Promise<BookData> {
         const fileHandle = await root.getFileHandle(BOOK_DATA_FILE);
         const file = await fileHandle.getFile();
         const text = await file.text();
-        return JSON.parse(text) as BookData;
+        const json: unknown = JSON.parse(text);
+        const result = BookDataSchema.parse(json);
+        if (!result.ok) {
+            console.warn(
+                "Book data validation failed:",
+                result.error.toString(),
+            );
+            return createDefaultBook();
+        }
+        return result.value as BookData;
     } catch {
         return createDefaultBook();
     }
@@ -61,6 +70,20 @@ export async function deletePhoto(id: PhotoId): Promise<void> {
     try {
         const dir = await getPhotosDir();
         await dir.removeEntry(id);
+    } catch {
+        // already gone
+    }
+}
+
+export async function clearAllData(): Promise<void> {
+    const root = await getRoot();
+    try {
+        await root.removeEntry(BOOK_DATA_FILE);
+    } catch {
+        // already gone
+    }
+    try {
+        await root.removeEntry(PHOTOS_DIR, { recursive: true });
     } catch {
         // already gone
     }

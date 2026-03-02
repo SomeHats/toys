@@ -83,7 +83,6 @@ export class TextGrid {
                 const _y = y + offsetY + textGrid.y;
                 assert(_x >= 0);
                 assert(_y >= 0);
-                console.log({ _x, _y, c });
                 this.w = Math.max(this.w, _x);
                 this.h = Math.max(this.h, _y);
                 (this.grid[_y] ??= [])[_x] = c;

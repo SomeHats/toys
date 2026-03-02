@@ -1,8 +1,12 @@
+import { entries } from "@/lib/utils";
 import { Grid } from "@/txdraw/components/Grid";
 import { Renderer } from "@/txdraw/components/Renderer";
+import { Toolbar } from "@/txdraw/components/Toolbar";
 import { TxBoxShapeUtil } from "@/txdraw/shapes/BoxShape";
+import "@/txdraw/shapes/shared/lineStyles";
 import { snapShapesToGrid } from "@/txdraw/shapes/shared/snapShapesToGrid";
 import { TextGrid } from "@/txdraw/TextGrid";
+import { BoxShapeTool } from "@/txdraw/tools/BoxTool";
 import { getAssetUrlsByImport } from "@tldraw/assets/imports.vite";
 import {
     ContextMenu,
@@ -19,6 +23,7 @@ import {
     TldrawSelectionForeground,
     TldrawShapeIndicators,
     TldrawUi,
+    TLUiOverrides,
     TLUnknownShape,
     ZoomTool,
 } from "tldraw";
@@ -42,13 +47,21 @@ const defaultComponents = {
     Overlays: TldrawOverlays,
 };
 
-const tools = [EraserTool, HandTool, LaserTool, ZoomTool, SelectTool];
+const tools = [
+    EraserTool,
+    HandTool,
+    LaserTool,
+    ZoomTool,
+    SelectTool,
+    BoxShapeTool,
+];
 const shapeUtils = [TxBoxShapeUtil];
 
 const components: TLComponents = {
     ...defaultComponents,
-    Grid: Grid,
+    Grid,
     OnTheCanvas: Renderer,
+    Toolbar,
 };
 
 const options: Partial<TldrawOptions> = {
@@ -59,6 +72,25 @@ const options: Partial<TldrawOptions> = {
         // { min: 0.15, mid: 1, step: 4 },
         // { min: 0.7, mid: 2.5, step: 1 },
     ],
+};
+
+const allowedDefaultTools = new Set(["select", "hand", "eraser"]);
+const overrides: TLUiOverrides = {
+    tools(editor, tools, helpers) {
+        tools = Object.fromEntries(
+            entries(tools).filter(([id, _]) => allowedDefaultTools.has(id)),
+        );
+        tools["tx-box"] = {
+            id: "tx-box",
+            label: "Rectangle",
+            icon: "geo-rectangle",
+            onSelect() {
+                editor.setCurrentTool("tx-box");
+            },
+            kbd: "r",
+        };
+        return tools;
+    },
 };
 
 export function TxdrawApp() {
@@ -87,7 +119,11 @@ export function TxdrawApp() {
                     }
                 }}
             >
-                <TldrawUi assetUrls={assetUrls}>
+                <TldrawUi
+                    assetUrls={assetUrls}
+                    components={components}
+                    overrides={overrides}
+                >
                     <InsideEditorAndUiContext />
                 </TldrawUi>
             </TldrawEditor>

@@ -32,7 +32,7 @@ function Editor() {
     }
 
     return (
-        <div className="editor-ui flex h-screen bg-stone-100">
+        <div className="editor-ui flex h-screen overflow-hidden bg-stone-100">
             {/* Desktop sidebar */}
             <aside className="hidden lg:flex">
                 <PhotoSidebar />
@@ -41,8 +41,8 @@ function Editor() {
             {/* Main content */}
             <div className="flex flex-1 flex-col overflow-hidden">
                 {/* Header */}
-                <header className="z-40 border-b border-stone-200 bg-white/80 backdrop-blur-sm">
-                    <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-3">
+                <header className="z-40 h-14 shrink-0 border-b border-stone-200 bg-white/80 backdrop-blur-sm">
+                    <div className="mx-auto flex h-full max-w-2xl items-center justify-between px-5">
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setSidebarOpen(true)}
@@ -64,7 +64,7 @@ function Editor() {
                 </header>
 
                 {/* Page list — scrollable */}
-                <main className="flex-1 overflow-y-auto">
+                <main className="min-h-0 flex-1 overflow-y-auto">
                     <div className="mx-auto max-w-2xl px-5 py-8">
                         {book.pages.length === 0 && <EmptyState />}
 

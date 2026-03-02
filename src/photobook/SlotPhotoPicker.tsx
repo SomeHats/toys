@@ -38,8 +38,8 @@ export function SlotPhotoPicker({
                 <div className="flex-1 overflow-auto p-5">
                     {book.photos.length === 0 && (
                         <p className="py-8 text-center text-sm text-stone-400">
-                            No photos imported yet. Add photos using
-                            the sidebar.
+                            No photos imported yet. Add photos using the
+                            sidebar.
                         </p>
                     )}
 
@@ -54,9 +54,7 @@ export function SlotPhotoPicker({
                                     return (
                                         <button
                                             key={photo.id}
-                                            onClick={() =>
-                                                onSelect(photo.id)
-                                            }
+                                            onClick={() => onSelect(photo.id)}
                                             className={classNames(
                                                 "group relative aspect-square overflow-hidden rounded",
                                                 "ring-2 ring-transparent transition-all hover:ring-stone-400",
@@ -87,9 +85,7 @@ export function SlotPhotoPicker({
                                     return (
                                         <button
                                             key={photo.id}
-                                            onClick={() =>
-                                                onSelect(photo.id)
-                                            }
+                                            onClick={() => onSelect(photo.id)}
                                             className={classNames(
                                                 "group relative aspect-square overflow-hidden rounded opacity-60",
                                                 "ring-2 ring-transparent transition-all hover:opacity-100 hover:ring-stone-400",

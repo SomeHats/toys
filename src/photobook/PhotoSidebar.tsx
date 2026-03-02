@@ -1,18 +1,47 @@
 import { getGoogleClientId } from "@/photobook/googlePhotos";
 import { GooglePhotosImport } from "@/photobook/GooglePhotosImport";
 import { GooglePhotosSetup } from "@/photobook/GooglePhotosSetup";
+import type { PhotoMeta } from "@/photobook/types";
 import { useBookState } from "@/photobook/useBookState";
 import classNames from "classnames";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const PHOTO_MIME_TYPE = "application/x-photobook-photo";
+const TARGET_ROW_HEIGHT = 170;
+const ROW_GAP = 4;
 
 export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
     const { book, photoUrls, usedPhotoIds, addPhoto } = useBookState();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [googleModal, setGoogleModal] = useState<
-        "none" | "setup" | "import"
-    >("none");
+    const gridRef = useRef<HTMLDivElement>(null);
+    const [containerWidth, setContainerWidth] = useState(0);
+    const [googleModal, setGoogleModal] = useState<"none" | "setup" | "import">(
+        "none",
+    );
+
+    // Measure the scrollable container width
+    useEffect(() => {
+        const el = gridRef.current;
+        if (!el) return;
+        const observer = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                setContainerWidth(entry.contentRect.width);
+            }
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
+    const rows = useMemo(
+        () =>
+            computeJustifiedRows(
+                book.photos,
+                containerWidth,
+                TARGET_ROW_HEIGHT,
+                ROW_GAP,
+            ),
+        [book.photos, containerWidth],
+    );
 
     const handleFileChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +52,6 @@ export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
                 for (const file of Array.from(files)) {
                     await addPhoto(file);
                 }
-                // Reset so the same files can be re-selected
                 input.value = "";
             })();
         },
@@ -40,9 +68,9 @@ export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
 
     return (
         <>
-            <div className="flex h-full w-72 flex-col border-r border-stone-200 bg-white">
+            <div className="flex h-full w-96 flex-col border-r border-stone-200 bg-white">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-stone-200 px-4 py-3">
+                <div className="flex h-14 items-center justify-between border-b border-stone-200 px-4">
                     <h2 className="text-sm font-bold tracking-wide text-stone-600">
                         Photos
                         {book.photos.length > 0 && (
@@ -87,8 +115,8 @@ export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
                     </button>
                 </div>
 
-                {/* Photo grid */}
-                <div className="flex-1 overflow-y-auto p-3">
+                {/* Photo gallery */}
+                <div ref={gridRef} className="flex-1 overflow-y-auto p-2">
                     {book.photos.length === 0 ?
                         <div className="flex flex-col items-center py-12 text-center">
                             <div className="mb-2 text-stone-300">
@@ -98,43 +126,60 @@ export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
                                 Import photos to get started
                             </p>
                         </div>
-                    :   <div className="grid grid-cols-3 gap-2">
-                            {book.photos.map((photo) => {
-                                const url = photoUrls.get(photo.id);
-                                const used = usedPhotoIds.has(photo.id);
-                                return (
-                                    <div
-                                        key={photo.id}
-                                        draggable
-                                        onDragStart={(e) => {
-                                            e.dataTransfer.setData(
-                                                PHOTO_MIME_TYPE,
-                                                photo.id,
-                                            );
-                                            e.dataTransfer.effectAllowed =
-                                                "copy";
-                                        }}
-                                        className={classNames(
-                                            "group relative aspect-square cursor-grab overflow-hidden rounded",
-                                            "ring-1 ring-stone-200 transition-all hover:ring-2 hover:ring-stone-400",
-                                            "active:cursor-grabbing",
-                                        )}
-                                    >
-                                        {url && (
-                                            <img
-                                                src={url}
-                                                className="h-full w-full object-cover"
-                                                draggable={false}
-                                            />
-                                        )}
-                                        {used && (
-                                            <div className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 shadow-sm">
-                                                <CheckIcon />
+                    :   <div className="flex flex-col" style={{ gap: ROW_GAP }}>
+                            {rows.map((row, rowIdx) => (
+                                <div
+                                    key={rowIdx}
+                                    className="flex"
+                                    style={{
+                                        height: row.height,
+                                        gap: ROW_GAP,
+                                    }}
+                                >
+                                    {row.photos.map((photo) => {
+                                        const url = photoUrls.get(photo.id);
+                                        const used = usedPhotoIds.has(photo.id);
+                                        const aspect =
+                                            photo.width / photo.height || 1;
+                                        return (
+                                            <div
+                                                key={photo.id}
+                                                draggable
+                                                onDragStart={(e) => {
+                                                    e.dataTransfer.setData(
+                                                        PHOTO_MIME_TYPE,
+                                                        photo.id,
+                                                    );
+                                                    e.dataTransfer.effectAllowed =
+                                                        "copy";
+                                                }}
+                                                className={classNames(
+                                                    "relative cursor-grab overflow-hidden rounded",
+                                                    "ring-1 ring-stone-200 transition-all hover:ring-2 hover:ring-stone-400",
+                                                    "active:cursor-grabbing",
+                                                )}
+                                                style={{
+                                                    width: row.height * aspect,
+                                                    flexShrink: 0,
+                                                }}
+                                            >
+                                                {url && (
+                                                    <img
+                                                        src={url}
+                                                        className="h-full w-full object-cover"
+                                                        draggable={false}
+                                                    />
+                                                )}
+                                                {used && (
+                                                    <div className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 shadow-sm">
+                                                        <CheckIcon />
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
+                                        );
+                                    })}
+                                </div>
+                            ))}
                         </div>
                     }
                 </div>
@@ -148,13 +193,62 @@ export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
             )}
 
             {googleModal === "import" && (
-                <GooglePhotosImport
-                    onClose={() => setGoogleModal("none")}
-                />
+                <GooglePhotosImport onClose={() => setGoogleModal("none")} />
             )}
         </>
     );
 }
+
+// --- Justified row layout algorithm ---
+
+interface JustifiedRow {
+    photos: PhotoMeta[];
+    height: number;
+}
+
+/**
+ * Greedily packs photos into rows so each row fills the full container width.
+ * Each photo's display width = aspectRatio * rowHeight.
+ * We solve for rowHeight = (containerWidth - gaps) / sum(aspectRatios).
+ * Once that height drops to or below the target, we finalize the row.
+ * The last (incomplete) row uses the target height so it doesn't stretch.
+ */
+function computeJustifiedRows(
+    photos: PhotoMeta[],
+    containerWidth: number,
+    targetHeight: number,
+    gap: number,
+): JustifiedRow[] {
+    if (containerWidth <= 0 || photos.length === 0) return [];
+
+    const rows: JustifiedRow[] = [];
+    let current: PhotoMeta[] = [];
+    let aspectSum = 0;
+
+    for (const photo of photos) {
+        const aspect = photo.width / photo.height || 1;
+        current.push(photo);
+        aspectSum += aspect;
+
+        const availableWidth = containerWidth - (current.length - 1) * gap;
+        const rowHeight = availableWidth / aspectSum;
+
+        if (rowHeight <= targetHeight) {
+            rows.push({ photos: [...current], height: rowHeight });
+            current = [];
+            aspectSum = 0;
+        }
+    }
+
+    // Last incomplete row: keep target height, don't stretch
+    if (current.length > 0) {
+        rows.push({ photos: current, height: targetHeight });
+    }
+
+    return rows;
+}
+
+// --- Icons ---
 
 function CloseIcon() {
     return (

@@ -4,6 +4,11 @@
     font-family: "Caveat", cursive;
 }
 
+/* Cap HDR photos to SDR brightness */
+img {
+    dynamic-range-limit: standard;
+}
+
 /* Print styles: hide all editor UI, show only the print view */
 @media print {
     @page {
@@ -39,8 +44,14 @@
     }
 }
 
-/* On screen the print view is hidden */
+/* On screen the print view is hidden and body scroll is locked */
 @media screen {
+    html,
+    body {
+        height: 100%;
+        overflow: hidden;
+    }
+
     .print-view {
         display: none;
     }

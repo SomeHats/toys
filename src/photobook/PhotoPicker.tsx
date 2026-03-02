@@ -1,7 +1,10 @@
+import { getGoogleClientId } from "@/photobook/googlePhotos";
+import { GooglePhotosImport } from "@/photobook/GooglePhotosImport";
+import { GooglePhotosSetup } from "@/photobook/GooglePhotosSetup";
 import type { PhotoId } from "@/photobook/types";
 import { useBookState } from "@/photobook/useBookState";
 import classNames from "classnames";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 
 export function PhotoPicker({
     onSelect,
@@ -12,6 +15,9 @@ export function PhotoPicker({
 }) {
     const { book, photoUrls, addPhoto } = useBookState();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [googleModal, setGoogleModal] = useState<"none" | "setup" | "import">(
+        "none",
+    );
 
     const handleFileChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,72 +28,101 @@ export function PhotoPicker({
         [addPhoto, onSelect],
     );
 
+    const handleGooglePhotos = useCallback(() => {
+        if (getGoogleClientId()) {
+            setGoogleModal("import");
+        } else {
+            setGoogleModal("setup");
+        }
+    }, []);
+
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-            onClick={onClose}
-        >
+        <>
             <div
-                className="mx-4 flex max-h-[80vh] w-full max-w-lg flex-col rounded-lg bg-white shadow-xl"
-                onClick={(e) => e.stopPropagation()}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+                onClick={onClose}
             >
-                <div className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
-                    <h2 className="text-lg font-bold tracking-wide text-stone-700">
-                        Choose Photo
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        className="text-stone-400 hover:text-stone-600"
-                    >
-                        <CloseIcon />
-                    </button>
-                </div>
+                <div
+                    className="mx-4 flex max-h-[80vh] w-full max-w-lg flex-col rounded-lg bg-white shadow-xl"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
+                        <h2 className="text-lg font-bold tracking-wide text-stone-700">
+                            Choose Photo
+                        </h2>
+                        <button
+                            onClick={onClose}
+                            className="text-stone-400 hover:text-stone-600"
+                        >
+                            <CloseIcon />
+                        </button>
+                    </div>
 
-                <div className="flex-1 overflow-auto p-5">
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleFileChange}
-                        className="hidden"
-                    />
+                    <div className="flex-1 overflow-auto p-5">
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleFileChange}
+                            className="hidden"
+                        />
 
-                    <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="mb-4 w-full rounded-lg border-2 border-dashed border-stone-300 p-6 text-center font-bold tracking-wide text-stone-400 transition-colors hover:border-stone-400 hover:text-stone-500"
-                    >
-                        Upload New Photo
-                    </button>
-
-                    {book.photos.length > 0 && (
-                        <div className="grid grid-cols-3 gap-2">
-                            {book.photos.map((photo) => {
-                                const url = photoUrls.get(photo.id);
-                                return (
-                                    <button
-                                        key={photo.id}
-                                        onClick={() => onSelect(photo.id)}
-                                        className={classNames(
-                                            "group relative aspect-square overflow-hidden rounded",
-                                            "ring-2 ring-transparent transition-all hover:ring-stone-400",
-                                        )}
-                                    >
-                                        {url && (
-                                            <img
-                                                src={url}
-                                                className="h-full w-full object-cover transition-transform duration-200 ease-out-back group-hover:scale-105"
-                                                draggable={false}
-                                            />
-                                        )}
-                                    </button>
-                                );
-                            })}
+                        <div className="mb-4 flex gap-3">
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex-1 rounded-lg border-2 border-dashed border-stone-300 p-4 text-center font-bold tracking-wide text-stone-400 transition-colors hover:border-stone-400 hover:text-stone-500"
+                            >
+                                Upload Photo
+                            </button>
+                            <button
+                                onClick={handleGooglePhotos}
+                                className="flex-1 rounded-lg border-2 border-dashed border-blue-300 p-4 text-center font-bold tracking-wide text-blue-400 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-500"
+                            >
+                                Google Photos
+                            </button>
                         </div>
-                    )}
+
+                        {book.photos.length > 0 && (
+                            <div className="grid grid-cols-3 gap-2">
+                                {book.photos.map((photo) => {
+                                    const url = photoUrls.get(photo.id);
+                                    return (
+                                        <button
+                                            key={photo.id}
+                                            onClick={() => onSelect(photo.id)}
+                                            className={classNames(
+                                                "group relative aspect-square overflow-hidden rounded",
+                                                "ring-2 ring-transparent transition-all hover:ring-stone-400",
+                                            )}
+                                        >
+                                            {url && (
+                                                <img
+                                                    src={url}
+                                                    className="h-full w-full object-cover transition-transform duration-200 ease-out-back group-hover:scale-105"
+                                                    draggable={false}
+                                                />
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
+
+            {googleModal === "setup" && (
+                <GooglePhotosSetup
+                    onComplete={() => setGoogleModal("import")}
+                    onClose={() => setGoogleModal("none")}
+                />
+            )}
+
+            {googleModal === "import" && (
+                <GooglePhotosImport onClose={() => setGoogleModal("none")} />
+            )}
+        </>
     );
 }
 

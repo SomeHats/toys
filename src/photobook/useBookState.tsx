@@ -155,41 +155,51 @@ export function BookProvider({ children }: { children: ReactNode }) {
         [book, save],
     );
 
-    const addPhoto = useCallback(
-        async (file: File): Promise<PhotoId> => {
-            const id = newPhotoId();
-            const blob = new Blob([await file.arrayBuffer()], {
-                type: file.type,
-            });
+    const addPhoto = useCallback(async (file: File): Promise<PhotoId> => {
+        const id = newPhotoId();
+        const blob = new Blob([await file.arrayBuffer()], {
+            type: file.type,
+        });
 
-            // Get image dimensions
-            const { width, height } = await getImageDimensions(blob);
+        // Get image dimensions
+        const { width, height } = await getImageDimensions(blob);
 
-            const meta: PhotoMeta = {
-                id,
-                filename: file.name,
-                width,
-                height,
-                addedAt: Date.now(),
+        const meta: PhotoMeta = {
+            id,
+            filename: file.name,
+            width,
+            height,
+            addedAt: Date.now(),
+        };
+
+        await savePhoto(id, blob);
+        const url = URL.createObjectURL(blob);
+        setPhotoUrls((prev) => {
+            const next = new Map(prev);
+            next.set(id, url);
+            return next;
+        });
+
+        // Use functional updater so sequential addPhoto calls
+        // (e.g. bulk Google Photos import) accumulate correctly.
+        let updatedBook: BookData;
+        setBook((prev) => {
+            updatedBook = {
+                ...prev,
+                photos: [...prev.photos, meta],
             };
+            return updatedBook;
+        });
 
-            await savePhoto(id, blob);
-            const url = URL.createObjectURL(blob);
-            setPhotoUrls((prev) => {
-                const next = new Map(prev);
-                next.set(id, url);
-                return next;
-            });
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+        saveTimeoutRef.current = setTimeout(() => {
+            void saveBookData(updatedBook!);
+        }, 500);
 
-            const newBook = {
-                ...book,
-                photos: [...book.photos, meta],
-            };
-            save(newBook);
-            return id;
-        },
-        [book, save],
-    );
+        return id;
+    }, []);
 
     const updateTitle = useCallback(
         (title: string) => {

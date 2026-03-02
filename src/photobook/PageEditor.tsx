@@ -1,9 +1,9 @@
 import { JournalEditor } from "@/photobook/JournalEditor";
 import { PageRenderer } from "@/photobook/PageRenderer";
 import { PhotoPicker } from "@/photobook/PhotoPicker";
-import { useBookState } from "@/photobook/useBookState";
 import type { LayoutId, Page, PhotoId } from "@/photobook/types";
 import { LAYOUTS } from "@/photobook/types";
+import { useBookState } from "@/photobook/useBookState";
 import classNames from "classnames";
 import { useState } from "react";
 
@@ -93,12 +93,10 @@ export function PageEditor({
 
             {editingSlot?.type === "journal" && (
                 <JournalEditor
-                    initialText={
-                        (() => {
-                            const slot = page.slots[editingSlot.index];
-                            return slot.type === "journal" ? slot.text : "";
-                        })()
-                    }
+                    initialText={(() => {
+                        const slot = page.slots[editingSlot.index];
+                        return slot.type === "journal" ? slot.text : "";
+                    })()}
                     onSave={handleJournalSave}
                     onClose={() => setEditingSlot(null)}
                 />

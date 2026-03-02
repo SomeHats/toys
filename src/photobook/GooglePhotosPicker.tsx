@@ -27,9 +27,7 @@ export function GooglePhotosPicker({
     onImport,
     onBack,
 }: {
-    onImport: (
-        photos: { blob: Blob; filename: string }[],
-    ) => Promise<void>;
+    onImport: (photos: { blob: Blob; filename: string }[]) => Promise<void>;
     onBack: () => void;
 }) {
     const [view, setView] = useState<PickerView>(() => {
@@ -119,19 +117,57 @@ function ClientIdSetup({
                     Connect Google Photos
                 </h3>
             </div>
-            <p className="text-sm leading-relaxed text-stone-500">
-                To import from Google Photos, you need a Google Cloud
-                OAuth Client ID. Create one in the{" "}
-                <a
-                    href="https://console.cloud.google.com/apis/credentials"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 underline"
-                >
-                    Google Cloud Console
-                </a>{" "}
-                with the Photos Library API enabled.
-            </p>
+            <div className="flex flex-col gap-2 rounded-lg bg-stone-50 p-3 text-sm leading-relaxed text-stone-500">
+                <p>
+                    To connect to Google Photos you need an OAuth Client ID from
+                    Google Cloud. Here&apos;s how:
+                </p>
+                <ol className="list-inside list-decimal space-y-1 text-stone-500">
+                    <li>
+                        Go to the{" "}
+                        <a
+                            href="https://console.cloud.google.com/apis/credentials"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 underline"
+                        >
+                            Google Cloud Console
+                        </a>
+                    </li>
+                    <li>Create a project (or select an existing one)</li>
+                    <li>
+                        Enable the{" "}
+                        <a
+                            href="https://console.cloud.google.com/apis/library/photoslibrary.googleapis.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 underline"
+                        >
+                            Photos Library API
+                        </a>
+                    </li>
+                    <li>
+                        Go to{" "}
+                        <strong className="text-stone-600">Credentials</strong>{" "}
+                        and create an{" "}
+                        <strong className="text-stone-600">
+                            OAuth 2.0 Client ID
+                        </strong>{" "}
+                        (type: Web application)
+                    </li>
+                    <li>
+                        Add{" "}
+                        <code className="rounded bg-stone-200 px-1 text-xs text-stone-600">
+                            {window.location.origin}
+                        </code>{" "}
+                        to{" "}
+                        <strong className="text-stone-600">
+                            Authorized JavaScript origins
+                        </strong>
+                    </li>
+                    <li>Copy the Client ID and paste it below</li>
+                </ol>
+            </div>
             <input
                 type="text"
                 value={clientId}
@@ -169,9 +205,7 @@ function AuthPrompt({
     onResetClientId: () => void;
 }) {
     const [loading, setLoading] = useState(false);
-    const [authError, setAuthError] = useState<string | null>(
-        error ?? null,
-    );
+    const [authError, setAuthError] = useState<string | null>(error ?? null);
 
     const handleAuth = useCallback(async () => {
         setLoading(true);
@@ -206,9 +240,7 @@ function AuthPrompt({
                 Sign in to browse and import your photos.
             </p>
             {authError && (
-                <p className="text-center text-sm text-red-500">
-                    {authError}
-                </p>
+                <p className="text-center text-sm text-red-500">{authError}</p>
             )}
             <button
                 onClick={() => void handleAuth()}
@@ -236,19 +268,14 @@ function AlbumListView({
     onBack,
     onAuthError,
 }: {
-    onSelectAlbum: (
-        albumId: string | null,
-        albumTitle: string,
-    ) => void;
+    onSelectAlbum: (albumId: string | null, albumTitle: string) => void;
     onBack: () => void;
     onAuthError: () => void;
 }) {
     const [albums, setAlbums] = useState<GooglePhotosAlbum[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [nextPageToken, setNextPageToken] = useState<
-        string | undefined
-    >();
+    const [nextPageToken, setNextPageToken] = useState<string | undefined>();
 
     const fetchAlbums = useCallback(
         async (pageToken?: string) => {
@@ -263,17 +290,12 @@ function AlbumListView({
                 );
                 setNextPageToken(result.nextPageToken);
             } catch (e) {
-                if (
-                    e instanceof Error &&
-                    e.message.includes("Auth error")
-                ) {
+                if (e instanceof Error && e.message.includes("Auth error")) {
                     onAuthError();
                     return;
                 }
                 setError(
-                    e instanceof Error ?
-                        e.message
-                    :   "Failed to load albums",
+                    e instanceof Error ? e.message : "Failed to load albums",
                 );
             } finally {
                 setLoading(false);
@@ -318,9 +340,7 @@ function AlbumListView({
                 {albums.map((album) => (
                     <button
                         key={album.id}
-                        onClick={() =>
-                            onSelectAlbum(album.id, album.title)
-                        }
+                        onClick={() => onSelectAlbum(album.id, album.title)}
                         className="group overflow-hidden rounded-lg ring-1 ring-stone-200 transition-all hover:ring-stone-300 hover:shadow-sm"
                     >
                         <div className="aspect-square overflow-hidden bg-stone-100">
@@ -352,9 +372,7 @@ function AlbumListView({
 
             {error && (
                 <div className="flex flex-col items-center gap-2 py-4">
-                    <p className="text-center text-sm text-red-500">
-                        {error}
-                    </p>
+                    <p className="text-center text-sm text-red-500">{error}</p>
                     <button
                         onClick={() => void fetchAlbums()}
                         className="text-sm font-bold text-stone-500 hover:text-stone-700"
@@ -387,20 +405,14 @@ function PhotoGridView({
 }: {
     albumId: string | null;
     albumTitle: string;
-    onImport: (
-        photos: { blob: Blob; filename: string }[],
-    ) => Promise<void>;
+    onImport: (photos: { blob: Blob; filename: string }[]) => Promise<void>;
     onBack: () => void;
     onAuthError: () => void;
 }) {
-    const [mediaItems, setMediaItems] = useState<
-        GooglePhotosMediaItem[]
-    >([]);
+    const [mediaItems, setMediaItems] = useState<GooglePhotosMediaItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [nextPageToken, setNextPageToken] = useState<
-        string | undefined
-    >();
+    const [nextPageToken, setNextPageToken] = useState<string | undefined>();
     const [selectedIds, setSelectedIds] = useState<Set<string>>(
         () => new Set(),
     );
@@ -426,17 +438,12 @@ function PhotoGridView({
                 );
                 setNextPageToken(result.nextPageToken);
             } catch (e) {
-                if (
-                    e instanceof Error &&
-                    e.message.includes("Auth error")
-                ) {
+                if (e instanceof Error && e.message.includes("Auth error")) {
                     onAuthError();
                     return;
                 }
                 setError(
-                    e instanceof Error ?
-                        e.message
-                    :   "Failed to load photos",
+                    e instanceof Error ? e.message : "Failed to load photos",
                 );
             } finally {
                 setLoading(false);
@@ -468,9 +475,7 @@ function PhotoGridView({
         const photos: { blob: Blob; filename: string }[] = [];
         let done = 0;
 
-        for (const item of mediaItems.filter((m) =>
-            selectedIds.has(m.id),
-        )) {
+        for (const item of mediaItems.filter((m) => selectedIds.has(m.id))) {
             try {
                 const blob = await downloadPhotoBlob(item);
                 photos.push({ blob, filename: item.filename });
@@ -506,9 +511,7 @@ function PhotoGridView({
 
             {error && (
                 <div className="flex flex-col items-center gap-2 py-4">
-                    <p className="text-center text-sm text-red-500">
-                        {error}
-                    </p>
+                    <p className="text-center text-sm text-red-500">{error}</p>
                     <button
                         onClick={() => void fetchPhotos()}
                         className="text-sm font-bold text-stone-500 hover:text-stone-700"
@@ -529,9 +532,9 @@ function PhotoGridView({
                             className={classNames(
                                 "group relative aspect-square overflow-hidden rounded",
                                 "ring-2 transition-all",
-                                isSelected ?
-                                    "ring-blue-500"
-                                :   "ring-transparent hover:ring-stone-400",
+                                isSelected ? "ring-blue-500" : (
+                                    "ring-transparent hover:ring-stone-400"
+                                ),
                             )}
                         >
                             <img
@@ -607,28 +610,11 @@ function BackIcon() {
 
 function GooglePhotosIcon({ size = 24 }: { size?: number }) {
     return (
-        <svg
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill="none"
-        >
-            <path
-                d="M12 2C9.8 2 8 3.8 8 6v6h4V2z"
-                fill="#EA4335"
-            />
-            <path
-                d="M22 12c0-2.2-1.8-4-4-4h-6v4h10z"
-                fill="#4285F4"
-            />
-            <path
-                d="M12 22c2.2 0 4-1.8 4-4v-6h-4v10z"
-                fill="#34A853"
-            />
-            <path
-                d="M2 12c0 2.2 1.8 4 4 4h6v-4H2z"
-                fill="#FBBC05"
-            />
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C9.8 2 8 3.8 8 6v6h4V2z" fill="#EA4335" />
+            <path d="M22 12c0-2.2-1.8-4-4-4h-6v4h10z" fill="#4285F4" />
+            <path d="M12 22c2.2 0 4-1.8 4-4v-6h-4v10z" fill="#34A853" />
+            <path d="M2 12c0 2.2 1.8 4 4 4h6v-4H2z" fill="#FBBC05" />
         </svg>
     );
 }

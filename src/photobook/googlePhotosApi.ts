@@ -57,9 +57,7 @@ declare global {
                         }) => void;
                         error_callback?: (error: { type: string }) => void;
                     }): {
-                        requestAccessToken(opts?: {
-                            prompt?: string;
-                        }): void;
+                        requestAccessToken(opts?: { prompt?: string }): void;
                     };
                 };
             };
@@ -209,9 +207,7 @@ export async function listAlbums(
     const params = new URLSearchParams({ pageSize: "50" });
     if (pageToken) params.set("pageToken", pageToken);
 
-    const response = await fetchGooglePhotos(
-        `${API_BASE}/albums?${params}`,
-    );
+    const response = await fetchGooglePhotos(`${API_BASE}/albums?${params}`);
     return response.json();
 }
 
@@ -227,13 +223,10 @@ export async function listAlbumMediaItems(
     };
     if (pageToken) body.pageToken = pageToken;
 
-    const response = await fetchGooglePhotos(
-        `${API_BASE}/mediaItems:search`,
-        {
-            method: "POST",
-            body: JSON.stringify(body),
-        },
-    );
+    const response = await fetchGooglePhotos(`${API_BASE}/mediaItems:search`, {
+        method: "POST",
+        body: JSON.stringify(body),
+    });
     return response.json();
 }
 
@@ -250,13 +243,10 @@ export async function listRecentMediaItems(
     };
     if (pageToken) body.pageToken = pageToken;
 
-    const response = await fetchGooglePhotos(
-        `${API_BASE}/mediaItems:search`,
-        {
-            method: "POST",
-            body: JSON.stringify(body),
-        },
-    );
+    const response = await fetchGooglePhotos(`${API_BASE}/mediaItems:search`, {
+        method: "POST",
+        body: JSON.stringify(body),
+    });
     return response.json();
 }
 
@@ -269,9 +259,7 @@ export async function downloadPhotoBlob(
     const url = `${item.baseUrl}=w${maxDimension}-h${maxDimension}`;
     const response = await fetch(url);
     if (!response.ok) {
-        throw new Error(
-            `Failed to download photo: ${response.status}`,
-        );
+        throw new Error(`Failed to download photo: ${response.status}`);
     }
     return response.blob();
 }

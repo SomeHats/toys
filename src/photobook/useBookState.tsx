@@ -39,6 +39,7 @@ interface BookState {
     updateSlot: (pageId: PageId, slotIndex: number, slot: PageSlot) => void;
     changeLayout: (pageId: PageId, layout: LayoutId) => void;
     addPhoto: (file: File) => Promise<PhotoId>;
+    addPhotoFromBlob: (blob: Blob, filename: string) => Promise<PhotoId>;
     updateTitle: (title: string) => void;
 }
 
@@ -191,6 +192,37 @@ export function BookProvider({ children }: { children: ReactNode }) {
         [book, save],
     );
 
+    const addPhotoFromBlob = useCallback(
+        async (blob: Blob, filename: string): Promise<PhotoId> => {
+            const id = newPhotoId();
+            const { width, height } = await getImageDimensions(blob);
+
+            const meta: PhotoMeta = {
+                id,
+                filename,
+                width,
+                height,
+                addedAt: Date.now(),
+            };
+
+            await savePhoto(id, blob);
+            const url = URL.createObjectURL(blob);
+            setPhotoUrls((prev) => {
+                const next = new Map(prev);
+                next.set(id, url);
+                return next;
+            });
+
+            const newBook = {
+                ...book,
+                photos: [...book.photos, meta],
+            };
+            save(newBook);
+            return id;
+        },
+        [book, save],
+    );
+
     const updateTitle = useCallback(
         (title: string) => {
             save({ ...book, title });
@@ -210,6 +242,7 @@ export function BookProvider({ children }: { children: ReactNode }) {
                 updateSlot,
                 changeLayout,
                 addPhoto,
+                addPhotoFromBlob,
                 updateTitle,
             }}
         >

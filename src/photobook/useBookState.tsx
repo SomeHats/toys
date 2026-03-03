@@ -1,8 +1,11 @@
 import {
+    deletePhoto,
     loadBookData,
     loadPhoto,
+    loadThumbnail,
     saveBookData,
     savePhoto,
+    saveThumbnail,
 } from "@/photobook/storage";
 import type {
     BookData,
@@ -35,12 +38,14 @@ interface BookState {
     book: BookData;
     loading: boolean;
     photoUrls: Map<PhotoId, string>;
+    thumbUrls: Map<PhotoId, string>;
     addPage: (layout: LayoutId) => void;
     removePage: (pageId: PageId) => void;
     movePage: (pageId: PageId, direction: "up" | "down") => void;
     updateSlot: (pageId: PageId, slotIndex: number, slot: PageSlot) => void;
     changeLayout: (pageId: PageId, layout: LayoutId) => void;
     addPhoto: (file: File, takenAtOverride?: number | null) => Promise<PhotoId>;
+    removePhoto: (photoId: PhotoId) => void;
     updateTitle: (title: string) => void;
     usedPhotoIds: Set<PhotoId>;
 }
@@ -59,6 +64,9 @@ export function BookProvider({ children }: { children: ReactNode }) {
     const [photoUrls, setPhotoUrls] = useState<Map<PhotoId, string>>(
         () => new Map(),
     );
+    const [thumbUrls, setThumbUrls] = useState<Map<PhotoId, string>>(
+        () => new Map(),
+    );
     const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Load on mount
@@ -66,16 +74,34 @@ export function BookProvider({ children }: { children: ReactNode }) {
         void loadBookData().then(async (data) => {
             setBook(data);
 
-            // Load all photo blobs into object URLs
+            // Load thumbnails first for fast sidebar rendering,
+            // then load full-res photos in the background.
+            const thumbs = new Map<PhotoId, string>();
             const urls = new Map<PhotoId, string>();
+            for (const photo of data.photos) {
+                const thumb = await loadThumbnail(photo.id);
+                if (thumb) {
+                    thumbs.set(photo.id, URL.createObjectURL(thumb));
+                }
+            }
+            setThumbUrls(thumbs);
+            setLoading(false);
+
             for (const photo of data.photos) {
                 const blob = await loadPhoto(photo.id);
                 if (blob) {
                     urls.set(photo.id, URL.createObjectURL(blob));
+                    // Generate missing thumbnails for photos imported before
+                    // thumbnail support was added.
+                    if (!thumbs.has(photo.id)) {
+                        const thumbBlob = await generateThumbnail(blob);
+                        thumbs.set(photo.id, URL.createObjectURL(thumbBlob));
+                        void saveThumbnail(photo.id, thumbBlob);
+                    }
                 }
             }
-            setPhotoUrls(urls);
-            setLoading(false);
+            setPhotoUrls(new Map(urls));
+            setThumbUrls(new Map(thumbs));
         });
     }, []);
 
@@ -182,11 +208,22 @@ export function BookProvider({ children }: { children: ReactNode }) {
                 takenAt: takenAtOverride ?? exifDate,
             };
 
-            await savePhoto(id, blob);
+            const [thumbBlob] = await Promise.all([
+                generateThumbnail(blob),
+                savePhoto(id, blob),
+            ]);
+            await saveThumbnail(id, thumbBlob);
+
             const url = URL.createObjectURL(blob);
+            const thumbUrl = URL.createObjectURL(thumbBlob);
             setPhotoUrls((prev) => {
                 const next = new Map(prev);
                 next.set(id, url);
+                return next;
+            });
+            setThumbUrls((prev) => {
+                const next = new Map(prev);
+                next.set(id, thumbUrl);
                 return next;
             });
 
@@ -211,6 +248,46 @@ export function BookProvider({ children }: { children: ReactNode }) {
             return id;
         },
         [],
+    );
+
+    const removePhoto = useCallback(
+        (photoId: PhotoId) => {
+            // Remove from book: drop from photos list, clear from any slots
+            const updated: BookData = {
+                ...book,
+                photos: book.photos.filter((p) => p.id !== photoId),
+                pages: book.pages.map((page) => ({
+                    ...page,
+                    slots: page.slots.map((slot) => {
+                        if (slot.type === "photo" && slot.photoId === photoId) {
+                            return { ...slot, photoId: null };
+                        }
+                        return slot;
+                    }),
+                })),
+            };
+            save(updated);
+
+            // Revoke object URLs
+            const photoUrl = photoUrls.get(photoId);
+            const thumbUrl = thumbUrls.get(photoId);
+            if (photoUrl) URL.revokeObjectURL(photoUrl);
+            if (thumbUrl) URL.revokeObjectURL(thumbUrl);
+            setPhotoUrls((prev) => {
+                const next = new Map(prev);
+                next.delete(photoId);
+                return next;
+            });
+            setThumbUrls((prev) => {
+                const next = new Map(prev);
+                next.delete(photoId);
+                return next;
+            });
+
+            // Delete from OPFS
+            void deletePhoto(photoId);
+        },
+        [book, save, photoUrls, thumbUrls],
     );
 
     const usedPhotoIds = useMemo(() => {
@@ -238,12 +315,14 @@ export function BookProvider({ children }: { children: ReactNode }) {
                 book,
                 loading,
                 photoUrls,
+                thumbUrls,
                 addPage,
                 removePage,
                 movePage,
                 updateSlot,
                 changeLayout,
                 addPhoto,
+                removePhoto,
                 updateTitle,
                 usedPhotoIds,
             }}
@@ -261,6 +340,38 @@ function getImageDimensions(
         img.onload = () => {
             resolve({ width: img.naturalWidth, height: img.naturalHeight });
             URL.revokeObjectURL(img.src);
+        };
+        img.onerror = reject;
+        img.src = URL.createObjectURL(blob);
+    });
+}
+
+const THUMB_MAX_SIZE = 300;
+
+function generateThumbnail(blob: Blob): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const { naturalWidth: w, naturalHeight: h } = img;
+            const scale = Math.min(THUMB_MAX_SIZE / w, THUMB_MAX_SIZE / h, 1);
+            const tw = Math.round(w * scale);
+            const th = Math.round(h * scale);
+
+            const canvas = document.createElement("canvas");
+            canvas.width = tw;
+            canvas.height = th;
+            const ctx = canvas.getContext("2d")!;
+            ctx.drawImage(img, 0, 0, tw, th);
+            URL.revokeObjectURL(img.src);
+
+            canvas.toBlob(
+                (result) => {
+                    if (result) resolve(result);
+                    else reject(new Error("Failed to create thumbnail"));
+                },
+                "image/jpeg",
+                0.8,
+            );
         };
         img.onerror = reject;
         img.src = URL.createObjectURL(blob);

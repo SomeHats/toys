@@ -3,6 +3,7 @@ import { BookDataSchema, createDefaultBook } from "@/photobook/types";
 
 const BOOK_DATA_FILE = "book.json";
 const PHOTOS_DIR = "photos";
+const THUMBS_DIR = "thumbnails";
 
 async function getRoot(): Promise<FileSystemDirectoryHandle> {
     return await navigator.storage.getDirectory();
@@ -11,6 +12,11 @@ async function getRoot(): Promise<FileSystemDirectoryHandle> {
 async function getPhotosDir(): Promise<FileSystemDirectoryHandle> {
     const root = await getRoot();
     return await root.getDirectoryHandle(PHOTOS_DIR, { create: true });
+}
+
+async function getThumbsDir(): Promise<FileSystemDirectoryHandle> {
+    const root = await getRoot();
+    return await root.getDirectoryHandle(THUMBS_DIR, { create: true });
 }
 
 // --- Book Data ---
@@ -66,9 +72,35 @@ export async function loadPhoto(id: PhotoId): Promise<Blob | null> {
     }
 }
 
+// --- Thumbnails ---
+
+export async function saveThumbnail(id: PhotoId, blob: Blob): Promise<void> {
+    const dir = await getThumbsDir();
+    const fileHandle = await dir.getFileHandle(id, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+}
+
+export async function loadThumbnail(id: PhotoId): Promise<Blob | null> {
+    try {
+        const dir = await getThumbsDir();
+        const fileHandle = await dir.getFileHandle(id);
+        return await fileHandle.getFile();
+    } catch {
+        return null;
+    }
+}
+
 export async function deletePhoto(id: PhotoId): Promise<void> {
     try {
         const dir = await getPhotosDir();
+        await dir.removeEntry(id);
+    } catch {
+        // already gone
+    }
+    try {
+        const dir = await getThumbsDir();
         await dir.removeEntry(id);
     } catch {
         // already gone
@@ -84,6 +116,11 @@ export async function clearAllData(): Promise<void> {
     }
     try {
         await root.removeEntry(PHOTOS_DIR, { recursive: true });
+    } catch {
+        // already gone
+    }
+    try {
+        await root.removeEntry(THUMBS_DIR, { recursive: true });
     } catch {
         // already gone
     }

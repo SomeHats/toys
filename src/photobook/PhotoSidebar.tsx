@@ -1,7 +1,7 @@
 import { getGoogleClientId } from "@/photobook/googlePhotos";
 import { GooglePhotosImport } from "@/photobook/GooglePhotosImport";
 import { GooglePhotosSetup } from "@/photobook/GooglePhotosSetup";
-import type { PhotoMeta } from "@/photobook/types";
+import type { PhotoId, PhotoMeta } from "@/photobook/types";
 import { useBookState } from "@/photobook/useBookState";
 import classNames from "classnames";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -11,13 +11,15 @@ const TARGET_ROW_HEIGHT = 170;
 const ROW_GAP = 4;
 
 export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
-    const { book, photoUrls, usedPhotoIds, addPhoto } = useBookState();
+    const { book, thumbUrls, photoUrls, usedPhotoIds, addPhoto, removePhoto } =
+        useBookState();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState(0);
     const [googleModal, setGoogleModal] = useState<"none" | "setup" | "import">(
         "none",
     );
+    const [lightboxId, setLightboxId] = useState<PhotoId | null>(null);
 
     // Measure the scrollable container width
     useEffect(() => {
@@ -145,7 +147,7 @@ export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
                                     }}
                                 >
                                     {row.photos.map((photo) => {
-                                        const url = photoUrls.get(photo.id);
+                                        const url = thumbUrls.get(photo.id);
                                         const used = usedPhotoIds.has(photo.id);
                                         const aspect =
                                             photo.width / photo.height || 1;
@@ -153,6 +155,9 @@ export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
                                             <div
                                                 key={photo.id}
                                                 draggable
+                                                onClick={() =>
+                                                    setLightboxId(photo.id)
+                                                }
                                                 onDragStart={(e) => {
                                                     e.dataTransfer.setData(
                                                         PHOTO_MIME_TYPE,
@@ -162,7 +167,7 @@ export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
                                                         "copy";
                                                 }}
                                                 className={classNames(
-                                                    "relative cursor-grab overflow-hidden rounded",
+                                                    "relative cursor-pointer overflow-hidden rounded",
                                                     "ring-1 ring-stone-200 transition-all hover:ring-2 hover:ring-stone-400",
                                                     "active:cursor-grabbing",
                                                 )}
@@ -192,6 +197,23 @@ export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
                     }
                 </div>
             </div>
+
+            {lightboxId && (
+                <PhotoLightbox
+                    photoId={lightboxId}
+                    photoUrl={
+                        photoUrls.get(lightboxId) ??
+                        thumbUrls.get(lightboxId) ??
+                        null
+                    }
+                    isUsed={usedPhotoIds.has(lightboxId)}
+                    onDelete={() => {
+                        removePhoto(lightboxId);
+                        setLightboxId(null);
+                    }}
+                    onClose={() => setLightboxId(null)}
+                />
+            )}
 
             {googleModal === "setup" && (
                 <GooglePhotosSetup
@@ -254,6 +276,74 @@ function computeJustifiedRows(
     }
 
     return rows;
+}
+
+// --- Lightbox ---
+
+function PhotoLightbox({
+    photoId: _photoId,
+    photoUrl,
+    isUsed,
+    onDelete,
+    onClose,
+}: {
+    photoId: PhotoId;
+    photoUrl: string | null;
+    isUsed: boolean;
+    onDelete: () => void;
+    onClose: () => void;
+}) {
+    useEffect(() => {
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+    }, [onClose]);
+
+    return (
+        <div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70"
+            onClick={onClose}
+        >
+            <div
+                className="relative flex max-h-[90vh] max-w-[90vw] flex-col items-center"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {photoUrl && (
+                    <img
+                        src={photoUrl}
+                        className="max-h-[80vh] max-w-[90vw] rounded-lg object-contain shadow-2xl"
+                        draggable={false}
+                    />
+                )}
+                <div className="mt-4 flex gap-3">
+                    <button
+                        onClick={onClose}
+                        className="rounded-lg bg-white/10 px-4 py-2 text-sm font-bold tracking-wide text-white backdrop-blur transition-colors hover:bg-white/20"
+                    >
+                        Close
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (
+                                isUsed &&
+                                !window.confirm(
+                                    "This photo is used on a page. Delete anyway?",
+                                )
+                            ) {
+                                return;
+                            }
+                            onDelete();
+                        }}
+                        className="rounded-lg bg-red-500/80 px-4 py-2 text-sm font-bold tracking-wide text-white backdrop-blur transition-colors hover:bg-red-500"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 // --- Icons ---

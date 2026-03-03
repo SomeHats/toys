@@ -14,7 +14,7 @@ export function SlotPhotoPicker({
     onSelect: (photoId: PhotoId) => void;
     onClose: () => void;
 }) {
-    const { book, photoUrls, usedPhotoIds } = useBookState();
+    const { book, thumbUrls, usedPhotoIds } = useBookState();
 
     const unused = useMemo(
         () =>
@@ -65,7 +65,7 @@ export function SlotPhotoPicker({
                             </p>
                             <div className="mb-4 grid grid-cols-3 gap-2">
                                 {unused.map((photo) => {
-                                    const url = photoUrls.get(photo.id);
+                                    const url = thumbUrls.get(photo.id);
                                     return (
                                         <button
                                             key={photo.id}
@@ -96,7 +96,7 @@ export function SlotPhotoPicker({
                             </p>
                             <div className="grid grid-cols-3 gap-2">
                                 {used.map((photo) => {
-                                    const url = photoUrls.get(photo.id);
+                                    const url = thumbUrls.get(photo.id);
                                     return (
                                         <button
                                             key={photo.id}

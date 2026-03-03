@@ -1,8 +1,4 @@
-import {
-    loadPhoto,
-    saveBookData,
-    savePhoto,
-} from "@/photobook/storage";
+import { loadPhoto, saveBookData, savePhoto } from "@/photobook/storage";
 import type { BookData, PhotoId } from "@/photobook/types";
 import { BookDataSchema } from "@/photobook/types";
 import { useBookState } from "@/photobook/useBookState";

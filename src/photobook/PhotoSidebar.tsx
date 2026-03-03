@@ -32,15 +32,23 @@ export function PhotoSidebar({ onClose }: { onClose?: () => void }) {
         return () => observer.disconnect();
     }, []);
 
+    const sortedPhotos = useMemo(
+        () =>
+            [...book.photos].sort(
+                (a, b) => (a.takenAt ?? a.addedAt) - (b.takenAt ?? b.addedAt),
+            ),
+        [book.photos],
+    );
+
     const rows = useMemo(
         () =>
             computeJustifiedRows(
-                book.photos,
+                sortedPhotos,
                 containerWidth,
                 TARGET_ROW_HEIGHT,
                 ROW_GAP,
             ),
-        [book.photos, containerWidth],
+        [sortedPhotos, containerWidth],
     );
 
     const handleFileChange = useCallback(

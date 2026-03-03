@@ -21,6 +21,7 @@ export interface PhotoMeta {
     width: number;
     height: number;
     addedAt: number;
+    takenAt: number | null;
 }
 
 /**
@@ -116,6 +117,7 @@ const PhotoMetaSchema = Schema.object({
     width: Schema.number,
     height: Schema.number,
     addedAt: Schema.number,
+    takenAt: Schema.number.nullable(),
 });
 
 const PageSlotSchema = Schema.union("type", {

@@ -19,6 +19,7 @@ import {
     newPageId,
     newPhotoId,
 } from "@/photobook/types";
+import exifr from "exifr";
 import {
     createContext,
     ReactNode,
@@ -39,7 +40,7 @@ interface BookState {
     movePage: (pageId: PageId, direction: "up" | "down") => void;
     updateSlot: (pageId: PageId, slotIndex: number, slot: PageSlot) => void;
     changeLayout: (pageId: PageId, layout: LayoutId) => void;
-    addPhoto: (file: File) => Promise<PhotoId>;
+    addPhoto: (file: File, takenAtOverride?: number | null) => Promise<PhotoId>;
     updateTitle: (title: string) => void;
     usedPhotoIds: Set<PhotoId>;
 }
@@ -157,51 +158,60 @@ export function BookProvider({ children }: { children: ReactNode }) {
         [book, save],
     );
 
-    const addPhoto = useCallback(async (file: File): Promise<PhotoId> => {
-        const id = newPhotoId();
-        const blob = new Blob([await file.arrayBuffer()], {
-            type: file.type,
-        });
+    const addPhoto = useCallback(
+        async (
+            file: File,
+            takenAtOverride?: number | null,
+        ): Promise<PhotoId> => {
+            const id = newPhotoId();
+            const blob = new Blob([await file.arrayBuffer()], {
+                type: file.type,
+            });
 
-        // Get image dimensions
-        const { width, height } = await getImageDimensions(blob);
+            const [{ width, height }, exifDate] = await Promise.all([
+                getImageDimensions(blob),
+                getExifDate(blob),
+            ]);
 
-        const meta: PhotoMeta = {
-            id,
-            filename: file.name,
-            width,
-            height,
-            addedAt: Date.now(),
-        };
-
-        await savePhoto(id, blob);
-        const url = URL.createObjectURL(blob);
-        setPhotoUrls((prev) => {
-            const next = new Map(prev);
-            next.set(id, url);
-            return next;
-        });
-
-        // Use functional updater so sequential addPhoto calls
-        // (e.g. bulk Google Photos import) accumulate correctly.
-        let updatedBook: BookData;
-        setBook((prev) => {
-            updatedBook = {
-                ...prev,
-                photos: [...prev.photos, meta],
+            const meta: PhotoMeta = {
+                id,
+                filename: file.name,
+                width,
+                height,
+                addedAt: Date.now(),
+                takenAt: takenAtOverride ?? exifDate,
             };
-            return updatedBook;
-        });
 
-        if (saveTimeoutRef.current) {
-            clearTimeout(saveTimeoutRef.current);
-        }
-        saveTimeoutRef.current = setTimeout(() => {
-            void saveBookData(updatedBook!);
-        }, 500);
+            await savePhoto(id, blob);
+            const url = URL.createObjectURL(blob);
+            setPhotoUrls((prev) => {
+                const next = new Map(prev);
+                next.set(id, url);
+                return next;
+            });
 
-        return id;
-    }, []);
+            // Use functional updater so sequential addPhoto calls
+            // (e.g. bulk Google Photos import) accumulate correctly.
+            let updatedBook: BookData;
+            setBook((prev) => {
+                updatedBook = {
+                    ...prev,
+                    photos: [...prev.photos, meta],
+                };
+                return updatedBook;
+            });
+
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+            saveTimeoutRef.current = setTimeout(() => {
+                void saveBookData(updatedBook!);
+            }, 500);
+
+            return id;
+        },
+        [],
+    );
 
     const usedPhotoIds = useMemo(() => {
         const ids = new Set<PhotoId>();
@@ -255,4 +265,16 @@ function getImageDimensions(
         img.onerror = reject;
         img.src = URL.createObjectURL(blob);
     });
+}
+
+async function getExifDate(blob: Blob): Promise<number | null> {
+    try {
+        const exif = await exifr.parse(blob, ["DateTimeOriginal"]);
+        if (exif?.DateTimeOriginal instanceof Date) {
+            return exif.DateTimeOriginal.getTime();
+        }
+    } catch {
+        // No EXIF or unreadable
+    }
+    return null;
 }

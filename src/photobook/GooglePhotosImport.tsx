@@ -74,7 +74,11 @@ export function GooglePhotosImport({ onClose }: { onClose: () => void }) {
                 const file = new File([blob], filename, {
                     type: item.mediaFile.mimeType || "image/jpeg",
                 });
-                await addPhotoRef.current(file);
+                const takenAt =
+                    item.createTime ?
+                        new Date(item.createTime).getTime()
+                    :   null;
+                await addPhotoRef.current(file, takenAt);
 
                 setState({
                     step: "downloading",

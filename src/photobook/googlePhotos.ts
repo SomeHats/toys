@@ -115,6 +115,7 @@ interface PickerSession {
 
 export interface PickedMediaItem {
     id: string;
+    createTime?: string;
     type?: string;
     mediaFile: {
         baseUrl: string;
@@ -179,7 +180,9 @@ async function listMediaItems(
         pageToken = data.nextPageToken;
     } while (pageToken);
 
-    return items;
+    // The Picker API doesn't support server-side media type filtering,
+    // so we drop videos here.
+    return items.filter((item) => item.mediaFile.mimeType.startsWith("image/"));
 }
 
 export async function downloadPhoto(

@@ -1,6 +1,11 @@
-import type { PhotoId } from "@/photobook/types";
+import type { PhotoId, PhotoMeta } from "@/photobook/types";
 import { useBookState } from "@/photobook/useBookState";
 import classNames from "classnames";
+import { useMemo } from "react";
+
+function byTakenDate(a: PhotoMeta, b: PhotoMeta) {
+    return (a.takenAt ?? a.addedAt) - (b.takenAt ?? b.addedAt);
+}
 
 export function SlotPhotoPicker({
     onSelect,
@@ -11,8 +16,18 @@ export function SlotPhotoPicker({
 }) {
     const { book, photoUrls, usedPhotoIds } = useBookState();
 
-    const unused = book.photos.filter((p) => !usedPhotoIds.has(p.id));
-    const used = book.photos.filter((p) => usedPhotoIds.has(p.id));
+    const unused = useMemo(
+        () =>
+            book.photos
+                .filter((p) => !usedPhotoIds.has(p.id))
+                .sort(byTakenDate),
+        [book.photos, usedPhotoIds],
+    );
+    const used = useMemo(
+        () =>
+            book.photos.filter((p) => usedPhotoIds.has(p.id)).sort(byTakenDate),
+        [book.photos, usedPhotoIds],
+    );
 
     return (
         <div

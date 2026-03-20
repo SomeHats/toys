@@ -1,8 +1,8 @@
 import { PageEditor } from "@/photobook/PageEditor";
 import { PrintView } from "@/photobook/PrintView";
-import { BookProvider, useBookState } from "@/photobook/useBookState";
 import type { LayoutId } from "@/photobook/types";
 import { LAYOUTS } from "@/photobook/types";
+import { BookProvider, useBookState } from "@/photobook/useBookState";
 import classNames from "classnames";
 import { useState } from "react";
 
@@ -73,9 +73,7 @@ function Editor() {
                     </button>
 
                     {showAddMenu && (
-                        <AddPageMenu
-                            onClose={() => setShowAddMenu(false)}
-                        />
+                        <AddPageMenu onClose={() => setShowAddMenu(false)} />
                     )}
                 </div>
             </main>
@@ -138,12 +136,7 @@ function LayoutThumbnail({ layoutId }: { layoutId: LayoutId }) {
             );
         case "two-photos-vertical":
             return (
-                <div
-                    className={classNames(
-                        base,
-                        "flex flex-col gap-0.5 p-1",
-                    )}
-                >
+                <div className={classNames(base, "flex flex-col gap-0.5 p-1")}>
                     <div className="w-full flex-1 rounded-sm bg-stone-300" />
                     <div className="w-full flex-1 rounded-sm bg-stone-300" />
                 </div>

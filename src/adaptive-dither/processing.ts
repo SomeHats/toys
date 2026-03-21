@@ -134,13 +134,11 @@ function getDropOffFn(
         case "exponential":
             return (d, r) => Math.exp(-d * r);
         case "quadratic":
-            return (d, r) => Math.max(0, 1 - (d * r) * (d * r));
+            return (d, r) => Math.max(0, 1 - d * r * (d * r));
         case "sine":
             return (d, r) => {
                 const v = d * r;
-                return v >= 1 ?
-                        0
-                    :   Math.cos((v * Math.PI) / 2);
+                return v >= 1 ? 0 : Math.cos((v * Math.PI) / 2);
             };
     }
 }
@@ -270,11 +268,13 @@ function ditherAtBlockSize(
             dithered[idx] = newVal;
             const err = old - newVal;
 
-            if (x + 1 < bw) dithered[idx + 1] += err * 7 / 16;
+            if (x + 1 < bw) dithered[idx + 1] += (err * 7) / 16;
             if (y + 1 < bh) {
-                if (x - 1 >= 0) dithered[(y + 1) * bw + (x - 1)] += err * 3 / 16;
-                dithered[(y + 1) * bw + x] += err * 5 / 16;
-                if (x + 1 < bw) dithered[(y + 1) * bw + (x + 1)] += err * 1 / 16;
+                if (x - 1 >= 0)
+                    dithered[(y + 1) * bw + (x - 1)] += (err * 3) / 16;
+                dithered[(y + 1) * bw + x] += (err * 5) / 16;
+                if (x + 1 < bw)
+                    dithered[(y + 1) * bw + (x + 1)] += (err * 1) / 16;
             }
         }
     }

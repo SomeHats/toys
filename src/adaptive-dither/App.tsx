@@ -1,21 +1,7 @@
-import {
-    DEFAULT_PARAMS,
-    adaptiveDither,
-    applyBrightnessContrast,
-    buildContrastMap,
-    detectEdges,
-    getScaledGrayscale,
-    renderBinary,
-    renderGrayscale,
-} from "@/adaptive-dither/processing";
+import { DitherPipeline } from "@/adaptive-dither/gpuPipeline";
 import type { ProcessingParams } from "@/adaptive-dither/processing";
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import { DEFAULT_PARAMS } from "@/adaptive-dither/processing";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type PassName =
     | "original"
@@ -45,9 +31,12 @@ export function App() {
     const [activePass, setActivePass] = useState<PassName>("dithered");
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const pipelineRef = useRef<DitherPipeline | null>(null);
 
-    const scaledWidth = image ? Math.round(image.naturalWidth * params.scale) : 0;
-    const scaledHeight = image ? Math.round(image.naturalHeight * params.scale) : 0;
+    const scaledWidth =
+        image ? Math.round(image.naturalWidth * params.scale) : 0;
+    const scaledHeight =
+        image ? Math.round(image.naturalHeight * params.scale) : 0;
 
     const updateParam = useCallback(
         <K extends keyof ProcessingParams>(
@@ -73,94 +62,28 @@ export function App() {
         [],
     );
 
-    // Compute all passes
-    const passes = useMemo(() => {
-        if (!image || scaledWidth === 0 || scaledHeight === 0) return null;
-
-        const grayscale = getScaledGrayscale(
-            image,
-            scaledWidth,
-            scaledHeight,
-        );
-        const preprocessed = applyBrightnessContrast(
-            grayscale,
-            params.brightness,
-            params.contrast,
-        );
-        const edges = detectEdges(
-            preprocessed,
-            scaledWidth,
-            scaledHeight,
-            params.edgeStrength,
-        );
-        const contrastMap = buildContrastMap(
-            edges,
-            scaledWidth,
-            scaledHeight,
-            params.dropOffRate,
-            params.dropOffFunction,
-        );
-        const dithered = adaptiveDither(
-            preprocessed,
-            contrastMap,
-            scaledWidth,
-            scaledHeight,
-            params.maxDitherLevels,
-            params.contrastRangeLow,
-            params.contrastRangeHigh,
-        );
-
-        return { grayscale, preprocessed, edges, contrastMap, dithered };
-    }, [image, scaledWidth, scaledHeight, params]);
-
-    // Render active pass to canvas
+    // Initialize pipeline when canvas is available
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas || !passes) return;
+        if (!canvas) return;
+        const pipeline = new DitherPipeline(canvas);
+        pipelineRef.current = pipeline;
+        return () => {
+            pipeline.destroy();
+            pipelineRef.current = null;
+        };
+    }, []);
 
-        switch (activePass) {
-            case "original":
-                renderGrayscale(
-                    passes.grayscale,
-                    scaledWidth,
-                    scaledHeight,
-                    canvas,
-                );
-                break;
-            case "preprocessed":
-                renderGrayscale(
-                    passes.preprocessed,
-                    scaledWidth,
-                    scaledHeight,
-                    canvas,
-                );
-                break;
-            case "edges":
-                renderGrayscale(
-                    passes.edges,
-                    scaledWidth,
-                    scaledHeight,
-                    canvas,
-                );
-                break;
-            case "contrastMap":
-                renderGrayscale(
-                    passes.contrastMap,
-                    scaledWidth,
-                    scaledHeight,
-                    canvas,
-                );
-                break;
-            case "dithered":
-                renderBinary(
-                    passes.dithered,
-                    scaledWidth,
-                    scaledHeight,
-                    canvas,
-                );
-                break;
-        }
-    }, [passes, activePass, scaledWidth, scaledHeight]);
+    // Run pipeline when image or params change
+    useEffect(() => {
+        const pipeline = pipelineRef.current;
+        if (!pipeline || !image || scaledWidth === 0 || scaledHeight === 0)
+            return;
+
+        pipeline.uploadImage(image, scaledWidth, scaledHeight);
+        pipeline.runPipeline(params);
+        pipeline.displayPass(activePass);
+    }, [image, scaledWidth, scaledHeight, params, activePass]);
 
     return (
         <div className="flex h-full">
@@ -187,10 +110,12 @@ export function App() {
                             }}
                         />
                         <p className="text-xs text-stone-400">
-                            {scaledWidth} x {scaledHeight}px
+                            {scaledWidth} x {scaledHeight}px — GPU accelerated
                         </p>
                     </div>
                 }
+                {/* Hidden canvas for WebGL when no image yet */}
+                {!image && <canvas ref={canvasRef} className="hidden" />}
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -223,9 +148,9 @@ export function App() {
                                 <button
                                     key={pass}
                                     className={`rounded px-2 py-1 text-xs font-bold tracking-wide transition-colors ${
-                                        activePass === pass
-                                            ? "bg-stone-700 text-stone-100"
-                                            : "bg-stone-200 text-stone-500 hover:bg-stone-300"
+                                        activePass === pass ?
+                                            "bg-stone-700 text-stone-100"
+                                        :   "bg-stone-200 text-stone-500 hover:bg-stone-300"
                                     }`}
                                     onClick={() => setActivePass(pass)}
                                 >
@@ -300,9 +225,9 @@ export function App() {
                                 <button
                                     key={fn}
                                     className={`rounded px-2 py-1 text-xs font-bold tracking-wide transition-colors ${
-                                        params.dropOffFunction === fn
-                                            ? "bg-stone-700 text-stone-100"
-                                            : "bg-stone-200 text-stone-500 hover:bg-stone-300"
+                                        params.dropOffFunction === fn ?
+                                            "bg-stone-700 text-stone-100"
+                                        :   "bg-stone-200 text-stone-500 hover:bg-stone-300"
                                     }`}
                                     onClick={() =>
                                         updateParam("dropOffFunction", fn)

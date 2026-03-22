@@ -11,8 +11,8 @@ export interface ProcessingParams {
     // Pass 2: Edge detection
     edgeStrength: number;
 
-    // Pass 3: Contrast map
-    dropOffRate: number;
+    // Pass 3: Contrast map (GPU JFA)
+    radius: number;
     dropOffFunction: "linear" | "exponential" | "quadratic" | "sine";
 
     // Pass 4: Adaptive dithering
@@ -26,7 +26,7 @@ export const DEFAULT_PARAMS: ProcessingParams = {
     brightness: 0,
     contrast: 0,
     edgeStrength: 1,
-    dropOffRate: 0.05,
+    radius: 50,
     dropOffFunction: "exponential",
     maxDitherLevels: 5,
     contrastRangeLow: 0.1,
@@ -122,108 +122,6 @@ export function detectEdges(
     }
 
     return edges;
-}
-
-/**
- * Drop-off functions for the contrast map propagation.
- */
-function getDropOffFn(
-    type: ProcessingParams["dropOffFunction"],
-): (distance: number, rate: number) => number {
-    switch (type) {
-        case "linear":
-            return (d, r) => Math.max(0, 1 - d * r);
-        case "exponential":
-            return (d, r) => Math.exp(-d * r);
-        case "quadratic":
-            return (d, r) => Math.max(0, 1 - d * r * (d * r));
-        case "sine":
-            return (d, r) => {
-                const v = d * r;
-                return v >= 1 ? 0 : Math.cos((v * Math.PI) / 2);
-            };
-    }
-}
-
-/**
- * Pass 3: Build contrast map by propagating edge values outward.
- * This works like a distance field: high-contrast pixels seed the map,
- * and their influence drops off with distance according to the chosen function.
- *
- * Uses a BFS-like flood fill from high-edge pixels.
- */
-export function buildContrastMap(
-    edges: Float32Array,
-    width: number,
-    height: number,
-    dropOffRate: number,
-    dropOffFunction: ProcessingParams["dropOffFunction"],
-): Float32Array {
-    const contrastMap = new Float32Array(width * height);
-    const dropOff = getDropOffFn(dropOffFunction);
-
-    // Distance from nearest significant edge pixel
-    const dist = new Float32Array(width * height).fill(Infinity);
-
-    // Edge value of the source pixel that influenced each cell
-    const sourceEdge = new Float32Array(width * height);
-
-    // BFS queue: [index, distance, sourceEdgeValue]
-    const queue: [number, number, number][] = [];
-
-    // Seed with all pixels that have non-trivial edge values
-    const threshold = 0.05;
-    for (let i = 0; i < edges.length; i++) {
-        if (edges[i] > threshold) {
-            dist[i] = 0;
-            sourceEdge[i] = edges[i];
-            contrastMap[i] = edges[i];
-            queue.push([i, 0, edges[i]]);
-        }
-    }
-
-    // Sort by edge value descending so strongest edges propagate first
-    queue.sort((a, b) => b[2] - a[2]);
-
-    const dx = [-1, 1, 0, 0];
-    const dy = [0, 0, -1, 1];
-
-    let head = 0;
-    while (head < queue.length) {
-        const [idx, d, srcEdge] = queue[head++];
-        const x = idx % width;
-        const y = (idx - x) / width;
-
-        for (let dir = 0; dir < 4; dir++) {
-            const nx = x + dx[dir];
-            const ny = y + dy[dir];
-            if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-
-            const nIdx = ny * width + nx;
-            const newDist = d + 1;
-            const newVal = srcEdge * dropOff(newDist, dropOffRate);
-
-            if (newVal > contrastMap[nIdx]) {
-                contrastMap[nIdx] = newVal;
-                dist[nIdx] = newDist;
-                sourceEdge[nIdx] = srcEdge;
-                queue.push([nIdx, newDist, srcEdge]);
-            }
-        }
-    }
-
-    // Normalize the contrast map to [0, 1]
-    let maxVal = 0;
-    for (const v of contrastMap) {
-        if (v > maxVal) maxVal = v;
-    }
-    if (maxVal > 0) {
-        for (let i = 0; i < contrastMap.length; i++) {
-            contrastMap[i] /= maxVal;
-        }
-    }
-
-    return contrastMap;
 }
 
 /**
@@ -354,96 +252,6 @@ async function yieldIfNeeded(start: number): Promise<number> {
         return performance.now();
     }
     return start;
-}
-
-/**
- * Async version of buildContrastMap that yields to the browser and supports
- * cancellation via AbortSignal. Reports progress as head / queue.length.
- */
-export async function buildContrastMapAsync(
-    edges: Float32Array,
-    width: number,
-    height: number,
-    dropOffRate: number,
-    dropOffFunction: ProcessingParams["dropOffFunction"],
-    { signal, onProgress }: AsyncPassOptions,
-): Promise<Float32Array> {
-    const totalPixels = width * height;
-    const contrastMap = new Float32Array(totalPixels);
-    const dropOff = getDropOffFn(dropOffFunction);
-
-    // Track which pixels have been finalized to prevent unbounded queue growth.
-    // Without this, pixels get re-enqueued every time a better value arrives,
-    // causing the queue to explode to tens of millions of entries.
-    const processed = new Uint8Array(totalPixels);
-
-    const queue: [number, number, number][] = [];
-
-    const threshold = 0.05;
-    for (let i = 0; i < edges.length; i++) {
-        if (edges[i] > threshold) {
-            contrastMap[i] = edges[i];
-            queue.push([i, 0, edges[i]]);
-        }
-    }
-
-    // Sort by edge value descending so strongest edges propagate first.
-    // Since we process in order and mark pixels done, strong sources win.
-    queue.sort((a, b) => b[2] - a[2]);
-
-    const dx = [-1, 1, 0, 0];
-    const dy = [0, 0, -1, 1];
-
-    let head = 0;
-    let processedCount = 0;
-    let lastYield = performance.now();
-    while (head < queue.length) {
-        const [idx, d, srcEdge] = queue[head++];
-
-        if (processed[idx]) continue;
-        processed[idx] = 1;
-        processedCount++;
-
-        const x = idx % width;
-        const y = (idx - x) / width;
-
-        for (let dir = 0; dir < 4; dir++) {
-            const nx = x + dx[dir];
-            const ny = y + dy[dir];
-            if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-
-            const nIdx = ny * width + nx;
-            if (processed[nIdx]) continue;
-
-            const newDist = d + 1;
-            const newVal = srcEdge * dropOff(newDist, dropOffRate);
-
-            if (newVal > contrastMap[nIdx]) {
-                contrastMap[nIdx] = newVal;
-                queue.push([nIdx, newDist, srcEdge]);
-            }
-        }
-
-        if (processedCount % 10000 === 0) {
-            if (signal.aborted) throw new DOMException("Aborted", "AbortError");
-            onProgress(processedCount / totalPixels);
-            lastYield = await yieldIfNeeded(lastYield);
-        }
-    }
-
-    // Normalize
-    let maxVal = 0;
-    for (const v of contrastMap) {
-        if (v > maxVal) maxVal = v;
-    }
-    if (maxVal > 0) {
-        for (let i = 0; i < contrastMap.length; i++) {
-            contrastMap[i] /= maxVal;
-        }
-    }
-
-    onProgress(1);
-    return contrastMap;
 }
 
 /**

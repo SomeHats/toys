@@ -3,7 +3,6 @@ import type { ProcessingParams } from "@/adaptive-dither/processing";
 import {
     DEFAULT_PARAMS,
     adaptiveDitherAsync,
-    buildContrastMapAsync,
 } from "@/adaptive-dither/processing";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -22,7 +21,12 @@ const PASS_LABELS: Record<PassName, string> = {
     dithered: "4. Adaptive Dither",
 };
 
-const GPU_PASSES = new Set<PassName>(["original", "preprocessed", "edges"]);
+const GPU_PASSES = new Set<PassName>([
+    "original",
+    "preprocessed",
+    "edges",
+    "contrastMap",
+]);
 
 const DROP_OFF_FUNCTIONS: ProcessingParams["dropOffFunction"][] = [
     "linear",
@@ -75,13 +79,12 @@ export function App() {
         [updateParam],
     );
 
-    // Run GPU passes immediately, schedule CPU passes with debounce
+    // Run GPU passes immediately, schedule CPU dither with debounce
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas || !image || scaledWidth === 0 || scaledHeight === 0)
             return;
 
-        // Lazily create the pipeline on first use
         pipelineRef.current ??= new DitherPipeline(canvas);
         const pipeline = pipelineRef.current;
 
@@ -103,7 +106,7 @@ export function App() {
             clearTimeout(debounceRef.current);
         }
 
-        // Schedule CPU passes after debounce
+        // Schedule CPU dither pass after debounce
         debounceRef.current = setTimeout(() => {
             debounceRef.current = null;
             const controller = new AbortController();
@@ -116,36 +119,15 @@ export function App() {
                 try {
                     setCpuProgress(0);
 
-                    // Read GPU results
+                    // Read GPU results for CPU dithering
                     const preprocessed = pipeline.readPassPixels(
                         DitherPipeline.PASS_PREPROCESSED,
                     );
-                    const edges = pipeline.readPassPixels(
-                        DitherPipeline.PASS_EDGES,
-                    );
-
-                    // Pass 3: Contrast map
-                    const contrastMap = await buildContrastMapAsync(
-                        edges,
-                        w,
-                        h,
-                        params.dropOffRate,
-                        params.dropOffFunction,
-                        {
-                            signal: controller.signal,
-                            onProgress: (p) => setCpuProgress(p * 0.5),
-                        },
-                    );
-
-                    pipeline.uploadGrayscaleToPass(
+                    const contrastMap = pipeline.readPassPixels(
                         DitherPipeline.PASS_CONTRAST_MAP,
-                        contrastMap,
                     );
-                    if (activePass === "contrastMap") {
-                        pipeline.displayPass("contrastMap");
-                    }
 
-                    // Pass 4: Adaptive dither
+                    // Pass 4: Adaptive dither (CPU)
                     const dithered = await adaptiveDitherAsync(
                         preprocessed,
                         contrastMap,
@@ -156,7 +138,7 @@ export function App() {
                         params.contrastRangeHigh,
                         {
                             signal: controller.signal,
-                            onProgress: (p) => setCpuProgress(0.5 + p * 0.5),
+                            onProgress: (p) => setCpuProgress(p),
                         },
                     );
 
@@ -339,12 +321,12 @@ export function App() {
                 {/* Pass 3: Contrast Map */}
                 <Section title="3. Contrast Map">
                     <Slider
-                        label="Drop-off Rate"
-                        value={params.dropOffRate}
-                        min={0.001}
-                        max={0.3}
-                        step={0.001}
-                        onChange={(v) => updateParam("dropOffRate", v)}
+                        label="Radius"
+                        value={params.radius}
+                        min={1}
+                        max={200}
+                        step={1}
+                        onChange={(v) => updateParam("radius", v)}
                     />
                     <div className="mb-2">
                         <label className="mb-1 block text-xs font-bold text-stone-500">

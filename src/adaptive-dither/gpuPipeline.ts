@@ -20,7 +20,7 @@ import type { GlVertexArray } from "@/lib/gl/GlVertexArray";
 // ── shared vertex shader (fullscreen quad) ──────────────────────────────
 
 const FULLSCREEN_VERT = glsl`#version 300 es
-    in vec2 a_position;
+    layout(location = 0) in vec2 a_position;
     out vec2 v_uv;
     void main() {
         v_uv = a_position;
@@ -284,6 +284,9 @@ export class DitherPipeline {
         this.glCtx = new Gl(canvas);
         this.rawGl = this.glCtx.gl;
         const gl = this.rawGl;
+
+        // Required to render to RGBA16F / RGBA32F framebuffers
+        gl.getExtension("EXT_color_buffer_float");
 
         // Create all shader programs
         this.brightnessContrastProg = this.glCtx.createProgram({
@@ -601,8 +604,15 @@ export class DitherPipeline {
             | "dithered",
     ) {
         const gl = this.rawGl;
-        this.canvas.width = this.currentWidth;
-        this.canvas.height = this.currentHeight;
+
+        // Only resize if needed — setting width/height clears the WebGL state
+        if (
+            this.canvas.width !== this.currentWidth ||
+            this.canvas.height !== this.currentHeight
+        ) {
+            this.canvas.width = this.currentWidth;
+            this.canvas.height = this.currentHeight;
+        }
 
         let tex: WebGLTexture;
         switch (pass) {

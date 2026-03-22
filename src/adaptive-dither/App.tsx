@@ -62,34 +62,36 @@ export function App() {
         [],
     );
 
-    // Initialize pipeline when canvas is available
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const pipeline = new DitherPipeline(canvas);
-        pipelineRef.current = pipeline;
-        return () => {
-            pipeline.destroy();
-            pipelineRef.current = null;
-        };
-    }, []);
-
     // Run pipeline when image or params change
     useEffect(() => {
-        const pipeline = pipelineRef.current;
-        if (!pipeline || !image || scaledWidth === 0 || scaledHeight === 0)
+        const canvas = canvasRef.current;
+        if (!canvas || !image || scaledWidth === 0 || scaledHeight === 0)
             return;
+
+        // Lazily create the pipeline on first use
+        if (!pipelineRef.current) {
+            pipelineRef.current = new DitherPipeline(canvas);
+        }
+        const pipeline = pipelineRef.current;
 
         pipeline.uploadImage(image, scaledWidth, scaledHeight);
         pipeline.runPipeline(params);
         pipeline.displayPass(activePass);
     }, [image, scaledWidth, scaledHeight, params, activePass]);
 
+    // Clean up pipeline on unmount
+    useEffect(() => {
+        return () => {
+            pipelineRef.current?.destroy();
+            pipelineRef.current = null;
+        };
+    }, []);
+
     return (
         <div className="flex h-full">
             {/* Left: Canvas / Image Preview */}
             <div className="flex flex-1 flex-col items-center justify-center bg-stone-200 p-4">
-                {!image ?
+                {!image && (
                     <div className="flex flex-col items-center gap-4">
                         <p className="text-lg text-stone-500">
                             Upload an image to get started
@@ -101,21 +103,22 @@ export function App() {
                             Choose Image
                         </button>
                     </div>
-                :   <div className="flex flex-col items-center gap-2">
-                        <canvas
-                            ref={canvasRef}
-                            className="max-h-[80vh] max-w-full border border-stone-300"
-                            style={{
-                                imageRendering: "pixelated",
-                            }}
-                        />
-                        <p className="text-xs text-stone-400">
-                            {scaledWidth} x {scaledHeight}px — GPU accelerated
-                        </p>
-                    </div>
-                }
-                {/* Hidden canvas for WebGL when no image yet */}
-                {!image && <canvas ref={canvasRef} className="hidden" />}
+                )}
+                {/* Always render the canvas so the WebGL context persists */}
+                <div
+                    className={
+                        image ? "flex flex-col items-center gap-2" : "hidden"
+                    }
+                >
+                    <canvas
+                        ref={canvasRef}
+                        className="max-h-[80vh] max-w-full border border-stone-300"
+                        style={{ imageRendering: "pixelated" }}
+                    />
+                    <p className="text-xs text-stone-400">
+                        {scaledWidth} x {scaledHeight}px — GPU accelerated
+                    </p>
+                </div>
                 <input
                     ref={fileInputRef}
                     type="file"

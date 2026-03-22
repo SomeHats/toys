@@ -1,13 +1,14 @@
 /** GPU-accelerated image processing pipeline for adaptive dithering.
  *
  * Uses WebGL2 with the project's GL helpers for shader programs and textures,
- * plus raw WebGL for framebuffer ping-pong (not covered by the helpers).
+ * plus raw WebGL for framebuffer management.
  *
- * Pipeline:
+ * Pipeline (GPU portion):
  *   Pass 1: Brightness/contrast (fragment shader)
  *   Pass 2: Sobel edge detection (fragment shader)
- *   Pass 3: Jump Flood Algorithm to propagate contrast (multi-pass ping-pong)
- *   Pass 4: Adaptive Bayer dithering at varying block sizes (fragment shader)
+ *
+ * Passes 3-4 (contrast map, adaptive dither) run on the CPU and upload
+ * results back to FBO textures so displayPass still works uniformly.
  */
 
 import type { ProcessingParams } from "@/adaptive-dither/processing";
@@ -76,174 +77,7 @@ const EDGE_DETECT_FRAG = glsl`#version 300 es
     }
 `;
 
-// ── Pass 3a: JFA seed (initialize jump-flood from edge pixels) ──────────
-
-const JFA_SEED_FRAG = glsl`#version 300 es
-    precision highp float;
-    in vec2 v_uv;
-    out vec4 fragColor;
-    uniform sampler2D u_edges;
-    uniform float u_threshold;
-
-    void main() {
-        float edge = texture(u_edges, v_uv).r;
-        if (edge > u_threshold) {
-            // Store this pixel's UV coords and edge value
-            fragColor = vec4(v_uv, edge, 1.0);
-        } else {
-            // Sentinel: no source assigned yet
-            fragColor = vec4(-1.0, -1.0, 0.0, 0.0);
-        }
-    }
-`;
-
-// ── Pass 3b: JFA step ───────────────────────────────────────────────────
-
-const JFA_STEP_FRAG = glsl`#version 300 es
-    precision highp float;
-    in vec2 v_uv;
-    out vec4 fragColor;
-    uniform sampler2D u_jfa;
-    uniform vec2 u_texelSize;
-    uniform float u_stepSize;
-
-    void main() {
-        vec4 best = texture(u_jfa, v_uv);
-        float bestDist = best.w > 0.5 ? distance(v_uv, best.xy) : 1e10;
-
-        for (int dy = -1; dy <= 1; dy++) {
-            for (int dx = -1; dx <= 1; dx++) {
-                if (dx == 0 && dy == 0) continue;
-                vec2 sampleUV = v_uv + vec2(float(dx), float(dy)) * u_stepSize * u_texelSize;
-                vec4 s = texture(u_jfa, sampleUV);
-                if (s.w > 0.5) {
-                    float d = distance(v_uv, s.xy);
-                    if (d < bestDist) {
-                        bestDist = d;
-                        best = s;
-                    }
-                }
-            }
-        }
-        fragColor = best;
-    }
-`;
-
-// ── Pass 3c: JFA resolve (convert JFA result to contrast map) ───────────
-
-const JFA_RESOLVE_FRAG = glsl`#version 300 es
-    precision highp float;
-    in vec2 v_uv;
-    out vec4 fragColor;
-    uniform sampler2D u_jfa;
-    uniform vec2 u_resolution;
-    uniform float u_dropOffRate;
-    uniform int u_dropOffFunction; // 0=linear, 1=exp, 2=quadratic, 3=sine
-
-    float applyDropOff(float dist, float rate) {
-        if (u_dropOffFunction == 0) {
-            return max(0.0, 1.0 - dist * rate);
-        } else if (u_dropOffFunction == 1) {
-            return exp(-dist * rate);
-        } else if (u_dropOffFunction == 2) {
-            float v = dist * rate;
-            return max(0.0, 1.0 - v * v);
-        } else {
-            float v = dist * rate;
-            return v >= 1.0 ? 0.0 : cos(v * 1.5707963);
-        }
-    }
-
-    void main() {
-        vec4 jfa = texture(u_jfa, v_uv);
-        if (jfa.w < 0.5) {
-            fragColor = vec4(0.0, 0.0, 0.0, 1.0);
-            return;
-        }
-        float pixelDist = distance(v_uv * u_resolution, jfa.xy * u_resolution);
-        float srcEdge = jfa.z;
-        float val = srcEdge * applyDropOff(pixelDist, u_dropOffRate);
-        fragColor = vec4(val, val, val, 1.0);
-    }
-`;
-
-// ── Pass 4: Adaptive Bayer dithering ────────────────────────────────────
-
-const ADAPTIVE_DITHER_FRAG = glsl`#version 300 es
-    precision highp float;
-    in vec2 v_uv;
-    out vec4 fragColor;
-    uniform sampler2D u_preprocessed;
-    uniform sampler2D u_contrastMap;
-    uniform vec2 u_resolution;
-    uniform int u_maxLevels;
-    uniform float u_rangeLow;
-    uniform float u_rangeHigh;
-
-    // 8x8 Bayer matrix (normalized to [0, 1))
-    float bayer8(vec2 pos) {
-        ivec2 p = ivec2(pos) & 7;
-        int idx = p.x + p.y * 8;
-        // Precomputed 8x8 Bayer matrix
-        int b8[64] = int[64](
-             0, 32,  8, 40,  2, 34, 10, 42,
-            48, 16, 56, 24, 50, 18, 58, 26,
-            12, 44,  4, 36, 14, 46,  6, 38,
-            60, 28, 52, 20, 62, 30, 54, 22,
-             3, 35, 11, 43,  1, 33,  9, 41,
-            51, 19, 59, 27, 49, 17, 57, 25,
-            15, 47,  7, 39, 13, 45,  5, 37,
-            63, 31, 55, 23, 61, 29, 53, 21
-        );
-        return (float(b8[idx]) + 0.5) / 64.0;
-    }
-
-    // Dither at a given block size using Bayer pattern
-    float ditherAtBlock(vec2 pixelCoord, float gray, int blockSize) {
-        // Quantize pixel to block grid
-        vec2 blockCoord = floor(pixelCoord / float(blockSize));
-        // Average the block: sample at block center
-        vec2 blockCenter = (blockCoord + 0.5) * float(blockSize) / u_resolution;
-        float blockGray = texture(u_preprocessed, blockCenter).r;
-        // Apply Bayer threshold within the block
-        vec2 posInBlock = mod(pixelCoord, float(blockSize));
-        float threshold = bayer8(posInBlock * (8.0 / float(blockSize)));
-        return step(threshold, blockGray);
-    }
-
-    void main() {
-        float contrast = texture(u_contrastMap, v_uv).r;
-        vec2 pixelCoord = v_uv * u_resolution;
-        float gray = texture(u_preprocessed, v_uv).r;
-
-        // Map contrast to level index
-        float t;
-        if (contrast >= u_rangeHigh) {
-            t = 0.0;
-        } else if (contrast <= u_rangeLow) {
-            t = 1.0;
-        } else {
-            t = 1.0 - (contrast - u_rangeLow) / (u_rangeHigh - u_rangeLow);
-        }
-
-        float levelFloat = t * float(u_maxLevels - 1);
-        int level = int(round(levelFloat));
-        level = min(level, u_maxLevels - 1);
-        int blockSize = 1 << level;
-
-        float result = ditherAtBlock(pixelCoord, gray, blockSize);
-        fragColor = vec4(result, result, result, 1.0);
-    }
-`;
-
 // ── Pipeline class ──────────────────────────────────────────────────────
-
-const DROP_OFF_FN_INDEX: Record<ProcessingParams["dropOffFunction"], number> = {
-    linear: 0,
-    exponential: 1,
-    quadratic: 2,
-    sine: 3,
-};
 
 export class DitherPipeline {
     private glCtx: Gl;
@@ -252,20 +86,15 @@ export class DitherPipeline {
     // Programs
     private brightnessContrastProg: GlProgram;
     private edgeDetectProg: GlProgram;
-    private jfaSeedProg: GlProgram;
-    private jfaStepProg: GlProgram;
-    private jfaResolveProg: GlProgram;
-    private adaptiveDitherProg: GlProgram;
     private displayProg: GlProgram;
 
     // Fullscreen quad
     private quadVao: GlVertexArray;
 
     // Framebuffers + textures (managed manually)
+    // 0 = preprocessed, 1 = edges, 2 = contrastMap, 3 = dithered
     private fbos: WebGLFramebuffer[] = [];
     private fboTextures: WebGLTexture[] = [];
-    private jfaFbos: [WebGLFramebuffer, WebGLFramebuffer] = [null!, null!];
-    private jfaTextures: [WebGLTexture, WebGLTexture] = [null!, null!];
 
     // Texture units for the source image
     private sourceTexture: WebGLTexture;
@@ -273,12 +102,10 @@ export class DitherPipeline {
     private currentWidth = 0;
     private currentHeight = 0;
 
-    // Pass indices into fbos/fboTextures:
-    // 0 = preprocessed, 1 = edges, 2 = contrastMap, 3 = dithered
-    private static readonly PASS_PREPROCESSED = 0;
-    private static readonly PASS_EDGES = 1;
-    private static readonly PASS_CONTRAST_MAP = 2;
-    private static readonly PASS_DITHERED = 3;
+    static readonly PASS_PREPROCESSED = 0;
+    static readonly PASS_EDGES = 1;
+    static readonly PASS_CONTRAST_MAP = 2;
+    static readonly PASS_DITHERED = 3;
 
     constructor(private canvas: HTMLCanvasElement) {
         this.glCtx = new Gl(canvas);
@@ -288,7 +115,7 @@ export class DitherPipeline {
         // Required to render to RGBA16F / RGBA32F framebuffers
         gl.getExtension("EXT_color_buffer_float");
 
-        // Create all shader programs
+        // Create shader programs (passes 1-2 + display)
         this.brightnessContrastProg = this.glCtx.createProgram({
             vertex: FULLSCREEN_VERT,
             fragment: BRIGHTNESS_CONTRAST_FRAG,
@@ -296,22 +123,6 @@ export class DitherPipeline {
         this.edgeDetectProg = this.glCtx.createProgram({
             vertex: FULLSCREEN_VERT,
             fragment: EDGE_DETECT_FRAG,
-        });
-        this.jfaSeedProg = this.glCtx.createProgram({
-            vertex: FULLSCREEN_VERT,
-            fragment: JFA_SEED_FRAG,
-        });
-        this.jfaStepProg = this.glCtx.createProgram({
-            vertex: FULLSCREEN_VERT,
-            fragment: JFA_STEP_FRAG,
-        });
-        this.jfaResolveProg = this.glCtx.createProgram({
-            vertex: FULLSCREEN_VERT,
-            fragment: JFA_RESOLVE_FRAG,
-        });
-        this.adaptiveDitherProg = this.glCtx.createProgram({
-            vertex: FULLSCREEN_VERT,
-            fragment: ADAPTIVE_DITHER_FRAG,
         });
         this.displayProg = this.glCtx.createProgram({
             vertex: FULLSCREEN_VERT,
@@ -326,8 +137,7 @@ export class DitherPipeline {
             `,
         });
 
-        // Fullscreen quad VAO (shared across all programs)
-        // We'll bind it manually to each program
+        // Fullscreen quad VAO
         this.quadVao =
             this.brightnessContrastProg.createAndBindVertexArrayObject({
                 name: "a_position",
@@ -348,12 +158,6 @@ export class DitherPipeline {
             const tex = assertExists(gl.createTexture());
             this.fbos.push(fbo);
             this.fboTextures.push(tex);
-        }
-
-        // JFA ping-pong framebuffers
-        for (let i = 0; i < 2; i++) {
-            this.jfaFbos[i] = assertExists(gl.createFramebuffer());
-            this.jfaTextures[i] = assertExists(gl.createTexture());
         }
     }
 
@@ -411,26 +215,6 @@ export class DitherPipeline {
             );
         }
 
-        // JFA FBOs (RGBA32F for storing UV coords + edge value + flag)
-        for (let i = 0; i < 2; i++) {
-            this.setupTexture(
-                this.jfaTextures[i],
-                width,
-                height,
-                gl.RGBA32F,
-                gl.RGBA,
-                gl.FLOAT,
-            );
-            gl.bindFramebuffer(gl.FRAMEBUFFER, this.jfaFbos[i]);
-            gl.framebufferTexture2D(
-                gl.FRAMEBUFFER,
-                gl.COLOR_ATTACHMENT0,
-                gl.TEXTURE_2D,
-                this.jfaTextures[i],
-                0,
-            );
-        }
-
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
@@ -453,7 +237,6 @@ export class DitherPipeline {
         const gl = this.rawGl;
         this.resizeBuffers(width, height);
 
-        // Draw image to an offscreen canvas at the target size, then upload
         const offscreen = document.createElement("canvas");
         offscreen.width = width;
         offscreen.height = height;
@@ -461,6 +244,7 @@ export class DitherPipeline {
         ctx.drawImage(image, 0, 0, width, height);
 
         gl.bindTexture(gl.TEXTURE_2D, this.sourceTexture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
         gl.texImage2D(
             gl.TEXTURE_2D,
             0,
@@ -469,13 +253,15 @@ export class DitherPipeline {
             gl.UNSIGNED_BYTE,
             offscreen,
         );
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     }
 
-    runPipeline(params: ProcessingParams) {
+    /** Run GPU passes 1-2 only (brightness/contrast + edge detection). */
+    runGpuPasses(params: ProcessingParams) {
         const gl = this.rawGl;
         const w = this.currentWidth;
         const h = this.currentHeight;
@@ -513,85 +299,78 @@ export class DitherPipeline {
             params.edgeStrength,
         );
         this.drawQuad(ed, this.fbos[DitherPipeline.PASS_EDGES]);
+    }
 
-        // ── Pass 3: Jump Flood Algorithm ────────────────────────────
+    /**
+     * Read the R channel from a pass FBO as a Float32Array.
+     * Reads RGBA float pixels and extracts the red channel.
+     */
+    readPassPixels(passIndex: number): Float32Array {
+        const gl = this.rawGl;
+        const w = this.currentWidth;
+        const h = this.currentHeight;
 
-        // 3a: Seed
-        this.bindTextureToUnit(this.fboTextures[DitherPipeline.PASS_EDGES], 0);
-        const seed = this.jfaSeedProg;
-        gl.useProgram(seed.program);
-        gl.uniform1i(gl.getUniformLocation(seed.program, "u_edges"), 0);
-        gl.uniform1f(gl.getUniformLocation(seed.program, "u_threshold"), 0.05);
-        this.drawQuad(seed, this.jfaFbos[0]);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos[passIndex]);
+        const rgba = new Float32Array(w * h * 4);
+        gl.readPixels(0, 0, w, h, gl.RGBA, gl.FLOAT, rgba);
 
-        // 3b: JFA steps (ping-pong)
-        const maxDim = Math.max(w, h);
-        let stepSize = Math.pow(2, Math.ceil(Math.log2(maxDim)) - 1);
-        let readIdx = 0;
+        const result = new Float32Array(w * h);
+        for (let i = 0; i < w * h; i++) {
+            result[i] = rgba[i * 4];
+        }
+        return result;
+    }
 
-        while (stepSize >= 1) {
-            const writeIdx = 1 - readIdx;
-            this.bindTextureToUnit(this.jfaTextures[readIdx], 0);
-            const step = this.jfaStepProg;
-            gl.useProgram(step.program);
-            gl.uniform1i(gl.getUniformLocation(step.program, "u_jfa"), 0);
-            gl.uniform2f(
-                gl.getUniformLocation(step.program, "u_texelSize"),
-                1 / w,
-                1 / h,
-            );
-            gl.uniform1f(
-                gl.getUniformLocation(step.program, "u_stepSize"),
-                stepSize,
-            );
-            this.drawQuad(step, this.jfaFbos[writeIdx]);
-            readIdx = writeIdx;
-            stepSize = Math.floor(stepSize / 2);
+    /**
+     * Upload a grayscale Float32Array to a pass FBO texture as RGBA16F.
+     * Expands the single channel to RGB so displayPass works.
+     */
+    uploadGrayscaleToPass(passIndex: number, data: Float32Array) {
+        const gl = this.rawGl;
+        const w = this.currentWidth;
+        const h = this.currentHeight;
+
+        // Expand grayscale to RGBA
+        const rgba = new Float32Array(w * h * 4);
+        for (let i = 0; i < w * h; i++) {
+            const v = data[i];
+            rgba[i * 4] = v;
+            rgba[i * 4 + 1] = v;
+            rgba[i * 4 + 2] = v;
+            rgba[i * 4 + 3] = 1;
         }
 
-        // 3c: Resolve to contrast map
-        this.bindTextureToUnit(this.jfaTextures[readIdx], 0);
-        const res = this.jfaResolveProg;
-        gl.useProgram(res.program);
-        gl.uniform1i(gl.getUniformLocation(res.program, "u_jfa"), 0);
-        gl.uniform2f(gl.getUniformLocation(res.program, "u_resolution"), w, h);
-        gl.uniform1f(
-            gl.getUniformLocation(res.program, "u_dropOffRate"),
-            params.dropOffRate,
-        );
-        gl.uniform1i(
-            gl.getUniformLocation(res.program, "u_dropOffFunction"),
-            DROP_OFF_FN_INDEX[params.dropOffFunction],
-        );
-        this.drawQuad(res, this.fbos[DitherPipeline.PASS_CONTRAST_MAP]);
+        gl.bindTexture(gl.TEXTURE_2D, this.fboTextures[passIndex]);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, w, h, gl.RGBA, gl.FLOAT, rgba);
+    }
 
-        // ── Pass 4: Adaptive Dithering ──────────────────────────────
-        this.bindTextureToUnit(
-            this.fboTextures[DitherPipeline.PASS_PREPROCESSED],
-            0,
-        );
-        this.bindTextureToUnit(
-            this.fboTextures[DitherPipeline.PASS_CONTRAST_MAP],
-            1,
-        );
-        const ad = this.adaptiveDitherProg;
-        gl.useProgram(ad.program);
-        gl.uniform1i(gl.getUniformLocation(ad.program, "u_preprocessed"), 0);
-        gl.uniform1i(gl.getUniformLocation(ad.program, "u_contrastMap"), 1);
-        gl.uniform2f(gl.getUniformLocation(ad.program, "u_resolution"), w, h);
-        gl.uniform1i(
-            gl.getUniformLocation(ad.program, "u_maxLevels"),
-            params.maxDitherLevels,
-        );
-        gl.uniform1f(
-            gl.getUniformLocation(ad.program, "u_rangeLow"),
-            params.contrastRangeLow,
-        );
-        gl.uniform1f(
-            gl.getUniformLocation(ad.program, "u_rangeHigh"),
-            params.contrastRangeHigh,
-        );
-        this.drawQuad(ad, this.fbos[DitherPipeline.PASS_DITHERED]);
+    /**
+     * Upload a Uint8Array (0 or 255) to a pass FBO texture as RGBA16F.
+     * Converts to [0, 1] float range.
+     */
+    uploadBinaryToPass(passIndex: number, data: Uint8Array) {
+        const gl = this.rawGl;
+        const w = this.currentWidth;
+        const h = this.currentHeight;
+
+        const rgba = new Float32Array(w * h * 4);
+        for (let i = 0; i < w * h; i++) {
+            const v = data[i] / 255;
+            rgba[i * 4] = v;
+            rgba[i * 4 + 1] = v;
+            rgba[i * 4 + 2] = v;
+            rgba[i * 4 + 3] = 1;
+        }
+
+        gl.bindTexture(gl.TEXTURE_2D, this.fboTextures[passIndex]);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, w, h, gl.RGBA, gl.FLOAT, rgba);
+    }
+
+    get width() {
+        return this.currentWidth;
+    }
+    get height() {
+        return this.currentHeight;
     }
 
     /** Display one of the pass results to the visible canvas. */
@@ -649,8 +428,6 @@ export class DitherPipeline {
         const gl = this.rawGl;
         for (const fbo of this.fbos) gl.deleteFramebuffer(fbo);
         for (const tex of this.fboTextures) gl.deleteTexture(tex);
-        for (const fbo of this.jfaFbos) gl.deleteFramebuffer(fbo);
-        for (const tex of this.jfaTextures) gl.deleteTexture(tex);
         gl.deleteTexture(this.sourceTexture);
         this.glCtx.destroy();
     }

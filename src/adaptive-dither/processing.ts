@@ -1,5 +1,7 @@
 /** Image processing pipeline for adaptive dithering */
 
+import { frame } from "@/lib/utils";
+
 export interface ProcessingParams {
     // Pass 1: Preprocessing
     scale: number;
@@ -336,6 +338,166 @@ export function adaptiveDither(
         output[i] = levels[Math.min(levelIdx, maxLevels - 1)][i];
     }
 
+    return output;
+}
+
+// ── Async batched CPU passes ─────────────────────────────────────────
+
+interface AsyncPassOptions {
+    signal: AbortSignal;
+    onProgress: (progress: number) => void;
+}
+
+async function yieldIfNeeded(start: number): Promise<number> {
+    if (performance.now() - start > 10) {
+        await frame();
+        return performance.now();
+    }
+    return start;
+}
+
+/**
+ * Async version of buildContrastMap that yields to the browser and supports
+ * cancellation via AbortSignal. Reports progress as head / queue.length.
+ */
+export async function buildContrastMapAsync(
+    edges: Float32Array,
+    width: number,
+    height: number,
+    dropOffRate: number,
+    dropOffFunction: ProcessingParams["dropOffFunction"],
+    { signal, onProgress }: AsyncPassOptions,
+): Promise<Float32Array> {
+    const totalPixels = width * height;
+    const contrastMap = new Float32Array(totalPixels);
+    const dropOff = getDropOffFn(dropOffFunction);
+
+    // Track which pixels have been finalized to prevent unbounded queue growth.
+    // Without this, pixels get re-enqueued every time a better value arrives,
+    // causing the queue to explode to tens of millions of entries.
+    const processed = new Uint8Array(totalPixels);
+
+    const queue: [number, number, number][] = [];
+
+    const threshold = 0.05;
+    for (let i = 0; i < edges.length; i++) {
+        if (edges[i] > threshold) {
+            contrastMap[i] = edges[i];
+            queue.push([i, 0, edges[i]]);
+        }
+    }
+
+    // Sort by edge value descending so strongest edges propagate first.
+    // Since we process in order and mark pixels done, strong sources win.
+    queue.sort((a, b) => b[2] - a[2]);
+
+    const dx = [-1, 1, 0, 0];
+    const dy = [0, 0, -1, 1];
+
+    let head = 0;
+    let processedCount = 0;
+    let lastYield = performance.now();
+    while (head < queue.length) {
+        const [idx, d, srcEdge] = queue[head++];
+
+        if (processed[idx]) continue;
+        processed[idx] = 1;
+        processedCount++;
+
+        const x = idx % width;
+        const y = (idx - x) / width;
+
+        for (let dir = 0; dir < 4; dir++) {
+            const nx = x + dx[dir];
+            const ny = y + dy[dir];
+            if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+
+            const nIdx = ny * width + nx;
+            if (processed[nIdx]) continue;
+
+            const newDist = d + 1;
+            const newVal = srcEdge * dropOff(newDist, dropOffRate);
+
+            if (newVal > contrastMap[nIdx]) {
+                contrastMap[nIdx] = newVal;
+                queue.push([nIdx, newDist, srcEdge]);
+            }
+        }
+
+        if (processedCount % 10000 === 0) {
+            if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+            onProgress(processedCount / totalPixels);
+            lastYield = await yieldIfNeeded(lastYield);
+        }
+    }
+
+    // Normalize
+    let maxVal = 0;
+    for (const v of contrastMap) {
+        if (v > maxVal) maxVal = v;
+    }
+    if (maxVal > 0) {
+        for (let i = 0; i < contrastMap.length; i++) {
+            contrastMap[i] /= maxVal;
+        }
+    }
+
+    onProgress(1);
+    return contrastMap;
+}
+
+/**
+ * Async version of adaptiveDither that yields to the browser and supports
+ * cancellation. Reports progress across dither level generation and blending.
+ */
+export async function adaptiveDitherAsync(
+    preprocessed: Float32Array,
+    contrastMap: Float32Array,
+    width: number,
+    height: number,
+    maxLevels: number,
+    rangeLow: number,
+    rangeHigh: number,
+    { signal, onProgress }: AsyncPassOptions,
+): Promise<Uint8Array> {
+    // Phase 1: Generate dithered versions (50% of progress)
+    const levels: Uint8Array[] = [];
+    for (let i = 0; i < maxLevels; i++) {
+        if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+        const blockSize = 1 << i;
+        levels.push(ditherAtBlockSize(preprocessed, width, height, blockSize));
+        onProgress(((i + 1) / maxLevels) * 0.5);
+        await frame();
+    }
+
+    // Phase 2: Blend based on contrast map (remaining 50%)
+    const output = new Uint8Array(width * height);
+    const totalPixels = width * height;
+    let lastYield = performance.now();
+
+    for (let i = 0; i < totalPixels; i++) {
+        const c = contrastMap[i];
+        let t: number;
+        if (c >= rangeHigh) {
+            t = 0;
+        } else if (c <= rangeLow) {
+            t = 1;
+        } else {
+            t = 1 - (c - rangeLow) / (rangeHigh - rangeLow);
+        }
+
+        const levelFloat = t * (maxLevels - 1);
+        const levelIdx = Math.round(levelFloat);
+        output[i] = levels[Math.min(levelIdx, maxLevels - 1)][i];
+
+        if (i % 50000 === 0) {
+            if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+            onProgress(0.5 + (i / totalPixels) * 0.5);
+            lastYield = await yieldIfNeeded(lastYield);
+        }
+    }
+
+    onProgress(1);
     return output;
 }
 

@@ -1,6 +1,10 @@
 import { DitherPipeline } from "@/adaptive-dither/gpuPipeline";
 import type { ProcessingParams } from "@/adaptive-dither/processing";
-import { DEFAULT_PARAMS } from "@/adaptive-dither/processing";
+import {
+    DEFAULT_PARAMS,
+    adaptiveDitherAsync,
+    buildContrastMapAsync,
+} from "@/adaptive-dither/processing";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type PassName =
@@ -18,6 +22,8 @@ const PASS_LABELS: Record<PassName, string> = {
     dithered: "4. Adaptive Dither",
 };
 
+const GPU_PASSES = new Set<PassName>(["original", "preprocessed", "edges"]);
+
 const DROP_OFF_FUNCTIONS: ProcessingParams["dropOffFunction"][] = [
     "linear",
     "exponential",
@@ -29,9 +35,12 @@ export function App() {
     const [image, setImage] = useState<HTMLImageElement | null>(null);
     const [params, setParams] = useState<ProcessingParams>(DEFAULT_PARAMS);
     const [activePass, setActivePass] = useState<PassName>("dithered");
+    const [cpuProgress, setCpuProgress] = useState<number | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pipelineRef = useRef<DitherPipeline | null>(null);
+    const abortRef = useRef<AbortController | null>(null);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const scaledWidth =
         image ? Math.round(image.naturalWidth * params.scale) : 0;
@@ -54,15 +63,19 @@ export function App() {
             if (!file) return;
             const img = new Image();
             img.onload = () => {
+                const maxDim = Math.max(img.naturalWidth, img.naturalHeight);
+                if (maxDim > 1000) {
+                    updateParam("scale", 1000 / maxDim);
+                }
                 setImage(img);
                 URL.revokeObjectURL(img.src);
             };
             img.src = URL.createObjectURL(file);
         },
-        [],
+        [updateParam],
     );
 
-    // Run pipeline when image or params change
+    // Run GPU passes immediately, schedule CPU passes with debounce
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas || !image || scaledWidth === 0 || scaledHeight === 0)
@@ -73,8 +86,109 @@ export function App() {
         const pipeline = pipelineRef.current;
 
         pipeline.uploadImage(image, scaledWidth, scaledHeight);
-        pipeline.runPipeline(params);
-        pipeline.displayPass(activePass);
+        pipeline.runGpuPasses(params);
+
+        // Display GPU pass immediately if viewing one
+        if (GPU_PASSES.has(activePass)) {
+            pipeline.displayPass(activePass);
+        }
+
+        // Cancel any in-progress CPU work
+        abortRef.current?.abort();
+        abortRef.current = null;
+        setCpuProgress(null);
+
+        // Clear pending debounce
+        if (debounceRef.current !== null) {
+            clearTimeout(debounceRef.current);
+        }
+
+        // Schedule CPU passes after debounce
+        debounceRef.current = setTimeout(() => {
+            debounceRef.current = null;
+            const controller = new AbortController();
+            abortRef.current = controller;
+
+            const runCpu = async () => {
+                const w = pipeline.width;
+                const h = pipeline.height;
+
+                try {
+                    setCpuProgress(0);
+
+                    // Read GPU results
+                    const preprocessed = pipeline.readPassPixels(
+                        DitherPipeline.PASS_PREPROCESSED,
+                    );
+                    const edges = pipeline.readPassPixels(
+                        DitherPipeline.PASS_EDGES,
+                    );
+
+                    // Pass 3: Contrast map
+                    const contrastMap = await buildContrastMapAsync(
+                        edges,
+                        w,
+                        h,
+                        params.dropOffRate,
+                        params.dropOffFunction,
+                        {
+                            signal: controller.signal,
+                            onProgress: (p) => setCpuProgress(p * 0.5),
+                        },
+                    );
+
+                    pipeline.uploadGrayscaleToPass(
+                        DitherPipeline.PASS_CONTRAST_MAP,
+                        contrastMap,
+                    );
+                    if (activePass === "contrastMap") {
+                        pipeline.displayPass("contrastMap");
+                    }
+
+                    // Pass 4: Adaptive dither
+                    const dithered = await adaptiveDitherAsync(
+                        preprocessed,
+                        contrastMap,
+                        w,
+                        h,
+                        params.maxDitherLevels,
+                        params.contrastRangeLow,
+                        params.contrastRangeHigh,
+                        {
+                            signal: controller.signal,
+                            onProgress: (p) => setCpuProgress(0.5 + p * 0.5),
+                        },
+                    );
+
+                    pipeline.uploadBinaryToPass(
+                        DitherPipeline.PASS_DITHERED,
+                        dithered,
+                    );
+                    if (activePass === "dithered") {
+                        pipeline.displayPass("dithered");
+                    }
+
+                    setCpuProgress(null);
+                } catch (e) {
+                    if (e instanceof DOMException && e.name === "AbortError") {
+                        setCpuProgress(null);
+                    } else {
+                        throw e;
+                    }
+                }
+            };
+
+            void runCpu();
+        }, 150);
+
+        return () => {
+            abortRef.current?.abort();
+            abortRef.current = null;
+            if (debounceRef.current !== null) {
+                clearTimeout(debounceRef.current);
+                debounceRef.current = null;
+            }
+        };
     }, [image, scaledWidth, scaledHeight, params, activePass]);
 
     // Clean up pipeline on unmount
@@ -88,7 +202,7 @@ export function App() {
     return (
         <div className="flex h-full">
             {/* Left: Canvas / Image Preview */}
-            <div className="flex flex-1 flex-col items-center justify-center bg-stone-200 p-4">
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-stone-200 p-4">
                 {!image && (
                     <div className="flex flex-col items-center gap-4">
                         <p className="text-lg text-stone-500">
@@ -105,16 +219,31 @@ export function App() {
                 {/* Always render the canvas so the WebGL context persists */}
                 <div
                     className={
-                        image ? "flex flex-col items-center gap-2" : "hidden"
+                        image ?
+                            "relative flex min-h-0 flex-1 flex-col items-center justify-center gap-2"
+                        :   "hidden"
                     }
                 >
                     <canvas
                         ref={canvasRef}
-                        className="max-h-[80vh] max-w-full border border-stone-300"
+                        className="max-h-full max-w-full border border-stone-300"
                         style={{ imageRendering: "pixelated" }}
                     />
-                    <p className="text-xs text-stone-400">
-                        {scaledWidth} x {scaledHeight}px — GPU accelerated
+                    {cpuProgress !== null && (
+                        <div className="absolute bottom-8 left-0 right-0 mx-auto h-1 w-3/4 overflow-hidden rounded-full bg-stone-300">
+                            <div
+                                className="h-full bg-stone-600 transition-[width] duration-100"
+                                style={{
+                                    width: `${Math.round(cpuProgress * 100)}%`,
+                                }}
+                            />
+                        </div>
+                    )}
+                    <p className="shrink-0 text-xs text-stone-400">
+                        {scaledWidth} x {scaledHeight}px
+                        {cpuProgress !== null ?
+                            " — Processing..."
+                        :   " — GPU + CPU hybrid"}
                     </p>
                 </div>
                 <input

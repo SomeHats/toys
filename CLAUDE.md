@@ -196,9 +196,14 @@ After completing each prompt, always run the following and fix any issues:
 
 ```sh
 yarn format           # Auto-format with Prettier
-yarn types            # TypeScript type checking
-yarn lint             # ESLint
+yarn check            # Run all checks: types + lint + test
 ```
+
+**Note:** `yarn check` runs `yarn types && yarn lint && yarn test`. The type
+check will fail with errors about `@/sim/crate/pkg/sim` and
+`@/slomojs/crate/pkg/slomojs` if the Rust/WASM crates haven't been built
+(`yarn build:rust`). These are pre-existing and can be ignored locally — CI
+builds the crates first.
 
 ## CI/CD
 

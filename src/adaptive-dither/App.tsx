@@ -35,6 +35,13 @@ const DROP_OFF_FUNCTIONS: ProcessingParams["dropOffFunction"][] = [
     "sine",
 ];
 
+const DITHER_PATTERNS: ProcessingParams["ditherPattern"][] = [
+    "floyd-steinberg",
+    "atkinson",
+    "ordered",
+    "noise",
+];
+
 export function App() {
     const [image, setImage] = useState<HTMLImageElement | null>(null);
     const [params, setParams] = useState<ProcessingParams>(DEFAULT_PARAMS);
@@ -136,6 +143,8 @@ export function App() {
                         params.maxDitherLevels,
                         params.contrastRangeLow,
                         params.contrastRangeHigh,
+                        params.ditherPattern,
+                        params.preserveBlocks,
                         {
                             signal: controller.signal,
                             onProgress: (p) => setCpuProgress(p),
@@ -354,6 +363,28 @@ export function App() {
 
                 {/* Pass 4: Adaptive Dithering */}
                 <Section title="4. Adaptive Dithering">
+                    <div className="mb-2">
+                        <label className="mb-1 block text-xs font-bold text-stone-500">
+                            Pattern
+                        </label>
+                        <div className="flex flex-wrap gap-1">
+                            {DITHER_PATTERNS.map((p) => (
+                                <button
+                                    key={p}
+                                    className={`rounded px-2 py-1 text-xs font-bold tracking-wide transition-colors ${
+                                        params.ditherPattern === p ?
+                                            "bg-stone-700 text-stone-100"
+                                        :   "bg-stone-200 text-stone-500 hover:bg-stone-300"
+                                    }`}
+                                    onClick={() =>
+                                        updateParam("ditherPattern", p)
+                                    }
+                                >
+                                    {p}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                     <Slider
                         label="Resolution Levels"
                         value={params.maxDitherLevels}
@@ -378,6 +409,17 @@ export function App() {
                         step={0.01}
                         onChange={(v) => updateParam("contrastRangeHigh", v)}
                     />
+                    <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-stone-500">
+                        <input
+                            type="checkbox"
+                            checked={params.preserveBlocks}
+                            onChange={(e) =>
+                                updateParam("preserveBlocks", e.target.checked)
+                            }
+                            className="accent-stone-600"
+                        />
+                        Preserve Blocks
+                    </label>
                 </Section>
             </div>
         </div>

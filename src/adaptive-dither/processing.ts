@@ -16,9 +16,11 @@ export interface ProcessingParams {
     dropOffFunction: "linear" | "exponential" | "quadratic" | "sine";
 
     // Pass 4: Adaptive dithering
+    ditherPattern: "floyd-steinberg" | "atkinson" | "ordered" | "noise";
     maxDitherLevels: number;
     contrastRangeLow: number;
     contrastRangeHigh: number;
+    preserveBlocks: boolean;
 }
 
 export const DEFAULT_PARAMS: ProcessingParams = {
@@ -28,9 +30,11 @@ export const DEFAULT_PARAMS: ProcessingParams = {
     edgeStrength: 1,
     radius: 50,
     dropOffFunction: "exponential",
+    ditherPattern: "floyd-steinberg",
     maxDitherLevels: 5,
     contrastRangeLow: 0.1,
     contrastRangeHigh: 0.8,
+    preserveBlocks: false,
 };
 
 /**
@@ -124,9 +128,29 @@ export function detectEdges(
     return edges;
 }
 
+// prettier-ignore
+const BAYER_8X8 = [
+     0, 48, 12, 60,  3, 51, 15, 63,
+    32, 16, 44, 28, 35, 19, 47, 31,
+     8, 56,  4, 52, 11, 59,  7, 55,
+    40, 24, 36, 20, 43, 27, 39, 23,
+     2, 50, 14, 62,  1, 49, 13, 61,
+    34, 18, 46, 30, 33, 17, 45, 29,
+    10, 58,  6, 54,  9, 57,  5, 53,
+    42, 26, 38, 22, 41, 25, 37, 21,
+];
+const BAYER_NORM = BAYER_8X8.map((v) => (v + 0.5) / 64);
+
+/** Simple deterministic hash for noise dithering. */
+function hashNoise(x: number, y: number, seed: number): number {
+    let h = (seed * 374761393 + x * 668265263 + y * 2147483647) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    h = h ^ (h >>> 16);
+    return (h & 0x7fffffff) / 0x7fffffff;
+}
+
 /**
- * Floyd-Steinberg dithering on a grayscale buffer at a given block size.
- * blockSize=1 means pixel-level dithering, blockSize=2 means 2x2 blocks, etc.
+ * Dither a grayscale buffer at a given block size using the specified pattern.
  * Returns a Uint8Array of 0 or 255 values at the original resolution.
  */
 function ditherAtBlockSize(
@@ -134,6 +158,7 @@ function ditherAtBlockSize(
     width: number,
     height: number,
     blockSize: number,
+    pattern: ProcessingParams["ditherPattern"],
 ): Uint8Array {
     // Downsample by averaging blocks
     const bw = Math.ceil(width / blockSize);
@@ -158,23 +183,62 @@ function ditherAtBlockSize(
         }
     }
 
-    // Floyd-Steinberg on the blocked image
     const dithered = new Float32Array(blocked);
-    for (let y = 0; y < bh; y++) {
-        for (let x = 0; x < bw; x++) {
-            const idx = y * bw + x;
-            const old = dithered[idx];
-            const newVal = old >= 0.5 ? 1 : 0;
-            dithered[idx] = newVal;
-            const err = old - newVal;
 
-            if (x + 1 < bw) dithered[idx + 1] += (err * 7) / 16;
-            if (y + 1 < bh) {
-                if (x - 1 >= 0)
-                    dithered[(y + 1) * bw + (x - 1)] += (err * 3) / 16;
-                dithered[(y + 1) * bw + x] += (err * 5) / 16;
-                if (x + 1 < bw)
-                    dithered[(y + 1) * bw + (x + 1)] += (err * 1) / 16;
+    if (pattern === "floyd-steinberg") {
+        for (let y = 0; y < bh; y++) {
+            for (let x = 0; x < bw; x++) {
+                const idx = y * bw + x;
+                const old = dithered[idx];
+                const newVal = old >= 0.5 ? 1 : 0;
+                dithered[idx] = newVal;
+                const err = old - newVal;
+
+                if (x + 1 < bw) dithered[idx + 1] += (err * 7) / 16;
+                if (y + 1 < bh) {
+                    if (x - 1 >= 0)
+                        dithered[(y + 1) * bw + (x - 1)] += (err * 3) / 16;
+                    dithered[(y + 1) * bw + x] += (err * 5) / 16;
+                    if (x + 1 < bw)
+                        dithered[(y + 1) * bw + (x + 1)] += (err * 1) / 16;
+                }
+            }
+        }
+    } else if (pattern === "atkinson") {
+        for (let y = 0; y < bh; y++) {
+            for (let x = 0; x < bw; x++) {
+                const idx = y * bw + x;
+                const old = dithered[idx];
+                const newVal = old >= 0.5 ? 1 : 0;
+                dithered[idx] = newVal;
+                const err = (old - newVal) / 8;
+
+                if (x + 1 < bw) dithered[idx + 1] += err;
+                if (x + 2 < bw) dithered[idx + 2] += err;
+                if (y + 1 < bh) {
+                    if (x - 1 >= 0) dithered[(y + 1) * bw + (x - 1)] += err;
+                    dithered[(y + 1) * bw + x] += err;
+                    if (x + 1 < bw) dithered[(y + 1) * bw + (x + 1)] += err;
+                }
+                if (y + 2 < bh) {
+                    dithered[(y + 2) * bw + x] += err;
+                }
+            }
+        }
+    } else if (pattern === "ordered") {
+        for (let y = 0; y < bh; y++) {
+            for (let x = 0; x < bw; x++) {
+                const threshold = BAYER_NORM[(y & 7) * 8 + (x & 7)];
+                dithered[y * bw + x] = blocked[y * bw + x] > threshold ? 1 : 0;
+            }
+        }
+    } else {
+        // noise
+        const seed = blockSize * 31337;
+        for (let y = 0; y < bh; y++) {
+            for (let x = 0; x < bw; x++) {
+                const threshold = hashNoise(x, y, seed);
+                dithered[y * bw + x] = blocked[y * bw + x] > threshold ? 1 : 0;
             }
         }
     }
@@ -199,6 +263,77 @@ function ditherAtBlockSize(
  * High contrast areas get fine (1:1) dithering.
  * Low contrast areas get coarse (large block) dithering.
  */
+/** Compute per-pixel level index from contrast map value. */
+function contrastToLevel(
+    c: number,
+    rangeLow: number,
+    rangeHigh: number,
+    maxLevels: number,
+): number {
+    let t: number;
+    if (c >= rangeHigh) {
+        t = 0;
+    } else if (c <= rangeLow) {
+        t = 1;
+    } else {
+        t = 1 - (c - rangeLow) / (rangeHigh - rangeLow);
+    }
+    return Math.min(Math.round(t * (maxLevels - 1)), maxLevels - 1);
+}
+
+/**
+ * Block-preserving compositing: iterate coarse-to-fine, overwriting entire
+ * blocks atomically when any pixel in the block requests that level or finer.
+ */
+function compositeBlocks(
+    levels: Uint8Array[],
+    levelMap: Uint8Array,
+    width: number,
+    height: number,
+    maxLevels: number,
+): Uint8Array {
+    // Start with the coarsest level
+    const output = new Uint8Array(levels[maxLevels - 1]);
+
+    // Iterate from second-coarsest down to finest
+    for (let level = maxLevels - 2; level >= 0; level--) {
+        const blockSize = 1 << level;
+        const bw = Math.ceil(width / blockSize);
+        const bh = Math.ceil(height / blockSize);
+
+        for (let by = 0; by < bh; by++) {
+            for (let bx = 0; bx < bw; bx++) {
+                const x0 = bx * blockSize;
+                const y0 = by * blockSize;
+                const x1 = Math.min(x0 + blockSize, width);
+                const y1 = Math.min(y0 + blockSize, height);
+
+                // Check if any pixel in this block needs this level or finer
+                let needsLevel = false;
+                for (let y = y0; y < y1 && !needsLevel; y++) {
+                    for (let x = x0; x < x1 && !needsLevel; x++) {
+                        if (levelMap[y * width + x] <= level) {
+                            needsLevel = true;
+                        }
+                    }
+                }
+
+                if (needsLevel) {
+                    const src = levels[level];
+                    for (let y = y0; y < y1; y++) {
+                        for (let x = x0; x < x1; x++) {
+                            const idx = y * width + x;
+                            output[idx] = src[idx];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return output;
+}
+
 export function adaptiveDither(
     preprocessed: Float32Array,
     contrastMap: Float32Array,
@@ -207,33 +342,47 @@ export function adaptiveDither(
     maxLevels: number,
     rangeLow: number,
     rangeHigh: number,
+    ditherPattern: ProcessingParams["ditherPattern"],
+    preserveBlocks: boolean,
 ): Uint8Array {
     // Generate dithered versions at each block size level
     const levels: Uint8Array[] = [];
     for (let i = 0; i < maxLevels; i++) {
         const blockSize = 1 << i; // 1, 2, 4, 8, 16, ...
-        levels.push(ditherAtBlockSize(preprocessed, width, height, blockSize));
+        levels.push(
+            ditherAtBlockSize(
+                preprocessed,
+                width,
+                height,
+                blockSize,
+                ditherPattern,
+            ),
+        );
     }
 
-    // Blend based on contrast map
+    if (preserveBlocks) {
+        const levelMap = new Uint8Array(width * height);
+        for (let i = 0; i < width * height; i++) {
+            levelMap[i] = contrastToLevel(
+                contrastMap[i],
+                rangeLow,
+                rangeHigh,
+                maxLevels,
+            );
+        }
+        return compositeBlocks(levels, levelMap, width, height, maxLevels);
+    }
+
+    // Per-pixel blending (original behavior)
     const output = new Uint8Array(width * height);
     for (let i = 0; i < width * height; i++) {
-        const c = contrastMap[i];
-        // Map contrast value to a level index
-        // High contrast (>= rangeHigh) -> level 0 (finest)
-        // Low contrast (<= rangeLow) -> level maxLevels-1 (coarsest)
-        let t: number;
-        if (c >= rangeHigh) {
-            t = 0;
-        } else if (c <= rangeLow) {
-            t = 1;
-        } else {
-            t = 1 - (c - rangeLow) / (rangeHigh - rangeLow);
-        }
-
-        const levelFloat = t * (maxLevels - 1);
-        const levelIdx = Math.round(levelFloat);
-        output[i] = levels[Math.min(levelIdx, maxLevels - 1)][i];
+        const levelIdx = contrastToLevel(
+            contrastMap[i],
+            rangeLow,
+            rangeHigh,
+            maxLevels,
+        );
+        output[i] = levels[levelIdx][i];
     }
 
     return output;
@@ -266,6 +415,8 @@ export async function adaptiveDitherAsync(
     maxLevels: number,
     rangeLow: number,
     rangeHigh: number,
+    ditherPattern: ProcessingParams["ditherPattern"],
+    preserveBlocks: boolean,
     { signal, onProgress }: AsyncPassOptions,
 ): Promise<Uint8Array> {
     // Phase 1: Generate dithered versions (50% of progress)
@@ -273,30 +424,65 @@ export async function adaptiveDitherAsync(
     for (let i = 0; i < maxLevels; i++) {
         if (signal.aborted) throw new DOMException("Aborted", "AbortError");
         const blockSize = 1 << i;
-        levels.push(ditherAtBlockSize(preprocessed, width, height, blockSize));
+        levels.push(
+            ditherAtBlockSize(
+                preprocessed,
+                width,
+                height,
+                blockSize,
+                ditherPattern,
+            ),
+        );
         onProgress(((i + 1) / maxLevels) * 0.5);
         await frame();
     }
 
-    // Phase 2: Blend based on contrast map (remaining 50%)
-    const output = new Uint8Array(width * height);
+    // Phase 2: Composite / blend (remaining 50%)
     const totalPixels = width * height;
+
+    if (preserveBlocks) {
+        // Build per-pixel level map
+        const levelMap = new Uint8Array(totalPixels);
+        let lastYield = performance.now();
+        for (let i = 0; i < totalPixels; i++) {
+            levelMap[i] = contrastToLevel(
+                contrastMap[i],
+                rangeLow,
+                rangeHigh,
+                maxLevels,
+            );
+            if (i % 50000 === 0) {
+                if (signal.aborted)
+                    throw new DOMException("Aborted", "AbortError");
+                onProgress(0.5 + (i / totalPixels) * 0.25);
+                lastYield = await yieldIfNeeded(lastYield);
+            }
+        }
+
+        // Block compositing
+        const output = compositeBlocks(
+            levels,
+            levelMap,
+            width,
+            height,
+            maxLevels,
+        );
+        onProgress(1);
+        return output;
+    }
+
+    // Per-pixel blending (original behavior)
+    const output = new Uint8Array(totalPixels);
     let lastYield = performance.now();
 
     for (let i = 0; i < totalPixels; i++) {
-        const c = contrastMap[i];
-        let t: number;
-        if (c >= rangeHigh) {
-            t = 0;
-        } else if (c <= rangeLow) {
-            t = 1;
-        } else {
-            t = 1 - (c - rangeLow) / (rangeHigh - rangeLow);
-        }
-
-        const levelFloat = t * (maxLevels - 1);
-        const levelIdx = Math.round(levelFloat);
-        output[i] = levels[Math.min(levelIdx, maxLevels - 1)][i];
+        const levelIdx = contrastToLevel(
+            contrastMap[i],
+            rangeLow,
+            rangeHigh,
+            maxLevels,
+        );
+        output[i] = levels[levelIdx][i];
 
         if (i % 50000 === 0) {
             if (signal.aborted) throw new DOMException("Aborted", "AbortError");

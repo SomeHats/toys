@@ -180,18 +180,22 @@ const ADAPTIVE_DITHER_FRAG = glsl`#version 300 es
     uniform float u_rangeLow;
     uniform float u_rangeHigh;
 
-    // 8x8 Bayer threshold via recursive formula (no local arrays)
+    // 8x8 Bayer matrix (normalized to [0, 1))
     float bayer8(vec2 pos) {
         ivec2 p = ivec2(pos) & 7;
-        int v = 0;
-        for (int i = 0; i < 3; i++) {
-            int xi = (p.x >> i) & 1;
-            int yi = (p.y >> i) & 1;
-            // 2x2 base pattern: [[0,2],[3,1]]
-            int b = xi * 2 + yi * 3 - xi * yi * 4;
-            v += b << (2 * (2 - i));
-        }
-        return (float(v) + 0.5) / 64.0;
+        int idx = p.x + p.y * 8;
+        // Precomputed 8x8 Bayer matrix
+        int b8[64] = int[64](
+             0, 32,  8, 40,  2, 34, 10, 42,
+            48, 16, 56, 24, 50, 18, 58, 26,
+            12, 44,  4, 36, 14, 46,  6, 38,
+            60, 28, 52, 20, 62, 30, 54, 22,
+             3, 35, 11, 43,  1, 33,  9, 41,
+            51, 19, 59, 27, 49, 17, 57, 25,
+            15, 47,  7, 39, 13, 45,  5, 37,
+            63, 31, 55, 23, 61, 29, 53, 21
+        );
+        return (float(b8[idx]) + 0.5) / 64.0;
     }
 
     // Dither at a given block size using Bayer pattern

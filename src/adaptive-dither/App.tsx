@@ -1,15 +1,6 @@
 import { DitherPipeline } from "@/adaptive-dither/gpuPipeline";
 import type { ProcessingParams } from "@/adaptive-dither/processing";
-import {
-    adaptiveDither,
-    applyBrightnessContrast,
-    buildContrastMap,
-    DEFAULT_PARAMS,
-    detectEdges,
-    getScaledGrayscale,
-    renderBinary,
-    renderGrayscale,
-} from "@/adaptive-dither/processing";
+import { DEFAULT_PARAMS } from "@/adaptive-dither/processing";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type PassName =
@@ -41,7 +32,6 @@ export function App() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pipelineRef = useRef<DitherPipeline | null>(null);
-    const gpuFailedRef = useRef(false);
 
     const scaledWidth =
         image ? Math.round(image.naturalWidth * params.scale) : 0;
@@ -78,63 +68,13 @@ export function App() {
         if (!canvas || !image || scaledWidth === 0 || scaledHeight === 0)
             return;
 
-        // Try GPU pipeline, fall back to CPU on any error
-        if (!gpuFailedRef.current) {
-            try {
-                pipelineRef.current ??= new DitherPipeline(canvas);
-                const pipeline = pipelineRef.current;
-                pipeline.uploadImage(image, scaledWidth, scaledHeight);
-                pipeline.runPipeline(params);
-                pipeline.displayPass(activePass);
-                return;
-            } catch (e) {
-                console.error("GPU pipeline failed, falling back to CPU:", e);
-                gpuFailedRef.current = true;
-                pipelineRef.current?.destroy();
-                pipelineRef.current = null;
-            }
-        }
+        // Lazily create the pipeline on first use
+        pipelineRef.current ??= new DitherPipeline(canvas);
+        const pipeline = pipelineRef.current;
 
-        // CPU fallback
-        const w = scaledWidth;
-        const h = scaledHeight;
-        const grayscale = getScaledGrayscale(image, w, h);
-        const preprocessed = applyBrightnessContrast(
-            grayscale,
-            params.brightness,
-            params.contrast,
-        );
-        const edges = detectEdges(preprocessed, w, h, params.edgeStrength);
-        const contrastMap = buildContrastMap(
-            edges,
-            w,
-            h,
-            params.dropOffRate,
-            params.dropOffFunction,
-        );
-        const dithered = adaptiveDither(
-            preprocessed,
-            contrastMap,
-            w,
-            h,
-            params.maxDitherLevels,
-            params.contrastRangeLow,
-            params.contrastRangeHigh,
-        );
-
-        const data: Record<string, Float32Array | Uint8Array> = {
-            original: grayscale,
-            preprocessed,
-            edges,
-            contrastMap,
-            dithered,
-        };
-        const d = data[activePass];
-        if (d instanceof Uint8Array) {
-            renderBinary(d, w, h, canvas);
-        } else {
-            renderGrayscale(d, w, h, canvas);
-        }
+        pipeline.uploadImage(image, scaledWidth, scaledHeight);
+        pipeline.runPipeline(params);
+        pipeline.displayPass(activePass);
     }, [image, scaledWidth, scaledHeight, params, activePass]);
 
     // Clean up pipeline on unmount

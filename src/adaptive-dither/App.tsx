@@ -69,9 +69,7 @@ export function App() {
             return;
 
         // Lazily create the pipeline on first use
-        if (!pipelineRef.current) {
-            pipelineRef.current = new DitherPipeline(canvas);
-        }
+        pipelineRef.current ??= new DitherPipeline(canvas);
         const pipeline = pipelineRef.current;
 
         pipeline.uploadImage(image, scaledWidth, scaledHeight);

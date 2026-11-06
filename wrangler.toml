@@ -2,6 +2,7 @@ name = "toys"
 compatibility_date = "2026-11-01"
 # Keep toys.somehats.workers.dev, and preview URLs for branch builds.
 workers_dev = true
+routes = [{ pattern = "alex.dytry.ch/toys/*", zone_name = "dytry.ch" }]
 
 [assets]
 # scripts/workers-build.sh puts the site in dist/toys/, to match alex.dytry.ch/toys/.

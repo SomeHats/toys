@@ -1,4 +1,2 @@
-/static/*
-  Cache-Control: public
-  Cache-Control: max-age=365000000
-  Cache-Control: immutable
+/toys/static/*
+  Cache-Control: public, max-age=31536000, immutable

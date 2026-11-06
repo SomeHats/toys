@@ -8,8 +8,8 @@ is a standalone interactive demo (drawing tools, terrain generators, blob
 factories, physics simulations, WebGL experiments, etc.) served from its own
 HTML entry point.
 
-**Author:** Alex (`alex@dytry.ch`) **Live site:** Deployed to GitHub Pages via
-`gh-pages` branch
+**Author:** Alex (`alex@dytry.ch`) **Live site:** https://alex.dytry.ch/toys/, deployed by
+Cloudflare Workers Builds
 
 ## Tech Stack
 
@@ -207,9 +207,12 @@ builds the crates first.
 
 ## CI/CD
 
-GitHub Actions workflow (`.github/workflows/build.yml`):
+Cloudflare Workers Builds (configured in the Cloudflare dashboard) runs
+`scripts/workers-build.sh` on each push:
 
--   Triggers on push to `main`
--   Installs Node 18, Rust (stable), wasm-pack
--   Runs `yarn --immutable`, `yarn build:rust`, `yarn build`, `yarn check`
--   Deploys built artifacts to `gh-pages` branch
+-   Installs Rust (the build image has none); `wasm-pack` comes from npm
+-   Runs `yarn build:rust`, `VITE_BASE=/toys/ yarn build`, `yarn check`
+-   Moves the output into `dist/toys/`, to match the URL path
+-   On `main`, deploys with `wrangler deploy` to the `toys` Worker on the
+    route `alex.dytry.ch/toys/*`. Other branches get a preview URL from
+    `wrangler versions upload`.
